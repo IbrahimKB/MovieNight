@@ -338,9 +338,9 @@ export default function Suggest() {
                     No movies found. Try a different search term.
                   </p>
                 )}
-              </div>
+                            </div>
             )}
-          </div>
+          )}
 
           {/* Selected Movie Details */}
           {selectedMovie && (
