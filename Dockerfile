@@ -4,7 +4,7 @@ WORKDIR /app
 
 # 1. Copy package manifests and install ALL deps (incl. dev)
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # 2. Copy source & build both client and server
 COPY . .
