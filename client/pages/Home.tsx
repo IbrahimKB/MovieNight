@@ -126,13 +126,27 @@ export default function Home() {
     });
   };
 
-  const handleSuggestToFriends = (movieTitle: string, platform: string) => {
-    toast({
-      title: "Suggesting movie! 🎬",
-      description: `"${movieTitle}" from ${platform} is being suggested to your friends.`,
+  const handleSuggestToFriends = (release: MovieRelease) => {
+    // Navigate to suggest page with movie data as URL params
+    const movieData = {
+      title: release.title,
+      year: new Date(release.releaseDate).getFullYear(),
+      genres: release.genres,
+      platform: release.platform,
+      description: release.description || "",
+      isFromHome: "true",
+    };
+
+    const params = new URLSearchParams();
+    Object.entries(movieData).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        params.set(key, JSON.stringify(value));
+      } else {
+        params.set(key, value.toString());
+      }
     });
-    // In a real app, this would open a friend selector modal or navigate to suggest page
-    console.log("Suggesting movie:", movieTitle, "on", platform);
+
+    navigate(`/suggest?${params.toString()}`);
   };
 
   // Group releases by date
