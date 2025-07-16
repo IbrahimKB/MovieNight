@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
+import Watchlist from "./pages/Watchlist";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/suggest" element={<Suggest />} />
             <Route path="/movie-night" element={<MovieNight />} />
+            <Route path="/watchlist" element={<Watchlist />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
