@@ -117,6 +117,37 @@ export default function Suggest() {
     Record<string, number>
   >({});
 
+  // Check for pre-filled movie data from URL params
+  useEffect(() => {
+    const movieTitle = searchParams.get("title");
+    const movieYear = searchParams.get("year");
+    const movieGenres = searchParams.get("genres");
+    const moviePlatform = searchParams.get("platform");
+    const movieDescription = searchParams.get("description");
+    const fromHome = searchParams.get("isFromHome");
+
+    if (movieTitle && movieYear && fromHome) {
+      const prefilledMovie: Movie = {
+        id: `prefilled_${Date.now()}`,
+        title: movieTitle,
+        year: parseInt(movieYear),
+        genres: movieGenres ? JSON.parse(movieGenres) : [],
+        description: movieDescription || "",
+      };
+
+      setSelectedMovie(prefilledMovie);
+      setIsFromHome(true);
+
+      // Clear URL params after loading
+      navigate("/suggest", { replace: true });
+
+      toast({
+        title: "Movie pre-selected! 🎬",
+        description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
+      });
+    }
+  }, [searchParams, navigate]);
+
   const filteredMovies = mockMovies.filter((movie) =>
     movie.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
