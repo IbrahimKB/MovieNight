@@ -14,6 +14,9 @@ import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
 
+// Set dark mode by default
+document.documentElement.classList.add("dark");
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
