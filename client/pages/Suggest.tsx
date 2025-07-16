@@ -22,6 +22,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserFriends, getFriendName } from "@/lib/userData";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface Movie {
   id: string;
