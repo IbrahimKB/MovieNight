@@ -62,8 +62,8 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-        <div className="container mx-auto px-4 py-4">
-                    <div className="flex items-center justify-between">
+                <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-primary">🎬 MovieNight</h1>
 
             {/* Right Side - Notifications & User Menu */}
