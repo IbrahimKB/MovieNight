@@ -118,15 +118,50 @@ export default function NotificationBell() {
   ) => {
     e.stopPropagation();
 
-    // Mark as read and potentially remove
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
-    );
-
-    toast({
-      title: "Notification dismissed",
-      description: "You can always view it later",
-    });
+    switch (notification.type) {
+      case "friend_request":
+        // Remove friend request notification when ignored
+        setNotifications((prev) =>
+          prev.filter((n) => n.id !== notification.id),
+        );
+        toast({
+          title: "Friend request ignored",
+          description: `Request from ${notification.actionData?.username} was declined`,
+        });
+        break;
+      case "suggestion":
+        // Mark suggestion as read when dismissed
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, read: true } : n,
+          ),
+        );
+        toast({
+          title: "Suggestion dismissed",
+          description: "You can view it later in your suggestions",
+        });
+        break;
+      case "reminder":
+        // Remove reminder when dismissed
+        setNotifications((prev) =>
+          prev.filter((n) => n.id !== notification.id),
+        );
+        toast({
+          title: "Reminder dismissed",
+          description: "We won't remind you about this again",
+        });
+        break;
+      default:
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notification.id ? { ...n, read: true } : n,
+          ),
+        );
+        toast({
+          title: "Notification dismissed",
+          description: "You can always view it later",
+        });
+    }
   };
 
   const handleMarkAllAsRead = () => {
