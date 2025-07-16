@@ -6,10 +6,13 @@ import apiRouter from './routes';
 dotenv.config();
 
 (async () => {
+  // Initialize the database (creates file + default data if needed)
   await initDB();
 
   const app = express();
   app.use(express.json());
+
+  // Mount all API routes under /api/*
   app.use('/api', apiRouter);
 
   const PORT = process.env.PORT || 8000;

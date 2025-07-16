@@ -1,5 +1,6 @@
 // backend/src/db.ts
-import { Low, JSONFile } from 'lowdb';
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
 import { join } from 'path';
 
 type Schema = {
@@ -12,7 +13,13 @@ type Schema = {
 
 const filePath = join(__dirname, '..', 'data.json');  // __dirname works under CJS
 const adapter = new JSONFile<Schema>(filePath);
-export const db = new Low<Schema>(adapter);
+export const db = new Low<Schema>(adapter, {
+  users: [],
+  suggestions: [],
+  watchDesire: [],
+  watchedLogs: [],
+  watchedEpisodes: []
+});
 
 export async function initDB() {
   await db.read();
