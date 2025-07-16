@@ -82,11 +82,14 @@ const mockMovies: Movie[] = [
 
 export default function Suggest() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+  const [isFromHome, setIsFromHome] = useState(false);
 
   // Get user's friends
   const userFriends = user ? getUserFriends(user.id) : [];
