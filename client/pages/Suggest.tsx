@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserFriends, getFriendName } from "@/lib/userData";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
