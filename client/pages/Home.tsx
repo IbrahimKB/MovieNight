@@ -14,6 +14,7 @@ import { Calendar, Search, Filter, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SmartNudge from "@/components/SmartNudge";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface MovieRelease {
   id: string;
