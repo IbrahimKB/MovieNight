@@ -14,6 +14,7 @@ import { Calendar, Search, Filter, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SmartNudge from "@/components/SmartNudge";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface MovieRelease {
   id: string;
@@ -103,6 +104,7 @@ const genres = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("All Platforms");
   const [selectedGenre, setSelectedGenre] = useState("All Genres");
@@ -124,13 +126,27 @@ export default function Home() {
     });
   };
 
-  const handleSuggestToFriends = (movieTitle: string, platform: string) => {
-    toast({
-      title: "Suggesting movie! 🎬",
-      description: `"${movieTitle}" from ${platform} is being suggested to your friends.`,
+  const handleSuggestToFriends = (release: MovieRelease) => {
+    // Navigate to suggest page with movie data as URL params
+    const movieData = {
+      title: release.title,
+      year: new Date(release.releaseDate).getFullYear(),
+      genres: release.genres,
+      platform: release.platform,
+      description: release.description || "",
+      isFromHome: "true",
+    };
+
+    const params = new URLSearchParams();
+    Object.entries(movieData).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        params.set(key, JSON.stringify(value));
+      } else {
+        params.set(key, value.toString());
+      }
     });
-    // In a real app, this would open a friend selector modal or navigate to suggest page
-    console.log("Suggesting movie:", movieTitle, "on", platform);
+
+    navigate(`/suggest?${params.toString()}`);
   };
 
   // Group releases by date
@@ -317,12 +333,7 @@ export default function Home() {
                             size="sm"
                             variant="ghost"
                             className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() =>
-                              handleSuggestToFriends(
-                                release.title,
-                                release.platform,
-                              )
-                            }
+                            onClick={() => handleSuggestToFriends(release)}
                           >
                             <Share2 className="h-4 w-4 mr-1" />
                             Suggest to Friends
