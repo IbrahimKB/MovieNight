@@ -104,6 +104,7 @@ const genres = [
 ];
 
 export default function Home() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("All Platforms");
   const [selectedGenre, setSelectedGenre] = useState("All Genres");
