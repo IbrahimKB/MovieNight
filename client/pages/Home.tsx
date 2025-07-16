@@ -333,12 +333,7 @@ export default function Home() {
                             size="sm"
                             variant="ghost"
                             className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() =>
-                              handleSuggestToFriends(
-                                release.title,
-                                release.platform,
-                              )
-                            }
+                            onClick={() => handleSuggestToFriends(release)}
                           >
                             <Share2 className="h-4 w-4 mr-1" />
                             Suggest to Friends
