@@ -17,6 +17,7 @@ import {
   MessageSquare,
   Check,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserFriends, getFriendName } from "@/lib/userData";
