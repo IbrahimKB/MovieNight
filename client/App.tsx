@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
+import Squad from "./pages/Squad";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -71,6 +72,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Watchlist />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/friends"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Squad />
                   </Layout>
                 </ProtectedRoute>
               }
