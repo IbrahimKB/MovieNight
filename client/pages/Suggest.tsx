@@ -76,36 +76,35 @@ const mockMovies: Movie[] = [
   },
 ];
 
-const mockFriends: Friend[] = [
-  { id: "1", name: "Alice" },
-  { id: "2", name: "Bob" },
-  { id: "3", name: "Charlie" },
-  { id: "4", name: "Diana" },
-];
-
-const mockSuggestions: Suggestion[] = [
-  {
-    id: "1",
-    movie: mockMovies[0],
-    suggestedBy: mockFriends[0],
-    comment: "Perfect for our Friday night horror marathon!",
-    suggestedAt: "2024-01-14T10:30:00Z",
-  },
-  {
-    id: "2",
-    movie: mockMovies[1],
-    suggestedBy: mockFriends[1],
-    comment: "Loved the first one, this sequel looks amazing!",
-    suggestedAt: "2024-01-13T15:45:00Z",
-  },
-];
-
 export default function Suggest() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+
+  // Get user's friends
+  const userFriends = user ? getUserFriends(user.id) : [];
+
+  // Mock suggestions specific to current user
+  const mockSuggestions: Suggestion[] = [
+    {
+      id: "1",
+      movie: mockMovies[0],
+      suggestedBy: userFriends[0] || { id: "1", name: "Friend" },
+      comment: "Perfect for our Friday night horror marathon!",
+      suggestedAt: "2024-01-14T10:30:00Z",
+    },
+    {
+      id: "2",
+      movie: mockMovies[1],
+      suggestedBy: userFriends[1] || { id: "2", name: "Friend" },
+      comment: "Loved the first one, this sequel looks amazing!",
+      suggestedAt: "2024-01-13T15:45:00Z",
+    },
+  ].filter((s) => s.suggestedBy);
+
   const [suggestions] = useState<Suggestion[]>(mockSuggestions);
 
   const filteredMovies = mockMovies.filter((movie) =>
