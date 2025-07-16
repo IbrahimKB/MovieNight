@@ -30,49 +30,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock users database (in real app, this would be a backend API)
-const MOCK_USERS: (User & { password: string })[] = [
-  {
-    id: "1",
-    username: "ibrahim",
-    email: "ibrahim@example.com",
-    password: "password123",
-    name: "Ibrahim Kaysar",
-    joinedAt: "2024-01-01T00:00:00Z",
-  },
-  {
-    id: "2",
-    username: "omar",
-    email: "omar@example.com",
-    password: "password123",
-    name: "Omar",
-    joinedAt: "2024-01-02T00:00:00Z",
-  },
-  {
-    id: "3",
-    username: "sara",
-    email: "sara@example.com",
-    password: "password123",
-    name: "Sara",
-    joinedAt: "2024-01-03T00:00:00Z",
-  },
-  {
-    id: "4",
-    username: "alex",
-    email: "alex@example.com",
-    password: "password123",
-    name: "Alex",
-    joinedAt: "2024-01-04T00:00:00Z",
-  },
-  {
-    id: "5",
-    username: "maya",
-    email: "maya@example.com",
-    password: "password123",
-    name: "Maya",
-    joinedAt: "2024-01-05T00:00:00Z",
-  },
-];
+// API base URL
+const API_BASE = "/api";
+
+// API response interface
+interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -100,27 +67,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const foundUser = MOCK_USERS.find(
-      (u) =>
-        (u.email === email || u.username === email) && u.password === password,
-    );
+      const result: ApiResponse<User> = await response.json();
 
-    if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem(
-        "movienight_user",
-        JSON.stringify(userWithoutPassword),
-      );
+      if (result.success && result.data) {
+        setUser(result.data);
+        localStorage.setItem("movienight_user", JSON.stringify(result.data));
+        setIsLoading(false);
+        return true;
+      } else {
+        console.error("Login failed:", result.error);
+        setIsLoading(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       setIsLoading(false);
-      return true;
+      return false;
     }
-
-    setIsLoading(false);
-    return false;
   };
 
   const signup = async (
@@ -131,35 +103,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   ): Promise<boolean> => {
     setIsLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch(`${API_BASE}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password, name }),
+      });
 
-    // Check if user already exists
-    const existingUser = MOCK_USERS.find(
-      (u) => u.email === email || u.username === username,
-    );
+      const result: ApiResponse<User> = await response.json();
 
-    if (existingUser) {
+      if (result.success && result.data) {
+        setUser(result.data);
+        localStorage.setItem("movienight_user", JSON.stringify(result.data));
+        setIsLoading(false);
+        return true;
+      } else {
+        console.error("Signup failed:", result.error);
+        setIsLoading(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
       setIsLoading(false);
       return false;
     }
-
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      username,
-      email,
-      name,
-      joinedAt: new Date().toISOString(),
-    };
-
-    // In real app, this would be saved to backend
-    MOCK_USERS.push({ ...newUser, password });
-
-    setUser(newUser);
-    localStorage.setItem("movienight_user", JSON.stringify(newUser));
-    setIsLoading(false);
-    return true;
   };
 
   const logout = () => {
