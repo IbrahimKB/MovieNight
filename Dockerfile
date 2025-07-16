@@ -16,7 +16,7 @@ WORKDIR /app
 
 # 1. Copy only production deps
 COPY package.json package-lock.json ./
-RUN npm ci --production
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # 2. Pull in built artifacts and any public assets
 COPY --from=builder /app/dist ./dist
