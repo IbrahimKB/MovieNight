@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Search,
   PlusCircle,
@@ -17,12 +16,10 @@ import {
   MessageSquare,
   Check,
   X,
-  ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserFriends, getFriendName } from "@/lib/userData";
 import { toast } from "@/components/ui/use-toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface Movie {
   id: string;
@@ -82,48 +79,14 @@ const mockMovies: Movie[] = [
 
 export default function Suggest() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
-  const [isFromHome, setIsFromHome] = useState(false);
 
-    // Get user's friends
+  // Get user's friends
   const userFriends = user ? getUserFriends(user.id) : [];
-
-  // Check for pre-filled movie data from URL params
-  useEffect(() => {
-    const movieTitle = searchParams.get('title');
-    const movieYear = searchParams.get('year');
-    const movieGenres = searchParams.get('genres');
-    const moviePlatform = searchParams.get('platform');
-    const movieDescription = searchParams.get('description');
-    const fromHome = searchParams.get('isFromHome');
-
-    if (movieTitle && movieYear && fromHome) {
-      const prefilledMovie: Movie = {
-        id: `prefilled_${Date.now()}`,
-        title: movieTitle,
-        year: parseInt(movieYear),
-        genres: movieGenres ? JSON.parse(movieGenres) : [],
-        description: movieDescription || '',
-      };
-
-      setSelectedMovie(prefilledMovie);
-      setIsFromHome(true);
-
-      // Clear URL params after loading
-      navigate('/suggest', { replace: true });
-
-      toast({
-        title: "Movie pre-selected! 🎬",
-        description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
-      });
-    }
-  }, [searchParams, navigate]);
 
   // Mock suggestions specific to current user
   const mockSuggestions: Suggestion[] = [
@@ -143,8 +106,10 @@ export default function Suggest() {
     },
   ].filter((s) => s.suggestedBy);
 
-    const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
-  const [suggestionRatings, setSuggestionRatings] = useState<Record<string, number>>({});
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
+  const [suggestionRatings, setSuggestionRatings] = useState<
+    Record<string, number>
+  >({});
 
   const filteredMovies = mockMovies.filter((movie) =>
     movie.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -185,10 +150,14 @@ export default function Suggest() {
     setDesireRating([7]);
     setSelectedFriends([]);
     setComment("");
-        setSearchTerm("");
+    setSearchTerm("");
   };
 
-  const handleAcceptSuggestion = (suggestionId: string, movieTitle: string, suggestedBy: string) => {
+  const handleAcceptSuggestion = (
+    suggestionId: string,
+    movieTitle: string,
+    suggestedBy: string,
+  ) => {
     const rating = suggestionRatings[suggestionId] || 5;
 
     toast({
@@ -197,7 +166,7 @@ export default function Suggest() {
     });
 
     // Remove from suggestions
-    setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
+    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
   };
 
   const handleIgnoreSuggestion = (suggestionId: string, movieTitle: string) => {
@@ -207,11 +176,11 @@ export default function Suggest() {
     });
 
     // Remove from suggestions
-    setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
+    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
   };
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
-    setSuggestionRatings(prev => ({ ...prev, [suggestionId]: rating[0] }));
+    setSuggestionRatings((prev) => ({ ...prev, [suggestionId]: rating[0] }));
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -241,28 +210,6 @@ export default function Suggest() {
         </p>
       </div>
 
-            {/* Pre-selected Movie Alert */}
-      {isFromHome && selectedMovie && (
-        <Alert className="border-primary/50 bg-primary/10">
-          <Star className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
-            <span>
-              <strong>{selectedMovie.title}</strong> was pre-selected from upcoming releases.
-              Add your rating and select friends below to suggest it!
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/')}
-              className="ml-4"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to Home
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Top Section - Suggest a Movie */}
       <Card>
         <CardHeader>
@@ -271,19 +218,18 @@ export default function Suggest() {
             Suggest a Movie
           </CardTitle>
         </CardHeader>
-                <CardContent className="space-y-6">
+        <CardContent className="space-y-6">
           {/* Search Bar */}
-          {!isFromHome && (
-            <div className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search for a movie or show..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="space-y-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search for a movie or show..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
             {/* Search Results */}
             {searchTerm && (
@@ -338,9 +284,9 @@ export default function Suggest() {
                     No movies found. Try a different search term.
                   </p>
                 )}
-                            </div>
+              </div>
             )}
-          )}
+          </div>
 
           {/* Selected Movie Details */}
           {selectedMovie && (
@@ -531,19 +477,27 @@ export default function Suggest() {
                         <label className="text-sm font-medium">
                           How much do you want to watch this? (1-10)
                         </label>
-                                                <Slider
+                        <Slider
                           defaultValue={[5]}
                           max={10}
                           min={1}
                           step={1}
                           className="w-full"
-                          onValueChange={(rating) => handleRatingChange(suggestion.id, rating)}
+                          onValueChange={(rating) =>
+                            handleRatingChange(suggestion.id, rating)
+                          }
                         />
-                                                <div className="flex gap-2">
+                        <div className="flex gap-2">
                           <Button
                             size="sm"
                             className="flex-1"
-                            onClick={() => handleAcceptSuggestion(suggestion.id, suggestion.movie.title, suggestion.suggestedBy.name)}
+                            onClick={() =>
+                              handleAcceptSuggestion(
+                                suggestion.id,
+                                suggestion.movie.title,
+                                suggestion.suggestedBy.name,
+                              )
+                            }
                           >
                             <Check className="h-4 w-4 mr-1" />
                             Accept
@@ -552,7 +506,12 @@ export default function Suggest() {
                             size="sm"
                             variant="outline"
                             className="flex-1"
-                            onClick={() => handleIgnoreSuggestion(suggestion.id, suggestion.movie.title)}
+                            onClick={() =>
+                              handleIgnoreSuggestion(
+                                suggestion.id,
+                                suggestion.movie.title,
+                              )
+                            }
                           >
                             <X className="h-4 w-4 mr-1" />
                             Ignore
