@@ -247,6 +247,29 @@ export default function Suggest() {
         </p>
       </div>
 
+      {/* Pre-selected Movie Alert */}
+      {isFromHome && selectedMovie && (
+        <Alert className="border-primary/50 bg-primary/10">
+          <Star className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              <strong>{selectedMovie.title}</strong> was pre-selected from
+              upcoming releases. Add your rating and select friends below to
+              suggest it!
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="ml-4"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Home
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Top Section - Suggest a Movie */}
       <Card>
         <CardHeader>
