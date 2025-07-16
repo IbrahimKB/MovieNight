@@ -20,7 +20,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import NotificationBell from "@/components/NotificationBell";
 
 interface LayoutProps {
   children: ReactNode;
@@ -62,17 +61,12 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
-                <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-primary">🎬 MovieNight</h1>
 
-            {/* Right Side - Notifications & User Menu */}
-            <div className="flex items-center gap-2">
-              {/* Notification Bell */}
-              <NotificationBell />
-
-              {/* User Menu */}
-              <DropdownMenu>
+            {/* User Menu */}
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
