@@ -704,7 +704,8 @@ export default function Watchlist() {
                 disabled={!watchedDate}
                 className="flex-1"
               >
-                Confirm
+                <Sparkles className="h-4 w-4 mr-2" />
+                Continue to Reaction
               </Button>
               <Button
                 variant="outline"
@@ -717,6 +718,22 @@ export default function Watchlist() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Post-Watch Reaction Modal */}
+      <PostWatchReactionModal
+        isOpen={showReactionModal}
+        onClose={() => {
+          setShowReactionModal(false);
+          setPendingWatchedItem(null);
+        }}
+        onSave={handleReactionSave}
+        movieTitle={
+          pendingWatchedItem
+            ? `${pendingWatchedItem.title} (${pendingWatchedItem.year})`
+            : ""
+        }
+        originalScore={pendingWatchedItem?.userDesireScore}
+      />
     </div>
   );
 }
