@@ -106,7 +106,10 @@ export default function Suggest() {
     },
   ].filter((s) => s.suggestedBy);
 
-  const [suggestions] = useState<Suggestion[]>(mockSuggestions);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
+  const [suggestionRatings, setSuggestionRatings] = useState<
+    Record<string, number>
+  >({});
 
   const filteredMovies = mockMovies.filter((movie) =>
     movie.title.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -148,6 +151,36 @@ export default function Suggest() {
     setSelectedFriends([]);
     setComment("");
     setSearchTerm("");
+  };
+
+  const handleAcceptSuggestion = (
+    suggestionId: string,
+    movieTitle: string,
+    suggestedBy: string,
+  ) => {
+    const rating = suggestionRatings[suggestionId] || 5;
+
+    toast({
+      title: "Suggestion accepted! ✅",
+      description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
+    });
+
+    // Remove from suggestions
+    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+  };
+
+  const handleIgnoreSuggestion = (suggestionId: string, movieTitle: string) => {
+    toast({
+      title: "Suggestion ignored",
+      description: `"${movieTitle}" has been removed from your suggestions.`,
+    });
+
+    // Remove from suggestions
+    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+  };
+
+  const handleRatingChange = (suggestionId: string, rating: number[]) => {
+    setSuggestionRatings((prev) => ({ ...prev, [suggestionId]: rating[0] }));
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -450,9 +483,22 @@ export default function Suggest() {
                           min={1}
                           step={1}
                           className="w-full"
+                          onValueChange={(rating) =>
+                            handleRatingChange(suggestion.id, rating)
+                          }
                         />
                         <div className="flex gap-2">
-                          <Button size="sm" className="flex-1">
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() =>
+                              handleAcceptSuggestion(
+                                suggestion.id,
+                                suggestion.movie.title,
+                                suggestion.suggestedBy.name,
+                              )
+                            }
+                          >
                             <Check className="h-4 w-4 mr-1" />
                             Accept
                           </Button>
@@ -460,6 +506,12 @@ export default function Suggest() {
                             size="sm"
                             variant="outline"
                             className="flex-1"
+                            onClick={() =>
+                              handleIgnoreSuggestion(
+                                suggestion.id,
+                                suggestion.movie.title,
+                              )
+                            }
                           >
                             <X className="h-4 w-4 mr-1" />
                             Ignore
