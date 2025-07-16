@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Search,
   PlusCircle,
@@ -16,10 +17,12 @@ import {
   MessageSquare,
   Check,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserFriends, getFriendName } from "@/lib/userData";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface Movie {
   id: string;
@@ -79,14 +82,48 @@ const mockMovies: Movie[] = [
 
 export default function Suggest() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+  const [isFromHome, setIsFromHome] = useState(false);
 
   // Get user's friends
   const userFriends = user ? getUserFriends(user.id) : [];
+
+  // Check for pre-filled movie data from URL params
+  useEffect(() => {
+    const movieTitle = searchParams.get("title");
+    const movieYear = searchParams.get("year");
+    const movieGenres = searchParams.get("genres");
+    const moviePlatform = searchParams.get("platform");
+    const movieDescription = searchParams.get("description");
+    const fromHome = searchParams.get("isFromHome");
+
+    if (movieTitle && movieYear && fromHome) {
+      const prefilledMovie: Movie = {
+        id: `prefilled_${Date.now()}`,
+        title: movieTitle,
+        year: parseInt(movieYear),
+        genres: movieGenres ? JSON.parse(movieGenres) : [],
+        description: movieDescription || "",
+      };
+
+      setSelectedMovie(prefilledMovie);
+      setIsFromHome(true);
+
+      // Clear URL params after loading
+      navigate("/suggest", { replace: true });
+
+      toast({
+        title: "Movie pre-selected! 🎬",
+        description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
+      });
+    }
+  }, [searchParams, navigate]);
 
   // Mock suggestions specific to current user
   const mockSuggestions: Suggestion[] = [
