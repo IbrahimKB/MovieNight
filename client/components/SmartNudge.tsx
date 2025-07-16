@@ -67,7 +67,14 @@ export default function SmartNudge({
   const { user } = useAuth();
   const [currentNudge, setCurrentNudge] = useState<SmartNudgeData | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [dismissedNudges, setDismissedNudges] = useState<string[]>([]);
+  const [dismissedNudges, setDismissedNudges] = useState<string[]>(() => {
+    // Load dismissed nudges from localStorage
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("dismissedNudges");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -101,7 +108,17 @@ export default function SmartNudge({
 
   const handleDismiss = () => {
     if (currentNudge) {
-      setDismissedNudges((prev) => [...prev, currentNudge.id]);
+      const newDismissedNudges = [...dismissedNudges, currentNudge.id];
+      setDismissedNudges(newDismissedNudges);
+
+      // Persist to localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "dismissedNudges",
+          JSON.stringify(newDismissedNudges),
+        );
+      }
+
       onDismiss(currentNudge.id);
       setIsVisible(false);
       setCurrentNudge(null);
@@ -111,7 +128,20 @@ export default function SmartNudge({
   const handleWatchTonight = () => {
     if (currentNudge) {
       onWatchTonight(currentNudge.movieTitle);
-      handleDismiss();
+
+      // Also dismiss after accepting
+      const newDismissedNudges = [...dismissedNudges, currentNudge.id];
+      setDismissedNudges(newDismissedNudges);
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "dismissedNudges",
+          JSON.stringify(newDismissedNudges),
+        );
+      }
+
+      setIsVisible(false);
+      setCurrentNudge(null);
     }
   };
 
