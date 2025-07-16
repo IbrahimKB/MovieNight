@@ -6,6 +6,7 @@ import {
   PlusCircle,
   Users,
   Bookmark,
+  UserPlus,
   LogOut,
   User,
   Settings,
@@ -48,6 +49,11 @@ export default function Layout({ children }: LayoutProps) {
       path: "/watchlist",
       label: "Watchlist",
       icon: Bookmark,
+    },
+    {
+      path: "/friends",
+      label: "Squad",
+      icon: UserPlus,
     },
   ];
 
