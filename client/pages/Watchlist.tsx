@@ -667,10 +667,7 @@ export default function Watchlist() {
                       )
                     }
                   >
-                    <Checkbox
-                      checked={watchedWith.includes(friend.id)}
-                      readOnly
-                    />
+                    <Checkbox checked={watchedWith.includes(friend.id)} />
                     <span className="text-sm">{friend.name}</span>
                   </div>
                 ))}
