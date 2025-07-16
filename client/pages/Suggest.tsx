@@ -130,6 +130,17 @@ export default function Suggest() {
       comment,
     });
 
+    // Show success feedback
+    const friendNames = selectedFriends
+      .map((id) => userFriends.find((f) => f.id === id)?.name)
+      .filter(Boolean)
+      .join(", ");
+
+    toast({
+      title: "Movie suggested! 🎬",
+      description: `\"${selectedMovie.title}\" has been suggested to ${friendNames}`,
+    });
+
     // Reset form
     setSelectedMovie(null);
     setDesireRating([7]);
