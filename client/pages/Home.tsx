@@ -118,6 +118,19 @@ export default function Home() {
   const handleDismissNudge = (nudgeId: string) => {
     setShowNudge(false);
     console.log("Dismissed nudge:", nudgeId);
+    toast({
+      title: "Reminder dismissed",
+      description: "You won't see this suggestion again.",
+    });
+  };
+
+  const handleSuggestToFriends = (movieTitle: string, platform: string) => {
+    toast({
+      title: "Suggesting movie! 🎬",
+      description: `"${movieTitle}" from ${platform} is being suggested to your friends.`,
+    });
+    // In a real app, this would open a friend selector modal or navigate to suggest page
+    console.log("Suggesting movie:", movieTitle, "on", platform);
   };
 
   // Group releases by date
@@ -304,6 +317,12 @@ export default function Home() {
                             size="sm"
                             variant="ghost"
                             className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() =>
+                              handleSuggestToFriends(
+                                release.title,
+                                release.platform,
+                              )
+                            }
                           >
                             <Share2 className="h-4 w-4 mr-1" />
                             Suggest to Friends
