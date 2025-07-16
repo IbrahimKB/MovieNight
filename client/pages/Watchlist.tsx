@@ -32,8 +32,12 @@ import {
   Filter,
   History,
   Target,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import PostWatchReactionModal, {
+  PostWatchReaction,
+} from "@/components/PostWatchReactionModal";
 
 interface Friend {
   id: string;
@@ -67,7 +71,8 @@ interface HistoryItem {
   watchedDate: string;
   watchedWith: string[];
   originalScore: number;
-  actualRating?: number; // How much they actually enjoyed it
+  actualRating?: number;
+  reaction?: PostWatchReaction;
 }
 
 // Mock data
@@ -179,6 +184,9 @@ export default function Watchlist() {
   );
   const [watchedDate, setWatchedDate] = useState<Date | undefined>(new Date());
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
+  const [showReactionModal, setShowReactionModal] = useState(false);
+  const [pendingWatchedItem, setPendingWatchedItem] =
+    useState<WatchlistItem | null>(null);
   const [historyFilter, setHistoryFilter] = useState("All");
   const [selectedFriend, setSelectedFriend] = useState("All Friends");
 
@@ -235,17 +243,34 @@ export default function Watchlist() {
   const confirmMarkAsWatched = () => {
     if (!markAsWatchedItem || !watchedDate) return;
 
+    const item = watchlist.find((w) => w.id === markAsWatchedItem);
+    if (!item) return;
+
+    setPendingWatchedItem(item);
+    setShowReactionModal(true);
+
+    // Reset mark as watched state
+    setMarkAsWatchedItem(null);
+    setWatchedDate(new Date());
+    setWatchedWith([]);
+  };
+
+  const handleReactionSave = (reaction: PostWatchReaction) => {
+    if (!pendingWatchedItem) return;
+
     // In real app, this would create a history entry and remove from watchlist
     setWatchlist((prev) =>
       prev.map((item) =>
-        item.id === markAsWatchedItem ? { ...item, isWatched: true } : item,
+        item.id === pendingWatchedItem.id ? { ...item, isWatched: true } : item,
       ),
     );
 
     // Reset state
-    setMarkAsWatchedItem(null);
-    setWatchedDate(new Date());
-    setWatchedWith([]);
+    setShowReactionModal(false);
+    setPendingWatchedItem(null);
+
+    // Could also add to history with reaction here
+    console.log("Saved reaction:", reaction);
   };
 
   const getFriendName = (friendId: string) => {
