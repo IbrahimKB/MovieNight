@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, PlusCircle, Users } from "lucide-react";
+import { Home, PlusCircle, Users, Bookmark } from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,6 +25,11 @@ export default function Layout({ children }: LayoutProps) {
       path: "/movie-night",
       label: "Movie Night",
       icon: Users,
+    },
+    {
+      path: "/watchlist",
+      label: "Watchlist",
+      icon: Bookmark,
     },
   ];
 
