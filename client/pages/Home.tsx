@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Calendar, Search, Filter, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import SmartNudge from "@/components/SmartNudge";
+import { toast } from "@/components/ui/use-toast";
 
 interface MovieRelease {
   id: string;
@@ -104,6 +106,19 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("All Platforms");
   const [selectedGenre, setSelectedGenre] = useState("All Genres");
+  const [showNudge, setShowNudge] = useState(true);
+
+  const handleWatchTonight = (movieTitle: string) => {
+    toast({
+      title: "Added to tonight's queue! 🎬",
+      description: `${movieTitle} is ready for your movie night.`,
+    });
+  };
+
+  const handleDismissNudge = (nudgeId: string) => {
+    setShowNudge(false);
+    console.log("Dismissed nudge:", nudgeId);
+  };
 
   // Group releases by date
   const groupedReleases = mockReleases.reduce(
@@ -191,6 +206,14 @@ export default function Home() {
           Discover new movies and shows coming to your favorite platforms
         </p>
       </div>
+
+      {/* Smart Nudge */}
+      {showNudge && (
+        <SmartNudge
+          onWatchTonight={handleWatchTonight}
+          onDismiss={handleDismissNudge}
+        />
+      )}
 
       {/* Filter Bar */}
       <Card>
