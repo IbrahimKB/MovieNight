@@ -12,6 +12,7 @@ import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
+import ReelTalk from "./pages/ReelTalk";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
@@ -82,6 +83,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Squad />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/stats"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ReelTalk />
                   </Layout>
                 </ProtectedRoute>
               }
