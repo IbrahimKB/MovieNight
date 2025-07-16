@@ -296,7 +296,7 @@ export default function Suggest() {
                     Suggest to friends
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {mockFriends.map((friend) => (
+                    {userFriends.map((friend) => (
                       <div
                         key={friend.id}
                         className="flex items-center space-x-2"
