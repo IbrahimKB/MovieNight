@@ -59,6 +59,9 @@ export function createServer() {
   // Initialize database on server start
   initializeDatabase().catch(console.error);
 
+  // Start scheduler service for automatic weekly sync
+  schedulerService.start();
+
   // Middleware
   app.use(cors());
 
