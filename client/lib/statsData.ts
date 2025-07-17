@@ -28,59 +28,11 @@ export interface MonthlyStats {
   groupMoviesWatched: number;
 }
 
-// Mock user stats data
-export const MOCK_USER_STATS: Record<string, UserStats> = {
-  "1": {
-    // Ibrahim
-    userId: "1",
-    totalSuggestionsMade: 12,
-    avgWatchDesireOnPicks: 8.3,
-    totalMoviesWatched: 24,
-    avgPostWatchRating: 7.8,
-  },
-  "2": {
-    // Omar
-    userId: "2",
-    totalSuggestionsMade: 8,
-    avgWatchDesireOnPicks: 7.9,
-    totalMoviesWatched: 18,
-    avgPostWatchRating: 8.4,
-  },
-  "3": {
-    // Sara
-    userId: "3",
-    totalSuggestionsMade: 15,
-    avgWatchDesireOnPicks: 8.7,
-    totalMoviesWatched: 31,
-    avgPostWatchRating: 8.1,
-  },
-  "4": {
-    // Alex
-    userId: "4",
-    totalSuggestionsMade: 6,
-    avgWatchDesireOnPicks: 7.2,
-    totalMoviesWatched: 14,
-    avgPostWatchRating: 6.9,
-  },
-  "5": {
-    // Maya
-    userId: "5",
-    totalSuggestionsMade: 10,
-    avgWatchDesireOnPicks: 8.1,
-    totalMoviesWatched: 22,
-    avgPostWatchRating: 7.6,
-  },
-};
+// Empty stats data - real data will be loaded from API
+export const MOCK_USER_STATS: Record<string, UserStats> = {};
 
-// Mock monthly stats (last 6 months)
-export const MOCK_MONTHLY_STATS: MonthlyStats[] = [
-  { month: "Jul", moviesWatched: 6, groupMoviesWatched: 8 },
-  { month: "Aug", moviesWatched: 4, groupMoviesWatched: 7 },
-  { month: "Sep", moviesWatched: 8, groupMoviesWatched: 12 },
-  { month: "Oct", moviesWatched: 5, groupMoviesWatched: 9 },
-  { month: "Nov", moviesWatched: 7, groupMoviesWatched: 11 },
-  { month: "Dec", moviesWatched: 9, groupMoviesWatched: 15 },
-];
+// Empty monthly stats - real data will be loaded from API
+export const MOCK_MONTHLY_STATS: MonthlyStats[] = [];
 
 // Get user stats by ID
 export function getUserStats(userId: string): UserStats | undefined {
@@ -94,14 +46,8 @@ export function generateLeaderboard(userIds: string[]): LeaderboardEntry[] {
       const stats = MOCK_USER_STATS[userId];
       if (!stats) return null;
 
-      // Mock user data (in real app, would come from database)
-      const userMap: Record<string, { name: string; username: string }> = {
-        "1": { name: "Ibrahim Kaysar", username: "ibrahim" },
-        "2": { name: "Omar", username: "omar" },
-        "3": { name: "Sara", username: "sara" },
-        "4": { name: "Alex", username: "alex" },
-        "5": { name: "Maya", username: "maya" },
-      };
+      // Real user data will come from API/database
+      const userMap: Record<string, { name: string; username: string }> = {};
 
       const user = userMap[userId];
       if (!user) return null;
