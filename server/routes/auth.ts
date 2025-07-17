@@ -47,10 +47,31 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const result = await withTransaction(async (db) => {
       console.log("Login attempt:", { email: body.email, password: "***" });
 
-      // Create admin user if it doesn't exist
-      const adminExists = db.users.find((u) => u.username === "admin");
+      // Create admin user if it doesn't exist or recreate if password doesn't work
+      let adminExists = db.users.find((u) => u.username === "admin");
+
+      if (adminExists) {
+        // Test if existing admin password works
+        const testPassword = await bcrypt.compare(
+          "admin123",
+          adminExists.password,
+        );
+        console.log("Testing existing admin password:", testPassword);
+
+        if (!testPassword) {
+          console.log(
+            "Existing admin password invalid, recreating admin user...",
+          );
+          // Remove old admin user
+          db.users = db.users.filter((u) => u.username !== "admin");
+          adminExists = null;
+        } else {
+          console.log("Admin user exists with valid password");
+        }
+      }
+
       if (!adminExists) {
-        console.log("Creating admin user...");
+        console.log("Creating new admin user...");
         const hashedPassword = await bcrypt.hash("admin123", 12);
         const adminUser: User = {
           id: generateId(),
@@ -65,8 +86,13 @@ export const handleLogin: RequestHandler = async (req, res) => {
         };
         db.users.push(adminUser);
         console.log("Admin user created successfully");
-      } else {
-        console.log("Admin user already exists");
+
+        // Test the new password immediately
+        const testNewPassword = await bcrypt.compare(
+          "admin123",
+          hashedPassword,
+        );
+        console.log("New admin password test:", testNewPassword);
       }
 
       // Find user by email or username
