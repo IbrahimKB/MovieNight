@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import accessibility utilities */
-@import "./styles/accessibility.css";
-
 @layer base {
   /* Mobile-first optimizations */
   html {
