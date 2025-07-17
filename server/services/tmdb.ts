@@ -64,6 +64,21 @@ interface MovieNightSearchResult {
   tmdbId: number;
 }
 
+interface UpcomingRelease {
+  id: string;
+  title: string;
+  platform: string;
+  releaseDate: string;
+  genres: string[];
+  description?: string;
+  poster?: string;
+  year: number;
+  mediaType: "movie" | "tv";
+  tmdbId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Genre mapping (TMDB genre IDs to names)
 const genreMap: Record<number, string> = {
   28: "Action",
@@ -229,6 +244,128 @@ class TMDBService {
       console.error("TMDB TV details error:", error);
       throw new Error("Failed to fetch TV show details");
     }
+  }
+
+  async getUpcomingMovies(days: number = 30): Promise<UpcomingRelease[]> {
+    try {
+      const today = new Date();
+      const futureDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+
+      const todayStr = today.toISOString().split("T")[0];
+      const futureDateStr = futureDate.toISOString().split("T")[0];
+
+      const data = await this.makeRequest("/discover/movie", {
+        "primary_release_date.gte": todayStr,
+        "primary_release_date.lte": futureDateStr,
+        sort_by: "primary_release_date.asc",
+        page: 1,
+        include_adult: false,
+        with_original_language: "en", // Focus on English releases
+      });
+
+      return this.formatReleases(data.results, "movie");
+    } catch (error) {
+      console.error("TMDB upcoming movies error:", error);
+      throw new Error("Failed to fetch upcoming movies");
+    }
+  }
+
+  async getUpcomingTVShows(days: number = 30): Promise<UpcomingRelease[]> {
+    try {
+      const today = new Date();
+      const futureDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+
+      const todayStr = today.toISOString().split("T")[0];
+      const futureDateStr = futureDate.toISOString().split("T")[0];
+
+      const data = await this.makeRequest("/discover/tv", {
+        "first_air_date.gte": todayStr,
+        "first_air_date.lte": futureDateStr,
+        sort_by: "first_air_date.asc",
+        page: 1,
+        include_adult: false,
+        with_original_language: "en", // Focus on English releases
+      });
+
+      return this.formatReleases(data.results, "tv");
+    } catch (error) {
+      console.error("TMDB upcoming TV shows error:", error);
+      throw new Error("Failed to fetch upcoming TV shows");
+    }
+  }
+
+  async getUpcomingReleases(days: number = 30): Promise<UpcomingRelease[]> {
+    try {
+      const [movies, tvShows] = await Promise.all([
+        this.getUpcomingMovies(days),
+        this.getUpcomingTVShows(days),
+      ]);
+
+      // Combine and sort by release date
+      const allReleases = [...movies, ...tvShows];
+      return allReleases.sort(
+        (a, b) =>
+          new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime(),
+      );
+    } catch (error) {
+      console.error("TMDB upcoming releases error:", error);
+      throw new Error("Failed to fetch upcoming releases");
+    }
+  }
+
+  private formatReleases(
+    items: (TMDBMovie | TMDBTVShow)[],
+    mediaType: "movie" | "tv",
+  ): UpcomingRelease[] {
+    const now = new Date().toISOString();
+
+    return items
+      .filter((item) => {
+        const releaseDate =
+          mediaType === "movie"
+            ? (item as TMDBMovie).release_date
+            : (item as TMDBTVShow).first_air_date;
+
+        return (
+          releaseDate &&
+          this.isValidReleaseDate(releaseDate, mediaType === "movie") &&
+          item.vote_average > 0
+        ); // Only include items with some ratings
+      })
+      .map((item): UpcomingRelease => {
+        const isMovie = mediaType === "movie";
+        const title = isMovie
+          ? (item as TMDBMovie).title
+          : (item as TMDBTVShow).name;
+        const releaseDate = isMovie
+          ? (item as TMDBMovie).release_date
+          : (item as TMDBTVShow).first_air_date;
+
+        // Map platform based on popularity and type
+        let platform = "Theaters";
+        if (!isMovie) {
+          platform = "TV";
+        } else if (item.popularity < 50) {
+          platform = "Streaming";
+        }
+
+        return {
+          id: `tmdb_${item.id}_${mediaType}_${Date.now()}`,
+          title,
+          platform,
+          releaseDate,
+          genres: item.genre_ids.map((id) => genreMap[id]).filter(Boolean),
+          description: item.overview || "No description available",
+          poster: item.poster_path
+            ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
+            : undefined,
+          year: new Date(releaseDate).getFullYear(),
+          mediaType,
+          tmdbId: item.id,
+          createdAt: now,
+          updatedAt: now,
+        };
+      });
   }
 
   getRateLimitStatus() {
