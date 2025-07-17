@@ -292,6 +292,9 @@ export default function Home() {
             </CardContent>
           </Card>
 
+          {/* Suggestion Leaderboard */}
+          <SuggestionLeaderboard />
+
           {/* Quick Actions */}
           <Card>
             <CardHeader className="pb-3">
