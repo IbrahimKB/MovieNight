@@ -311,4 +311,81 @@ router.get("/sent", verifyJWT, async (req, res) => {
   }
 });
 
+// Delete a suggestion
+router.delete("/:suggestionId", verifyJWT, async (req, res) => {
+  try {
+    const { suggestionId } = req.params;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: "User not authenticated",
+      } as ApiResponse);
+    }
+
+    if (!suggestionId) {
+      return res.status(400).json({
+        success: false,
+        error: "Suggestion ID is required",
+      } as ApiResponse);
+    }
+
+    const database = loadDatabase();
+
+    // Find the suggestion
+    const suggestionIndex = database.suggestions.findIndex(
+      (s) => s.id === suggestionId,
+    );
+
+    if (suggestionIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: "Suggestion not found",
+      } as ApiResponse);
+    }
+
+    const suggestion = database.suggestions[suggestionIndex];
+
+    // Check if user is the owner of this suggestion
+    if (suggestion.suggestedBy !== userId) {
+      return res.status(403).json({
+        success: false,
+        error: "You can only delete your own suggestions",
+      } as ApiResponse);
+    }
+
+    // Remove the suggestion
+    const deletedSuggestion = database.suggestions.splice(
+      suggestionIndex,
+      1,
+    )[0];
+
+    // Clean up related data
+    // Remove associated watch desires
+    database.watchDesires = database.watchDesires.filter(
+      (wd) => wd.suggestionId !== suggestionId,
+    );
+
+    // Remove associated notifications
+    database.notifications = database.notifications.filter(
+      (notification) => notification.actionData?.suggestionId !== suggestionId,
+    );
+
+    saveDatabase(database);
+
+    res.json({
+      success: true,
+      data: deletedSuggestion,
+      message: "Suggestion and related data deleted successfully",
+    } as ApiResponse);
+  } catch (error) {
+    console.error("Delete suggestion error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+    } as ApiResponse);
+  }
+});
+
 export default router;
