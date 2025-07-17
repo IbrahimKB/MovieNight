@@ -74,6 +74,17 @@ export function createServer() {
     });
   });
 
+  // Test endpoint for body parsing
+  app.post("/api/test", (req, res) => {
+    console.log("Test endpoint body:", req.body);
+    res.json({
+      success: true,
+      receivedBody: req.body,
+      bodyType: typeof req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+    });
+  });
+
   // Legacy demo route
   app.get("/api/demo", handleDemo);
 
