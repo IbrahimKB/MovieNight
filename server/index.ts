@@ -67,6 +67,21 @@ export function createServer() {
   app.get("/api/auth/profile/:userId", handleGetProfile);
   app.get("/api/auth/search-users", handleSearchUsers);
 
+  // Admin routes (protected)
+  app.get("/api/admin/users", verifyJWT, requireAdmin, handleGetAllUsers);
+  app.post(
+    "/api/admin/users/reset-password",
+    verifyJWT,
+    requireAdmin,
+    handleResetPassword,
+  );
+  app.delete(
+    "/api/admin/users/:userId",
+    verifyJWT,
+    requireAdmin,
+    handleDeleteUser,
+  );
+
   // Movie and suggestion routes
   app.get("/api/movies", handleGetMovies);
   app.get("/api/movies/search", handleSearchMovies);
