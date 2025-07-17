@@ -8,87 +8,569 @@
   "notifications": [],
   "releases": [
     {
-      "id": "sample-1",
-      "title": "Deadpool & Wolverine",
-      "platform": "Theaters, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": [
-        "Action",
-        "Comedy",
-        "Superhero"
-      ],
-      "description": "The Merc with a Mouth teams up with Wolverine in this highly anticipated superhero adventure.",
-      "poster": "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
+      "id": "a7dedc25-0f8d-490a-849c-81007322a969",
+      "title": "The Deal",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [],
+      "description": "Two men arrive at Johnny's house for drugs, but one of them seems uneasy about the prospect. Inside, they get caught up in a game of distrust, murder mysteries and 70s film.",
+      "poster": "https://image.tmdb.org/t/p/w500/8q7hKxtSUc87uBVjUICUHXD5Z2w.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:47:00.000Z",
-      "updatedAt": "2025-07-17T23:47:00.000Z"
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
     },
     {
-      "id": "sample-2",
-      "title": "Inside Out 2",
-      "platform": "Theaters, Disney+",
-      "releaseDate": "2025-07-19",
+      "id": "101305b4-f493-4902-8f1f-aaf4d66094ef",
+      "title": "Two in One: The Briscoe Story",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
       "genres": [
-        "Animation",
-        "Family",
+        "Documentary"
+      ],
+      "description": "Mark Briscoe and the Pugh family share the story of how The Briscoe brothers built a dynasty over a 20+ year career filled with barbed wire, love, and tragedy.",
+      "poster": "https://image.tmdb.org/t/p/w500/ekvtRpPtDVOAPI3T3rFKwaRryxs.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "1e62479e-aa38-407a-8671-da07050ba141",
+      "title": "Closing Shift",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Horror",
+        "Thriller"
+      ],
+      "description": "An usher working the closing shift at a cinema begins to question what she sees and hears as the building becomes more unsettling",
+      "poster": "https://image.tmdb.org/t/p/w500/pvhwChEPTBuGAawgD05i7nAsCiQ.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "fa41f15e-95d5-468f-b21c-423e46ca4745",
+      "title": "Le Temps Est Le Temps",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Mystery",
+        "Thriller",
+        "Drama"
+      ],
+      "description": "Seàn-Liqué Bleùharde's latest New-New Wave experiment invites the audience to question not just what they’re watching — but when. Shot on stark black & white 16mm film, this is post-silence cinema at its most profound.",
+      "poster": "https://image.tmdb.org/t/p/w500/yzUaGi2GzjJvUjIDyxToSQYlslK.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "0e8025ab-8504-4506-9fd8-d315d8542942",
+      "title": "Katie Boyle: Terapy",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
         "Comedy"
       ],
-      "description": "Joy, Sadness, and the crew are back for another emotional adventure inside Riley's mind.",
-      "poster": "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
+      "description": "Get ready for a fearless, fast-paced, and laugh-out-loud comedy special from Irish comedian Katie Boyle, filmed live in New York City! In TERAPY, Katie hilariously unpacks culture shocks, Catholic guilt, American dating, therapy sessions, and awkward family moments with her signature mix of wit, charm, and emotional honesty. From growing up in Ireland to navigating modern life in the U.S., nothing is off limits—from mast*rb*tion mishaps and mental health to language mix-ups and avocado injuries.",
+      "poster": "https://image.tmdb.org/t/p/w500/6hiE6JvvTZDaDYGUvUkimo8mFNd.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:47:00.000Z",
-      "updatedAt": "2025-07-17T23:47:00.000Z"
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
     },
     {
-      "id": "sample-3",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-20",
+      "id": "069526e4-4a67-4024-a9fb-cd8e4abfd965",
+      "title": "Stranger with My Name",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Thriller",
+        "TV Movie"
+      ],
+      "description": "After taking a job in a new town, Alice gets into a car accident and awakens to discover that her husband doesn't recognize her, another woman has assumed her identity, and all records show that Alice is not who she says she is.",
+      "poster": "https://image.tmdb.org/t/p/w500/pNbd3jZKiP0OZZHJxHF3yR6Qnbq.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "ab9e6fef-d63e-462e-8fbf-b793f8927188",
+      "title": "a reel of flowers, super 8",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [],
+      "description": "a reel of flowers, super 8",
+      "poster": "https://image.tmdb.org/t/p/w500/9DgF2MRTRhxQM0ghv05Y4HC3bZP.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "d1872f1c-c6ef-48b4-b8c3-98eb5c087c0e",
+      "title": "Pas de Deux",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Thriller",
+        "Drama"
+      ],
+      "description": "A ballet dancer becomes trapped in a battle of wills with a cold, uncaring judge.",
+      "poster": "https://image.tmdb.org/t/p/w500/yugSCg6CnRcFmwzF3gI0veHUI2L.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "f2aced44-3f5e-4544-8ffd-9158834086a6",
+      "title": "GRUT / CELL",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Adventure",
+        "Fantasy",
+        "Horror"
+      ],
+      "description": "The Master takes The Vicar on a quest across the Three Kingdoms to destroy the GRUT CELL to stop The EBE and his legion of Gruts.",
+      "poster": "https://image.tmdb.org/t/p/w500/bkiyBgCVl7Io5IEGUyFr8dKAhi7.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "2a19c7ff-8024-4fe7-a00f-cf872b8c54fa",
+      "title": "Birthday Video",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "Syd has a hard time recording a birthday video for her friend's grandma.",
+      "poster": "https://image.tmdb.org/t/p/w500/kMjd2p5Qc6FyPdX8raeCSWNp8wh.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "290d2178-a6a1-4370-8c96-e797467e09e5",
+      "title": "Human Nature",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Thriller",
+        "Science Fiction"
+      ],
+      "description": "Five strangers are kidnapped and forced into a game of life or death, all while the world is in a state of chaos. A virus has decimated almost half of the population and Xena corp. A.I. humanoids have replaced the vast majority of the work force. A detective must confront a failed case to be able to David his way through this corporate Goliath.",
+      "poster": "https://image.tmdb.org/t/p/w500/rX4n8UGEiYGZSz4U6RBBPuA3CES.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "17357ebe-e779-4e95-8dbf-61e397f02fbe",
+      "title": "Detachment",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [],
+      "description": "When a shy American-Filipino struggles with social isolation, he turns to online gaming for escape and community, unknowingly trading real-world connection for a life controlled by the screen.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "439097c8-a3ce-4b17-b3d1-8be25b7ad815",
+      "title": "Childhood",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "A former child soldier living in Ireland reckons with his trauma as his son reaches the age he was when he was first captured.",
+      "poster": "https://image.tmdb.org/t/p/w500/sR5fsFA3nLv7t12Ob14GzUHRFjt.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "7915b0a9-7ec3-4c2c-8f3d-2b66320aa53b",
+      "title": "As The Decay Encroaches",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Thriller",
+        "Drama"
+      ],
+      "description": "A nuclear researcher and radio jockey's paths intersect in a shared struggle.",
+      "poster": "https://image.tmdb.org/t/p/w500/cIXgUbYodA1HWLkVGCyoPzfMZec.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "90c9e462-4afc-46b5-9759-4f26ebefcfef",
+      "title": "I Hope We Can Still Be Friends",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Mystery",
+        "Thriller",
+        "Horror"
+      ],
+      "description": "A high-powered executive wakes trapped alone in a wooden cell, but when he discovers a woman imprisoned beside him, their fragile alliance unravels amid shared secrets, shifting trust, and a sinister game orchestrated by their unseen captor, where escape means confronting the darkest corners of themselves.",
+      "poster": "https://image.tmdb.org/t/p/w500/2XPLiyKIFwLbXAvdO6pu7jC95Fu.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "d990e731-e057-41d7-b386-2200438b0517",
+      "title": "Sunphlowers",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Drama"
+      ],
+      "description": "In the wake of her husband's death, a rural widow battles isolation, mounting debts, and the threat of organised crime, all while holding her fractured family together. But as pressure mounts, Catherine discovers an unexpected inner strength, forging a powerful journey of resilience, survival, and self-reclamation.",
+      "poster": "https://image.tmdb.org/t/p/w500/3VmCjiYsz2xL5IqPlywHwJeTwNP.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "13c8ab7c-d556-4abc-bfcf-11af90ad3414",
+      "title": "We Only Want the Earth",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "An iconic presence in the landscape of Irish socialism and republicanism, the name of James Connolly looms large in the trade union movement, and wherever radical left-wing politics are espoused. This film tries to bring Connolly’s many achievements in the field of workers’ and women’s rights into the fore, alongside his role in the 1916 Easter uprising.",
+      "poster": "https://image.tmdb.org/t/p/w500/fvtm6RAk37xevqdMVUSAbmzsSFA.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "da788294-49b9-4e3b-9ef9-979f4b5e987a",
+      "title": "Stolen Lives",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "The lives of Sunny Jacobs and Peter Pringle were torn apart when they were wrongly convicted of killing police officers—Sunny in the U.S, Peter in Ireland. Each were jailed for crimes they did not commit, only be exonerated after more than a decade each behind bar. In the aftermath of unimaginable hardship, by chance, they found one another and became the world’s only wrongfully convicted, death sentenced, cop-killer accused, exonerated and married couple!",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "b8f76a9e-dea1-4097-b288-1ce2fb638250",
+      "title": "Transindigenous Assembly",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [],
+      "description": "Punk documentary about queer Aboriginal and Indigenous artists and their inventions of the “good life”. Here you will meet artists who have remained in their Indigenous communities or have rediscovered them for themselves, and are active outside and beyond the Western art institutions: masters whose outstanding teachings on light are as precise as any mathematics available to the Western world; Aboriginal cultural workers who emancipated themselves solely through the power of their art; Amazonian curanderas who work miracles despite the shaman business, and others.",
+      "poster": "https://image.tmdb.org/t/p/w500/6U0RZsFZGtcz8cU605jxIAgFviM.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "4f31243e-df50-457b-a1ba-d912d3282e41",
+      "title": "Between These Times",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "A 10-hour, 'slow TV' film, documenting 10 days spent travelling the length of England on public buses, exploring the issues faced with service quality and the disabled bus pass.",
+      "poster": "https://image.tmdb.org/t/p/w500/oUD3UwcSns4ue4KfrRkJt2TzFff.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "2afb4e03-809b-48e8-abce-dafbad48716d",
+      "title": "Cookieverse",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
+      "genres": [],
+      "description": "Called 'the greatest show of all time' by fans and critics alike, The Cookieverse follows the civil war between Cookie King and his acquaintances. It is a non-fiction ongoing account of the sudden and destructive dissolving of a once blossoming friendship group. The discourse all occurs on social media and has left the internet divided....\n\nWho will be cancelled, and who will gain the adoration of the public?",
+      "poster": "https://image.tmdb.org/t/p/w500/clcYLY0HMzOXqczHJzRcUYwxqdh.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "dd8917eb-b510-4859-8d1c-63ab24810624",
+      "title": "Lie Detector: Truth or Deception",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Crime",
+        "Reality",
+        "Documentary"
+      ],
+      "description": "Individuals long suspected of serious crimes voluntarily submit to taking a polygraph test hoping to clear their names in the eyes of their family and community.",
+      "poster": "https://image.tmdb.org/t/p/w500/zfen8cVt3Ev25S44WfuttkZ0pMn.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "b56e26e3-6a12-4586-afdc-9a710a976705",
+      "title": "Back to the Frontier",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Reality",
+        "Action & Adventure",
+        "Family"
+      ],
+      "description": "Follow three American families as they reimagine their lives as 1880s homesteaders, challenged to forgo the comforts of the present day for a more analog life on the frontier.",
+      "poster": "https://image.tmdb.org/t/p/w500/caiU6KM9fkVzOSCJrha3vI6i46U.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "26b3bee6-fe6d-4e32-b79e-668dccabe152",
+      "title": "Electric Bloom",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Comedy",
+        "Family",
+        "Drama"
+      ],
+      "description": "Follow the three members of a mega-famous pop group, Electric Bloom, as they look back and tell the story of their band and friendship, starting with the day they all met in middle school. The girls go on a journey to becoming the biggest band in the world and the best friends in the universe.",
+      "poster": "https://image.tmdb.org/t/p/w500/2QZAkwZZ1SI72YD2IygwVMDSP4k.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "68a8c680-ca9c-4f6d-bc90-d8722e211797",
+      "title": "Too Much",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
       "genres": [
         "Comedy",
         "Drama"
       ],
-      "description": "Carmy and the crew return for another intense season in the kitchen.",
-      "poster": "https://image.tmdb.org/t/p/w500/6P6tMtAunYiXbUtCX6Wm8uWSAsN.jpg",
+      "description": "When a heartbroken New Yorker moves to London hoping for a love story, she falls for an indie musician who's anything but the typical romantic hero.",
+      "poster": "https://image.tmdb.org/t/p/w500/jZXS6VgFhVsAqkT6oHuIo5VeCkw.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:47:00.000Z",
-      "updatedAt": "2025-07-17T23:47:00.000Z"
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
     },
     {
-      "id": "sample-4",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-25",
+      "id": "edaea002-369a-4ed2-9158-4f11bd985d7a",
+      "title": "Underdog Inc.",
+      "platform": "TV",
+      "releaseDate": "2025-07-11",
       "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
+        "Reality"
       ],
-      "description": "The final season of the beloved supernatural series brings the story to an epic conclusion.",
-      "poster": "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+      "description": "Underdog Inc. is an adrenaline-fueled docuseries following Dale Kristensen—heavy-machinery operator, truck driver and mechanic—who stands just four-foot-two but takes on jobs built for giants.",
+      "poster": "https://image.tmdb.org/t/p/w500/tVYHxunQX8KECgyKCfSX9hkopq6.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:47:00.000Z",
-      "updatedAt": "2025-07-17T23:47:00.000Z"
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
     },
     {
-      "id": "sample-5",
-      "title": "Dune: Part Three",
-      "platform": "Theaters",
-      "releaseDate": "2025-08-15",
+      "id": "70c9cc30-d097-4fb2-8306-6982194dcd36",
+      "title": "One Night in Idaho: The College Murders",
+      "platform": "TV",
+      "releaseDate": "2025-07-11",
       "genres": [
-        "Sci-Fi",
-        "Adventure",
+        "Documentary"
+      ],
+      "description": "Told in captivating, tense, and emotionally wrenching detail by only those involved in and affected by the crime, this series intimately explores this American tragedy and its continued impact and fallout.",
+      "poster": "https://image.tmdb.org/t/p/w500/b4D6AVcZoE45c6JAKmdpicU0zCc.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "c06d7665-8eae-4cc0-b1c6-34d867dc6c7c",
+      "title": "The Wild Ones",
+      "platform": "TV",
+      "releaseDate": "2025-07-11",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "Explore hidden corners of Earth with a trio of experts as they try to save six endangered species from extinction. With crafty camerawork and survival skills, the team race to find, record, and protect these elusive creatures before it's too late.",
+      "poster": "https://image.tmdb.org/t/p/w500/8jQ1Ie7y4YXw2TnOoCdvCbaaZcn.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "65eccf59-f4bb-4119-a771-6103831938fb",
+      "title": "Dear Bestie",
+      "platform": "TV",
+      "releaseDate": "2025-07-12",
+      "genres": [],
+      "description": "Dear Bestie – Three best friends forging their own path: Iman's journey to journalism, Dania's battle to become an influencer,",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "2675dece-f93d-4204-b23d-92dce40b0772",
+      "title": "Rise Of The Dolphins",
+      "platform": "TV",
+      "releaseDate": "2025-07-12",
+      "genres": [],
+      "description": "'Rise Of The Dolphins' continues the story of Australia's newest rugby league team, The NRL Dolphins, as they navigate their final season under the\n\nlegendary Wayne Bennett.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "8d90ff3f-10d6-411b-972d-8554adf8b54c",
+      "title": "Path to Fame",
+      "platform": "TV",
+      "releaseDate": "2025-07-12",
+      "genres": [],
+      "description": "Young musicians compete in an intense talent camp, facing challenges and eliminations. Only a few will make it into the final band, with winners scoring $100K and a HYBE Latin America record deal.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "578cb98d-63b6-4cf8-986a-256a42281673",
+      "title": "Transformers: Cyberworld",
+      "platform": "TV",
+      "releaseDate": "2025-07-12",
+      "genres": [],
+      "description": "Join Optimus Prime, Bumblebee, Elita-1, Megatron, Grimlock, and more as they’re hurled into the hostile and unknown landscapes of CYBERWORLD. Stranded, disoriented and with no memory of how they got there, they must face a gauntlet of extreme, game-like challenges designed to test their strength, skill and level up as they are pushed to their limit.",
+      "poster": "https://image.tmdb.org/t/p/w500/znHo3e75HvrNhp6k5Of9RUunkCt.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "a8ff677f-8dba-4681-b1f6-e0f043d74d92",
+      "title": "Billionaire Boys Club",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Crime",
+        "Documentary"
+      ],
+      "description": "The 1980s rise and fall of Joe Hunt and the young men who made up an exclusive investment group.",
+      "poster": "https://image.tmdb.org/t/p/w500/5pWqQVAQitNiVoG4bop6qQ628lL.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "9ff206f8-1510-41ed-ba5a-4899aa814b8e",
+      "title": "Live Aid: When Rock ‘n’ Roll Took On the World",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "A look back at the 1985 concert Live Aid, one of the largest global music events in history that raised money for famine relief in Africa.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "cc4e7193-572d-41cd-b821-9ef0334bb62a",
+      "title": "Kings Court",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [],
+      "description": "Kings Court is a new dating series with three celebrity kings — supermodel Tyson Beckford, NBA All-Star Carlos Boozer and WWE legend Thaddeus \"Titus O'Neil\" Bullard — searching for their queen among 21 smart, accomplished and beautiful single ladies ready to risk it all for the one.",
+      "poster": "https://image.tmdb.org/t/p/w500/syFT74eAQ2y8FHlkbFPogySdzXl.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "36996834-9d2d-4862-bcaf-c4040e936572",
+      "title": "Amy's Dead-End Dreamhouse",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "Welcome to Amy’s Dead-End Dreamhouse! Follow Amy and her apartment full of appliances as they encounter all kinds of adult problems, from mental illness, to job hunting, to impossible beauty standards, to your guy friends getting red-pilled. Turns out, life can’t really be solved in under 20 minutes, even with commercial breaks.",
+      "poster": "https://image.tmdb.org/t/p/w500/wv1ZtoK0iUlccnjDqbQu6kY69Rz.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "a5d86ae5-0c8a-4491-a2a4-b974dc4b74fd",
+      "title": "Love Island: Beyond the Villa",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Reality"
+      ],
+      "description": "Follow the season 6 Islanders as they navigate new careers, evolving friendships, newfound fame, and the complexities of life and love outside the villa.",
+      "poster": "https://image.tmdb.org/t/p/w500/kdEnZVGT1WVGZDiVRUzn4rqNfG9.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "460c8095-9c51-45d2-af5c-4d358bf68706",
+      "title": "Dexter: Resurrection",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Crime",
         "Drama"
       ],
-      "description": "The epic conclusion to Paul Atreides' journey on the desert planet Arrakis.",
-      "poster": "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
+      "description": "Dexter Morgan awakens from a coma to find Harrison gone without a trace. Realizing the weight of what he put his son through, Dexter sets out for New York City, determined to find him and make things right. But closure won't come easy. When Miami Metro's Angel Batista arrives with questions, Dexter realizes his past is catching up to him fast. As father and son navigate their own darkness in the city that never sleeps, they soon find themselves deeper than they ever imagined - and that the only way out is together.",
+      "poster": "https://image.tmdb.org/t/p/w500/jSoRKtjlqQi9Hb1hmGQ8cbDnCbj.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:47:00.000Z",
-      "updatedAt": "2025-07-17T23:47:00.000Z"
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "95ecc802-01e8-467c-8509-62638751f459",
+      "title": "The Institute",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Mystery",
+        "Sci-Fi & Fantasy"
+      ],
+      "description": "When 14 year old genius Luke Ellis is kidnapped, he awakens at The Institute, a facility full of children who all got there the same way he did, and who are all possessed of unusual abilities. In a nearby town, haunted former police officer Tim Jamieson has come looking to start a new life, but the peace and quiet won’t last, as his story and Luke’s are destined to collide.",
+      "poster": "https://image.tmdb.org/t/p/w500/7JXZdWifaa6wL0XLRi0GJOlOA8y.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
+    },
+    {
+      "id": "30b4eaeb-9102-495b-9db5-c9dda25948f6",
+      "title": "13 Hours To Survive",
+      "platform": "TV",
+      "releaseDate": "2025-07-14",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "Get swept up in a gladiatorial fight for survival as the ocean recedes and sea animals of all kinds struggle between life and death in tide pools. Hold your breath as love perseveres and thieves run amok in a place where survival is never guaranteed.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-17T23:47:34.082Z",
+      "updatedAt": "2025-07-17T23:47:34.082Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:47:32.497Z"
+    "lastUpdated": "2025-07-17T23:48:37.128Z"
   }
 }
