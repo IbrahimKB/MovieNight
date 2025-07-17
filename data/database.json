@@ -10,17 +10,6 @@
       "joinedAt": "2025-01-18T00:00:00.000Z",
       "createdAt": "2025-01-18T00:00:00.000Z",
       "updatedAt": "2025-01-18T00:00:00.000Z"
-    },
-    {
-      "id": "84a5f36e-4432-4429-87a0-6c261db0818c",
-      "username": "admin",
-      "email": "admin@movienight.com",
-      "name": "Administrator",
-      "password": "$2b$12$VC11n5/5wj4vPKcjuMWkn.UeeDJB89f7o84IrbvUtX.1F1K0EUfHq",
-      "role": "admin",
-      "joinedAt": "2025-07-17T23:30:22.505Z",
-      "createdAt": "2025-07-17T23:30:22.505Z",
-      "updatedAt": "2025-07-17T23:30:22.505Z"
     }
   ],
   "movies": [],
@@ -32,7 +21,7 @@
   "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:30:23.075Z"
+    "lastUpdated": "2025-01-18T00:00:00.000Z"
   },
   "notificationPreferences": []
 }
