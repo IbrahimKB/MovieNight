@@ -255,35 +255,111 @@ async function syncPendingSuggestions() {
 
 // Push notifications
 self.addEventListener("push", (event) => {
+  console.log("Push notification received:", event);
+
+  let notificationData;
+
+  try {
+    notificationData = event.data ? event.data.json() : {};
+  } catch (error) {
+    console.error("Error parsing push notification data:", error);
+    notificationData = {
+      title: "MovieNight",
+      body: "You have a new notification!",
+      icon: "/icons/icon-192x192.svg",
+    };
+  }
+
   const options = {
-    body: "You have new movie suggestions!",
-    icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-72x72.png",
-    tag: "movienight-notification",
-    requireInteraction: false,
-    actions: [
-      {
-        action: "view",
-        title: "View Suggestions",
-        icon: "/icons/suggest-96x96.png",
-      },
-      {
-        action: "dismiss",
-        title: "Dismiss",
-      },
-    ],
+    body: notificationData.body || "You have a new notification!",
+    icon: notificationData.icon || "/icons/icon-192x192.svg",
+    badge: notificationData.badge || "/icons/icon-72x72.svg",
+    tag: notificationData.tag || "movienight-notification",
+    requireInteraction: notificationData.requireInteraction || false,
+    data: notificationData.data || {},
+    image: notificationData.image,
+    actions: getNotificationActions(notificationData.type),
+    silent: false,
+    timestamp: Date.now(),
   };
 
-  event.waitUntil(self.registration.showNotification("MovieNight", options));
+  const title = notificationData.title || "MovieNight";
+
+  event.waitUntil(
+    self.registration
+      .showNotification(title, options)
+      .then(() => {
+        console.log("Notification displayed successfully");
+        // Track notification display
+        trackNotificationEvent("displayed", notificationData.type);
+      })
+      .catch((error) => {
+        console.error("Failed to show notification:", error);
+      }),
+  );
 });
 
 // Handle notification clicks
 self.addEventListener("notificationclick", (event) => {
+  console.log("Notification clicked:", event.notification.tag, event.action);
+
   event.notification.close();
 
-  if (event.action === "view") {
-    event.waitUntil(clients.openWindow("/"));
+  const notificationData = event.notification.data || {};
+  const action = event.action;
+
+  // Track notification interaction
+  trackNotificationEvent("clicked", notificationData.type, action);
+
+  let urlToOpen = "/";
+
+  // Determine URL based on notification type and action
+  if (action === "view" || !action) {
+    switch (notificationData.type) {
+      case "friend_request":
+        urlToOpen = "/squad";
+        break;
+      case "movie_suggestion":
+        urlToOpen = "/";
+        break;
+      case "movie_night_invite":
+        urlToOpen = "/movie-night";
+        break;
+      case "movie_available":
+        urlToOpen = "/watchlist";
+        break;
+      case "system_update":
+        urlToOpen = "/";
+        break;
+      default:
+        urlToOpen = "/";
+    }
+  } else if (action === "dismiss") {
+    // Just close, no action needed
+    return;
   }
+
+  // Open the app or focus existing window
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        // Try to focus existing window
+        for (const client of clientList) {
+          if (client.url.includes(self.location.origin)) {
+            client.focus();
+            client.navigate(urlToOpen);
+            return;
+          }
+        }
+
+        // Open new window if none exists
+        return clients.openWindow(urlToOpen);
+      })
+      .catch((error) => {
+        console.error("Failed to handle notification click:", error);
+      }),
+  );
 });
 
 // Utility to get stored pending data
