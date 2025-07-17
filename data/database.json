@@ -1,5 +1,17 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "admin-001",
+      "username": "admin",
+      "email": "admin@movienight.co.uk",
+      "name": "Administrator",
+      "password": "$2b$12$XqwCe.b4FD7tpdLukWboJe.5MMN2/dKZo9iiF5t9l5A2jJ/19Y1um",
+      "role": "admin",
+      "joinedAt": "2025-07-17T15:41:00.000Z",
+      "createdAt": "2025-07-17T15:41:00.000Z",
+      "updatedAt": "2025-07-17T15:41:00.000Z"
+    }
+  ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
