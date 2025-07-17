@@ -278,6 +278,7 @@ export default function AdminDashboard() {
     if (isAdmin && token) {
       loadUsers();
       loadMovies();
+      loadReleases();
       loadRateLimit();
     }
   }, [isAdmin, token]);
