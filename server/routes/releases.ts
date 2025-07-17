@@ -249,7 +249,49 @@ export const handleGetTMDBStatus: RequestHandler = async (req, res) => {
 // Weekly sync endpoint (for cron jobs)
 export const handleWeeklySync: RequestHandler = async (req, res) => {
   try {
-    const syncResult = await justWatchService.syncWeeklyReleases();
+    // Get weekly releases from TMDB
+    const tmdbReleases = await tmdbService.getUpcomingReleases(7);
+
+    // Convert to Release format and sync
+    const releasesToSync: Release[] = tmdbReleases.map((release) => ({
+      id: release.id,
+      title: release.title,
+      platform: release.platform,
+      releaseDate: release.releaseDate,
+      genres: release.genres,
+      description: release.description,
+      poster: release.poster,
+      year: release.year,
+      createdAt: release.createdAt,
+      updatedAt: release.updatedAt,
+    }));
+
+    // Update database
+    const syncResult = await withTransaction(async (db) => {
+      // Get releases for the next week
+      const startDate = new Date();
+      const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      // Remove existing releases for this week to avoid duplicates
+      db.releases = db.releases.filter((release) => {
+        const releaseDate = new Date(release.releaseDate);
+        return releaseDate < startDate || releaseDate > endDate;
+      });
+
+      // Add new releases
+      db.releases.push(...releasesToSync);
+
+      // Sort by release date
+      db.releases.sort(
+        (a, b) =>
+          new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime(),
+      );
+
+      return {
+        totalReleases: releasesToSync.length,
+        syncTime: new Date().toISOString(),
+      };
+    });
 
     // Update database with new releases
     await withTransaction(async (db) => {
