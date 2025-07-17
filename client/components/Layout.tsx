@@ -61,9 +61,9 @@ export default function Layout({ children }: LayoutProps) {
     },
   ];
 
-  // All navigation items (combining primary and secondary for desktop)
+  // All navigation items (combining bottom nav and additional pages for desktop)
   const allNavItems = [
-    ...navItems,
+    ...bottomNavItems,
     {
       path: "/movie-night",
       label: "Movie Night",
