@@ -284,10 +284,12 @@ export default function AdminDashboard() {
       description: "Movies in catalog",
     },
     {
-      title: "Active Friendships",
-      value: friendships.filter((f) => f.status === "accepted").length,
-      icon: Heart,
-      description: "Connected users",
+      title: "TMDB Searches",
+      value: rateLimitInfo
+        ? `${40 - rateLimitInfo.remaining}/40`
+        : "Loading...",
+      icon: Search,
+      description: "API calls used",
     },
   ];
 
