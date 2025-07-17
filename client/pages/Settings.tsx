@@ -661,13 +661,13 @@ function NotificationPreferenceRow({
             variant="ghost"
             size="sm"
             onClick={() => onTest(type)}
-            disabled={isTesting || !pref.enabled || !pushEnabled}
+            disabled={isTesting || !pref?.enabled || !pushEnabled}
           >
             <TestTube className="h-3 w-3 mr-1" />
             Test
           </Button>
           <Switch
-            checked={pref.enabled}
+            checked={pref?.enabled || false}
             onCheckedChange={(checked) => onUpdate(type, "enabled", checked)}
           />
         </div>
