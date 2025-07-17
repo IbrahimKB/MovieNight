@@ -146,6 +146,14 @@ export function createServer() {
   // Movie and suggestion routes
   app.get("/api/movies", handleGetMovies);
   app.get("/api/movies/search", handleSearchMovies);
+  app.get("/api/movies/:movieId", handleGetMovieById);
+  app.put("/api/movies/:movieId", verifyJWT, handleUpdateMovie);
+  app.delete(
+    "/api/movies/:movieId",
+    verifyJWT,
+    requireAdmin,
+    handleDeleteMovie,
+  );
   app.get("/api/releases", handleGetReleases);
   app.post("/api/suggestions/:userId", handleCreateSuggestion);
   app.get("/api/suggestions/:userId", handleGetSuggestions);
