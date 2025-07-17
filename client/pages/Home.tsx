@@ -141,19 +141,19 @@ export default function Home() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Welcome Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">
-          Welcome back, {user?.name || "Movie Lover"}! 🎬
+      <div className="space-y-1 sm:space-y-2">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
+          Welcome back, {user?.name?.split(" ")[0] || "Movie Lover"}! 🎬
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Discover what your friends are watching and find your next great movie
         </p>
       </div>
 
       {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           title="Friends"
           value={stats.totalFriends}
@@ -162,24 +162,24 @@ export default function Home() {
           color="text-blue-500"
         />
         <StatCard
-          title="Active Suggestions"
+          title="Suggestions"
           value={stats.activeSuggestions}
           icon={MessageSquare}
-          trend="Respond to suggestions"
+          trend="Respond now"
           color="text-green-500"
         />
         <StatCard
-          title="Movies This Week"
+          title="This Week"
           value={stats.moviesWatchedThisWeek}
           icon={Eye}
-          trend="Great watching!"
+          trend="Great!"
           color="text-purple-500"
         />
         <StatCard
-          title="Suggestion Accuracy"
+          title="Accuracy"
           value={`${stats.suggestionAccuracy}%`}
           icon={Target}
-          trend="You're a great predictor!"
+          trend="Great predictor!"
           color="text-orange-500"
         />
       </div>
