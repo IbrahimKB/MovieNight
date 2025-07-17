@@ -279,28 +279,49 @@ export default function MovieSearch({
                       {movie.description}
                     </p>
 
-                    {/* Genres */}
-                    {movie.genres.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {movie.genres.slice(0, 3).map((genre) => (
-                          <Badge
-                            key={genre}
-                            variant="outline"
-                            className="text-xs py-0 px-1.5"
-                          >
-                            {genre}
-                          </Badge>
-                        ))}
-                        {movie.genres.length > 3 && (
+                    {/* Platform & Genres */}
+                    <div className="space-y-2 mt-2">
+                      {/* Platform indicator */}
+                      <div className="flex items-center gap-2">
+                        <PlatformLogo
+                          platform={
+                            movie.mediaType === "tv" ? "TV" : "Theaters"
+                          }
+                          size="sm"
+                        />
+                        {movie.year && (
                           <Badge
                             variant="outline"
                             className="text-xs py-0 px-1.5"
                           >
-                            +{movie.genres.length - 3}
+                            {movie.year}
                           </Badge>
                         )}
                       </div>
-                    )}
+
+                      {/* Genres */}
+                      {movie.genres.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {movie.genres.slice(0, 3).map((genre) => (
+                            <Badge
+                              key={genre}
+                              variant="outline"
+                              className="text-xs py-0 px-1.5"
+                            >
+                              {genre}
+                            </Badge>
+                          ))}
+                          {movie.genres.length > 3 && (
+                            <Badge
+                              variant="outline"
+                              className="text-xs py-0 px-1.5"
+                            >
+                              +{movie.genres.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
