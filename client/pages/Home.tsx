@@ -259,42 +259,51 @@ export default function Home() {
           <SmartNudge />
 
           {/* Upcoming Releases */}
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="lg:block">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Coming Soon
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Coming Soon</span>
+                  <span className="sm:hidden">Releases</span>
                 </CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate("/releases")}
+                  className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                 >
-                  View Calendar
+                  <span className="hidden sm:inline">View Calendar</span>
+                  <span className="sm:hidden">View All</span>
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {recentReleases.slice(0, 3).map((release) => (
+            <CardContent className="space-y-2 sm:space-y-3">
+              {recentReleases.slice(0, 2).map((release) => (
                 <div
                   key={release.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
                   onClick={() => navigate("/releases")}
                 >
-                  <div className="w-8 h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                    <Film className="h-4 w-4 text-muted-foreground" />
+                  <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                    <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="font-medium text-sm leading-none">
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <p className="font-medium text-xs sm:text-sm leading-none truncate">
                       {release.title}
                     </p>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <Badge variant="outline" className="text-xs shrink-0">
                         {release.platform}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(release.releaseDate).toLocaleDateString()}
+                      <span className="text-xs text-muted-foreground truncate">
+                        {new Date(release.releaseDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
                       </span>
                     </div>
                   </div>
