@@ -127,54 +127,53 @@
   "notifications": [],
   "releases": [
     {
-      "id": "8e8483d4-d4ee-419b-a405-04119ea3d166",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
+      "id": "tmdb_1513946_movie_1752766164490",
+      "title": "Tur De Zur",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-17",
       "genres": [
         "Comedy",
         "Drama"
       ],
-      "description": "Carmy and the crew return for another intense season.",
+      "description": "Three best friends go through three different stories at an awful house party.",
+      "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
       "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T15:28:35.156Z",
-      "updatedAt": "2025-07-17T15:28:35.156Z"
+      "createdAt": "2025-07-17T15:29:24.490Z",
+      "updatedAt": "2025-07-17T15:29:24.490Z"
     },
     {
-      "id": "c6aac954-8ca5-4a0c-90b5-9c3c7b1b1754",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
+      "id": "tmdb_1512943_movie_1752766164490",
+      "title": "Desight",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-17",
       "genres": [
-        "Sci-Fi",
         "Horror",
+        "Music"
+      ],
+      "description": "If you believe in parallel worlds, please pray that they will take us in.",
+      "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T15:29:24.490Z",
+      "updatedAt": "2025-07-17T15:29:24.490Z"
+    },
+    {
+      "id": "tmdb_248852_tv_1752766164412",
+      "title": "UNTAMED",
+      "platform": "TV",
+      "releaseDate": "2025-07-17",
+      "genres": [
+        "Mystery",
         "Drama"
       ],
-      "description": "The final season of the beloved supernatural series.",
+      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
+      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
       "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T15:28:35.156Z",
-      "updatedAt": "2025-07-17T15:28:35.156Z"
-    },
-    {
-      "id": "9b7b8f34-8456-476e-93c9-db1f765fe58a",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T15:28:35.156Z",
-      "updatedAt": "2025-07-17T15:28:35.156Z"
+      "createdAt": "2025-07-17T15:29:24.411Z",
+      "updatedAt": "2025-07-17T15:29:24.411Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T15:28:54.311Z"
+    "lastUpdated": "2025-07-17T15:29:54.322Z"
   }
 }
