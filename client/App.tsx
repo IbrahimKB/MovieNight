@@ -15,6 +15,7 @@ import Squad from "./pages/Squad";
 import ReelTalk from "./pages/ReelTalk";
 import AdminDashboard from "./pages/AdminDashboard";
 import MovieSearch from "./pages/MovieSearch";
+import Releases from "./pages/Releases";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
