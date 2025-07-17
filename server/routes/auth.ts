@@ -117,12 +117,15 @@ export const handleLogin: RequestHandler = async (req, res) => {
     });
 
     if (!result) {
+      console.log("Login failed: Invalid credentials");
       const response: ApiResponse = {
         success: false,
         error: "Invalid email/username or password",
       };
       return res.status(401).json(response);
     }
+
+    console.log("Login successful for user:", result.user.username);
 
     const response: ApiResponse<{
       user: Omit<User, "password">;
