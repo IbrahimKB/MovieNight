@@ -189,7 +189,12 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: typeof error,
+      error: error,
+    });
 
     if (error instanceof z.ZodError) {
       const response: ApiResponse = {
@@ -201,7 +206,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     const response: ApiResponse = {
       success: false,
-      error: "Internal server error",
+      error: error instanceof Error ? error.message : "Internal server error",
     };
     res.status(500).json(response);
   }
