@@ -416,12 +416,12 @@ export default function Suggest() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <PlusCircle className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Suggest a Movie</h1>
+          <Search className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Discover & Suggest Movies</h1>
         </div>
         <p className="text-muted-foreground">
-          Find movies to suggest to your friends and respond to their
-          suggestions
+          Search the TMDB database to discover new movies and TV shows, then
+          suggest them to your friends
         </p>
       </div>
 
