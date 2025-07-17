@@ -37,6 +37,11 @@ import {
   handleDeleteNotification,
   handleClearAllNotifications,
 } from "./routes/notifications";
+import {
+  handleSearchMoviesExternal,
+  handleSaveMovieFromTMDB,
+  handleGetRateLimit,
+} from "./routes/tmdb";
 import { initializeDatabase } from "./utils/storage";
 
 export function createServer() {
