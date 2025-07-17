@@ -35,6 +35,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -43,14 +44,14 @@ export default function Layout({ children }: LayoutProps) {
       icon: Home,
     },
     {
-      path: "/discover",
+      path: "/movie-search",
       label: "Discover",
       icon: Search,
     },
     {
-      path: "/movie-night",
-      label: "Movie Night",
-      icon: Users,
+      path: "/suggest",
+      label: "Suggest",
+      icon: PlusCircle,
     },
     {
       path: "/watchlist",
@@ -58,14 +59,28 @@ export default function Layout({ children }: LayoutProps) {
       icon: Bookmark,
     },
     {
+      path: "/squad",
+      label: "Squad",
+      icon: UserPlus,
+    },
+  ];
+
+  // Additional navigation items for desktop/drawer
+  const secondaryNavItems = [
+    {
+      path: "/movie-night",
+      label: "Movie Night",
+      icon: Users,
+    },
+    {
       path: "/releases",
       label: "Releases",
       icon: Calendar,
     },
     {
-      path: "/friends",
-      label: "Squad",
-      icon: UserPlus,
+      path: "/reel-talk",
+      label: "ReelTalk",
+      icon: MessageCircle,
     },
   ];
 
