@@ -673,6 +673,97 @@ export default function AdminDashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Scheduler Status Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Release Scheduler
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {schedulerStatus ? (
+                    <div className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium">Status</Label>
+                          <div className="mt-1">
+                            {schedulerStatus.isRunning ? (
+                              <Badge
+                                variant="default"
+                                className="text-green-600"
+                              >
+                                ✓ Running
+                              </Badge>
+                            ) : (
+                              <Badge variant="destructive">⚠️ Stopped</Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium">
+                            Schedule
+                          </Label>
+                          <div className="mt-1 text-sm text-muted-foreground">
+                            {schedulerStatus.schedule}
+                          </div>
+                        </div>
+                      </div>
+
+                      {schedulerStatus.nextScheduledRun && (
+                        <div>
+                          <Label className="text-sm font-medium">
+                            Next Run
+                          </Label>
+                          <div className="mt-1 font-mono text-sm bg-muted p-2 rounded">
+                            {new Date(
+                              schedulerStatus.nextScheduledRun,
+                            ).toLocaleString()}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={triggerManualSync}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Trigger Sync Now
+                        </Button>
+                        <Button
+                          onClick={loadSchedulerStatus}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          Refresh Status
+                        </Button>
+                      </div>
+
+                      <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+                        <p>
+                          <strong>Automatic Schedule:</strong> Every Monday at
+                          1:00 AM UTC
+                        </p>
+                        <p>
+                          <strong>Purpose:</strong> Syncs upcoming movie/TV
+                          releases from JustWatch
+                        </p>
+                        <p>
+                          <strong>Timezone:</strong> {schedulerStatus.timezone}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground">
+                      Loading scheduler status...
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
