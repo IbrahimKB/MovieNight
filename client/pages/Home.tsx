@@ -316,14 +316,16 @@ export default function Home() {
           <SuggestionLeaderboard />
 
           {/* Quick Actions */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Quick Actions</CardTitle>
+          <Card className="lg:block">
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-base sm:text-lg">
+                Quick Actions
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
                 onClick={() => navigate("/movie-search")}
               >
                 <Film className="h-4 w-4 mr-2" />
@@ -331,7 +333,7 @@ export default function Home() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
                 onClick={() => navigate("/suggest")}
               >
                 <Users className="h-4 w-4 mr-2" />
@@ -339,7 +341,7 @@ export default function Home() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start"
+                className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
                 onClick={() => navigate("/movie-night")}
               >
                 <Calendar className="h-4 w-4 mr-2" />
