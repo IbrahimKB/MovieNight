@@ -72,6 +72,17 @@ interface Suggestion {
   createdAt: string;
 }
 
+interface Release {
+  id: string;
+  title: string;
+  platform: string;
+  releaseDate: string;
+  genres: string[];
+  description?: string;
+  year: number;
+  createdAt: string;
+}
+
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
