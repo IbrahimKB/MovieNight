@@ -38,6 +38,11 @@ import {
   handleMarkAsRead,
   handleDeleteNotification,
   handleClearAllNotifications,
+  handleSubscribePush,
+  handleUnsubscribePush,
+  handleGetNotificationPreferences,
+  handleSaveNotificationPreferences,
+  handleSendTestNotification,
 } from "./routes/notifications";
 import {
   handleSearchMoviesExternal,
