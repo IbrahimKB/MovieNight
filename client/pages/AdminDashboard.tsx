@@ -281,6 +281,43 @@ export default function AdminDashboard() {
     }
   };
 
+  // Load scheduler status
+  const loadSchedulerStatus = async () => {
+    try {
+      const result: ApiResponse<{
+        isRunning: boolean;
+        nextScheduledRun: string | null;
+        schedule: string;
+        timezone: string;
+      }> = await apiCall("/admin/scheduler/status");
+      if (result.success && result.data) {
+        setSchedulerStatus(result.data);
+      } else {
+        toast.error(result.error || "Failed to load scheduler status");
+      }
+    } catch (error) {
+      toast.error("Failed to load scheduler status");
+    }
+  };
+
+  // Trigger manual sync
+  const triggerManualSync = async () => {
+    try {
+      const result: ApiResponse = await apiCall("/admin/scheduler/trigger", {
+        method: "POST",
+      });
+      if (result.success) {
+        toast.success("Manual sync triggered successfully");
+        await loadSchedulerStatus();
+        await loadReleases();
+      } else {
+        toast.error(result.error || "Failed to trigger manual sync");
+      }
+    } catch (error) {
+      toast.error("Failed to trigger manual sync");
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     if (isAdmin && token) {
