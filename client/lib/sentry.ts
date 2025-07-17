@@ -1,21 +1,15 @@
 import * as Sentry from "@sentry/react";
 
 export function initSentry() {
+  // Only initialize if DSN is provided
+  if (!import.meta.env.VITE_SENTRY_DSN) {
+    return;
+  }
+
   Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN || "", // Add your Sentry DSN
-    integrations: [
-      Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({
-        // Capture 10% of all sessions for replay
-        sessionSampleRate: 0.1,
-        // Capture 100% of sessions with an error for replay
-        errorSampleRate: 1.0,
-      }),
-    ],
+    dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE,
     tracesSampleRate: 0.1,
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
     beforeSend(event) {
       // Filter out common non-critical errors
       if (event.exception) {
