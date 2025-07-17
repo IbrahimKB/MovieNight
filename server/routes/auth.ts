@@ -115,13 +115,38 @@ export const handleLogin: RequestHandler = async (req, res) => {
         return null;
       }
 
-      // Verify password
+      // Verify password - handle both hashed and plaintext for migration
       console.log("Verifying password...");
-      const isPasswordValid = await bcrypt.compare(
-        body.password,
-        foundUser.password,
-      );
-      console.log("Password valid:", isPasswordValid);
+      let isPasswordValid = false;
+
+      // Check if password is already hashed (starts with $2b$ for bcrypt)
+      if (foundUser.password.startsWith("$2b$")) {
+        // Use bcrypt compare for hashed passwords
+        isPasswordValid = await bcrypt.compare(
+          body.password,
+          foundUser.password,
+        );
+        console.log("Password validation (bcrypt):", isPasswordValid);
+      } else {
+        // Plain text comparison for legacy users, then hash and update
+        isPasswordValid = body.password === foundUser.password;
+        console.log("Password validation (plaintext):", isPasswordValid);
+
+        if (isPasswordValid) {
+          console.log("Migrating user to hashed password...");
+          // Hash the password and update user record
+          const hashedPassword = await bcrypt.hash(body.password, 12);
+          foundUser.password = hashedPassword;
+          foundUser.updatedAt = new Date().toISOString();
+
+          // Update user role if not set
+          if (!foundUser.role) {
+            foundUser.role = "user";
+          }
+
+          console.log("User password migrated to bcrypt hash");
+        }
+      }
 
       if (!isPasswordValid) {
         console.log("Password verification failed");
