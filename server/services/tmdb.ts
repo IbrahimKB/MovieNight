@@ -135,6 +135,21 @@ class TMDBService {
     return response.data;
   }
 
+  private isValidReleaseDate(releaseDate: string, isMovie: boolean): boolean {
+    if (!releaseDate) return false;
+
+    const date = new Date(releaseDate);
+    const currentYear = new Date().getFullYear();
+    const releaseYear = date.getFullYear();
+
+    // Valid release years: 1900 to current year + 3 (for announced future releases)
+    // For movies: more strict future dating
+    // For TV shows: allow slightly more flexibility
+    const maxFutureYear = isMovie ? currentYear + 2 : currentYear + 3;
+
+    return releaseYear >= 1900 && releaseYear <= maxFutureYear;
+  }
+
   async searchMulti(
     query: string,
     page: number = 1,
@@ -148,11 +163,18 @@ class TMDBService {
 
       return data.results
         .filter((item) => {
+          const isMovie = "title" in item;
+          const releaseDate = isMovie
+            ? item.release_date
+            : (item as TMDBTVShow).first_air_date;
+
           // Filter out people and adult content
+          // Also filter out items with invalid or unrealistic release dates
           return (
             ("title" in item || "name" in item) &&
             !item.adult &&
-            (item.vote_count > 0 || item.popularity > 1)
+            (item.vote_count > 0 || item.popularity > 1) &&
+            (!releaseDate || this.isValidReleaseDate(releaseDate, isMovie))
           );
         })
         .map((item): MovieNightSearchResult => {
