@@ -40,7 +40,7 @@ export default function Layout({ children }: LayoutProps) {
       icon: Home,
     },
     {
-      path: "/movie-search",
+      path: "/suggest",
       label: "Discover",
       icon: Search,
     },
