@@ -179,5 +179,8 @@ export function createServer() {
     handleClearAllNotifications,
   );
 
+  // New suggestions router (replaces old suggestion routes)
+  app.use("/api/suggestions", suggestionsRouter);
+
   return app;
 }
