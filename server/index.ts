@@ -49,6 +49,8 @@ import {
   handleGetReleasesByPlatform,
   handleGetJustWatchStatus,
   handleWeeklySync,
+  handleGetSchedulerStatus,
+  handleTriggerManualSync,
 } from "./routes/releases";
 import { initializeDatabase } from "./utils/storage";
 import { schedulerService } from "./services/scheduler";
