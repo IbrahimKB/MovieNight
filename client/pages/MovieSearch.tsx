@@ -139,7 +139,7 @@ export default function MovieSearchPage() {
                     <h2 className="text-2xl font-bold">
                       {selectedMovie.title}
                     </h2>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         {selectedMovie.mediaType === "movie" ? (
                           <Film className="h-4 w-4" />
@@ -160,6 +160,12 @@ export default function MovieSearchPage() {
                           <span>{selectedMovie.rating.toFixed(1)}/10</span>
                         </div>
                       )}
+                      <PlatformLogo
+                        platform={
+                          selectedMovie.mediaType === "tv" ? "TV" : "Theaters"
+                        }
+                        size="sm"
+                      />
                     </div>
                   </div>
 
