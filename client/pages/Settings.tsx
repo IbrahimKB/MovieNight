@@ -666,20 +666,20 @@ function NotificationPreferenceRow({
             variant="ghost"
             size="sm"
             onClick={() => onTest(type)}
-            disabled={isTesting || !pref?.enabled || !pushEnabled}
+            disabled={isTesting || !pref.enabled || !pushEnabled}
           >
             <TestTube className="h-3 w-3 mr-1" />
             Test
           </Button>
           <Switch
-            checked={pref?.enabled || false}
+            checked={pref.enabled}
             onCheckedChange={(checked) => onUpdate(type, "enabled", checked)}
           />
         </div>
       </div>
 
       {/* Notification Methods */}
-      {pref?.enabled && (
+      {pref.enabled && (
         <div className="space-y-3 pl-6 border-l-2 border-muted">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -687,7 +687,7 @@ function NotificationPreferenceRow({
               <span className="text-sm">Push Notifications</span>
             </div>
             <Switch
-              checked={pref?.push && pushEnabled}
+              checked={pref.push && pushEnabled}
               onCheckedChange={(checked) => onUpdate(type, "push", checked)}
               disabled={!pushEnabled}
             />
@@ -698,11 +698,11 @@ function NotificationPreferenceRow({
             <>
               <Separator />
               <div className="space-y-3">
-                {pref && "reminderHours" in pref && (
+                {"reminderHours" in pref && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Reminder time</span>
                     <Select
-                      value={pref?.reminderHours?.toString() || "1"}
+                      value={pref.reminderHours.toString()}
                       onValueChange={(value) =>
                         onUpdate(type, "reminderHours", parseInt(value))
                       }
@@ -721,11 +721,11 @@ function NotificationPreferenceRow({
                   </div>
                 )}
 
-                {pref && "dayOfWeek" in pref && (
+                {"dayOfWeek" in pref && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Day of week</span>
                     <Select
-                      value={pref?.dayOfWeek?.toString() || "0"}
+                      value={pref.dayOfWeek.toString()}
                       onValueChange={(value) =>
                         onUpdate(type, "dayOfWeek", parseInt(value))
                       }
