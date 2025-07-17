@@ -393,9 +393,10 @@ export default function AdminDashboard() {
 
         {/* Data Management Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="movies">Movies</TabsTrigger>
+            <TabsTrigger value="releases">Releases</TabsTrigger>
             <TabsTrigger value="tmdb">TMDB</TabsTrigger>
             <TabsTrigger value="friendships">Friendships</TabsTrigger>
             <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
