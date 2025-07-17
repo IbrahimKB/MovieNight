@@ -14,6 +14,7 @@ import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
 import AdminDashboard from "./pages/AdminDashboard";
+import NotificationSettings from "./pages/NotificationSettings";
 
 import Releases from "./pages/Releases";
 import Login from "./pages/Login";
@@ -113,6 +114,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Squad />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/notifications"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <NotificationSettings />
                   </Layout>
                 </ProtectedRoute>
               }
