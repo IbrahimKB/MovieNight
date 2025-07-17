@@ -325,6 +325,7 @@ export default function AdminDashboard() {
       loadMovies();
       loadReleases();
       loadRateLimit();
+      loadSchedulerStatus();
     }
   }, [isAdmin, token]);
 
