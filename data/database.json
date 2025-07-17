@@ -5,10 +5,11 @@
       "username": "ibrahim",
       "email": "ibrahim@example.com",
       "name": "Ibrahim Kaysar",
-      "password": "password123",
+      "password": "$2b$12$7.7bFmqigS3OasVIcbpFdOQ.YErT3iRRH6gJHAsoH0dHfDi8aBuQO",
       "joinedAt": "2024-01-01T00:00:00Z",
       "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
+      "updatedAt": "2025-07-17T12:52:37.636Z",
+      "role": "user"
     },
     {
       "id": "user-2",
@@ -297,6 +298,6 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T12:51:49.295Z"
+    "lastUpdated": "2025-07-17T12:52:37.639Z"
   }
 }

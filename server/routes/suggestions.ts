@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateToken } from "../middleware/auth";
+import { verifyJWT } from "./auth";
 import { loadDatabase, saveDatabase, generateId } from "../utils/storage";
 import {
   CreateSuggestionRequest,
