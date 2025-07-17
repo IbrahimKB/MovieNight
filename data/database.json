@@ -8,7 +8,7 @@
   "notifications": [],
   "releases": [
     {
-      "id": "95f29410-d24d-4afd-b9d7-852a4a135d68",
+      "id": "3dcbc7b9-b2d2-4ec9-9883-a06c6a0319c0",
       "title": "The Frisbee",
       "platform": "Streaming",
       "releaseDate": "2025-07-17",
@@ -18,11 +18,11 @@
       "description": "The Frisbee is an animated short featuring a dog and a frisbee which may or may not belong to the dog. The director was contacted for a comment, and he stated that it was meant to be ambiguous.",
       "poster": "https://image.tmdb.org/t/p/w500/2XnfTiSWOptWixMlTsEstPK2I2Q.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:41:17.039Z",
-      "updatedAt": "2025-07-17T23:41:17.039Z"
+      "createdAt": "2025-07-17T23:41:55.363Z",
+      "updatedAt": "2025-07-17T23:41:55.363Z"
     },
     {
-      "id": "fa30fd90-1abd-45bd-9098-386e4479ead3",
+      "id": "9149a751-0d55-48f3-a5e5-912886b934b9",
       "title": "Tur De Zur",
       "platform": "Streaming",
       "releaseDate": "2025-07-17",
@@ -33,11 +33,11 @@
       "description": "Three best friends go through three different stories at an awful house party.",
       "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:41:17.039Z",
-      "updatedAt": "2025-07-17T23:41:17.039Z"
+      "createdAt": "2025-07-17T23:41:55.363Z",
+      "updatedAt": "2025-07-17T23:41:55.363Z"
     },
     {
-      "id": "3fd549e3-76f8-490a-bd8c-b22ea5afedef",
+      "id": "40f2c5a3-7a39-4385-872e-3a67dbaf0add",
       "title": "Desight",
       "platform": "Streaming",
       "releaseDate": "2025-07-17",
@@ -48,11 +48,11 @@
       "description": "If you believe in parallel worlds, please pray that they will take us in.",
       "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:41:17.039Z",
-      "updatedAt": "2025-07-17T23:41:17.039Z"
+      "createdAt": "2025-07-17T23:41:55.363Z",
+      "updatedAt": "2025-07-17T23:41:55.363Z"
     },
     {
-      "id": "f9469558-5e7e-445d-adc0-44c452735773",
+      "id": "fb7f2ec8-3d8e-4f65-bdfe-227b5dff829a",
       "title": "UNTAMED",
       "platform": "TV",
       "releaseDate": "2025-07-17",
@@ -63,12 +63,12 @@
       "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
       "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T23:41:17.039Z",
-      "updatedAt": "2025-07-17T23:41:17.039Z"
+      "createdAt": "2025-07-17T23:41:55.363Z",
+      "updatedAt": "2025-07-17T23:41:55.363Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:41:17.041Z"
+    "lastUpdated": "2025-07-17T23:41:59.120Z"
   }
 }

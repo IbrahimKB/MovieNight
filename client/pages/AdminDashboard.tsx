@@ -756,7 +756,7 @@ export default function AdminDashboard() {
                         </p>
                         <p>
                           <strong>Purpose:</strong> Syncs upcoming movie/TV
-                          releases from JustWatch
+                          releases from TMDB
                         </p>
                         <p>
                           <strong>Timezone:</strong> {schedulerStatus.timezone}
