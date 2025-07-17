@@ -594,7 +594,7 @@ export default function Suggest() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
-                              {suggestion.suggestedBy.name}
+                              {suggestion.suggestedByUser?.name}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               suggested
@@ -602,7 +602,7 @@ export default function Suggest() {
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               <span className="text-xs text-muted-foreground">
-                                {formatTimeAgo(suggestion.suggestedAt)}
+                                {formatTimeAgo(suggestion.createdAt)}
                               </span>
                             </div>
                           </div>
