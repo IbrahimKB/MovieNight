@@ -143,6 +143,10 @@ export default function Squad() {
     }
 
     try {
+      captureUserAction("send_friend_request", user.id, {
+        targetUserId,
+        username,
+      });
       await sendFriendRequest(user.id, targetUserId);
       setMessage({ type: "success", text: `Request sent to @${username}` });
       setTimeout(() => setMessage(null), 3000);
@@ -151,6 +155,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Send request error:", error);
+      captureApiError(error, "send_friend_request", user.id);
       setMessage({ type: "error", text: "Failed to send request" });
       setTimeout(() => setMessage(null), 3000);
     }
