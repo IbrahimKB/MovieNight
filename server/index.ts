@@ -42,6 +42,14 @@ import {
   handleSaveMovieFromTMDB,
   handleGetRateLimit,
 } from "./routes/tmdb";
+import {
+  handleGetReleases,
+  handleSyncReleases,
+  handleGetUpcomingReleases,
+  handleGetReleasesByPlatform,
+  handleGetJustWatchStatus,
+  handleWeeklySync,
+} from "./routes/releases";
 import { initializeDatabase } from "./utils/storage";
 
 export function createServer() {
