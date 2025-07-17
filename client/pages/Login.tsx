@@ -140,20 +140,6 @@ export default function Login() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Demo Credentials */}
-        <Card className="border-dashed border-primary/30">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-2">
-              <h3 className="font-medium text-sm">Demo Credentials</h3>
-              <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
-                <div>📧 ibrahim@example.com / 🔑 password123</div>
-                <div>📧 omar@example.com / 🔑 password123</div>
-                <div>📧 sara@example.com / 🔑 password123</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
