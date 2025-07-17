@@ -77,11 +77,6 @@ export default function Layout({ children }: LayoutProps) {
       label: "Releases",
       icon: Calendar,
     },
-    {
-      path: "/reel-talk",
-      label: "ReelTalk",
-      icon: MessageCircle,
-    },
   ];
 
   return (
