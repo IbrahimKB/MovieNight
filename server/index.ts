@@ -52,6 +52,7 @@ import {
   handleTriggerManualSync,
 } from "./routes/releases";
 import suggestionsRouter from "./routes/suggestions";
+import analyticsRouter from "./routes/analytics";
 import { initializeDatabase } from "./utils/storage";
 import { schedulerService } from "./services/scheduler";
 
