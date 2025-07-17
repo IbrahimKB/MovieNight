@@ -1,0 +1,33 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with safe area for maskable -->
+  <rect width="512" height="512" fill="#0a0a0a"/>
+  
+  <!-- Centered movie camera icon (larger) -->
+  <g transform="translate(128, 170)">
+    <!-- Camera body -->
+    <rect width="256" height="172" rx="20" fill="#dc2626"/>
+    
+    <!-- Large lenses -->
+    <circle cx="64" cy="64" r="32" fill="#0a0a0a"/>
+    <circle cx="192" cy="64" r="32" fill="#0a0a0a"/>
+    
+    <!-- Inner lens reflections -->
+    <circle cx="64" cy="64" r="16" fill="#333"/>
+    <circle cx="192" cy="64" r="16" fill="#333"/>
+    
+    <!-- Film strip -->
+    <rect x="32" y="120" width="192" height="32" fill="#0a0a0a"/>
+    <!-- Film perforations -->
+    <rect x="40" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="56" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="72" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="88" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="104" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="120" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="136" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="152" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="168" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="184" y="128" width="8" height="16" fill="#dc2626"/>
+    <rect x="200" y="128" width="8" height="16" fill="#dc2626"/>
+  </g>
+</svg>
