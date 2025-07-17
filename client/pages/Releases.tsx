@@ -86,13 +86,19 @@ export default function ReleasesPage() {
   // Load releases
   const loadReleases = async () => {
     try {
+      console.log("🔄 Loading releases...");
       const result: ApiResponse<Release[]> = await apiCall("/releases");
+      console.log("✅ Releases API response:", result);
+
       if (result.success && result.data) {
+        console.log("📝 Setting releases:", result.data);
         setReleases(result.data);
       } else {
+        console.error("❌ Releases API error:", result.error);
         toast.error(result.error || "Failed to load releases");
       }
     } catch (error) {
+      console.error("❌ Releases load exception:", error);
       toast.error("Failed to load releases");
     }
   };
