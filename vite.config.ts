@@ -32,19 +32,19 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "icons/icon-192x192.png",
+            src: "icons/icon-192x192.svg",
             sizes: "192x192",
-            type: "image/png",
+            type: "image/svg+xml",
           },
           {
-            src: "icons/icon-512x512.png",
+            src: "icons/icon-512x512.svg",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/svg+xml",
           },
           {
-            src: "icons/icon-512x512.png",
+            src: "icons/icon-512x512.svg",
             sizes: "512x512",
-            type: "image/png",
+            type: "image/svg+xml",
             purpose: "any maskable",
           },
         ],
@@ -59,10 +59,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "tmdb-api-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 hours
-              },
-              cacheKeyWillBeUsed: async ({ request }) => {
-                return `${request.url}?${new Date().toDateString()}`;
+                maxAgeSeconds: 60 * 60 * 24,
               },
             },
           },
@@ -73,7 +70,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "api-cache",
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60, // 1 hour
+                maxAgeSeconds: 60 * 60,
               },
             },
           },
@@ -84,7 +81,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: "images-cache",
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },
           },
@@ -92,7 +89,6 @@ export default defineConfig(({ mode }) => ({
       },
       devOptions: {
         enabled: true,
-        type: "module",
       },
     }),
   ],
