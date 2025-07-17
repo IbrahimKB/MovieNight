@@ -163,6 +163,10 @@ export default function Squad() {
 
   const handleAcceptRequest = async (requestId: string, username: string) => {
     try {
+      captureUserAction("accept_friend_request", user.id, {
+        requestId,
+        username,
+      });
       await respondToFriendRequest(user.id, requestId, "accept");
       setMessage({
         type: "success",
@@ -174,6 +178,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Accept request error:", error);
+      captureApiError(error, "accept_friend_request", user.id);
       toast({
         title: "Error",
         description: "Failed to accept friend request",
