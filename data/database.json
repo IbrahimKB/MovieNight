@@ -10,6 +10,17 @@
       "joinedAt": "2025-07-17T14:21:00.479Z",
       "createdAt": "2025-07-17T14:21:00.479Z",
       "updatedAt": "2025-07-17T14:21:00.479Z"
+    },
+    {
+      "id": "admin-uk-001",
+      "username": "admin-uk",
+      "email": "admin@movienight.co.uk",
+      "name": "Administrator (UK)",
+      "password": "$2b$12$lCnPiO8eNT2dUqXCnS6pre.16OS.fU9pIsZ5JQO1yuuYjiwd7Zxb2",
+      "role": "admin",
+      "joinedAt": "2025-07-17T14:21:00.479Z",
+      "createdAt": "2025-07-17T14:21:00.479Z",
+      "updatedAt": "2025-07-17T14:21:00.479Z"
     }
   ],
   "movies": [],
@@ -24,10 +35,7 @@
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-18",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
+      "genres": ["Comedy", "Drama"],
       "description": "Carmy and the crew return for another intense season.",
       "year": 2025,
       "poster": null,
@@ -39,11 +47,7 @@
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-20",
-      "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
-      ],
+      "genres": ["Sci-Fi", "Horror", "Drama"],
       "description": "The final season of the beloved supernatural series.",
       "year": 2025,
       "poster": null,
@@ -55,10 +59,7 @@
       "title": "Blade Runner 2099",
       "platform": "Amazon Prime Video",
       "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
+      "genres": ["Sci-Fi", "Thriller"],
       "description": "A new series set in the Blade Runner universe.",
       "year": 2025,
       "poster": null,
@@ -70,11 +71,7 @@
       "title": "House of the Dragon: Season 3",
       "platform": "HBO Max",
       "releaseDate": "2025-07-30",
-      "genres": [
-        "Fantasy",
-        "Drama",
-        "Action"
-      ],
+      "genres": ["Fantasy", "Drama", "Action"],
       "description": "The Targaryen civil war continues in Westeros.",
       "year": 2025,
       "poster": null,
@@ -86,11 +83,7 @@
       "title": "Spider-Man: Beyond the Spider-Verse",
       "platform": "Theaters, Netflix",
       "releaseDate": "2025-08-02",
-      "genres": [
-        "Animation",
-        "Action",
-        "Adventure"
-      ],
+      "genres": ["Animation", "Action", "Adventure"],
       "description": "The highly anticipated conclusion to the Spider-Verse trilogy.",
       "year": 2025,
       "poster": null,
@@ -102,11 +95,7 @@
       "title": "The Mandalorian: Season 4",
       "platform": "Disney+",
       "releaseDate": "2025-08-05",
-      "genres": [
-        "Sci-Fi",
-        "Action",
-        "Adventure"
-      ],
+      "genres": ["Sci-Fi", "Action", "Adventure"],
       "description": "Din Djarin and Grogu return for new adventures.",
       "year": 2025,
       "poster": null,
@@ -118,11 +107,7 @@
       "title": "The Batman: Part II",
       "platform": "HBO Max, Theaters",
       "releaseDate": "2025-08-08",
-      "genres": [
-        "Action",
-        "Crime",
-        "Drama"
-      ],
+      "genres": ["Action", "Crime", "Drama"],
       "description": "Robert Pattinson returns as the Dark Knight.",
       "year": 2025,
       "poster": null,
@@ -134,11 +119,7 @@
       "title": "Wednesday: Season 2",
       "platform": "Netflix",
       "releaseDate": "2025-08-12",
-      "genres": [
-        "Comedy",
-        "Horror",
-        "Mystery"
-      ],
+      "genres": ["Comedy", "Horror", "Mystery"],
       "description": "Wednesday Addams returns to Nevermore Academy.",
       "year": 2025,
       "poster": null,
