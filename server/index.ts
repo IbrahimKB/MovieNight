@@ -266,7 +266,9 @@ export function createServer() {
   app.use("/api/analytics", analyticsRouter);
 
   // The error handler must be before any other error middleware and after all controllers
-  app.use(Sentry.Handlers.errorHandler());
+  if (process.env.SENTRY_DSN) {
+    app.use(Sentry.Handlers.errorHandler());
+  }
 
   // Optional fallthrough error handler
   app.use(
