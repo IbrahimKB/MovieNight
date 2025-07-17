@@ -70,6 +70,19 @@ const simulatedReleases: JustWatchRelease[] = [
     short_description: "A new series set in the Blade Runner universe.",
   },
   {
+    id: 1011,
+    title: "Fantastic Four: First Steps",
+    object_type: "movie",
+    release_date: "2025-07-25",
+    genres: ["Action", "Adventure", "Sci-Fi"],
+    providers: [
+      { name: "Disney+", technical_name: "disney_plus" },
+      { name: "Theaters", technical_name: "theaters" },
+    ],
+    year: 2025,
+    short_description: "Marvel's First Family joins the MCU.",
+  },
+  {
     id: 1005,
     title: "Avatar: Fire and Ash",
     object_type: "movie",
