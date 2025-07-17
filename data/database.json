@@ -137,7 +137,23 @@
   "notifications": [],
   "releases": [
     {
-      "id": "9c71897e-69c1-404c-b864-6d30009f117d",
+      "id": "b654a6aa-9880-40c4-8e3b-9a07ec74dfd8",
+      "title": "Dune: Part Three",
+      "platform": "HBO Max, Amazon Prime Video",
+      "releaseDate": "2025-07-25",
+      "genres": [
+        "Sci-Fi",
+        "Adventure",
+        "Drama"
+      ],
+      "description": "The epic conclusion to Denis Villeneuve's Dune trilogy.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "38defbaa-db76-4712-83b8-ab46c2cc240f",
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-18",
@@ -148,11 +164,11 @@
       "description": "Carmy and the crew return for another intense season.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:41:52.540Z",
-      "updatedAt": "2025-07-17T12:41:52.540Z"
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
     },
     {
-      "id": "8fcc1cd6-fa41-4e26-bcea-9538a706358e",
+      "id": "8e51625e-0863-4866-a82a-1ac515d833c4",
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-20",
@@ -164,11 +180,11 @@
       "description": "The final season of the beloved supernatural series.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:41:52.540Z",
-      "updatedAt": "2025-07-17T12:41:52.540Z"
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
     },
     {
-      "id": "f3928eb4-5af7-4dcf-8f42-3479f60e66ec",
+      "id": "d2b6b24a-a299-423c-ae2c-14c39a7a7d18",
       "title": "Blade Runner 2099",
       "platform": "Amazon Prime Video",
       "releaseDate": "2025-07-22",
@@ -179,12 +195,108 @@
       "description": "A new series set in the Blade Runner universe.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:41:52.540Z",
-      "updatedAt": "2025-07-17T12:41:52.540Z"
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "6f051192-3578-4163-9b3d-d18708f0a0df",
+      "title": "Fantastic Four: First Steps",
+      "platform": "Disney+, Theaters",
+      "releaseDate": "2025-07-25",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "description": "Marvel's First Family joins the MCU.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "f8dd35bb-79fb-44a9-958a-445f77ac09f3",
+      "title": "House of the Dragon: Season 3",
+      "platform": "HBO Max",
+      "releaseDate": "2025-07-30",
+      "genres": [
+        "Fantasy",
+        "Drama",
+        "Action"
+      ],
+      "description": "The Targaryen civil war continues in Westeros.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "9653e2f1-b365-47a3-91d2-29f7315b78db",
+      "title": "Spider-Man: Beyond the Spider-Verse",
+      "platform": "Theaters, Netflix",
+      "releaseDate": "2025-08-02",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure"
+      ],
+      "description": "The highly anticipated conclusion to the Spider-Verse trilogy.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "f29d6ee3-8063-47f5-8e17-ff2161eadf3a",
+      "title": "The Mandalorian: Season 4",
+      "platform": "Disney+",
+      "releaseDate": "2025-08-05",
+      "genres": [
+        "Sci-Fi",
+        "Action",
+        "Adventure"
+      ],
+      "description": "Din Djarin and Grogu return for new adventures.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "b732a71e-345a-4134-a1af-c55bdc6ae382",
+      "title": "The Batman: Part II",
+      "platform": "HBO Max, Theaters",
+      "releaseDate": "2025-08-08",
+      "genres": [
+        "Action",
+        "Crime",
+        "Drama"
+      ],
+      "description": "Robert Pattinson returns as the Dark Knight.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "8bf36083-1512-424d-910d-b57b7bc0d8a0",
+      "title": "Wednesday: Season 2",
+      "platform": "Netflix",
+      "releaseDate": "2025-08-12",
+      "genres": [
+        "Comedy",
+        "Horror",
+        "Mystery"
+      ],
+      "description": "Wednesday Addams returns to Nevermore Academy.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T12:44:56.585Z"
+    "lastUpdated": "2025-07-17T12:45:00.621Z"
   }
 }
