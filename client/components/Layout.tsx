@@ -24,6 +24,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import NotificationBell from "@/components/NotificationBell";
+import PWAStatus from "@/components/PWAStatus";
 
 interface LayoutProps {
   children: ReactNode;
@@ -109,6 +110,9 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* Right Side - Notifications & User Menu */}
             <div className="flex items-center gap-2">
+              {/* PWA Status */}
+              <PWAStatus />
+
               {/* Notification Bell */}
               <NotificationBell />
 
