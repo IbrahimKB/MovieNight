@@ -2,7 +2,8 @@ import axios from "axios";
 
 // TMDB API configuration
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
-const TMDB_API_KEY = process.env.TMDB_API_KEY || "your_tmdb_api_key_here";
+const TMDB_API_KEY =
+  process.env.TMDB_API_KEY || "265324a90fd3ab4851c19f5f5393d3c0";
 const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
 // Rate limiting (TMDB allows 40 requests per 10 seconds)
