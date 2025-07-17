@@ -11,12 +11,14 @@ export interface User {
   username: string;
   email: string;
   name: string;
+  role: "user" | "admin";
   avatar?: string;
   joinedAt: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (
     username: string,
@@ -26,6 +28,7 @@ interface AuthContextType {
   ) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,18 +50,23 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("movienight_user");
-    if (storedUser) {
+    const storedToken = localStorage.getItem("movienight_token");
+
+    if (storedUser && storedToken) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
+        setToken(storedToken);
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("movienight_user");
+        localStorage.removeItem("movienight_token");
       }
     }
     setIsLoading(false);
@@ -76,11 +84,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
         body: JSON.stringify({ email, password }),
       });
 
-      const result: ApiResponse<User> = await response.json();
+      if (!response.ok) {
+        console.error(
+          "Login response not ok:",
+          response.status,
+          response.statusText,
+        );
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        setIsLoading(false);
+        return false;
+      }
+
+      const result: ApiResponse<{ user: User; token: string }> =
+        await response.json();
 
       if (result.success && result.data) {
-        setUser(result.data);
-        localStorage.setItem("movienight_user", JSON.stringify(result.data));
+        setUser(result.data.user);
+        setToken(result.data.token);
+        localStorage.setItem(
+          "movienight_user",
+          JSON.stringify(result.data.user),
+        );
+        localStorage.setItem("movienight_token", result.data.token);
         setIsLoading(false);
         return true;
       } else {
@@ -89,7 +115,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error details:", {
+        error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       setIsLoading(false);
       return false;
     }
@@ -112,11 +142,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         body: JSON.stringify({ username, email, password, name }),
       });
 
-      const result: ApiResponse<User> = await response.json();
+      const result: ApiResponse<{ user: User; token: string }> =
+        await response.json();
 
       if (result.success && result.data) {
-        setUser(result.data);
-        localStorage.setItem("movienight_user", JSON.stringify(result.data));
+        setUser(result.data.user);
+        setToken(result.data.token);
+        localStorage.setItem(
+          "movienight_user",
+          JSON.stringify(result.data.user),
+        );
+        localStorage.setItem("movienight_token", result.data.token);
         setIsLoading(false);
         return true;
       } else {
@@ -133,15 +169,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("movienight_user");
+    localStorage.removeItem("movienight_token");
   };
+
+  const isAdmin = user?.role === "admin";
 
   const value: AuthContextType = {
     user,
+    token,
     login,
     signup,
     logout,
     isLoading,
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

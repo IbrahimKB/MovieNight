@@ -94,28 +94,34 @@ export default function Suggest() {
   // Get user's friends
   const userFriends = user ? getUserFriends(user.id) : [];
 
-  // Mock suggestions specific to current user
-  const mockSuggestions: Suggestion[] = [
-    {
-      id: "1",
-      movie: mockMovies[0],
-      suggestedBy: userFriends[0] || { id: "1", name: "Friend" },
-      comment: "Perfect for our Friday night horror marathon!",
-      suggestedAt: "2024-01-14T10:30:00Z",
-    },
-    {
-      id: "2",
-      movie: mockMovies[1],
-      suggestedBy: userFriends[1] || { id: "2", name: "Friend" },
-      comment: "Loved the first one, this sequel looks amazing!",
-      suggestedAt: "2024-01-13T15:45:00Z",
-    },
-  ].filter((s) => s.suggestedBy);
-
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
     Record<string, number>
   >({});
+
+  // Fetch suggestions on component mount
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!user) return;
+
+      try {
+        const response = await fetch("/api/suggestions", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch suggestions:", error);
+      }
+    };
+
+    fetchSuggestions();
+  }, [user]);
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
@@ -125,8 +131,11 @@ export default function Suggest() {
     const moviePlatform = searchParams.get("platform");
     const movieDescription = searchParams.get("description");
     const fromHome = searchParams.get("isFromHome");
+    const fromMovieSearch = searchParams.get("isFromMovieSearch");
+    const tmdbId = searchParams.get("tmdbId");
+    const mediaType = searchParams.get("mediaType");
 
-    if (movieTitle && movieYear && fromHome) {
+    if (movieTitle && movieYear && (fromHome || fromMovieSearch)) {
       const prefilledMovie: Movie = {
         id: `prefilled_${Date.now()}`,
         title: movieTitle,
@@ -136,14 +145,15 @@ export default function Suggest() {
       };
 
       setSelectedMovie(prefilledMovie);
-      setIsFromHome(true);
+      setIsFromHome(!!fromHome);
 
       // Clear URL params after loading
       navigate("/suggest", { replace: true });
 
+      const source = fromHome ? "upcoming releases" : "movie search";
       toast({
         title: "Movie pre-selected! 🎬",
-        description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
+        description: `"${movieTitle}" was selected from ${source}. Add your rating and select friends below.`,
       });
     }
   }, [searchParams, navigate]);
@@ -160,60 +170,163 @@ export default function Suggest() {
     );
   };
 
-  const handleSuggest = () => {
-    if (!selectedMovie || selectedFriends.length === 0) return;
+  const handleSuggest = async () => {
+    if (!selectedMovie || selectedFriends.length === 0 || !user) return;
 
-    // In a real app, this would make an API call
-    console.log("Suggesting:", {
-      movie: selectedMovie,
-      desireRating: desireRating[0],
-      friends: selectedFriends,
-      comment,
-    });
+    try {
+      // First, save the movie to the database if it doesn't exist
+      let movieId = selectedMovie.id;
 
-    // Show success feedback
-    const friendNames = selectedFriends
-      .map((id) => userFriends.find((f) => f.id === id)?.name)
-      .filter(Boolean)
-      .join(", ");
+      // If this is a prefilled movie from TMDB/external source, save it first
+      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+        const saveResponse = await fetch("/api/tmdb/save-movie", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            title: selectedMovie.title,
+            year: selectedMovie.year,
+            genres: selectedMovie.genres,
+            description: selectedMovie.description,
+            poster: selectedMovie.poster,
+          }),
+        });
 
-    toast({
-      title: "Movie suggested! 🎬",
-      description: `\"${selectedMovie.title}\" has been suggested to ${friendNames}`,
-    });
+        if (saveResponse.ok) {
+          const saveData = await saveResponse.json();
+          movieId = saveData.data.id;
+        } else {
+          throw new Error("Failed to save movie");
+        }
+      }
 
-    // Reset form
-    setSelectedMovie(null);
-    setDesireRating([7]);
-    setSelectedFriends([]);
-    setComment("");
-    setSearchTerm("");
+      // Create the suggestion
+      const response = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          movieId,
+          suggestedTo: selectedFriends,
+          desireRating: desireRating[0],
+          comment: comment || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create suggestion");
+      }
+
+      const data = await response.json();
+
+      // Show success feedback
+      const friendNames = selectedFriends
+        .map((id) => userFriends.find((f) => f.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
+
+      toast({
+        title: "Movie suggested! 🎬",
+        description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+      });
+
+      // Reset form
+      setSelectedMovie(null);
+      setDesireRating([7]);
+      setSelectedFriends([]);
+      setComment("");
+      setSearchTerm("");
+    } catch (error) {
+      console.error("Suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleAcceptSuggestion = (
+  const handleAcceptSuggestion = async (
     suggestionId: string,
     movieTitle: string,
     suggestedBy: string,
   ) => {
     const rating = suggestionRatings[suggestionId] || 5;
 
-    toast({
-      title: "Suggestion accepted! ✅",
-      description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
-    });
+    try {
+      const response = await fetch("/api/suggestions/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          suggestionId,
+          rating,
+        }),
+      });
 
-    // Remove from suggestions
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      if (response.ok) {
+        toast({
+          title: "Suggestion accepted! ✅",
+          description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
+        });
+
+        // Remove from suggestions
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      } else {
+        throw new Error("Failed to respond to suggestion");
+      }
+    } catch (error) {
+      console.error("Accept suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleIgnoreSuggestion = (suggestionId: string, movieTitle: string) => {
-    toast({
-      title: "Suggestion ignored",
-      description: `"${movieTitle}" has been removed from your suggestions.`,
-    });
+  const handleIgnoreSuggestion = async (
+    suggestionId: string,
+    movieTitle: string,
+  ) => {
+    try {
+      const response = await fetch("/api/suggestions/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          suggestionId,
+          rating: 1, // Low rating indicates rejection
+        }),
+      });
 
-    // Remove from suggestions
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      if (response.ok) {
+        toast({
+          title: "Suggestion ignored",
+          description: `"${movieTitle}" has been removed from your suggestions.`,
+        });
+
+        // Remove from suggestions
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      } else {
+        throw new Error("Failed to respond to suggestion");
+      }
+    } catch (error) {
+      console.error("Ignore suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to ignore suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
@@ -481,7 +594,7 @@ export default function Suggest() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
-                              {suggestion.suggestedBy.name}
+                              {suggestion.suggestedByUser?.name}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               suggested
@@ -489,7 +602,7 @@ export default function Suggest() {
                             <div className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               <span className="text-xs text-muted-foreground">
-                                {formatTimeAgo(suggestion.suggestedAt)}
+                                {formatTimeAgo(suggestion.createdAt)}
                               </span>
                             </div>
                           </div>
@@ -555,7 +668,7 @@ export default function Suggest() {
                               handleAcceptSuggestion(
                                 suggestion.id,
                                 suggestion.movie.title,
-                                suggestion.suggestedBy.name,
+                                suggestion.suggestedByUser?.name || "Unknown",
                               )
                             }
                           >

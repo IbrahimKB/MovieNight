@@ -12,12 +12,15 @@ import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
-import ReelTalk from "./pages/ReelTalk";
+import AdminDashboard from "./pages/AdminDashboard";
+import MovieSearch from "./pages/MovieSearch";
+import Releases from "./pages/Releases";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +61,36 @@ const App = () => (
               }
             />
             <Route
+              path="/discover"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MovieSearch />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/movie-search"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MovieSearch />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/releases"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Releases />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/movie-night"
               element={
                 <ProtectedRoute>
@@ -88,13 +121,22 @@ const App = () => (
               }
             />
             <Route
-              path="/stats"
+              path="/squad"
               element={
                 <ProtectedRoute>
                   <Layout>
-                    <ReelTalk />
+                    <Squad />
                   </Layout>
                 </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminDashboard />
+                </AdminRoute>
               }
             />
 

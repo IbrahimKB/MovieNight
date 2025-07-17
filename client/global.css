@@ -3,6 +3,152 @@
 @tailwind utilities;
 
 @layer base {
+  /* Mobile-first optimizations */
+  html {
+    font-size: 14px;
+  }
+
+  @media (min-width: 640px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
+  /* Touch targets for mobile */
+  button,
+  a,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1rem);
+  }
+
+  /* Safe area support for mobile devices */
+  @supports (padding: max(0px)) {
+    .safe-area-pb {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+@layer components {
+  /* Mobile-optimized card component */
+  .mobile-card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .mobile-card.interactive {
+    @apply active:scale-[0.98] transition-transform;
+  }
+
+  /* Touch-friendly buttons */
+  .btn-touch {
+    @apply min-h-[44px] min-w-[44px] touch-manipulation active:scale-95 transition-transform;
+  }
+
+  /* Mobile input styling */
+  .input-mobile {
+    @apply h-12 px-4 text-base;
+  }
+
+  /* Responsive text sizing */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+
+  /* Mobile grid patterns */
+  .grid-mobile-2 {
+    @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4;
+  }
+
+  .grid-mobile-3 {
+    @apply grid grid-cols-3 lg:grid-cols-6;
+  }
+
+  /* Mobile spacing */
+  .space-mobile {
+    @apply space-y-3 sm:space-y-4 lg:space-y-6;
+  }
+
+  .gap-mobile {
+    @apply gap-3 sm:gap-4 lg:gap-6;
+  }
+
+  .p-mobile {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+}
+
+@layer utilities {
+  /* Mobile-specific utilities */
+  .xs\:block {
+    @media (min-width: 475px) {
+      display: block;
+    }
+  }
+
+  .xs\:hidden {
+    @media (min-width: 475px) {
+      display: none;
+    }
+  }
+
+  .xs\:inline {
+    @media (min-width: 475px) {
+      display: inline;
+    }
+  }
+
+  /* Truncate text responsively */
+  .truncate-mobile {
+    @apply truncate sm:text-clip sm:overflow-visible sm:whitespace-normal;
+  }
+
+  /* Hide scrollbar on mobile */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Animation utilities for mobile */
+  .animate-press {
+    @apply active:scale-95 transition-transform duration-75;
+  }
+
+  .animate-press-sm {
+    @apply active:scale-[0.98] transition-transform duration-75;
+  }
+}
+
+@layer base {
   /**
    * Tailwind CSS theme
    * tailwind.config.ts expects the following color variables to be expressed as HSL values.
