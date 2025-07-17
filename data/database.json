@@ -31,10 +31,10 @@
       "id": "bea56e96-abdb-4842-94d3-759effbf12d2",
       "userId1": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
       "userId2": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "status": "pending",
+      "status": "accepted",
       "requestedBy": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
       "createdAt": "2025-07-17T20:11:31.233Z",
-      "updatedAt": "2025-07-17T20:11:31.233Z"
+      "updatedAt": "2025-07-17T20:11:51.678Z"
     }
   ],
   "watchedMovies": [],
@@ -52,6 +52,20 @@
       },
       "createdAt": "2025-07-17T20:11:31.233Z",
       "updatedAt": "2025-07-17T20:11:31.233Z"
+    },
+    {
+      "id": "a32f37ac-bcbd-4496-8edf-812e08378e8d",
+      "userId": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
+      "type": "friend_request",
+      "title": "Friend Request Accepted",
+      "content": "Test User 2 accepted your friend request",
+      "read": false,
+      "actionData": {
+        "userId": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
+        "friendshipId": "bea56e96-abdb-4842-94d3-759effbf12d2"
+      },
+      "createdAt": "2025-07-17T20:11:51.678Z",
+      "updatedAt": "2025-07-17T20:11:51.678Z"
     }
   ],
   "releases": [
@@ -104,7 +118,7 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T20:11:46.856Z"
+    "lastUpdated": "2025-07-17T20:11:51.678Z"
   },
   "notificationPreferences": []
 }
