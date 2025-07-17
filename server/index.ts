@@ -203,15 +203,21 @@ export function createServer() {
   app.delete("/api/friends/:userId/:friendshipId", handleRemoveFriend);
 
   // Notification routes
-  app.get("/api/notifications/:userId", handleGetNotifications);
-  app.get("/api/notifications/:userId/unread-count", handleGetUnreadCount);
-  app.post("/api/notifications/:userId/mark-read", handleMarkAsRead);
+  app.get("/api/notifications/:userId", verifyJWT, handleGetNotifications);
+  app.get(
+    "/api/notifications/:userId/unread-count",
+    verifyJWT,
+    handleGetUnreadCount,
+  );
+  app.post("/api/notifications/:userId/mark-read", verifyJWT, handleMarkAsRead);
   app.delete(
     "/api/notifications/:userId/:notificationId",
+    verifyJWT,
     handleDeleteNotification,
   );
   app.delete(
     "/api/notifications/:userId/clear-all",
+    verifyJWT,
     handleClearAllNotifications,
   );
 
