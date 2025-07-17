@@ -90,6 +90,14 @@ export default function AdminDashboard() {
   // Loading states
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingMovies, setLoadingMovies] = useState(false);
+  const [loadingRateLimit, setLoadingRateLimit] = useState(false);
+
+  // TMDB state
+  const [rateLimitInfo, setRateLimitInfo] = useState<{
+    remaining: number;
+    resetTime: Date | null;
+    isLimited: boolean;
+  } | null>(null);
 
   // Modal states
   const [resetPasswordModal, setResetPasswordModal] = useState<{
