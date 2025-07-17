@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Film, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -11,9 +12,21 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Load saved credentials if available
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("movienight_remember_email");
+    const savedRemember = localStorage.getItem("movienight_remember_me");
+
+    if (savedEmail && savedRemember === "true") {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +39,15 @@ export default function Login() {
 
     const success = await login(email, password);
     if (success) {
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem("movienight_remember_email", email);
+        localStorage.setItem("movienight_remember_me", "true");
+      } else {
+        localStorage.removeItem("movienight_remember_email");
+        localStorage.removeItem("movienight_remember_me");
+      }
+
       // Check if we should redirect to admin after login
       if (email === "admin@movienight.co.uk" || email === "admin") {
         navigate("/admin");
@@ -108,6 +130,23 @@ export default function Login() {
                     )}
                   </Button>
                 </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember-me"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) =>
+                    setRememberMe(checked as boolean)
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="remember-me"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Remember me
+                </label>
               </div>
 
               <Button
