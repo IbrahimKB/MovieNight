@@ -2,6 +2,120 @@ import { RequestHandler } from "express";
 import { withTransaction } from "../utils/storage";
 import { Database } from "../models/types";
 
+// Original notification functions
+export const handleGetNotifications: RequestHandler = async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const notifications = await withTransaction(async (db: Database) => {
+      return db.notifications?.filter((n: any) => n.userId === userId) || [];
+    });
+
+    res.json(notifications);
+  } catch (error) {
+    console.error("Failed to get notifications:", error);
+    res.status(500).json({ error: "Failed to get notifications" });
+  }
+};
+
+export const handleGetUnreadCount: RequestHandler = async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const count = await withTransaction(async (db: Database) => {
+      if (!db.notifications) return 0;
+      return db.notifications.filter((n: any) => n.userId === userId && !n.read)
+        .length;
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error("Failed to get unread count:", error);
+    res.status(500).json({ error: "Failed to get unread count" });
+  }
+};
+
+export const handleMarkAsRead: RequestHandler = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await withTransaction(async (db: Database) => {
+      if (!db.notifications) return;
+
+      const notification = db.notifications.find(
+        (n: any) => n.id === notificationId && n.userId === userId,
+      );
+
+      if (notification) {
+        notification.read = true;
+        notification.updatedAt = new Date().toISOString();
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to mark notification as read:", error);
+    res.status(500).json({ error: "Failed to mark as read" });
+  }
+};
+
+export const handleDeleteNotification: RequestHandler = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = (req as any).user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await withTransaction(async (db: Database) => {
+      if (!db.notifications) return;
+
+      db.notifications = db.notifications.filter(
+        (n: any) => !(n.id === notificationId && n.userId === userId),
+      );
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete notification:", error);
+    res.status(500).json({ error: "Failed to delete notification" });
+  }
+};
+
+export const handleClearAllNotifications: RequestHandler = async (req, res) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await withTransaction(async (db: Database) => {
+      if (!db.notifications) return;
+
+      db.notifications = db.notifications.filter(
+        (n: any) => n.userId !== userId,
+      );
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to clear notifications:", error);
+    res.status(500).json({ error: "Failed to clear notifications" });
+  }
+};
+
 // Types for push subscriptions
 interface PushSubscription {
   endpoint: string;
