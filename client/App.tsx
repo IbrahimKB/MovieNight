@@ -33,6 +33,9 @@ const queryClient = new QueryClient();
 // Set dark mode by default
 document.documentElement.classList.add("dark");
 
+// Initialize Sentry for error monitoring
+initSentry();
+
 // Initialize PWA features
 initializePWA();
 
