@@ -86,7 +86,7 @@ export const handleMarkAsRead: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Failed to mark notification as read:", error);
-    res.status(500).json({ error: "Failed to mark as read" });
+    res.status(500).json({ success: false, error: "Failed to mark as read" });
   }
 };
 
@@ -110,7 +110,9 @@ export const handleDeleteNotification: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Failed to delete notification:", error);
-    res.status(500).json({ error: "Failed to delete notification" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to delete notification" });
   }
 };
 
@@ -132,7 +134,9 @@ export const handleClearAllNotifications: RequestHandler = async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error("Failed to clear notifications:", error);
-    res.status(500).json({ error: "Failed to clear notifications" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to clear notifications" });
   }
 };
 
@@ -271,7 +275,9 @@ export const handleGetNotificationPreferences: RequestHandler = async (
     res.json(result);
   } catch (error) {
     console.error("Failed to get notification preferences:", error);
-    res.status(500).json({ error: "Failed to get preferences" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to get preferences" });
   }
 };
 
@@ -315,7 +321,9 @@ export const handleSaveNotificationPreferences: RequestHandler = async (
     res.json({ success: true, message: "Preferences saved" });
   } catch (error) {
     console.error("Failed to save notification preferences:", error);
-    res.status(500).json({ error: "Failed to save preferences" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to save preferences" });
   }
 };
 
@@ -374,7 +382,9 @@ export const handleSendTestNotification: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Failed to send test notification:", error);
-    res.status(500).json({ error: "Failed to send test notification" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to send test notification" });
   }
 };
 
@@ -448,7 +458,9 @@ export const handleSendNotificationToUsers: RequestHandler = async (
     });
   } catch (error) {
     console.error("Failed to send notifications:", error);
-    res.status(500).json({ error: "Failed to send notifications" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to send notifications" });
   }
 };
 
