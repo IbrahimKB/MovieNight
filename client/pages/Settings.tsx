@@ -17,7 +17,6 @@ import {
   Bell,
   BellOff,
   Smartphone,
-  Mail,
   Settings as SettingsIcon,
   TestTube,
   CheckCircle,
