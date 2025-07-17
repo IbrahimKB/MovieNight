@@ -31,6 +31,7 @@ import {
   hasExistingRequest,
 } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
+import { captureUserAction, captureApiError } from "@/lib/sentry";
 
 export default function Squad() {
   const { user } = useAuth();
@@ -58,6 +59,8 @@ export default function Squad() {
   const loadData = async () => {
     try {
       setIsLoading(true);
+      captureUserAction("load_friends_data", user.id);
+
       const [friends, incoming, outgoing] = await Promise.all([
         getUserFriends(user.id),
         getIncomingRequests(user.id),
@@ -67,8 +70,15 @@ export default function Squad() {
       setUserFriends(friends);
       setIncomingRequests(incoming);
       setOutgoingRequests(outgoing);
+
+      captureUserAction("friends_data_loaded", user.id, {
+        friendsCount: friends.length,
+        incomingCount: incoming.length,
+        outgoingCount: outgoing.length,
+      });
     } catch (error) {
       console.error("Failed to load data:", error);
+      captureApiError(error, "load_friends_data", user.id);
       toast({
         title: "Error",
         description: "Failed to load friends data. Please refresh the page.",
@@ -133,6 +143,10 @@ export default function Squad() {
     }
 
     try {
+      captureUserAction("send_friend_request", user.id, {
+        targetUserId,
+        username,
+      });
       await sendFriendRequest(user.id, targetUserId);
       setMessage({ type: "success", text: `Request sent to @${username}` });
       setTimeout(() => setMessage(null), 3000);
@@ -141,6 +155,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Send request error:", error);
+      captureApiError(error, "send_friend_request", user.id);
       setMessage({ type: "error", text: "Failed to send request" });
       setTimeout(() => setMessage(null), 3000);
     }
@@ -148,6 +163,10 @@ export default function Squad() {
 
   const handleAcceptRequest = async (requestId: string, username: string) => {
     try {
+      captureUserAction("accept_friend_request", user.id, {
+        requestId,
+        username,
+      });
       await respondToFriendRequest(user.id, requestId, "accept");
       setMessage({
         type: "success",
@@ -159,6 +178,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Accept request error:", error);
+      captureApiError(error, "accept_friend_request", user.id);
       toast({
         title: "Error",
         description: "Failed to accept friend request",
@@ -169,6 +189,10 @@ export default function Squad() {
 
   const handleRejectRequest = async (requestId: string, username: string) => {
     try {
+      captureUserAction("reject_friend_request", user.id, {
+        requestId,
+        username,
+      });
       await respondToFriendRequest(user.id, requestId, "reject");
       setMessage({ type: "info", text: `Declined request from @${username}` });
       setTimeout(() => setMessage(null), 3000);
@@ -177,6 +201,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Reject request error:", error);
+      captureApiError(error, "reject_friend_request", user.id);
       toast({
         title: "Error",
         description: "Failed to reject friend request",
