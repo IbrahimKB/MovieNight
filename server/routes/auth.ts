@@ -172,13 +172,20 @@ export const handleSignup: RequestHandler = async (req, res) => {
     const body = signupSchema.parse(req.body) as SignupRequest;
 
     const result = await withTransaction(async (db) => {
-      // Check if user already exists
+      // Check if user already exists (case-insensitive)
       const existingUser = db.users.find(
-        (u) => u.email === body.email || u.username === body.username,
+        (u) =>
+          u.email.toLowerCase() === body.email.toLowerCase() ||
+          u.username.toLowerCase() === body.username.toLowerCase(),
       );
 
       if (existingUser) {
-        throw new Error("User with this email or username already exists");
+        // Provide specific error message for better UX
+        if (existingUser.email.toLowerCase() === body.email.toLowerCase()) {
+          throw new Error("An account with this email already exists");
+        } else {
+          throw new Error("This username is already taken");
+        }
       }
 
       // Hash password
