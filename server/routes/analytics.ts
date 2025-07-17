@@ -17,7 +17,7 @@ router.get("/suggestion-accuracy/:userId", verifyJWT, async (req, res) => {
       // For now, allow viewing any user's accuracy
     }
 
-    const database = loadDatabase();
+    const database = await loadDatabase();
 
     // Find all suggestions made by this user
     const userSuggestions = database.suggestions.filter(
@@ -154,7 +154,7 @@ router.get("/suggestion-accuracy/:userId", verifyJWT, async (req, res) => {
 // Get leaderboard of best predictors
 router.get("/suggestion-leaderboard", verifyJWT, async (req, res) => {
   try {
-    const database = loadDatabase();
+    const database = await loadDatabase();
 
     // Calculate accuracy for all users who have made suggestions
     const userAccuracies = database.users
@@ -223,7 +223,7 @@ router.get("/suggestion-leaderboard", verifyJWT, async (req, res) => {
 router.get("/suggestion-impact/:userId", verifyJWT, async (req, res) => {
   try {
     const { userId } = req.params;
-    const database = loadDatabase();
+    const database = await loadDatabase();
 
     const userSuggestions = database.suggestions.filter(
       (s) => s.suggestedBy === userId,
