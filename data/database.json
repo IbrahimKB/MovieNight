@@ -127,7 +127,7 @@
   "notifications": [],
   "releases": [
     {
-      "id": "tmdb_1513946_movie_1752766164490",
+      "id": "tmdb_1513946_movie_1752766441700",
       "title": "Tur De Zur",
       "platform": "Streaming",
       "releaseDate": "2025-07-17",
@@ -138,11 +138,11 @@
       "description": "Three best friends go through three different stories at an awful house party.",
       "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T15:29:24.490Z",
-      "updatedAt": "2025-07-17T15:29:24.490Z"
+      "createdAt": "2025-07-17T15:34:01.700Z",
+      "updatedAt": "2025-07-17T15:34:01.700Z"
     },
     {
-      "id": "tmdb_1512943_movie_1752766164490",
+      "id": "tmdb_1512943_movie_1752766441700",
       "title": "Desight",
       "platform": "Streaming",
       "releaseDate": "2025-07-17",
@@ -153,11 +153,11 @@
       "description": "If you believe in parallel worlds, please pray that they will take us in.",
       "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T15:29:24.490Z",
-      "updatedAt": "2025-07-17T15:29:24.490Z"
+      "createdAt": "2025-07-17T15:34:01.700Z",
+      "updatedAt": "2025-07-17T15:34:01.700Z"
     },
     {
-      "id": "tmdb_248852_tv_1752766164412",
+      "id": "tmdb_248852_tv_1752766441700",
       "title": "UNTAMED",
       "platform": "TV",
       "releaseDate": "2025-07-17",
@@ -168,12 +168,12 @@
       "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
       "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
       "year": 2025,
-      "createdAt": "2025-07-17T15:29:24.411Z",
-      "updatedAt": "2025-07-17T15:29:24.411Z"
+      "createdAt": "2025-07-17T15:34:01.700Z",
+      "updatedAt": "2025-07-17T15:34:01.700Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T15:30:51.924Z"
+    "lastUpdated": "2025-07-17T15:34:22.437Z"
   }
 }
