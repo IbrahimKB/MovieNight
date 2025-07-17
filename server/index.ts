@@ -271,5 +271,25 @@ export function createServer() {
   // Analytics router for tracking suggestion accuracy and performance
   app.use("/api/analytics", analyticsRouter);
 
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
+
+  // Optional fallthrough error handler
+  app.use(
+    (
+      err: Error,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      console.error("Unhandled error:", err);
+      res.status(500).json({
+        success: false,
+        error: "Internal server error",
+        ...(process.env.NODE_ENV === "development" && { details: err.message }),
+      });
+    },
+  );
+
   return app;
 }
