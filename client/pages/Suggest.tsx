@@ -453,7 +453,7 @@ export default function Suggest() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Suggest a Movie
+            Discover & Suggest Movies
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
