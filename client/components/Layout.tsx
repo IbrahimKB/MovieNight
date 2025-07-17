@@ -84,30 +84,16 @@ export default function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            {/* Left Side - Logo & Mobile Menu */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="sm:hidden p-2 h-8 w-8"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Menu className="h-4 w-4" />
-                )}
-              </Button>
-              <Link to="/" className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-2xl font-bold text-primary">
-                  🎬 <span className="hidden xs:inline">MovieNight</span>
-                </h1>
-              </Link>
-            </div>
+            {/* Left Side - Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold text-primary">
+                🎬 <span className="hidden xs:inline">MovieNight</span>
+              </h1>
+            </Link>
 
-            {/* Desktop Navigation - Hidden on Mobile */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              {[...navItems, ...secondaryNavItems].map((item) => {
+              {allNavItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
                 return (
