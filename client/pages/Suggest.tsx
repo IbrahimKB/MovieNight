@@ -566,11 +566,11 @@ export default function Suggest() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Search className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Discover & Suggest Movies</h1>
+          <h1 className="text-3xl font-bold">Discover & Track Movies</h1>
         </div>
         <p className="text-muted-foreground">
-          Search the TMDB database to discover new movies and TV shows, then
-          suggest them to your friends
+          Search the TMDB database to discover movies and TV shows, then suggest
+          them to friends or add them to your personal watch history
         </p>
       </div>
 
@@ -602,7 +602,7 @@ export default function Suggest() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Discover & Suggest Movies
+            Discover & Track Movies
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
