@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
   PlusCircle,
@@ -18,11 +19,15 @@ import {
   Check,
   X,
   ArrowLeft,
+  Film,
+  Tv,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Friend, getUserFriends, getFriendName } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 
 interface Movie {
   id: string;
@@ -32,6 +37,27 @@ interface Movie {
   poster?: string;
   description: string;
   rating?: number;
+}
+
+interface MovieSearchResult {
+  id: string;
+  title: string;
+  year: number;
+  description: string;
+  poster: string | null;
+  mediaType: "movie" | "tv";
+  rating: number;
+  genres: string[];
+  tmdbId: number;
+}
+
+interface SearchResponse {
+  results: MovieSearchResult[];
+  rateLimit: {
+    remaining: number;
+    resetTime: Date | null;
+    isLimited: boolean;
+  };
 }
 
 interface Friend {
@@ -49,43 +75,42 @@ interface Suggestion {
   myRating?: number;
 }
 
-// Mock data
-const mockMovies: Movie[] = [
-  {
-    id: "1",
-    title: "The Menu",
-    year: 2022,
-    genres: ["Thriller", "Horror"],
-    description:
-      "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
-    rating: 7.2,
-  },
-  {
-    id: "2",
-    title: "Glass Onion: A Knives Out Mystery",
-    year: 2022,
-    genres: ["Mystery", "Comedy"],
-    description:
-      "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
-    rating: 7.1,
-  },
-  {
-    id: "3",
-    title: "Avatar: The Way of Water",
-    year: 2022,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    description:
-      "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
-    rating: 7.6,
-  },
-];
+// TMDB Search functionality
+const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
+  if (!query.trim()) return [];
+
+  try {
+    const response = await fetch(
+      `/api/tmdb/search?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Search failed");
+    }
+
+    const data: SearchResponse = await response.json();
+    return data.results;
+  } catch (error) {
+    console.error("Movie search error:", error);
+    return [];
+  }
+};
 
 export default function Suggest() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<
+    Movie | MovieSearchResult | null
+  >(null);
+  const [searchResults, setSearchResults] = useState<MovieSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
@@ -170,9 +195,37 @@ export default function Suggest() {
     }
   }, [searchParams, navigate]);
 
-  const filteredMovies = mockMovies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // Handle movie search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
+        const results = await searchMovies(searchTerm);
+        setSearchResults(results);
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const handleSelectMovie = (movie: MovieSearchResult) => {
+    // Convert MovieSearchResult to Movie format for consistency
+    const convertedMovie: Movie = {
+      id: `tmdb_${movie.tmdbId}`,
+      title: movie.title,
+      year: movie.year,
+      genres: movie.genres,
+      poster: movie.poster || undefined,
+      description: movie.description,
+      rating: movie.rating,
+    };
+    setSelectedMovie(convertedMovie);
+    setSearchTerm("");
+    setSearchResults([]);
+  };
 
   const handleFriendToggle = (friendId: string) => {
     setSelectedFriends((prev) =>
@@ -406,68 +459,132 @@ export default function Suggest() {
         <CardContent className="space-y-6">
           {/* Search Bar */}
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search for a movie or show..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search TMDB for movies and TV shows..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Search the TMDB database to find movies and TV shows to suggest
+                to your friends
+              </p>
             </div>
 
             {/* Search Results */}
             {searchTerm && (
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {filteredMovies.map((movie) => (
-                  <Card
-                    key={movie.id}
-                    className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                      selectedMovie?.id === movie.id
-                        ? "ring-2 ring-primary bg-accent/30"
-                        : ""
-                    }`}
-                    onClick={() => setSelectedMovie(movie)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <h4 className="font-semibold">
-                            {movie.title} ({movie.year})
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            {movie.rating && (
-                              <div className="flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                <span className="text-xs text-muted-foreground">
-                                  {movie.rating}
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex gap-1">
-                              {movie.genres.slice(0, 2).map((genre) => (
-                                <Badge
-                                  key={genre}
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  {genre}
-                                </Badge>
-                              ))}
+                {isSearching ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Card key={i}>
+                        <CardContent className="p-4">
+                          <div className="flex gap-3">
+                            <Skeleton className="w-12 h-16 rounded" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-3 w-1/2" />
+                              <Skeleton className="h-3 w-full" />
                             </div>
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {movie.description}
-                          </p>
-                        </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {searchResults.map((movie) => (
+                      <Card
+                        key={movie.id}
+                        className="cursor-pointer transition-colors hover:bg-accent/50"
+                        onClick={() => handleSelectMovie(movie)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex gap-3">
+                            {/* Poster */}
+                            <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                              {movie.poster ? (
+                                <img
+                                  src={movie.poster}
+                                  alt={movie.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                  {movie.mediaType === "movie" ? (
+                                    <Film className="h-4 w-4" />
+                                  ) : (
+                                    <Tv className="h-4 w-4" />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Details */}
+                            <div className="flex-1 space-y-1">
+                              <h4 className="font-semibold line-clamp-1">
+                                {movie.title} ({movie.year})
+                              </h4>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  {movie.mediaType === "movie" ? (
+                                    <Film className="h-3 w-3" />
+                                  ) : (
+                                    <Tv className="h-3 w-3" />
+                                  )}
+                                  <span className="capitalize">
+                                    {movie.mediaType}
+                                  </span>
+                                </div>
+                                {movie.rating > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                    <span>{movie.rating.toFixed(1)}</span>
+                                  </div>
+                                )}
+                                <PlatformLogo
+                                  platform={
+                                    movie.mediaType === "tv" ? "TV" : "Theaters"
+                                  }
+                                  size="sm"
+                                />
+                              </div>
+                              <div className="flex gap-1 flex-wrap">
+                                {movie.genres.slice(0, 2).map((genre) => (
+                                  <Badge
+                                    key={genre}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {genre}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {movie.description}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {searchResults.length === 0 && !isSearching && (
+                      <div className="text-center py-6 space-y-2">
+                        <Film className="h-8 w-8 text-muted-foreground mx-auto" />
+                        <p className="text-muted-foreground">
+                          No movies found for "{searchTerm}".
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Try searching for a different title, actor, or
+                          director.
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {filteredMovies.length === 0 && (
-                  <p className="text-center text-muted-foreground py-4">
-                    No movies found. Try a different search term.
-                  </p>
+                    )}
+                  </>
                 )}
               </div>
             )}
