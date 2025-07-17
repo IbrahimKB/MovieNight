@@ -281,18 +281,28 @@ export default function SocialActivityFeed({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-3 sm:space-y-4", className)}>
       {/* Feed Header */}
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold">Activity Feed</h2>
-          <p className="text-muted-foreground">
+        <div className="space-y-1 min-w-0 flex-1">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">
+            Activity Feed
+          </h2>
+          <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">
             See what your friends are watching and suggesting
           </p>
+          <p className="text-sm text-muted-foreground sm:hidden">
+            Friend activity
+          </p>
         </div>
-        <Button variant="outline" size="sm">
-          <TrendingUp className="h-4 w-4 mr-2" />
-          Trending
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 px-3 text-xs sm:text-sm"
+        >
+          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+          <span className="hidden sm:inline">Trending</span>
+          <span className="sm:hidden">Hot</span>
         </Button>
       </div>
 
