@@ -240,7 +240,7 @@ export const handleUnsubscribePush: RequestHandler = async (req, res) => {
     res.json({ success: true, message: "Push subscriptions removed" });
   } catch (error) {
     console.error("Failed to remove push subscriptions:", error);
-    res.status(500).json({ error: "Failed to unsubscribe" });
+    res.status(500).json({ success: false, error: "Failed to unsubscribe" });
   }
 };
 
