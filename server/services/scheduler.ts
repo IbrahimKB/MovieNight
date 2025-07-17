@@ -218,7 +218,8 @@ class SchedulerService {
       nextScheduledRun: this.getNextScheduledRun(),
       schedule: "Every Monday at 1:00 AM UTC",
       timezone: "UTC",
-      rateLimitStatus: justWatchService.getRateLimitStatus(),
+      rateLimitStatus: tmdbService.getRateLimitStatus(),
+      dataSource: "TMDB",
     };
   }
 }
