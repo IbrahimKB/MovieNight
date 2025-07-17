@@ -240,7 +240,7 @@ export const handleGetTMDBStatus: RequestHandler = async (req, res) => {
 
     const response: ApiResponse = {
       success: false,
-      error: "Failed to get JustWatch status",
+      error: "Failed to get TMDB status",
     };
     res.status(500).json(response);
   }
