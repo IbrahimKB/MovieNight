@@ -26,6 +26,7 @@ interface MovieSearchResult {
 }
 
 export default function MovieSearchPage() {
+  const navigate = useNavigate();
   const [selectedMovie, setSelectedMovie] = useState<MovieSearchResult | null>(
     null,
   );
