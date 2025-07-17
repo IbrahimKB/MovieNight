@@ -102,7 +102,7 @@ export const handleSyncReleases: RequestHandler = async (req, res) => {
       };
     });
 
-    const rateLimitStatus = justWatchService.getRateLimitStatus();
+    const rateLimitStatus = tmdbService.getRateLimitStatus();
 
     const response: ApiResponse<{
       result: typeof result;
@@ -227,7 +227,7 @@ export const handleGetReleasesByPlatform: RequestHandler = async (req, res) => {
 // Get JustWatch rate limit status
 export const handleGetJustWatchStatus: RequestHandler = async (req, res) => {
   try {
-    const rateLimitStatus = justWatchService.getRateLimitStatus();
+    const rateLimitStatus = tmdbService.getRateLimitStatus();
 
     const response: ApiResponse = {
       success: true,
