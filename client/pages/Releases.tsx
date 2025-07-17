@@ -300,39 +300,56 @@ export default function ReleasesPage() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Releases
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">Total Releases</span>
+              <span className="sm:hidden">Total</span>
             </CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">In selected period</p>
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
+              {stats.total}
+            </div>
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              In selected period
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Week</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">This Week</span>
+              <span className="sm:hidden">Week</span>
+            </CardTitle>
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisWeek}</div>
-            <p className="text-xs text-muted-foreground">Releasing in 7 days</p>
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
+              {stats.thisWeek}
+            </div>
+            <p className="text-xs text-muted-foreground hidden sm:block">
+              Releasing in 7 days
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              <span className="hidden sm:inline">This Month</span>
+              <span className="sm:hidden">Month</span>
+            </CardTitle>
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.thisMonth}</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="pb-3">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
+              {stats.thisMonth}
+            </div>
+            <p className="text-xs text-muted-foreground hidden sm:block">
               Releasing in 30 days
             </p>
           </CardContent>
