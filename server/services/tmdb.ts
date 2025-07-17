@@ -347,7 +347,7 @@ class TMDBService {
       const hasValidDate = releaseDate
         ? this.isValidReleaseDate(releaseDate, mediaType === "movie")
         : false;
-      const hasRating = item.vote_average > 0;
+      const hasRating = item.vote_average >= 0; // Allow zero ratings too
 
       if (!hasReleaseDate) {
         console.log(
@@ -360,6 +360,10 @@ class TMDBService {
       } else if (!hasRating) {
         console.log(
           `❌ ${mediaType} "${item.title || (item as TMDBTVShow).name}" - No rating: ${item.vote_average}`,
+        );
+      } else {
+        console.log(
+          `✅ ${mediaType} "${item.title || (item as TMDBTVShow).name}" - Valid (${releaseDate}, rating: ${item.vote_average})`,
         );
       }
 
