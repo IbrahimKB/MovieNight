@@ -321,3 +321,188 @@ export const handleTriggerManualSync: RequestHandler = async (req, res) => {
     res.status(500).json(response);
   }
 };
+
+// NEW: Get single release by ID
+export const handleGetReleaseById: RequestHandler = async (req, res) => {
+  try {
+    const { releaseId } = req.params;
+
+    if (!releaseId) {
+      return res.status(400).json({
+        success: false,
+        error: "Release ID is required",
+      } as ApiResponse);
+    }
+
+    const result = await withTransaction(async (database) => {
+      return database.releases.find((release) => release.id === releaseId);
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        error: "Release not found",
+      } as ApiResponse);
+    }
+
+    res.json({
+      success: true,
+      data: result,
+    } as ApiResponse<Release>);
+  } catch (error) {
+    console.error("Get release by ID error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch release",
+    } as ApiResponse);
+  }
+};
+
+// NEW: Create release
+export const handleCreateRelease: RequestHandler = async (req, res) => {
+  try {
+    const validation = createReleaseSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: validation.error.errors,
+      } as ApiResponse);
+    }
+
+    const releaseData = validation.data;
+
+    const result = await withTransaction(async (database) => {
+      const release: Release = {
+        id: generateId(),
+        title: releaseData.title,
+        platform: releaseData.platform,
+        releaseDate: releaseData.releaseDate,
+        genres: releaseData.genres,
+        description: releaseData.description || "",
+        poster: releaseData.poster,
+        year: releaseData.year,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      database.releases.push(release);
+      return release;
+    });
+
+    res.status(201).json({
+      success: true,
+      data: result,
+      message: "Release created successfully",
+    } as ApiResponse<Release>);
+  } catch (error) {
+    console.error("Create release error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to create release",
+    } as ApiResponse);
+  }
+};
+
+// NEW: Update release
+export const handleUpdateRelease: RequestHandler = async (req, res) => {
+  try {
+    const { releaseId } = req.params;
+    const validation = updateReleaseSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        error: "Validation failed",
+        details: validation.error.errors,
+      } as ApiResponse);
+    }
+
+    const updateData = validation.data;
+
+    const result = await withTransaction(async (database) => {
+      const releaseIndex = database.releases.findIndex(
+        (release) => release.id === releaseId,
+      );
+
+      if (releaseIndex === -1) {
+        throw new Error("Release not found");
+      }
+
+      const existingRelease = database.releases[releaseIndex];
+      const updatedRelease: Release = {
+        ...existingRelease,
+        ...updateData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      database.releases[releaseIndex] = updatedRelease;
+      return updatedRelease;
+    });
+
+    res.json({
+      success: true,
+      data: result,
+      message: "Release updated successfully",
+    } as ApiResponse<Release>);
+  } catch (error) {
+    console.error("Update release error:", error);
+    if (error instanceof Error && error.message === "Release not found") {
+      return res.status(404).json({
+        success: false,
+        error: "Release not found",
+      } as ApiResponse);
+    }
+    res.status(500).json({
+      success: false,
+      error: "Failed to update release",
+    } as ApiResponse);
+  }
+};
+
+// NEW: Delete release
+export const handleDeleteRelease: RequestHandler = async (req, res) => {
+  try {
+    const { releaseId } = req.params;
+
+    if (!releaseId) {
+      return res.status(400).json({
+        success: false,
+        error: "Release ID is required",
+      } as ApiResponse);
+    }
+
+    const result = await withTransaction(async (database) => {
+      const releaseIndex = database.releases.findIndex(
+        (release) => release.id === releaseId,
+      );
+
+      if (releaseIndex === -1) {
+        throw new Error("Release not found");
+      }
+
+      const deletedRelease = database.releases[releaseIndex];
+      database.releases.splice(releaseIndex, 1);
+      return deletedRelease;
+    });
+
+    res.json({
+      success: true,
+      data: result,
+      message: "Release deleted successfully",
+    } as ApiResponse<Release>);
+  } catch (error) {
+    console.error("Delete release error:", error);
+    if (error instanceof Error && error.message === "Release not found") {
+      return res.status(404).json({
+        success: false,
+        error: "Release not found",
+      } as ApiResponse);
+    }
+    res.status(500).json({
+      success: false,
+      error: "Failed to delete release",
+    } as ApiResponse);
+  }
+};
