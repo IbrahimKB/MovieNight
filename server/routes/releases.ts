@@ -224,8 +224,8 @@ export const handleGetReleasesByPlatform: RequestHandler = async (req, res) => {
   }
 };
 
-// Get JustWatch rate limit status
-export const handleGetJustWatchStatus: RequestHandler = async (req, res) => {
+// Get TMDB rate limit status
+export const handleGetTMDBStatus: RequestHandler = async (req, res) => {
   try {
     const rateLimitStatus = tmdbService.getRateLimitStatus();
 
