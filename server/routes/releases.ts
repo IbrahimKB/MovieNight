@@ -248,3 +248,52 @@ export const handleWeeklySync: RequestHandler = async (req, res) => {
     res.status(500).json(response);
   }
 };
+
+// Get scheduler status (admin only)
+export const handleGetSchedulerStatus: RequestHandler = async (req, res) => {
+  try {
+    const status = schedulerService.getStatus();
+
+    const response: ApiResponse = {
+      success: true,
+      data: status,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Get scheduler status error:", error);
+
+    const response: ApiResponse = {
+      success: false,
+      error: "Failed to get scheduler status",
+    };
+    res.status(500).json(response);
+  }
+};
+
+// Trigger manual weekly sync (admin only)
+export const handleTriggerManualSync: RequestHandler = async (req, res) => {
+  try {
+    const result = await schedulerService.triggerWeeklySync();
+
+    const response: ApiResponse = {
+      success: result.success,
+      data: result.data,
+      message: result.message,
+    };
+
+    if (result.success) {
+      res.json(response);
+    } else {
+      res.status(500).json(response);
+    }
+  } catch (error) {
+    console.error("Manual sync trigger error:", error);
+
+    const response: ApiResponse = {
+      success: false,
+      error: "Failed to trigger manual sync",
+    };
+    res.status(500).json(response);
+  }
+};
