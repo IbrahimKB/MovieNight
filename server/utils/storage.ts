@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { randomUUID } from "crypto";
 import { Database } from "../models/types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -85,7 +86,7 @@ export async function backupDatabase(): Promise<void> {
 
 // Generate unique ID
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return randomUUID();
 }
 
 // Database transaction helper
