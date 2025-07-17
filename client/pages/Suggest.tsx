@@ -107,7 +107,7 @@ export default function Suggest() {
       try {
         const response = await fetch("/api/suggestions", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
         });
 
@@ -195,7 +195,7 @@ export default function Suggest() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
           body: JSON.stringify({
             title: selectedMovie.title,
@@ -219,7 +219,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           movieId,
@@ -274,7 +274,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           suggestionId,
@@ -312,7 +312,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           suggestionId,
