@@ -51,6 +51,7 @@ import {
   handleWeeklySync,
 } from "./routes/releases";
 import { initializeDatabase } from "./utils/storage";
+import { schedulerService } from "./services/scheduler";
 
 export function createServer() {
   const app = express();
