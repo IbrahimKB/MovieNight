@@ -94,25 +94,7 @@ export default function Suggest() {
   // Get user's friends
   const userFriends = user ? getUserFriends(user.id) : [];
 
-  // Mock suggestions specific to current user
-  const mockSuggestions: Suggestion[] = [
-    {
-      id: "1",
-      movie: mockMovies[0],
-      suggestedBy: userFriends[0] || { id: "1", name: "Friend" },
-      comment: "Perfect for our Friday night horror marathon!",
-      suggestedAt: "2024-01-14T10:30:00Z",
-    },
-    {
-      id: "2",
-      movie: mockMovies[1],
-      suggestedBy: userFriends[1] || { id: "2", name: "Friend" },
-      comment: "Loved the first one, this sequel looks amazing!",
-      suggestedAt: "2024-01-13T15:45:00Z",
-    },
-  ].filter((s) => s.suggestedBy);
-
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
     Record<string, number>
   >({});
