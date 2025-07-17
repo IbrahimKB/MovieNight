@@ -127,14 +127,20 @@ export default function Home() {
     color?: string;
   }) => (
     <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {trend && <p className="text-xs text-muted-foreground">{trend}</p>}
+          <div className="space-y-1 min-w-0 flex-1">
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">
+              {title}
+            </p>
+            <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value}</p>
+            {trend && (
+              <p className="text-xs text-muted-foreground truncate hidden sm:block">
+                {trend}
+              </p>
+            )}
           </div>
-          <Icon className={cn("h-6 w-6", color)} />
+          <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)} />
         </div>
       </CardContent>
     </Card>
