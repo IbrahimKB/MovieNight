@@ -1,28 +1,5 @@
 {
-  "users": [
-    {
-      "id": "ccfc3e7b-ad55-4485-8833-8c6746e7449d",
-      "username": "admin",
-      "email": "admin@movienight.com",
-      "name": "Administrator",
-      "password": "$2b$12$XqwCe.b4FD7tpdLukWboJe.5MMN2/dKZo9iiF5t9l5A2jJ/19Y1um",
-      "role": "admin",
-      "joinedAt": "2025-07-17T14:28:48.912Z",
-      "createdAt": "2025-07-17T14:28:48.912Z",
-      "updatedAt": "2025-07-17T14:28:48.912Z"
-    },
-    {
-      "id": "d32b5753-199f-48b4-9baf-afbbff1402e0",
-      "username": "kaysar",
-      "email": "kaysar@gmail.com",
-      "name": "kaysar",
-      "password": "$2b$12$VdkbBt9RUB0h1x7uW348JuwEchpj.xzAeQe.rwX9ohSoq7Ur1i8jy",
-      "role": "user",
-      "joinedAt": "2025-07-17T14:29:09.491Z",
-      "createdAt": "2025-07-17T14:29:09.491Z",
-      "updatedAt": "2025-07-17T14:29:09.491Z"
-    }
-  ],
+  "users": [],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
@@ -32,6 +9,6 @@
   "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T14:31:59.550Z"
+    "lastUpdated": "2025-07-17T14:33:07.426Z"
   }
 }
