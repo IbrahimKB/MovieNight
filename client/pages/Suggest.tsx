@@ -668,7 +668,7 @@ export default function Suggest() {
                               handleAcceptSuggestion(
                                 suggestion.id,
                                 suggestion.movie.title,
-                                suggestion.suggestedBy.name,
+                                suggestion.suggestedByUser?.name || "Unknown",
                               )
                             }
                           >
