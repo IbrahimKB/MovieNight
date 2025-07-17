@@ -216,11 +216,38 @@ export default function AdminDashboard() {
     }
   };
 
+  // Load TMDB rate limit info
+  const loadRateLimit = async () => {
+    setLoadingRateLimit(true);
+    try {
+      const result: ApiResponse<{
+        remaining: number;
+        resetTime: string | null;
+        isLimited: boolean;
+      }> = await apiCall("/tmdb/rate-limit");
+      if (result.success && result.data) {
+        setRateLimitInfo({
+          ...result.data,
+          resetTime: result.data.resetTime
+            ? new Date(result.data.resetTime)
+            : null,
+        });
+      } else {
+        toast.error(result.error || "Failed to load rate limit info");
+      }
+    } catch (error) {
+      toast.error("Failed to load rate limit info");
+    } finally {
+      setLoadingRateLimit(false);
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     if (isAdmin && token) {
       loadUsers();
       loadMovies();
+      loadRateLimit();
     }
   }, [isAdmin, token]);
 
