@@ -120,6 +120,16 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/squad"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Squad />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="/admin"
