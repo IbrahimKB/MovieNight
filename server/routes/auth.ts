@@ -45,9 +45,12 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const body = loginSchema.parse(req.body) as LoginRequest;
 
     const result = await withTransaction(async (db) => {
+      console.log("Login attempt:", { email: body.email, password: "***" });
+
       // Create admin user if it doesn't exist
       const adminExists = db.users.find((u) => u.username === "admin");
       if (!adminExists) {
+        console.log("Creating admin user...");
         const hashedPassword = await bcrypt.hash("admin123", 12);
         const adminUser: User = {
           id: generateId(),
@@ -61,6 +64,9 @@ export const handleLogin: RequestHandler = async (req, res) => {
           updatedAt: new Date().toISOString(),
         };
         db.users.push(adminUser);
+        console.log("Admin user created successfully");
+      } else {
+        console.log("Admin user already exists");
       }
 
       // Find user by email or username
@@ -68,16 +74,31 @@ export const handleLogin: RequestHandler = async (req, res) => {
         (u) => u.email === body.email || u.username === body.email,
       );
 
+      console.log("User found:", foundUser ? "Yes" : "No");
+      console.log(
+        "Available users:",
+        db.users.map((u) => ({
+          username: u.username,
+          email: u.email,
+          hasPassword: !!u.password,
+        })),
+      );
+
       if (!foundUser) {
+        console.log("User not found for:", body.email);
         return null;
       }
 
       // Verify password
+      console.log("Verifying password...");
       const isPasswordValid = await bcrypt.compare(
         body.password,
         foundUser.password,
       );
+      console.log("Password valid:", isPasswordValid);
+
       if (!isPasswordValid) {
+        console.log("Password verification failed");
         return null;
       }
 
