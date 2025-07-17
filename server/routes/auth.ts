@@ -160,7 +160,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
       };
       const token = jwt.sign(payload, JWT_SECRET, {
         expiresIn: JWT_EXPIRES_IN,
-      });
+      } as SignOptions);
 
       // Return user without password
       const { password, ...userWithoutPassword } = foundUser;
@@ -247,7 +247,7 @@ export const handleSignup: RequestHandler = async (req, res) => {
       };
       const token = jwt.sign(payload, JWT_SECRET, {
         expiresIn: JWT_EXPIRES_IN,
-      });
+      } as SignOptions);
 
       // Return user without password
       const { password, ...userWithoutPassword } = user;
