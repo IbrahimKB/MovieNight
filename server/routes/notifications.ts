@@ -4,16 +4,24 @@ import { Database } from "../models/types";
 
 // Original notification functions
 export const handleGetNotifications: RequestHandler = async (req, res) => {
+  console.log("handleGetNotifications called for userId:", req.params.userId);
+  console.log("User from JWT:", (req as any).user);
   try {
     const userId = (req as any).user?.id;
+    console.log("Extracted userId:", userId);
     if (!userId) {
+      console.log("No userId found, returning unauthorized");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const notifications = await withTransaction(async (db: Database) => {
-      return db.notifications?.filter((n: any) => n.userId === userId) || [];
+      const userNotifications =
+        db.notifications?.filter((n: any) => n.userId === userId) || [];
+      console.log("Found notifications:", userNotifications.length);
+      return userNotifications;
     });
 
+    console.log("Sending notifications response");
     res.json(notifications);
   } catch (error) {
     console.error("Failed to get notifications:", error);
