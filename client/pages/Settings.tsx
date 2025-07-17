@@ -716,11 +716,11 @@ function NotificationPreferenceRow({
                   </div>
                 )}
 
-                {"dayOfWeek" in pref && (
+                {pref && "dayOfWeek" in pref && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Day of week</span>
                     <Select
-                      value={pref.dayOfWeek.toString()}
+                      value={pref?.dayOfWeek?.toString() || "0"}
                       onValueChange={(value) =>
                         onUpdate(type, "dayOfWeek", parseInt(value))
                       }
