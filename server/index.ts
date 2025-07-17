@@ -43,6 +43,7 @@ import {
   handleGetNotificationPreferences,
   handleSaveNotificationPreferences,
   handleSendTestNotification,
+  handleSendNotificationToUsers,
 } from "./routes/notifications";
 import {
   handleSearchMoviesExternal,
@@ -218,6 +219,12 @@ export function createServer() {
   app.post("/api/notifications/subscribe", verifyJWT, handleSubscribePush);
   app.post("/api/notifications/unsubscribe", verifyJWT, handleUnsubscribePush);
   app.post("/api/notifications/test", verifyJWT, handleSendTestNotification);
+  app.post(
+    "/api/notifications/send",
+    verifyJWT,
+    requireAdmin,
+    handleSendNotificationToUsers,
+  );
 
   // Notification preferences routes (protected)
   app.get(
