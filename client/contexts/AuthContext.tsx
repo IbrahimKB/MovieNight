@@ -163,6 +163,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         body: JSON.stringify({ username, email, password, name }),
       });
 
+      if (!response.ok) {
+        console.error(
+          "Signup response not ok:",
+          response.status,
+          response.statusText,
+        );
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        setIsLoading(false);
+        return false;
+      }
+
       const result: ApiResponse<{ user: User; token: string }> =
         await response.json();
 
