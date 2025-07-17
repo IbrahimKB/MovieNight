@@ -30,18 +30,26 @@ export const handleGetNotifications: RequestHandler = async (req, res) => {
 };
 
 export const handleGetUnreadCount: RequestHandler = async (req, res) => {
+  console.log("handleGetUnreadCount called for userId:", req.params.userId);
+  console.log("User from JWT:", (req as any).user);
   try {
     const userId = (req as any).user?.id;
+    console.log("Extracted userId:", userId);
     if (!userId) {
+      console.log("No userId found, returning unauthorized");
       return res.status(401).json({ error: "Unauthorized" });
     }
 
     const count = await withTransaction(async (db: Database) => {
       if (!db.notifications) return 0;
-      return db.notifications.filter((n: any) => n.userId === userId && !n.read)
-        .length;
+      const unreadCount = db.notifications.filter(
+        (n: any) => n.userId === userId && !n.read,
+      ).length;
+      console.log("Found unread notifications:", unreadCount);
+      return unreadCount;
     });
 
+    console.log("Sending unread count response:", count);
     res.json({ count });
   } catch (error) {
     console.error("Failed to get unread count:", error);
