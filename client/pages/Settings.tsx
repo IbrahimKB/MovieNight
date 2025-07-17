@@ -674,7 +674,7 @@ function NotificationPreferenceRow({
       </div>
 
       {/* Notification Methods */}
-      {pref.enabled && (
+      {pref?.enabled && (
         <div className="space-y-3 pl-6 border-l-2 border-muted">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -682,7 +682,7 @@ function NotificationPreferenceRow({
               <span className="text-sm">Push Notifications</span>
             </div>
             <Switch
-              checked={pref.push && pushEnabled}
+              checked={pref?.push && pushEnabled}
               onCheckedChange={(checked) => onUpdate(type, "push", checked)}
               disabled={!pushEnabled}
             />
@@ -693,11 +693,11 @@ function NotificationPreferenceRow({
             <>
               <Separator />
               <div className="space-y-3">
-                {"reminderHours" in pref && (
+                {pref && "reminderHours" in pref && (
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Reminder time</span>
                     <Select
-                      value={pref.reminderHours.toString()}
+                      value={pref?.reminderHours?.toString() || "1"}
                       onValueChange={(value) =>
                         onUpdate(type, "reminderHours", parseInt(value))
                       }
