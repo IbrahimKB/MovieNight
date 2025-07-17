@@ -642,7 +642,8 @@ function NotificationPreferenceRow({
 }: NotificationPreferenceRowProps) {
   const meta = NOTIFICATION_META[type];
   const pref = preferences[type];
-  const hasSpecialFields = "reminderHours" in pref || "dayOfWeek" in pref;
+  const hasSpecialFields =
+    pref && ("reminderHours" in pref || "dayOfWeek" in pref);
 
   return (
     <div className="space-y-3 p-4 border rounded-lg">
