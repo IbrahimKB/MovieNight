@@ -34,7 +34,6 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
