@@ -45,14 +45,14 @@ export default function Layout({ children }: LayoutProps) {
       icon: Search,
     },
     {
+      path: "/movie-night",
+      label: "Movie Night",
+      icon: Users,
+    },
+    {
       path: "/releases",
       label: "Releases",
       icon: Calendar,
-    },
-    {
-      path: "/watchlist",
-      label: "Watchlist",
-      icon: Bookmark,
     },
     {
       path: "/friends",
