@@ -1,5 +1,17 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "30ab4cf9-99ce-427f-97c3-e9b90b03cafc",
+      "username": "kaysar",
+      "email": "kaysar@movienight.co.uk",
+      "name": "kaysar",
+      "password": "$2b$12$efpLtClqcChQurFFtwUgMuKf4KJJ3gTnH.L7d8C3DVofbwB4KDwqi",
+      "role": "user",
+      "joinedAt": "2025-07-17T23:35:44.940Z",
+      "createdAt": "2025-07-17T23:35:44.940Z",
+      "updatedAt": "2025-07-17T23:35:44.940Z"
+    }
+  ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
@@ -12,7 +24,10 @@
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-18",
-      "genres": ["Comedy", "Drama"],
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
       "description": "Carmy and the crew return for another intense season.",
       "year": 2025,
       "poster": null,
@@ -24,7 +39,11 @@
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-20",
-      "genres": ["Sci-Fi", "Horror", "Drama"],
+      "genres": [
+        "Sci-Fi",
+        "Horror",
+        "Drama"
+      ],
       "description": "The final season of the beloved supernatural series.",
       "year": 2025,
       "poster": null,
@@ -36,7 +55,10 @@
       "title": "Blade Runner 2099",
       "platform": "Amazon Prime Video",
       "releaseDate": "2025-07-22",
-      "genres": ["Sci-Fi", "Thriller"],
+      "genres": [
+        "Sci-Fi",
+        "Thriller"
+      ],
       "description": "A new series set in the Blade Runner universe.",
       "year": 2025,
       "poster": null,
@@ -46,7 +68,7 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-18T00:00:00.000Z"
+    "lastUpdated": "2025-07-17T23:37:45.164Z"
   },
   "notificationPreferences": []
 }
