@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ApiResponse, Release } from "../models/types";
 import { withTransaction, generateId } from "../utils/storage";
 import { justWatchService } from "../services/justwatch";
+import { schedulerService } from "../services/scheduler";
 
 // Get all releases from database
 export const handleGetReleases: RequestHandler = async (req, res) => {
