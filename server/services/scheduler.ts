@@ -26,11 +26,11 @@ class SchedulerService {
       "✅ Weekly releases sync scheduled for every Monday at 1:00 AM UTC",
     );
 
-    // Optional: Run a sync 30 seconds after startup for testing/initialization
+    // Optional: Run a sync 5 seconds after startup for testing/initialization
     setTimeout(async () => {
-      console.log("🚀 Running initial releases sync...");
+      console.log("🚀 Running improved initial releases sync...");
       await this.performWeeklySync();
-    }, 30000);
+    }, 5000);
   }
 
   public stop() {
@@ -51,9 +51,11 @@ class SchedulerService {
     );
 
     try {
-      // Get upcoming releases from TMDB for the next 30 days
-      console.log("🎬 Fetching upcoming releases from TMDB...");
-      const tmdbReleases = await tmdbService.getUpcomingReleases(30);
+      // Get upcoming releases from TMDB for the next 60 days for better variety
+      console.log(
+        "🎬 Fetching upcoming releases from TMDB for next 60 days...",
+      );
+      const tmdbReleases = await tmdbService.getUpcomingReleases(60);
 
       // Convert TMDB releases to our Release format
       const newReleases: Release[] = tmdbReleases.map((release) => ({
