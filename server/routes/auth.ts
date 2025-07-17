@@ -147,8 +147,9 @@ export const handleLogin: RequestHandler = async (req, res) => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       type: typeof error,
-      error: error,
+      errorString: JSON.stringify(error, Object.getOwnPropertyNames(error)),
     });
+    console.error("Raw login error:", error);
 
     if (error instanceof z.ZodError) {
       const response: ApiResponse = {
