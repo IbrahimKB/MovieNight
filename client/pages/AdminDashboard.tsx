@@ -381,6 +381,42 @@ export default function AdminDashboard() {
     },
   ];
 
+  // Release table columns
+  const releaseColumns = [
+    { key: "title", label: "Title" },
+    { key: "year", label: "Year" },
+    {
+      key: "platform",
+      label: "Platform",
+      render: (value: string) => (
+        <PlatformBadges platforms={value.split(", ")} size="sm" />
+      ),
+    },
+    {
+      key: "releaseDate",
+      label: "Release Date",
+      render: (value: string) => formatDate(value),
+    },
+    {
+      key: "genres",
+      label: "Genres",
+      render: (value: string[]) => (
+        <div className="flex flex-wrap gap-1">
+          {value.slice(0, 2).map((genre, index) => (
+            <Badge key={index} variant="outline" className="text-xs">
+              {genre}
+            </Badge>
+          ))}
+          {value.length > 2 && (
+            <Badge variant="outline" className="text-xs">
+              +{value.length - 2}
+            </Badge>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
