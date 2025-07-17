@@ -159,7 +159,7 @@ export default function ReleasesPage() {
       if (result.success) {
         toast.success("Weekly sync completed successfully");
         await loadReleases();
-        await loadJustWatchStatus();
+        await loadTMDBStatus();
       } else {
         toast.error(result.error || "Weekly sync failed");
       }
