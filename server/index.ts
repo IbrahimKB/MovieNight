@@ -53,17 +53,13 @@ export function createServer() {
   // Middleware
   app.use(cors());
 
-  // Custom body parser middleware to handle potential conflicts
+  // Request logging
   app.use((req, res, next) => {
-    if (
-      req.method === "POST" ||
-      req.method === "PUT" ||
-      req.method === "PATCH"
-    ) {
-      if (!req.body || Object.keys(req.body).length === 0) {
-        return express.json({ limit: "10mb" })(req, res, next);
-      }
-    }
+    console.log(`${req.method} ${req.path}`, {
+      contentType: req.headers["content-type"],
+      hasBody: !!req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+    });
     next();
   });
 
