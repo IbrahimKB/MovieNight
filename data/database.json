@@ -1,229 +1,37 @@
 {
   "users": [
     {
-      "id": "ee324e11-5f2d-4cdf-83a2-ec621ab42ad2",
+      "id": "ccfc3e7b-ad55-4485-8833-8c6746e7449d",
       "username": "admin",
       "email": "admin@movienight.com",
       "name": "Administrator",
-      "password": "$2b$12$lCnPiO8eNT2dUqXCnS6pre.16OS.fU9pIsZ5JQO1yuuYjiwd7Zxb2",
+      "password": "$2b$12$XqwCe.b4FD7tpdLukWboJe.5MMN2/dKZo9iiF5t9l5A2jJ/19Y1um",
       "role": "admin",
-      "joinedAt": "2025-07-17T14:21:00.479Z",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
+      "joinedAt": "2025-07-17T14:28:48.912Z",
+      "createdAt": "2025-07-17T14:28:48.912Z",
+      "updatedAt": "2025-07-17T14:28:48.912Z"
     },
     {
-      "id": "admin-uk-001",
-      "username": "admin-uk",
-      "email": "admin@movienight.co.uk",
-      "name": "Administrator (UK)",
-      "password": "$2b$12$lCnPiO8eNT2dUqXCnS6pre.16OS.fU9pIsZ5JQO1yuuYjiwd7Zxb2",
-      "role": "admin",
-      "joinedAt": "2025-07-17T14:21:00.479Z",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "user-1",
-      "username": "ibrahim",
-      "email": "ibrahim@example.com",
-      "name": "Ibrahim Kaysar",
-      "password": "$2b$12$7.7bFmqigS3OasVIcbpFdOQ.YErT3iRRH6gJHAsoH0dHfDi8aBuQO",
+      "id": "d32b5753-199f-48b4-9baf-afbbff1402e0",
+      "username": "kaysar",
+      "email": "kaysar@gmail.com",
+      "name": "kaysar",
+      "password": "$2b$12$VdkbBt9RUB0h1x7uW348JuwEchpj.xzAeQe.rwX9ohSoq7Ur1i8jy",
       "role": "user",
-      "joinedAt": "2024-01-01T00:00:00Z",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "user-2",
-      "username": "omar",
-      "email": "omar@example.com",
-      "name": "Omar",
-      "password": "$2b$12$18v1yWb33fJ1SisC56boqOZPcL3Qbmast46miuwMoKs1yschaL23S",
-      "role": "user",
-      "joinedAt": "2024-01-02T00:00:00Z",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "user-3",
-      "username": "sara",
-      "email": "sara@example.com",
-      "name": "Sara",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-03T00:00:00Z",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
+      "joinedAt": "2025-07-17T14:29:09.491Z",
+      "createdAt": "2025-07-17T14:29:09.491Z",
+      "updatedAt": "2025-07-17T14:29:09.491Z"
     }
   ],
-  "movies": [
-    {
-      "id": "movie-1",
-      "title": "The Menu",
-      "year": 2022,
-      "genres": ["Thriller", "Horror"],
-      "description": "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
-      "imdbRating": 7.2,
-      "rtRating": 88,
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "movie-2",
-      "title": "Glass Onion: A Knives Out Mystery",
-      "year": 2022,
-      "genres": ["Mystery", "Comedy"],
-      "description": "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
-      "imdbRating": 7.1,
-      "rtRating": 85,
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "movie-3",
-      "title": "Avatar: The Way of Water",
-      "year": 2022,
-      "genres": ["Action", "Adventure", "Sci-Fi"],
-      "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
-      "imdbRating": 7.6,
-      "rtRating": 76,
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    }
-  ],
+  "movies": [],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [
-    {
-      "id": "friendship-1",
-      "userId1": "admin-uk-001",
-      "userId2": "user-1",
-      "status": "accepted",
-      "requestedBy": "admin-uk-001",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "friendship-2",
-      "userId1": "admin-uk-001",
-      "userId2": "user-2",
-      "status": "accepted",
-      "requestedBy": "user-2",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    },
-    {
-      "id": "friendship-3",
-      "userId1": "user-1",
-      "userId2": "user-3",
-      "status": "pending",
-      "requestedBy": "user-1",
-      "createdAt": "2025-07-17T14:21:00.479Z",
-      "updatedAt": "2025-07-17T14:21:00.479Z"
-    }
-  ],
+  "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "9576bda1-bdb9-4e37-b5a3-3e2513b9ffcd",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": ["Comedy", "Drama"],
-      "description": "Carmy and the crew return for another intense season.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "f085d6de-b734-40da-b8f7-15b5c9d41437",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
-      "genres": ["Sci-Fi", "Horror", "Drama"],
-      "description": "The final season of the beloved supernatural series.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "f208b8fd-5a72-4ea0-87ed-eb38f64a7b89",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": ["Sci-Fi", "Thriller"],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "bb3f2ad8-38ca-46bc-9f9f-e4b2e7a9dfee",
-      "title": "House of the Dragon: Season 3",
-      "platform": "HBO Max",
-      "releaseDate": "2025-07-30",
-      "genres": ["Fantasy", "Drama", "Action"],
-      "description": "The Targaryen civil war continues in Westeros.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "b261a629-c18d-4a57-8995-883a9779ab0c",
-      "title": "Spider-Man: Beyond the Spider-Verse",
-      "platform": "Theaters, Netflix",
-      "releaseDate": "2025-08-02",
-      "genres": ["Animation", "Action", "Adventure"],
-      "description": "The highly anticipated conclusion to the Spider-Verse trilogy.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "88a38546-be3b-41a7-b41e-f50268013211",
-      "title": "The Mandalorian: Season 4",
-      "platform": "Disney+",
-      "releaseDate": "2025-08-05",
-      "genres": ["Sci-Fi", "Action", "Adventure"],
-      "description": "Din Djarin and Grogu return for new adventures.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "241d711f-d232-4318-abe3-1acaacf45008",
-      "title": "The Batman: Part II",
-      "platform": "HBO Max, Theaters",
-      "releaseDate": "2025-08-08",
-      "genres": ["Action", "Crime", "Drama"],
-      "description": "Robert Pattinson returns as the Dark Knight.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    },
-    {
-      "id": "a37e6fc1-e904-4bb6-88a0-577dc7a3b3a1",
-      "title": "Wednesday: Season 2",
-      "platform": "Netflix",
-      "releaseDate": "2025-08-12",
-      "genres": ["Comedy", "Horror", "Mystery"],
-      "description": "Wednesday Addams returns to Nevermore Academy.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T14:20:06.760Z",
-      "updatedAt": "2025-07-17T14:20:06.760Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T14:26:38.475Z"
+    "lastUpdated": "2025-07-17T14:30:09.562Z"
   }
 }
