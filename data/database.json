@@ -67,10 +67,8 @@
       "id": "movie-1",
       "title": "The Menu",
       "year": 2022,
-      "genres": [
-        "Thriller",
-        "Horror"
-      ],
+      "genres": ["Thriller", "Horror"],
+      "platform": "HBO Max",
       "description": "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
       "imdbRating": 7.2,
       "rtRating": 88,
@@ -81,10 +79,7 @@
       "id": "movie-2",
       "title": "Glass Onion: A Knives Out Mystery",
       "year": 2022,
-      "genres": [
-        "Mystery",
-        "Comedy"
-      ],
+      "genres": ["Mystery", "Comedy"],
       "description": "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
       "imdbRating": 7.1,
       "rtRating": 85,
@@ -95,11 +90,7 @@
       "id": "movie-3",
       "title": "Avatar: The Way of Water",
       "year": 2022,
-      "genres": [
-        "Action",
-        "Adventure",
-        "Sci-Fi"
-      ],
+      "genres": ["Action", "Adventure", "Sci-Fi"],
       "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
       "imdbRating": 7.6,
       "rtRating": 76,
@@ -137,10 +128,7 @@
       "title": "The Menu",
       "platform": "Netflix",
       "releaseDate": "2024-01-15",
-      "genres": [
-        "Thriller",
-        "Horror"
-      ],
+      "genres": ["Thriller", "Horror"],
       "year": 2022,
       "description": "A young couple travels to a remote island to eat at an exclusive restaurant.",
       "createdAt": "2025-07-16T21:34:38.678Z",
@@ -151,10 +139,7 @@
       "title": "Glass Onion",
       "platform": "Netflix",
       "releaseDate": "2024-01-16",
-      "genres": [
-        "Mystery",
-        "Comedy"
-      ],
+      "genres": ["Mystery", "Comedy"],
       "year": 2022,
       "description": "Detective Benoit Blanc travels to Greece to solve a mystery.",
       "createdAt": "2025-07-16T21:34:38.678Z",
@@ -165,11 +150,7 @@
       "title": "Avatar: The Way of Water",
       "platform": "Disney+",
       "releaseDate": "2024-01-17",
-      "genres": [
-        "Action",
-        "Adventure",
-        "Sci-Fi"
-      ],
+      "genres": ["Action", "Adventure", "Sci-Fi"],
       "year": 2022,
       "description": "Jake Sully continues his story on Pandora.",
       "createdAt": "2025-07-16T21:34:38.678Z",
