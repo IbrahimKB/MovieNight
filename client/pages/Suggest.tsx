@@ -22,6 +22,8 @@ import {
   Film,
   Tv,
   Calendar,
+  Eye,
+  UserCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Friend, getUserFriends, getFriendName } from "@/lib/api";
@@ -166,6 +168,14 @@ export default function Suggest() {
   >(null);
   const [searchResults, setSearchResults] = useState<MovieSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [actionMode, setActionMode] = useState<"suggest" | "watched">(
+    "suggest",
+  );
+  const [watchedRating, setWatchedRating] = useState([8]);
+  const [watchDate, setWatchDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [personalNotes, setPersonalNotes] = useState("");
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
@@ -679,69 +689,160 @@ export default function Suggest() {
                   </Card>
                 </div>
 
-                {/* Desire Rating */}
+                {/* Action Mode Toggle */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium">
-                    How much do you want to watch this? ({desireRating[0]}/10)
+                    What would you like to do?
                   </label>
-                  <Slider
-                    value={desireRating}
-                    onValueChange={setDesireRating}
-                    max={10}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Friend Selector */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">
-                    Suggest to friends
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {userFriends.map((friend) => (
-                      <div
-                        key={friend.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={friend.id}
-                          checked={selectedFriends.includes(friend.id)}
-                          onCheckedChange={() => handleFriendToggle(friend.id)}
-                        />
-                        <label
-                          htmlFor={friend.id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {friend.name}
-                        </label>
-                      </div>
-                    ))}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={actionMode === "suggest" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActionMode("suggest")}
+                      className="flex-1"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Suggest to Friends
+                    </Button>
+                    <Button
+                      variant={actionMode === "watched" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActionMode("watched")}
+                      className="flex-1"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Mark as Watched
+                    </Button>
                   </div>
                 </div>
 
-                {/* Comment */}
+                {/* Desire Rating (for suggestions) */}
+                {actionMode === "suggest" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      How much do you want to watch this? ({desireRating[0]}/10)
+                    </label>
+                    <Slider
+                      value={desireRating}
+                      onValueChange={setDesireRating}
+                      max={10}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* Watch Rating (for watched movies) */}
+                {actionMode === "watched" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      How would you rate this movie? ({watchedRating[0]}/10)
+                    </label>
+                    <Slider
+                      value={watchedRating}
+                      onValueChange={setWatchedRating}
+                      max={10}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* Watch Date (for watched movies) */}
+                {actionMode === "watched" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      When did you watch it?
+                    </label>
+                    <Input
+                      type="date"
+                      value={watchDate}
+                      onChange={(e) => setWatchDate(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* Friend Selector (for suggestions) */}
+                {actionMode === "suggest" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      Suggest to friends
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {userFriends.map((friend) => (
+                        <div
+                          key={friend.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={friend.id}
+                            checked={selectedFriends.includes(friend.id)}
+                            onCheckedChange={() =>
+                              handleFriendToggle(friend.id)
+                            }
+                          />
+                          <label
+                            htmlFor={friend.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {friend.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Comment / Personal Notes */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Optional comment
+                    {actionMode === "suggest"
+                      ? "Optional comment"
+                      : "Personal notes (optional)"}
                   </label>
                   <Textarea
-                    placeholder="Movie night Thursday?"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
+                    placeholder={
+                      actionMode === "suggest"
+                        ? "Movie night Thursday?"
+                        : "What did you think of this movie?"
+                    }
+                    value={actionMode === "suggest" ? comment : personalNotes}
+                    onChange={(e) =>
+                      actionMode === "suggest"
+                        ? setComment(e.target.value)
+                        : setPersonalNotes(e.target.value)
+                    }
                     rows={2}
                   />
                 </div>
 
                 {/* Submit Button */}
                 <Button
-                  onClick={handleSuggest}
-                  disabled={!selectedMovie || selectedFriends.length === 0}
+                  onClick={
+                    actionMode === "suggest"
+                      ? handleSuggest
+                      : handleMarkAsWatched
+                  }
+                  disabled={
+                    actionMode === "suggest"
+                      ? !selectedMovie || selectedFriends.length === 0
+                      : !selectedMovie
+                  }
                   className="w-full"
                 >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Suggest to Friends
+                  {actionMode === "suggest" ? (
+                    <>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Suggest to Friends
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Add to Watch History
+                    </>
+                  )}
                 </Button>
               </div>
             </>
