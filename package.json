@@ -24,7 +24,6 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "zod": "^3.23.8"
-
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -71,7 +70,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
-    "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^12.6.2",
