@@ -293,28 +293,14 @@ export const handleWeeklySync: RequestHandler = async (req, res) => {
       };
     });
 
-    // Update database with new releases
-    await withTransaction(async (db) => {
-      // Add new releases, avoiding duplicates
-      const existingTitles = new Set(db.releases.map((r) => r.title));
-
-      syncResult.newReleases.forEach((release) => {
-        if (!existingTitles.has(release.title)) {
-          db.releases.push(release);
-        }
-      });
-
-      // Sort by release date
-      db.releases.sort(
-        (a, b) =>
-          new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime(),
-      );
-    });
+    console.log(
+      `✅ Weekly TMDB sync completed: ${syncResult.totalReleases} releases added`,
+    );
 
     const response: ApiResponse = {
       success: true,
       data: syncResult,
-      message: "Weekly sync completed successfully",
+      message: `Weekly TMDB sync completed: ${syncResult.totalReleases} releases added`,
     };
 
     res.json(response);
