@@ -6,69 +6,9 @@
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "tmdb_1514944_movie_1752795772304",
-      "title": "The Frisbee",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Animation"
-      ],
-      "description": "The Frisbee is an animated short featuring a dog and a frisbee which may or may not belong to the dog. The director was contacted for a comment, and he stated that it was meant to be ambiguous.",
-      "poster": "https://image.tmdb.org/t/p/w500/2XnfTiSWOptWixMlTsEstPK2I2Q.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T23:42:52.304Z",
-      "updatedAt": "2025-07-17T23:42:52.304Z"
-    },
-    {
-      "id": "tmdb_1513946_movie_1752795772304",
-      "title": "Tur De Zur",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Three best friends go through three different stories at an awful house party.",
-      "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T23:42:52.304Z",
-      "updatedAt": "2025-07-17T23:42:52.304Z"
-    },
-    {
-      "id": "tmdb_1512943_movie_1752795772304",
-      "title": "Desight",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Horror",
-        "Music"
-      ],
-      "description": "If you believe in parallel worlds, please pray that they will take us in.",
-      "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T23:42:52.304Z",
-      "updatedAt": "2025-07-17T23:42:52.304Z"
-    },
-    {
-      "id": "tmdb_248852_tv_1752795772303",
-      "title": "UNTAMED",
-      "platform": "TV",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Mystery",
-        "Drama"
-      ],
-      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
-      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T23:42:52.303Z",
-      "updatedAt": "2025-07-17T23:42:52.303Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:42:52.305Z"
+    "lastUpdated": "2025-07-17T23:43:32.984Z"
   }
 }
