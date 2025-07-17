@@ -26,7 +26,12 @@ export default function Login() {
 
     const success = await login(email, password);
     if (success) {
-      navigate("/");
+      // Check if we should redirect to admin after login
+      if (email === "admin@movienight.co.uk" || email === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } else {
       setError("Invalid email/username or password");
     }

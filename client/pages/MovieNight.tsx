@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Friend, getUserFriends } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +23,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface Friend {
-  id: string;
-  name: string;
-  avatar?: string;
-}
-
 interface MovieWithScores {
   id: string;
   title: string;
@@ -45,15 +41,6 @@ interface SurpriseMovie {
   movie: MovieWithScores;
   isVisible: boolean;
 }
-
-// Mock data
-const mockFriends: Friend[] = [
-  { id: "1", name: "Ibrahim" },
-  { id: "2", name: "Omar" },
-  { id: "3", name: "Sara" },
-  { id: "4", name: "Alex" },
-  { id: "5", name: "Maya" },
-];
 
 const mockMoviesWithScores: MovieWithScores[] = [
   {
@@ -173,6 +160,8 @@ const genres = [
 ];
 
 export default function MovieNight() {
+  const { user } = useAuth();
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [presentFriends, setPresentFriends] = useState<string[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("All Genres");
   const [filteredMovies, setFilteredMovies] = useState<MovieWithScores[]>([]);
@@ -180,6 +169,26 @@ export default function MovieNight() {
   const [surpriseMovie, setSurpriseMovie] = useState<SurpriseMovie | null>(
     null,
   );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load friends data
+  useEffect(() => {
+    if (user) {
+      loadFriends();
+    }
+  }, [user]);
+
+  const loadFriends = async () => {
+    try {
+      setIsLoading(true);
+      const userFriends = await getUserFriends(user!.id);
+      setFriends(userFriends);
+    } catch (error) {
+      console.error("Failed to load friends:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
@@ -395,30 +404,44 @@ export default function MovieNight() {
               👥 Who's Present?
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              {mockFriends.map((friend) => (
-                <div
-                  key={friend.id}
-                  className={cn(
-                    "flex items-center space-x-2 p-3 rounded-lg border transition-colors cursor-pointer",
-                    presentFriends.includes(friend.id)
-                      ? "bg-primary/10 border-primary"
-                      : "border-border hover:bg-accent/50",
-                  )}
-                  onClick={() => handleFriendToggle(friend.id)}
-                >
-                  <Checkbox
-                    id={friend.id}
-                    checked={presentFriends.includes(friend.id)}
-                    onChange={() => handleFriendToggle(friend.id)}
-                  />
-                  <label
-                    htmlFor={friend.id}
-                    className="text-sm font-medium leading-none cursor-pointer"
-                  >
-                    {friend.name}
-                  </label>
+              {isLoading ? (
+                <div className="col-span-full text-center py-4">
+                  <div className="text-sm text-muted-foreground">
+                    Loading friends...
+                  </div>
                 </div>
-              ))}
+              ) : friends.length === 0 ? (
+                <div className="col-span-full text-center py-4">
+                  <div className="text-sm text-muted-foreground">
+                    No friends yet. Add friends to plan movie nights together!
+                  </div>
+                </div>
+              ) : (
+                friends.map((friend) => (
+                  <div
+                    key={friend.id}
+                    className={cn(
+                      "flex items-center space-x-2 p-3 rounded-lg border transition-colors cursor-pointer",
+                      presentFriends.includes(friend.id)
+                        ? "bg-primary/10 border-primary"
+                        : "border-border hover:bg-accent/50",
+                    )}
+                    onClick={() => handleFriendToggle(friend.id)}
+                  >
+                    <Checkbox
+                      id={friend.id}
+                      checked={presentFriends.includes(friend.id)}
+                      onChange={() => handleFriendToggle(friend.id)}
+                    />
+                    <label
+                      htmlFor={friend.id}
+                      className="text-sm font-medium leading-none cursor-pointer"
+                    >
+                      {friend.name}
+                    </label>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 

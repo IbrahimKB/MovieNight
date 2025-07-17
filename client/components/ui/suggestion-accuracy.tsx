@@ -58,7 +58,7 @@ export default function SuggestionAccuracy({
           `/api/analytics/suggestion-accuracy/${userId}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
             },
           },
         );
@@ -260,7 +260,7 @@ export function SuggestionLeaderboard({ className }: { className?: string }) {
       try {
         const response = await fetch("/api/analytics/suggestion-leaderboard", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
         });
 

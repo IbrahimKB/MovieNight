@@ -40,11 +40,6 @@ export default function Layout({ children }: LayoutProps) {
       icon: Home,
     },
     {
-      path: "/movie-search",
-      label: "Discover",
-      icon: Search,
-    },
-    {
       path: "/suggest",
       label: "Suggest",
       icon: PlusCircle,
@@ -59,16 +54,16 @@ export default function Layout({ children }: LayoutProps) {
       label: "Squad",
       icon: UserPlus,
     },
-  ];
-
-  // All navigation items (combining bottom nav and additional pages for desktop)
-  const allNavItems = [
-    ...bottomNavItems,
     {
       path: "/movie-night",
       label: "Movie Night",
       icon: Users,
     },
+  ];
+
+  // All navigation items (combining bottom nav and additional pages for desktop)
+  const allNavItems = [
+    ...bottomNavItems,
     {
       path: "/releases",
       label: "Releases",

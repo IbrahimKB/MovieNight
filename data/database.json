@@ -1,191 +1,26 @@
 {
   "users": [
     {
-      "id": "user-1",
-      "username": "ibrahim",
-      "email": "ibrahim@example.com",
-      "name": "Ibrahim Kaysar",
-      "password": "$2b$12$7.7bFmqigS3OasVIcbpFdOQ.YErT3iRRH6gJHAsoH0dHfDi8aBuQO",
-      "joinedAt": "2024-01-01T00:00:00Z",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-17T12:52:37.636Z",
-      "role": "user"
-    },
-    {
-      "id": "user-2",
-      "username": "omar",
-      "email": "omar@example.com",
-      "name": "Omar",
-      "password": "$2b$12$18v1yWb33fJ1SisC56boqOZPcL3Qbmast46miuwMoKs1yschaL23S",
-      "joinedAt": "2024-01-02T00:00:00Z",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-17T12:33:45.364Z",
-      "role": "user"
-    },
-    {
-      "id": "user-3",
-      "username": "sara",
-      "email": "sara@example.com",
-      "name": "Sara",
-      "password": "password123",
-      "joinedAt": "2024-01-03T00:00:00Z",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "user-4",
-      "username": "alex",
-      "email": "alex@example.com",
-      "name": "Alex",
-      "password": "password123",
-      "joinedAt": "2024-01-04T00:00:00Z",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "user-5",
-      "username": "maya",
-      "email": "maya@example.com",
-      "name": "Maya",
-      "password": "password123",
-      "joinedAt": "2024-01-05T00:00:00Z",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "efbcc6c6-a6d3-45e7-9fcb-4d1aff9cef45",
+      "id": "admin-001",
       "username": "admin",
-      "email": "admin@movienight.com",
+      "email": "admin@movienight.co.uk",
       "name": "Administrator",
-      "password": "$2b$12$4C81wK./2GXAQcJCmktbIuIDe3DX6mBKKoYZjMfWM9BDurR8EZYH6",
+      "password": "$2b$12$XqwCe.b4FD7tpdLukWboJe.5MMN2/dKZo9iiF5t9l5A2jJ/19Y1um",
       "role": "admin",
-      "joinedAt": "2025-07-17T11:31:47.572Z",
-      "createdAt": "2025-07-17T11:31:47.572Z",
-      "updatedAt": "2025-07-17T11:31:47.572Z"
+      "joinedAt": "2025-07-17T15:41:00.000Z",
+      "createdAt": "2025-07-17T15:41:00.000Z",
+      "updatedAt": "2025-07-17T15:41:00.000Z"
     }
   ],
-  "movies": [
-    {
-      "id": "movie-1",
-      "title": "The Menu",
-      "year": 2022,
-      "genres": [
-        "Thriller",
-        "Horror"
-      ],
-      "platform": "HBO Max",
-      "description": "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
-      "imdbRating": 7.2,
-      "rtRating": 88,
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "movie-2",
-      "title": "Glass Onion: A Knives Out Mystery",
-      "year": 2022,
-      "genres": [
-        "Mystery",
-        "Comedy"
-      ],
-      "platform": "Netflix",
-      "description": "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
-      "imdbRating": 7.1,
-      "rtRating": 85,
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "movie-3",
-      "title": "Avatar: The Way of Water",
-      "year": 2022,
-      "genres": [
-        "Action",
-        "Adventure",
-        "Sci-Fi"
-      ],
-      "platform": "Disney+",
-      "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
-      "imdbRating": 7.6,
-      "rtRating": 76,
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    }
-  ],
+  "movies": [],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [
-    {
-      "id": "friendship-1",
-      "userId1": "user-1",
-      "userId2": "user-2",
-      "status": "accepted",
-      "requestedBy": "user-1",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    },
-    {
-      "id": "friendship-2",
-      "userId1": "user-1",
-      "userId2": "user-3",
-      "status": "accepted",
-      "requestedBy": "user-3",
-      "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
-    }
-  ],
+  "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "d1dfcad4-dbed-40e1-ae7f-617af498a12c",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Carmy and the crew return for another intense season.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:34:20.705Z",
-      "updatedAt": "2025-07-17T13:34:20.705Z"
-    },
-    {
-      "id": "45f37998-f754-40e0-a99c-7ee8bf79f37a",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
-      "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
-      ],
-      "description": "The final season of the beloved supernatural series.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:34:20.705Z",
-      "updatedAt": "2025-07-17T13:34:20.705Z"
-    },
-    {
-      "id": "4f2eb077-75a3-4083-9f16-305232805586",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:34:20.705Z",
-      "updatedAt": "2025-07-17T13:34:20.705Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T13:34:20.707Z"
+    "lastUpdated": "2025-07-17T15:46:58.353Z"
   }
 }

@@ -1,3 +1,6 @@
+// Legacy compatibility file - most functionality moved to api.ts
+// Keep minimal interfaces and utilities for backward compatibility
+
 export interface Notification {
   id: string;
   type:
@@ -17,80 +20,6 @@ export interface Notification {
     movieTitle?: string;
   };
 }
-
-// Mock notifications data
-export const MOCK_NOTIFICATIONS: Notification[] = [
-  {
-    id: "notif_1",
-    type: "suggestion",
-    content: "Omar suggested The Menu to you",
-    read: false,
-    created_at: "2024-01-14T10:30:00Z",
-    actionData: {
-      userId: "2",
-      username: "Omar",
-      movieTitle: "The Menu",
-      movieId: "movie_1",
-    },
-  },
-  {
-    id: "notif_2",
-    type: "friend_request",
-    content: "Alex sent you a friend request",
-    read: false,
-    created_at: "2024-01-14T09:15:00Z",
-    actionData: {
-      userId: "4",
-      username: "Alex",
-      requestId: "req_1",
-    },
-  },
-  {
-    id: "notif_3",
-    type: "reaction",
-    content: "Sara rated Glass Onion 9/10 after watching",
-    read: false,
-    created_at: "2024-01-13T20:45:00Z",
-    actionData: {
-      userId: "3",
-      username: "Sara",
-      movieTitle: "Glass Onion",
-    },
-  },
-  {
-    id: "notif_4",
-    type: "movie_night",
-    content: "Movie night tonight! Your squad picked The Menu",
-    read: true,
-    created_at: "2024-01-13T15:30:00Z",
-    actionData: {
-      movieTitle: "The Menu",
-    },
-  },
-  {
-    id: "notif_5",
-    type: "reminder",
-    content: "You scored Wednesday a 9 but haven't watched it yet",
-    read: true,
-    created_at: "2024-01-12T14:20:00Z",
-    actionData: {
-      movieTitle: "Wednesday",
-      movieId: "movie_5",
-    },
-  },
-  {
-    id: "notif_6",
-    type: "suggestion",
-    content: "Maya suggested Avatar: The Way of Water to your group",
-    read: true,
-    created_at: "2024-01-11T11:00:00Z",
-    actionData: {
-      userId: "5",
-      username: "Maya",
-      movieTitle: "Avatar: The Way of Water",
-    },
-  },
-];
 
 // Get notification icon based on type
 export function getNotificationIcon(type: Notification["type"]): string {
@@ -130,29 +59,37 @@ export function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString();
 }
 
-// Get unread count
+// Deprecated: Functions below are replaced by API calls in api.ts
+// They are kept for backward compatibility but return empty/default data
+
+export const MOCK_NOTIFICATIONS: Notification[] = [];
+
 export function getUnreadCount(notifications: Notification[]): number {
-  return notifications.filter((n) => !n.read).length;
+  console.warn(
+    "getUnreadCount from notificationData.ts is deprecated. Use api.ts instead.",
+  );
+  return 0;
 }
 
-// Mark notification as read
 export function markNotificationAsRead(
   notifications: Notification[],
   notificationId: string,
 ): Notification[] {
-  return notifications.map((n) =>
-    n.id === notificationId ? { ...n, read: true } : n,
+  console.warn(
+    "markNotificationAsRead from notificationData.ts is deprecated. Use api.ts instead.",
   );
+  return notifications;
 }
 
-// Mark all notifications as read
 export function markAllNotificationsAsRead(
   notifications: Notification[],
 ): Notification[] {
-  return notifications.map((n) => ({ ...n, read: true }));
+  console.warn(
+    "markAllNotificationsAsRead from notificationData.ts is deprecated. Use api.ts instead.",
+  );
+  return notifications;
 }
 
-// Get notification action text based on type
 export function getNotificationActionText(notification: Notification): {
   primary?: string;
   secondary?: string;
@@ -171,7 +108,6 @@ export function getNotificationActionText(notification: Notification): {
   }
 }
 
-// Sort notifications by date (newest first)
 export function sortNotificationsByDate(
   notifications: Notification[],
 ): Notification[] {

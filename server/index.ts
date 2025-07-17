@@ -49,7 +49,7 @@ import {
   handleSyncReleases,
   handleGetUpcomingReleases,
   handleGetReleasesByPlatform,
-  handleGetJustWatchStatus,
+  handleGetTMDBStatus,
   handleWeeklySync,
   handleGetSchedulerStatus,
   handleTriggerManualSync,
@@ -170,7 +170,7 @@ export function createServer() {
   app.get("/api/releases", handleGetReleases);
   app.get("/api/releases/upcoming", handleGetUpcomingReleases);
   app.get("/api/releases/platform", handleGetReleasesByPlatform);
-  app.get("/api/releases/justwatch-status", handleGetJustWatchStatus);
+  app.get("/api/releases/tmdb-status", handleGetTMDBStatus);
   app.get("/api/releases/:releaseId", handleGetReleaseById);
   app.post("/api/releases", verifyJWT, requireAdmin, handleCreateRelease);
   app.put(

@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 import { ApiResponse, Release } from "../models/types";
 import { withTransaction, generateId } from "../utils/storage";
-import { justWatchService } from "../services/justwatch";
+import { tmdbService } from "../services/tmdb";
 import { schedulerService } from "../services/scheduler";
 
 // Validation schemas
@@ -70,8 +70,22 @@ export const handleSyncReleases: RequestHandler = async (req, res) => {
       return res.status(400).json(response);
     }
 
-    // Get releases from JustWatch
-    const newReleases = await justWatchService.getUpcomingReleases(days);
+    // Get releases from TMDB
+    const tmdbReleases = await tmdbService.getUpcomingReleases(days);
+
+    // Convert to Release format
+    const newReleases: Release[] = tmdbReleases.map((release) => ({
+      id: release.id,
+      title: release.title,
+      platform: release.platform,
+      releaseDate: release.releaseDate,
+      genres: release.genres,
+      description: release.description,
+      poster: release.poster,
+      year: release.year,
+      createdAt: release.createdAt,
+      updatedAt: release.updatedAt,
+    }));
 
     // Update database
     const result = await withTransaction(async (db) => {
@@ -88,7 +102,7 @@ export const handleSyncReleases: RequestHandler = async (req, res) => {
       };
     });
 
-    const rateLimitStatus = justWatchService.getRateLimitStatus();
+    const rateLimitStatus = tmdbService.getRateLimitStatus();
 
     const response: ApiResponse<{
       result: typeof result;
@@ -210,10 +224,10 @@ export const handleGetReleasesByPlatform: RequestHandler = async (req, res) => {
   }
 };
 
-// Get JustWatch rate limit status
-export const handleGetJustWatchStatus: RequestHandler = async (req, res) => {
+// Get TMDB rate limit status
+export const handleGetTMDBStatus: RequestHandler = async (req, res) => {
   try {
-    const rateLimitStatus = justWatchService.getRateLimitStatus();
+    const rateLimitStatus = tmdbService.getRateLimitStatus();
 
     const response: ApiResponse = {
       success: true,
@@ -226,7 +240,7 @@ export const handleGetJustWatchStatus: RequestHandler = async (req, res) => {
 
     const response: ApiResponse = {
       success: false,
-      error: "Failed to get JustWatch status",
+      error: "Failed to get TMDB status",
     };
     res.status(500).json(response);
   }
@@ -235,30 +249,58 @@ export const handleGetJustWatchStatus: RequestHandler = async (req, res) => {
 // Weekly sync endpoint (for cron jobs)
 export const handleWeeklySync: RequestHandler = async (req, res) => {
   try {
-    const syncResult = await justWatchService.syncWeeklyReleases();
+    // Get weekly releases from TMDB
+    const tmdbReleases = await tmdbService.getUpcomingReleases(7);
 
-    // Update database with new releases
-    await withTransaction(async (db) => {
-      // Add new releases, avoiding duplicates
-      const existingTitles = new Set(db.releases.map((r) => r.title));
+    // Convert to Release format and sync
+    const releasesToSync: Release[] = tmdbReleases.map((release) => ({
+      id: release.id,
+      title: release.title,
+      platform: release.platform,
+      releaseDate: release.releaseDate,
+      genres: release.genres,
+      description: release.description,
+      poster: release.poster,
+      year: release.year,
+      createdAt: release.createdAt,
+      updatedAt: release.updatedAt,
+    }));
 
-      syncResult.newReleases.forEach((release) => {
-        if (!existingTitles.has(release.title)) {
-          db.releases.push(release);
-        }
+    // Update database
+    const syncResult = await withTransaction(async (db) => {
+      // Get releases for the next week
+      const startDate = new Date();
+      const endDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+      // Remove existing releases for this week to avoid duplicates
+      db.releases = db.releases.filter((release) => {
+        const releaseDate = new Date(release.releaseDate);
+        return releaseDate < startDate || releaseDate > endDate;
       });
+
+      // Add new releases
+      db.releases.push(...releasesToSync);
 
       // Sort by release date
       db.releases.sort(
         (a, b) =>
           new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime(),
       );
+
+      return {
+        totalReleases: releasesToSync.length,
+        syncTime: new Date().toISOString(),
+      };
     });
+
+    console.log(
+      `✅ Weekly TMDB sync completed: ${syncResult.totalReleases} releases added`,
+    );
 
     const response: ApiResponse = {
       success: true,
       data: syncResult,
-      message: "Weekly sync completed successfully",
+      message: `Weekly TMDB sync completed: ${syncResult.totalReleases} releases added`,
     };
 
     res.json(response);

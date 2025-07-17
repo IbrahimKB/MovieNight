@@ -22,96 +22,55 @@ import SuggestionAccuracy, {
 } from "@/components/ui/suggestion-accuracy";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import {
+  DashboardStats,
+  TrendingMovie,
+  getDashboardStats,
+  getTrendingMovies,
+  getUpcomingReleases,
+} from "@/lib/api";
 
-// Quick stats for the dashboard
-interface QuickStats {
-  totalFriends: number;
-  activeSuggestions: number;
-  moviesWatchedThisWeek: number;
-  suggestionAccuracy: number;
-}
-
-const mockStats: QuickStats = {
-  totalFriends: 12,
-  activeSuggestions: 3,
-  moviesWatchedThisWeek: 2,
-  suggestionAccuracy: 85,
+// Default stats while loading
+const defaultStats: DashboardStats = {
+  totalFriends: 0,
+  activeSuggestions: 0,
+  moviesWatchedThisWeek: 0,
+  suggestionAccuracy: 0,
 };
-
-// Trending movies data
-interface TrendingMovie {
-  id: string;
-  title: string;
-  year: number;
-  rating: number;
-  watchCount: number;
-  genres: string[];
-}
-
-const trendingMovies: TrendingMovie[] = [
-  {
-    id: "1",
-    title: "The Menu",
-    year: 2022,
-    rating: 8.2,
-    watchCount: 24,
-    genres: ["Thriller", "Horror"],
-  },
-  {
-    id: "2",
-    title: "Glass Onion",
-    year: 2022,
-    rating: 7.8,
-    watchCount: 18,
-    genres: ["Mystery", "Comedy"],
-  },
-  {
-    id: "3",
-    title: "Avatar: The Way of Water",
-    year: 2022,
-    rating: 8.5,
-    watchCount: 15,
-    genres: ["Action", "Sci-Fi"],
-  },
-];
-
-// Recent releases data
-interface RecentRelease {
-  id: string;
-  title: string;
-  platform: string;
-  releaseDate: string;
-  genres: string[];
-}
-
-const recentReleases: RecentRelease[] = [
-  {
-    id: "1",
-    title: "The White Lotus: Season 3",
-    platform: "HBO Max",
-    releaseDate: "2025-02-16",
-    genres: ["Drama", "Comedy"],
-  },
-  {
-    id: "2",
-    title: "Cobra Kai: Season 6 Part 3",
-    platform: "Netflix",
-    releaseDate: "2025-02-13",
-    genres: ["Action", "Drama"],
-  },
-  {
-    id: "3",
-    title: "Fantastic Four: First Steps",
-    platform: "Disney+",
-    releaseDate: "2025-07-25",
-    genres: ["Action", "Adventure"],
-  },
-];
 
 export default function Home() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<QuickStats>(mockStats);
+  const [stats, setStats] = useState<DashboardStats>(defaultStats);
+  const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
+  const [recentReleases, setRecentReleases] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load dashboard data
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      const [dashboardStats, trending, upcoming] = await Promise.all([
+        getDashboardStats(user!.id),
+        getTrendingMovies(),
+        getUpcomingReleases(),
+      ]);
+
+      setStats(dashboardStats);
+      setTrendingMovies(trending);
+      setRecentReleases(upcoming);
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const StatCard = ({
     title,
@@ -162,30 +121,52 @@ export default function Home() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           title="Friends"
-          value={stats.totalFriends}
+          value={isLoading ? "..." : stats.totalFriends}
           icon={Users}
-          trend="+2 this week"
+          trend={
+            stats.totalFriends > 0
+              ? `${stats.totalFriends} in your squad`
+              : "Find friends to get started"
+          }
           color="text-blue-500"
         />
         <StatCard
           title="Suggestions"
-          value={stats.activeSuggestions}
+          value={isLoading ? "..." : stats.activeSuggestions}
           icon={MessageSquare}
-          trend="Respond now"
+          trend={
+            stats.activeSuggestions > 0
+              ? "Respond now"
+              : "No pending suggestions"
+          }
           color="text-green-500"
         />
         <StatCard
           title="This Week"
-          value={stats.moviesWatchedThisWeek}
+          value={isLoading ? "..." : stats.moviesWatchedThisWeek}
           icon={Eye}
-          trend="Great!"
+          trend={
+            stats.moviesWatchedThisWeek > 0
+              ? "Great progress!"
+              : "Start watching"
+          }
           color="text-purple-500"
         />
         <StatCard
           title="Accuracy"
-          value={`${stats.suggestionAccuracy}%`}
+          value={
+            isLoading
+              ? "..."
+              : stats.suggestionAccuracy > 0
+                ? `${stats.suggestionAccuracy}%`
+                : "N/A"
+          }
           icon={Target}
-          trend="Great predictor!"
+          trend={
+            stats.suggestionAccuracy > 0
+              ? "Great predictor!"
+              : "Make suggestions to track"
+          }
           color="text-orange-500"
         />
       </div>
@@ -212,37 +193,59 @@ export default function Home() {
                   variant="ghost"
                   size="sm"
                   className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                  onClick={() => navigate("/movies")}
                 >
                   View All
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-2 sm:space-y-3">
-              {trendingMovies.slice(0, 3).map((movie, index) => (
-                <div
-                  key={movie.id}
-                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
-                  onClick={() => navigate("/movie-search")}
-                >
-                  <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                    <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 space-y-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
-                        {movie.title}
-                      </p>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-xs">{movie.rating}</span>
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
+                    >
+                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-muted rounded animate-pulse" />
+                        <div className="h-2 bg-muted rounded animate-pulse w-2/3" />
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {movie.watchCount} friends
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : trendingMovies.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No trending movies yet
+                </p>
+              ) : (
+                trendingMovies.slice(0, 3).map((movie, index) => (
+                  <div
+                    key={movie.id}
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                    onClick={() => navigate("/movie-search")}
+                  >
+                    <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                      <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
+                          {movie.title}
+                        </p>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span className="text-xs">{movie.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {movie.watchCount} friends
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -287,36 +290,57 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent className="space-y-2 sm:space-y-3">
-              {recentReleases.slice(0, 2).map((release) => (
-                <div
-                  key={release.id}
-                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
-                  onClick={() => navigate("/releases")}
-                >
-                  <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                    <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1 space-y-1 min-w-0">
-                    <p className="font-medium text-xs sm:text-sm leading-none truncate">
-                      {release.title}
-                    </p>
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <Badge variant="outline" className="text-xs shrink-0">
-                        {release.platform}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {new Date(release.releaseDate).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            day: "numeric",
-                          },
-                        )}
-                      </span>
+              {isLoading ? (
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
+                    >
+                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-muted rounded animate-pulse" />
+                        <div className="h-2 bg-muted rounded animate-pulse w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : recentReleases.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No upcoming releases
+                </p>
+              ) : (
+                recentReleases.slice(0, 2).map((release) => (
+                  <div
+                    key={release.id}
+                    className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                    onClick={() => navigate("/releases")}
+                  >
+                    <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                      <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 space-y-1 min-w-0">
+                      <p className="font-medium text-xs sm:text-sm leading-none truncate">
+                        {release.title}
+                      </p>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Badge variant="outline" className="text-xs shrink-0">
+                          {release.platform}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground truncate">
+                          {new Date(release.releaseDate).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
 

@@ -13,7 +13,7 @@ import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
 import AdminDashboard from "./pages/AdminDashboard";
-import MovieSearch from "./pages/MovieSearch";
+
 import Releases from "./pages/Releases";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -60,26 +60,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/discover"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MovieSearch />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/movie-search"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <MovieSearch />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/releases"
               element={

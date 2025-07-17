@@ -86,33 +86,44 @@ export default function ReleasesPage() {
   // Load releases
   const loadReleases = async () => {
     try {
+      console.log("🔄 Loading releases...");
       const result: ApiResponse<Release[]> = await apiCall("/releases");
+      console.log("✅ Releases API response:", result);
+
       if (result.success && result.data) {
+        console.log("📝 Setting releases:", result.data);
         setReleases(result.data);
       } else {
+        console.error("❌ Releases API error:", result.error);
         toast.error(result.error || "Failed to load releases");
       }
     } catch (error) {
+      console.error("❌ Releases load exception:", error);
       toast.error("Failed to load releases");
     }
   };
 
-  // Load JustWatch status
-  const loadJustWatchStatus = async () => {
+  // Load TMDB status
+  const loadTMDBStatus = async () => {
     try {
-      const result: ApiResponse<RateLimitStatus> = await apiCall(
-        "/releases/justwatch-status",
-      );
+      console.log("🔄 Loading TMDB status...");
+      const result: ApiResponse<RateLimitStatus & { service?: string }> =
+        await apiCall("/releases/tmdb-status");
+      console.log("✅ TMDB status API response:", result);
+
       if (result.success && result.data) {
+        console.log("📝 Setting TMDB status:", result.data);
         setRateLimitStatus({
           ...result.data,
           resetTime: result.data.resetTime
             ? new Date(result.data.resetTime)
             : null,
         });
+      } else {
+        console.error("❌ TMDB status API error:", result.error);
       }
     } catch (error) {
-      console.error("Failed to load JustWatch status:", error);
+      console.error("❌ TMDB status load exception:", error);
     }
   };
 
@@ -160,7 +171,7 @@ export default function ReleasesPage() {
       if (result.success) {
         toast.success("Weekly sync completed successfully");
         await loadReleases();
-        await loadJustWatchStatus();
+        await loadTMDBStatus();
       } else {
         toast.error(result.error || "Weekly sync failed");
       }
@@ -361,7 +372,7 @@ export default function ReleasesPage() {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            JustWatch API Status: {rateLimitStatus.remaining} requests remaining
+            TMDB API Status: {rateLimitStatus.remaining} requests remaining
             {rateLimitStatus.isLimited && rateLimitStatus.resetTime && (
               <span className="text-destructive">
                 {" "}

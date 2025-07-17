@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Search,
   PlusCircle,
@@ -18,11 +19,17 @@ import {
   Check,
   X,
   ArrowLeft,
+  Film,
+  Tv,
+  Calendar,
+  Eye,
+  UserCheck,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserFriends, getFriendName } from "@/lib/userData";
+import { Friend, getUserFriends, getFriendName } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 
 interface Movie {
   id: string;
@@ -32,6 +39,27 @@ interface Movie {
   poster?: string;
   description: string;
   rating?: number;
+}
+
+interface MovieSearchResult {
+  id: string;
+  title: string;
+  year: number;
+  description: string;
+  poster: string | null;
+  mediaType: "movie" | "tv";
+  rating: number;
+  genres: string[];
+  tmdbId: number;
+}
+
+interface SearchResponse {
+  results: MovieSearchResult[];
+  rateLimit: {
+    remaining: number;
+    resetTime: Date | null;
+    isLimited: boolean;
+  };
 }
 
 interface Friend {
@@ -49,50 +77,112 @@ interface Suggestion {
   myRating?: number;
 }
 
-// Mock data
-const mockMovies: Movie[] = [
-  {
-    id: "1",
-    title: "The Menu",
-    year: 2022,
-    genres: ["Thriller", "Horror"],
-    description:
-      "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
-    rating: 7.2,
-  },
-  {
-    id: "2",
-    title: "Glass Onion: A Knives Out Mystery",
-    year: 2022,
-    genres: ["Mystery", "Comedy"],
-    description:
-      "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
-    rating: 7.1,
-  },
-  {
-    id: "3",
-    title: "Avatar: The Way of Water",
-    year: 2022,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    description:
-      "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
-    rating: 7.6,
-  },
-];
+// TMDB Search functionality
+const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
+  if (!query.trim()) return [];
+
+  console.log("🔍 Starting TMDB search for:", query);
+
+  try {
+    const token = localStorage.getItem("movienight_token");
+    if (!token) {
+      console.error("❌ No authentication token found");
+      return [];
+    }
+
+    const url = `/api/tmdb/search?q=${encodeURIComponent(query)}`;
+    console.log("🌐 Fetching URL:", url);
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("📡 Response status:", response.status);
+    console.log(
+      "📡 Response headers:",
+      Object.fromEntries(response.headers.entries()),
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Search failed: ${response.status} - ${errorText}`);
+      throw new Error(`Search failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("✅ Raw response data:", data);
+
+    // Check if it's in the expected format
+    if (!data || typeof data !== "object") {
+      console.error("❌ Invalid response format:", data);
+      return [];
+    }
+
+    // Handle different possible response formats
+    let results = [];
+
+    if (data.success && data.data && Array.isArray(data.data.results)) {
+      // Format: { success: true, data: { results: [...] } }
+      results = data.data.results;
+    } else if (data.success && Array.isArray(data.data)) {
+      // Format: { success: true, data: [...] }
+      results = data.data;
+    } else if (Array.isArray(data.results)) {
+      // Format: { results: [...] }
+      results = data.results;
+    } else if (Array.isArray(data)) {
+      // Format: [...]
+      results = data;
+    } else {
+      console.error("❌ Could not find results array in response:", data);
+      return [];
+    }
+
+    console.log("📊 Results found:", results.length);
+
+    const processedResults = results.map((movie) => ({
+      ...movie,
+      genres: movie.genres || [],
+      description: movie.description || "No description available",
+      poster: movie.poster || null,
+      rating: movie.rating || 0,
+    }));
+    console.log("✅ Processed results:", processedResults);
+    return processedResults;
+  } catch (error) {
+    console.error("❌ Movie search error:", error);
+    return [];
+  }
+};
 
 export default function Suggest() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<
+    Movie | MovieSearchResult | null
+  >(null);
+  const [searchResults, setSearchResults] = useState<MovieSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [actionMode, setActionMode] = useState<"suggest" | "watched">(
+    "suggest",
+  );
+  const [watchedRating, setWatchedRating] = useState([8]);
+  const [watchDate, setWatchDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [personalNotes, setPersonalNotes] = useState("");
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [isFromHome, setIsFromHome] = useState(false);
 
-  // Get user's friends
-  const userFriends = user ? getUserFriends(user.id) : [];
+  // Get user's friends from API
+  const [userFriends, setUserFriends] = useState<Friend[]>([]);
 
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
@@ -107,7 +197,7 @@ export default function Suggest() {
       try {
         const response = await fetch("/api/suggestions", {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
         });
 
@@ -121,7 +211,19 @@ export default function Suggest() {
     };
 
     fetchSuggestions();
+    loadFriends();
   }, [user]);
+
+  // Load friends from API
+  const loadFriends = async () => {
+    if (!user) return;
+    try {
+      const friends = await getUserFriends(user.id);
+      setUserFriends(friends);
+    } catch (error) {
+      console.error("Failed to load friends:", error);
+    }
+  };
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
@@ -158,9 +260,46 @@ export default function Suggest() {
     }
   }, [searchParams, navigate]);
 
-  const filteredMovies = mockMovies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  // Handle movie search with debouncing
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      if (searchTerm.trim()) {
+        setIsSearching(true);
+        const results = await searchMovies(searchTerm);
+        setSearchResults(results);
+        setIsSearching(false);
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  // Reset form data when action mode changes
+  useEffect(() => {
+    setSelectedFriends([]);
+    setComment("");
+    setPersonalNotes("");
+    setDesireRating([7]);
+    setWatchedRating([8]);
+  }, [actionMode]);
+
+  const handleSelectMovie = (movie: MovieSearchResult) => {
+    // Convert MovieSearchResult to Movie format for consistency
+    const convertedMovie: Movie = {
+      id: `tmdb_${movie.tmdbId}`,
+      title: movie.title,
+      year: movie.year,
+      genres: movie.genres,
+      poster: movie.poster || undefined,
+      description: movie.description,
+      rating: movie.rating,
+    };
+    setSelectedMovie(convertedMovie);
+    setSearchTerm("");
+    setSearchResults([]);
+  };
 
   const handleFriendToggle = (friendId: string) => {
     setSelectedFriends((prev) =>
@@ -183,7 +322,7 @@ export default function Suggest() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
           body: JSON.stringify({
             title: selectedMovie.title,
@@ -207,7 +346,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           movieId,
@@ -225,8 +364,8 @@ export default function Suggest() {
 
       // Show success feedback
       const friendNames = selectedFriends
-        .map((id) => userFriends.find((f) => f.id === id)?.name)
-        .filter(Boolean)
+        .map((id) => getFriendName(id, userFriends))
+        .filter((name) => name !== "Unknown")
         .join(", ");
 
       toast({
@@ -240,6 +379,7 @@ export default function Suggest() {
       setSelectedFriends([]);
       setComment("");
       setSearchTerm("");
+      setActionMode("suggest");
     } catch (error) {
       console.error("Suggestion error:", error);
       toast({
@@ -262,7 +402,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           suggestionId,
@@ -300,7 +440,7 @@ export default function Suggest() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
         },
         body: JSON.stringify({
           suggestionId,
@@ -333,6 +473,80 @@ export default function Suggest() {
     setSuggestionRatings((prev) => ({ ...prev, [suggestionId]: rating[0] }));
   };
 
+  const handleMarkAsWatched = async () => {
+    if (!selectedMovie || !user) return;
+
+    try {
+      // First, save the movie to the database if it doesn't exist
+      let movieId = selectedMovie.id;
+
+      // If this is a prefilled movie from TMDB/external source, save it first
+      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+        const saveResponse = await fetch("/api/tmdb/save-movie", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+          },
+          body: JSON.stringify({
+            title: selectedMovie.title,
+            year: selectedMovie.year,
+            genres: selectedMovie.genres,
+            description: selectedMovie.description,
+            poster: selectedMovie.poster,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const saveData = await saveResponse.json();
+          movieId = saveData.data.id;
+        } else {
+          throw new Error("Failed to save movie");
+        }
+      }
+
+      // Mark as watched
+      const response = await fetch(`/api/watched/${user.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+        },
+        body: JSON.stringify({
+          movieId,
+          rating: watchedRating[0],
+          watchDate,
+          notes: personalNotes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark as watched");
+      }
+
+      // Show success feedback
+      toast({
+        title: "Movie added to watch history! 🎬",
+        description: `"${selectedMovie.title}" has been marked as watched with a ${watchedRating[0]}/10 rating.`,
+      });
+
+      // Reset form
+      setSelectedMovie(null);
+      setWatchedRating([8]);
+      setWatchDate(new Date().toISOString().split("T")[0]);
+      setPersonalNotes("");
+      setSearchTerm("");
+      setActionMode("suggest");
+    } catch (error) {
+      console.error("Mark as watched error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark movie as watched. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -351,12 +565,12 @@ export default function Suggest() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <PlusCircle className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Suggest a Movie</h1>
+          <Search className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Discover & Track Movies</h1>
         </div>
         <p className="text-muted-foreground">
-          Find movies to suggest to your friends and respond to their
-          suggestions
+          Search the TMDB database to discover movies and TV shows, then suggest
+          them to friends or add them to your personal watch history
         </p>
       </div>
 
@@ -388,74 +602,140 @@ export default function Suggest() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5" />
-            Suggest a Movie
+            Discover & Track Movies
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Search Bar */}
           <div className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search for a movie or show..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search TMDB for movies and TV shows..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Search the TMDB database to find movies and TV shows to suggest
+                to your friends
+              </p>
             </div>
 
             {/* Search Results */}
             {searchTerm && (
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {filteredMovies.map((movie) => (
-                  <Card
-                    key={movie.id}
-                    className={`cursor-pointer transition-colors hover:bg-accent/50 ${
-                      selectedMovie?.id === movie.id
-                        ? "ring-2 ring-primary bg-accent/30"
-                        : ""
-                    }`}
-                    onClick={() => setSelectedMovie(movie)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <h4 className="font-semibold">
-                            {movie.title} ({movie.year})
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            {movie.rating && (
-                              <div className="flex items-center gap-1">
-                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                <span className="text-xs text-muted-foreground">
-                                  {movie.rating}
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex gap-1">
-                              {movie.genres.slice(0, 2).map((genre) => (
-                                <Badge
-                                  key={genre}
-                                  variant="secondary"
-                                  className="text-xs"
-                                >
-                                  {genre}
-                                </Badge>
-                              ))}
+                {isSearching ? (
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <Card key={i}>
+                        <CardContent className="p-4">
+                          <div className="flex gap-3">
+                            <Skeleton className="w-12 h-16 rounded" />
+                            <div className="flex-1 space-y-2">
+                              <Skeleton className="h-4 w-3/4" />
+                              <Skeleton className="h-3 w-1/2" />
+                              <Skeleton className="h-3 w-full" />
                             </div>
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {movie.description}
-                          </p>
-                        </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    {searchResults.map((movie) => (
+                      <Card
+                        key={movie.id}
+                        className="cursor-pointer transition-colors hover:bg-accent/50"
+                        onClick={() => handleSelectMovie(movie)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex gap-3">
+                            {/* Poster */}
+                            <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                              {movie.poster ? (
+                                <img
+                                  src={movie.poster}
+                                  alt={movie.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                  {movie.mediaType === "movie" ? (
+                                    <Film className="h-4 w-4" />
+                                  ) : (
+                                    <Tv className="h-4 w-4" />
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Details */}
+                            <div className="flex-1 space-y-1">
+                              <h4 className="font-semibold line-clamp-1">
+                                {movie.title} ({movie.year})
+                              </h4>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  {movie.mediaType === "movie" ? (
+                                    <Film className="h-3 w-3" />
+                                  ) : (
+                                    <Tv className="h-3 w-3" />
+                                  )}
+                                  <span className="capitalize">
+                                    {movie.mediaType}
+                                  </span>
+                                </div>
+                                {movie.rating > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                    <span>{movie.rating.toFixed(1)}</span>
+                                  </div>
+                                )}
+                                <PlatformLogo
+                                  platform={
+                                    movie.mediaType === "tv" ? "TV" : "Theaters"
+                                  }
+                                  size="sm"
+                                />
+                              </div>
+                              <div className="flex gap-1 flex-wrap">
+                                {(movie.genres || [])
+                                  .slice(0, 2)
+                                  .map((genre) => (
+                                    <Badge
+                                      key={genre}
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
+                                      {genre}
+                                    </Badge>
+                                  ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {movie.description}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    {searchResults.length === 0 && !isSearching && (
+                      <div className="text-center py-6 space-y-2">
+                        <Film className="h-8 w-8 text-muted-foreground mx-auto" />
+                        <p className="text-muted-foreground">
+                          No movies found for "{searchTerm}".
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Try searching for a different title, actor, or
+                          director.
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {filteredMovies.length === 0 && (
-                  <p className="text-center text-muted-foreground py-4">
-                    No movies found. Try a different search term.
-                  </p>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -475,7 +755,7 @@ export default function Suggest() {
                           {selectedMovie.title} ({selectedMovie.year})
                         </h4>
                         <div className="flex gap-1">
-                          {selectedMovie.genres.map((genre) => (
+                          {(selectedMovie.genres || []).map((genre) => (
                             <Badge
                               key={genre}
                               variant="secondary"
@@ -493,69 +773,160 @@ export default function Suggest() {
                   </Card>
                 </div>
 
-                {/* Desire Rating */}
+                {/* Action Mode Toggle */}
                 <div className="space-y-3">
                   <label className="text-sm font-medium">
-                    How much do you want to watch this? ({desireRating[0]}/10)
+                    What would you like to do?
                   </label>
-                  <Slider
-                    value={desireRating}
-                    onValueChange={setDesireRating}
-                    max={10}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Friend Selector */}
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">
-                    Suggest to friends
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {userFriends.map((friend) => (
-                      <div
-                        key={friend.id}
-                        className="flex items-center space-x-2"
-                      >
-                        <Checkbox
-                          id={friend.id}
-                          checked={selectedFriends.includes(friend.id)}
-                          onCheckedChange={() => handleFriendToggle(friend.id)}
-                        />
-                        <label
-                          htmlFor={friend.id}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {friend.name}
-                        </label>
-                      </div>
-                    ))}
+                  <div className="flex gap-2">
+                    <Button
+                      variant={actionMode === "suggest" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActionMode("suggest")}
+                      className="flex-1"
+                    >
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Suggest to Friends
+                    </Button>
+                    <Button
+                      variant={actionMode === "watched" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setActionMode("watched")}
+                      className="flex-1"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Mark as Watched
+                    </Button>
                   </div>
                 </div>
 
-                {/* Comment */}
+                {/* Desire Rating (for suggestions) */}
+                {actionMode === "suggest" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      How much do you want to watch this? ({desireRating[0]}/10)
+                    </label>
+                    <Slider
+                      value={desireRating}
+                      onValueChange={setDesireRating}
+                      max={10}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* Watch Rating (for watched movies) */}
+                {actionMode === "watched" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      How would you rate this movie? ({watchedRating[0]}/10)
+                    </label>
+                    <Slider
+                      value={watchedRating}
+                      onValueChange={setWatchedRating}
+                      max={10}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* Watch Date (for watched movies) */}
+                {actionMode === "watched" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      When did you watch it?
+                    </label>
+                    <Input
+                      type="date"
+                      value={watchDate}
+                      onChange={(e) => setWatchDate(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* Friend Selector (for suggestions) */}
+                {actionMode === "suggest" && (
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium">
+                      Suggest to friends
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {userFriends.map((friend) => (
+                        <div
+                          key={friend.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={friend.id}
+                            checked={selectedFriends.includes(friend.id)}
+                            onCheckedChange={() =>
+                              handleFriendToggle(friend.id)
+                            }
+                          />
+                          <label
+                            htmlFor={friend.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {friend.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Comment / Personal Notes */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Optional comment
+                    {actionMode === "suggest"
+                      ? "Optional comment"
+                      : "Personal notes (optional)"}
                   </label>
                   <Textarea
-                    placeholder="Movie night Thursday?"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
+                    placeholder={
+                      actionMode === "suggest"
+                        ? "Movie night Thursday?"
+                        : "What did you think of this movie?"
+                    }
+                    value={actionMode === "suggest" ? comment : personalNotes}
+                    onChange={(e) =>
+                      actionMode === "suggest"
+                        ? setComment(e.target.value)
+                        : setPersonalNotes(e.target.value)
+                    }
                     rows={2}
                   />
                 </div>
 
                 {/* Submit Button */}
                 <Button
-                  onClick={handleSuggest}
-                  disabled={!selectedMovie || selectedFriends.length === 0}
+                  onClick={
+                    actionMode === "suggest"
+                      ? handleSuggest
+                      : handleMarkAsWatched
+                  }
+                  disabled={
+                    actionMode === "suggest"
+                      ? !selectedMovie || selectedFriends.length === 0
+                      : !selectedMovie
+                  }
                   className="w-full"
                 >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Suggest to Friends
+                  {actionMode === "suggest" ? (
+                    <>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Suggest to Friends
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Add to Watch History
+                    </>
+                  )}
                 </Button>
               </div>
             </>
@@ -624,7 +995,7 @@ export default function Suggest() {
                             </div>
                           )}
                           <div className="flex gap-1">
-                            {suggestion.movie.genres.map((genre) => (
+                            {(suggestion.movie.genres || []).map((genre) => (
                               <Badge
                                 key={genre}
                                 variant="secondary"
