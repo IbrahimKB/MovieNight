@@ -1,73 +1,14 @@
 {
-  "users": [
-    {
-      "id": "3f4d359c-247d-46e8-bd41-62452a4a55f8",
-      "username": "kaysar",
-      "email": "kaysar@gmail.com",
-      "name": "kaysar",
-      "password": "$2b$12$nBVMYuB8OEmTX3Uu4BRO2OtHD2E6BgeI1FAH1N7FsdNgJzTrnmOFK",
-      "role": "user",
-      "joinedAt": "2025-07-17T16:04:23.752Z",
-      "createdAt": "2025-07-17T16:04:23.752Z",
-      "updatedAt": "2025-07-17T16:04:23.752Z"
-    }
-  ],
+  "users": [],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "edbf8b0a-e42c-49ab-b751-a1120eefb328",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Carmy and the crew return for another intense season.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T16:42:13.857Z",
-      "updatedAt": "2025-07-17T16:42:13.857Z"
-    },
-    {
-      "id": "d737e7a7-8882-4232-b39b-355d487af467",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
-      "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
-      ],
-      "description": "The final season of the beloved supernatural series.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T16:42:13.857Z",
-      "updatedAt": "2025-07-17T16:42:13.857Z"
-    },
-    {
-      "id": "73964acc-aa1f-4565-9598-876ee59eabc9",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T16:42:13.857Z",
-      "updatedAt": "2025-07-17T16:42:13.857Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T16:42:13.858Z"
+    "lastUpdated": "2025-07-17T16:44:52.659Z"
   }
 }
