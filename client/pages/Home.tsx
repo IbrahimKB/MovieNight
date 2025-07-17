@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,9 @@ import {
   Star,
   Clock,
   ArrowRight,
+  Target,
+  Eye,
+  MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SmartNudge from "@/components/SmartNudge";
@@ -17,369 +20,300 @@ import SocialActivityFeed from "@/components/ui/social-activity-feed";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-interface MovieRelease {
+// Quick stats for the dashboard
+interface QuickStats {
+  totalFriends: number;
+  activeSuggestions: number;
+  moviesWatchedThisWeek: number;
+  suggestionAccuracy: number;
+}
+
+const mockStats: QuickStats = {
+  totalFriends: 12,
+  activeSuggestions: 3,
+  moviesWatchedThisWeek: 2,
+  suggestionAccuracy: 85,
+};
+
+// Trending movies data
+interface TrendingMovie {
+  id: string;
+  title: string;
+  year: number;
+  rating: number;
+  watchCount: number;
+  genres: string[];
+}
+
+const trendingMovies: TrendingMovie[] = [
+  {
+    id: "1",
+    title: "The Menu",
+    year: 2022,
+    rating: 8.2,
+    watchCount: 24,
+    genres: ["Thriller", "Horror"],
+  },
+  {
+    id: "2",
+    title: "Glass Onion",
+    year: 2022,
+    rating: 7.8,
+    watchCount: 18,
+    genres: ["Mystery", "Comedy"],
+  },
+  {
+    id: "3",
+    title: "Avatar: The Way of Water",
+    year: 2022,
+    rating: 8.5,
+    watchCount: 15,
+    genres: ["Action", "Sci-Fi"],
+  },
+];
+
+// Recent releases data
+interface RecentRelease {
   id: string;
   title: string;
   platform: string;
   releaseDate: string;
   genres: string[];
-  poster?: string;
-  description?: string;
 }
 
-// Mock data for upcoming releases
-const mockReleases: MovieRelease[] = [
+const recentReleases: RecentRelease[] = [
   {
     id: "1",
-    title: "The Menu",
-    platform: "Netflix",
-    releaseDate: "2024-01-15",
-    genres: ["Thriller", "Horror"],
-    description:
-      "A young couple travels to a remote island to eat at an exclusive restaurant.",
+    title: "The White Lotus: Season 3",
+    platform: "HBO Max",
+    releaseDate: "2025-02-16",
+    genres: ["Drama", "Comedy"],
   },
   {
     id: "2",
-    title: "Glass Onion",
+    title: "Cobra Kai: Season 6 Part 3",
     platform: "Netflix",
-    releaseDate: "2024-01-15",
-    genres: ["Mystery", "Comedy"],
-    description:
-      "Detective Benoit Blanc travels to Greece to solve a new mystery.",
+    releaseDate: "2025-02-13",
+    genres: ["Action", "Drama"],
   },
   {
     id: "3",
-    title: "Avatar: The Way of Water",
+    title: "Fantastic Four: First Steps",
     platform: "Disney+",
-    releaseDate: "2024-01-16",
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    description: "Jake Sully and his family continue their story on Pandora.",
+    releaseDate: "2025-07-25",
+    genres: ["Action", "Adventure"],
   },
-  {
-    id: "4",
-    title: "The Bear Season 3",
-    platform: "Hulu",
-    releaseDate: "2024-01-17",
-    genres: ["Comedy", "Drama"],
-    description:
-      "Carmen and the crew continue to work toward transforming The Beef.",
-  },
-  {
-    id: "5",
-    title: "Wednesday Season 2",
-    platform: "Netflix",
-    releaseDate: "2024-01-18",
-    genres: ["Comedy", "Horror", "Mystery"],
-    description:
-      "Wednesday Addams returns to Nevermore Academy for more supernatural adventures.",
-  },
-  {
-    id: "6",
-    title: "The Night Agent",
-    platform: "Netflix",
-    releaseDate: "2024-01-19",
-    genres: ["Action", "Thriller"],
-    description:
-      "A low-level FBI agent gets pulled into a conspiracy threatening the President.",
-  },
-];
-
-const platforms = [
-  "All Platforms",
-  "Netflix",
-  "Disney+",
-  "Hulu",
-  "Amazon Prime",
-  "HBO Max",
-];
-const genres = [
-  "All Genres",
-  "Action",
-  "Adventure",
-  "Comedy",
-  "Drama",
-  "Horror",
-  "Mystery",
-  "Sci-Fi",
-  "Thriller",
 ];
 
 export default function Home() {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState("All Platforms");
-  const [selectedGenre, setSelectedGenre] = useState("All Genres");
-  const [showNudge, setShowNudge] = useState(true);
+  const [stats, setStats] = useState<QuickStats>(mockStats);
 
-  const handleWatchTonight = (movieTitle: string) => {
-    toast({
-      title: "Added to tonight's queue! 🎬",
-      description: `${movieTitle} is ready for your movie night.`,
-    });
-  };
-
-  const handleDismissNudge = (nudgeId: string) => {
-    setShowNudge(false);
-    console.log("Dismissed nudge:", nudgeId);
-    toast({
-      title: "Reminder dismissed",
-      description: "You won't see this suggestion again.",
-    });
-  };
-
-  const handleSuggestToFriends = (release: MovieRelease) => {
-    // Navigate to suggest page with movie data as URL params
-    const movieData = {
-      title: release.title,
-      year: new Date(release.releaseDate).getFullYear(),
-      genres: release.genres,
-      platform: release.platform,
-      description: release.description || "",
-      isFromHome: "true",
-    };
-
-    const params = new URLSearchParams();
-    Object.entries(movieData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        params.set(key, JSON.stringify(value));
-      } else {
-        params.set(key, value.toString());
-      }
-    });
-
-    navigate(`/suggest?${params.toString()}`);
-  };
-
-  // Group releases by date
-  const groupedReleases = mockReleases.reduce(
-    (acc, release) => {
-      const date = release.releaseDate;
-      if (!acc[date]) {
-        acc[date] = [];
-      }
-      acc[date].push(release);
-      return acc;
-    },
-    {} as Record<string, MovieRelease[]>,
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    color = "text-primary",
+  }: {
+    title: string;
+    value: string | number;
+    icon: any;
+    trend?: string;
+    color?: string;
+  }) => (
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className="text-2xl font-bold">{value}</p>
+            {trend && <p className="text-xs text-muted-foreground">{trend}</p>}
+          </div>
+          <Icon className={cn("h-6 w-6", color)} />
+        </div>
+      </CardContent>
+    </Card>
   );
-
-  // Filter releases
-  const filteredGroupedReleases = Object.entries(groupedReleases).reduce(
-    (acc, [date, releases]) => {
-      const filtered = releases.filter((release) => {
-        const matchesSearch =
-          release.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          release.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesPlatform =
-          selectedPlatform === "All Platforms" ||
-          release.platform === selectedPlatform;
-        const matchesGenre =
-          selectedGenre === "All Genres" ||
-          release.genres.includes(selectedGenre);
-
-        return matchesSearch && matchesPlatform && matchesGenre;
-      });
-
-      if (filtered.length > 0) {
-        acc[date] = filtered;
-      }
-      return acc;
-    },
-    {} as Record<string, MovieRelease[]>,
-  );
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
-    if (date.toDateString() === today.toDateString()) {
-      return "Today";
-    } else if (date.toDateString() === tomorrow.toDateString()) {
-      return "Tomorrow";
-    } else {
-      return date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-      });
-    }
-  };
-
-  const getPlatformColor = (platform: string) => {
-    switch (platform) {
-      case "Netflix":
-        return "bg-red-600";
-      case "Disney+":
-        return "bg-blue-600";
-      case "Hulu":
-        return "bg-green-600";
-      case "Amazon Prime":
-        return "bg-orange-600";
-      case "HBO Max":
-        return "bg-purple-600";
-      default:
-        return "bg-gray-600";
-    }
-  };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Upcoming Releases</h1>
-        </div>
+      {/* Welcome Header */}
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">
+          Welcome back, {user?.name || "Movie Lover"}! 🎬
+        </h1>
         <p className="text-muted-foreground">
-          Discover new movies and shows coming to your favorite platforms
+          Discover what your friends are watching and find your next great movie
         </p>
       </div>
 
-      {/* Smart Nudge */}
-      {showNudge && (
-        <SmartNudge
-          onWatchTonight={handleWatchTonight}
-          onDismiss={handleDismissNudge}
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Friends"
+          value={stats.totalFriends}
+          icon={Users}
+          trend="+2 this week"
+          color="text-blue-500"
         />
-      )}
-
-      {/* Filter Bar */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search movies and shows..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select
-              value={selectedPlatform}
-              onValueChange={setSelectedPlatform}
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {platforms.map((platform) => (
-                  <SelectItem key={platform} value={platform}>
-                    {platform}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={selectedGenre} onValueChange={setSelectedGenre}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {genres.map((genre) => (
-                  <SelectItem key={genre} value={genre}>
-                    {genre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Calendar Layout */}
-      <div className="space-y-8">
-        {Object.entries(filteredGroupedReleases)
-          .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-          .map(([date, releases]) => (
-            <div key={date} className="space-y-4">
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-semibold">{formatDate(date)}</h2>
-                <div className="flex-1 h-px bg-border"></div>
-                <span className="text-sm text-muted-foreground">
-                  {releases.length} release{releases.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {releases.map((release) => (
-                  <Card
-                    key={release.id}
-                    className="group hover:bg-accent/50 transition-colors"
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">
-                              {release.title}
-                            </h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div
-                                className={cn(
-                                  "w-2 h-2 rounded-full",
-                                  getPlatformColor(release.platform),
-                                )}
-                              />
-                              <span className="text-sm text-muted-foreground">
-                                {release.platform}
-                              </span>
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => handleSuggestToFriends(release)}
-                          >
-                            <Share2 className="h-4 w-4 mr-1" />
-                            Suggest to Friends
-                          </Button>
-                        </div>
-
-                        {/* Description */}
-                        {release.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {release.description}
-                          </p>
-                        )}
-
-                        {/* Genres */}
-                        <div className="flex flex-wrap gap-1">
-                          {release.genres.map((genre) => (
-                            <Badge
-                              key={genre}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {genre}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          ))}
+        <StatCard
+          title="Active Suggestions"
+          value={stats.activeSuggestions}
+          icon={MessageSquare}
+          trend="Respond to suggestions"
+          color="text-green-500"
+        />
+        <StatCard
+          title="Movies This Week"
+          value={stats.moviesWatchedThisWeek}
+          icon={Eye}
+          trend="Great watching!"
+          color="text-purple-500"
+        />
+        <StatCard
+          title="Suggestion Accuracy"
+          value={`${stats.suggestionAccuracy}%`}
+          icon={Target}
+          trend="You're a great predictor!"
+          color="text-orange-500"
+        />
       </div>
 
-      {Object.keys(filteredGroupedReleases).length === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No releases found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your filters to see more upcoming releases.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Social Activity Feed */}
+        <div className="lg:col-span-2">
+          <SocialActivityFeed />
+        </div>
+
+        {/* Right Column - Sidebar */}
+        <div className="space-y-6">
+          {/* Trending in Your Network */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" />
+                  Trending in Network
+                </CardTitle>
+                <Button variant="ghost" size="sm">
+                  View All
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {trendingMovies.map((movie, index) => (
+                <div
+                  key={movie.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => navigate("/movie-search")}
+                >
+                  <div className="w-8 h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                    <Film className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-sm leading-none">
+                        {movie.title}
+                      </p>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs">{movie.rating}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {movie.watchCount} friends watched
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Smart Nudge */}
+          <SmartNudge />
+
+          {/* Upcoming Releases */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Coming Soon
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/releases")}
+                >
+                  View Calendar
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {recentReleases.slice(0, 3).map((release) => (
+                <div
+                  key={release.id}
+                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  onClick={() => navigate("/releases")}
+                >
+                  <div className="w-8 h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                    <Film className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <p className="font-medium text-sm leading-none">
+                      {release.title}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">
+                        {release.platform}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(release.releaseDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => navigate("/movie-search")}
+              >
+                <Film className="h-4 w-4 mr-2" />
+                Discover Movies
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => navigate("/suggest")}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Suggest to Friends
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => navigate("/movie-night")}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Plan Movie Night
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
