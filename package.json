@@ -21,6 +21,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@sentry/node": "^9.40.0",
+    "@sentry/profiling-node": "^9.40.0",
+    "@sentry/react": "^9.40.0",
+    "@sentry/vite-plugin": "^3.6.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node-cron": "^3.0.11",
