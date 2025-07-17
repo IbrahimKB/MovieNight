@@ -335,53 +335,75 @@ class TMDBService {
   ): UpcomingRelease[] {
     const now = new Date().toISOString();
 
-    return items
-      .filter((item) => {
-        const releaseDate =
-          mediaType === "movie"
-            ? (item as TMDBMovie).release_date
-            : (item as TMDBTVShow).first_air_date;
+    console.log(`🔄 Formatting ${items.length} ${mediaType} items from TMDB`);
 
-        return (
-          releaseDate &&
-          this.isValidReleaseDate(releaseDate, mediaType === "movie") &&
-          item.vote_average > 0
-        ); // Only include items with some ratings
-      })
-      .map((item): UpcomingRelease => {
-        const isMovie = mediaType === "movie";
-        const title = isMovie
-          ? (item as TMDBMovie).title
-          : (item as TMDBTVShow).name;
-        const releaseDate = isMovie
+    const filtered = items.filter((item) => {
+      const releaseDate =
+        mediaType === "movie"
           ? (item as TMDBMovie).release_date
           : (item as TMDBTVShow).first_air_date;
 
-        // Map platform based on popularity and type
-        let platform = "Theaters";
-        if (!isMovie) {
-          platform = "TV";
-        } else if (item.popularity < 50) {
-          platform = "Streaming";
-        }
+      const hasReleaseDate = !!releaseDate;
+      const hasValidDate = releaseDate
+        ? this.isValidReleaseDate(releaseDate, mediaType === "movie")
+        : false;
+      const hasRating = item.vote_average > 0;
 
-        return {
-          id: `tmdb_${item.id}_${mediaType}_${Date.now()}`,
-          title,
-          platform,
-          releaseDate,
-          genres: item.genre_ids.map((id) => genreMap[id]).filter(Boolean),
-          description: item.overview || "No description available",
-          poster: item.poster_path
-            ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
-            : undefined,
-          year: new Date(releaseDate).getFullYear(),
-          mediaType,
-          tmdbId: item.id,
-          createdAt: now,
-          updatedAt: now,
-        };
-      });
+      if (!hasReleaseDate) {
+        console.log(
+          `❌ ${mediaType} "${item.title || (item as TMDBTVShow).name}" - No release date`,
+        );
+      } else if (!hasValidDate) {
+        console.log(
+          `❌ ${mediaType} "${item.title || (item as TMDBTVShow).name}" - Invalid date: ${releaseDate}`,
+        );
+      } else if (!hasRating) {
+        console.log(
+          `❌ ${mediaType} "${item.title || (item as TMDBTVShow).name}" - No rating: ${item.vote_average}`,
+        );
+      }
+
+      return hasReleaseDate && hasValidDate && hasRating;
+    });
+
+    console.log(
+      `✅ After filtering: ${filtered.length} valid ${mediaType} releases`,
+    );
+
+    return filtered.map((item): UpcomingRelease => {
+      const isMovie = mediaType === "movie";
+      const title = isMovie
+        ? (item as TMDBMovie).title
+        : (item as TMDBTVShow).name;
+      const releaseDate = isMovie
+        ? (item as TMDBMovie).release_date
+        : (item as TMDBTVShow).first_air_date;
+
+      // Map platform based on popularity and type
+      let platform = "Theaters";
+      if (!isMovie) {
+        platform = "TV";
+      } else if (item.popularity < 50) {
+        platform = "Streaming";
+      }
+
+      return {
+        id: `tmdb_${item.id}_${mediaType}_${Date.now()}`,
+        title,
+        platform,
+        releaseDate,
+        genres: item.genre_ids.map((id) => genreMap[id]).filter(Boolean),
+        description: item.overview || "No description available",
+        poster: item.poster_path
+          ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}`
+          : undefined,
+        year: new Date(releaseDate).getFullYear(),
+        mediaType,
+        tmdbId: item.id,
+        createdAt: now,
+        updatedAt: now,
+      };
+    });
   }
 
   getRateLimitStatus() {
