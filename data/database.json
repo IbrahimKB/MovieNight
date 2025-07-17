@@ -137,22 +137,6 @@
   "notifications": [],
   "releases": [
     {
-      "id": "b654a6aa-9880-40c4-8e3b-9a07ec74dfd8",
-      "title": "Dune: Part Three",
-      "platform": "HBO Max, Amazon Prime Video",
-      "releaseDate": "2025-07-25",
-      "genres": [
-        "Sci-Fi",
-        "Adventure",
-        "Drama"
-      ],
-      "description": "The epic conclusion to Denis Villeneuve's Dune trilogy.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T12:45:00.620Z",
-      "updatedAt": "2025-07-17T12:45:00.620Z"
-    },
-    {
       "id": "38defbaa-db76-4712-83b8-ab46c2cc240f",
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
@@ -193,6 +177,22 @@
         "Thriller"
       ],
       "description": "A new series set in the Blade Runner universe.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T12:45:00.620Z",
+      "updatedAt": "2025-07-17T12:45:00.620Z"
+    },
+    {
+      "id": "b654a6aa-9880-40c4-8e3b-9a07ec74dfd8",
+      "title": "Dune: Part Three",
+      "platform": "HBO Max, Amazon Prime Video",
+      "releaseDate": "2025-07-25",
+      "genres": [
+        "Sci-Fi",
+        "Adventure",
+        "Drama"
+      ],
+      "description": "The epic conclusion to Denis Villeneuve's Dune trilogy.",
       "year": 2025,
       "poster": null,
       "createdAt": "2025-07-17T12:45:00.620Z",
@@ -297,6 +297,6 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T12:45:00.621Z"
+    "lastUpdated": "2025-07-17T12:45:05.053Z"
   }
 }
