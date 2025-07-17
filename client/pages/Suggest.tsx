@@ -20,7 +20,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getUserFriends, getFriendName } from "@/lib/userData";
+import { Friend, getUserFriends, getFriendName } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -91,8 +91,8 @@ export default function Suggest() {
   const [comment, setComment] = useState("");
   const [isFromHome, setIsFromHome] = useState(false);
 
-  // Get user's friends
-  const userFriends = user ? getUserFriends(user.id) : [];
+  // Get user's friends from API
+  const [userFriends, setUserFriends] = useState<Friend[]>([]);
 
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
@@ -121,7 +121,19 @@ export default function Suggest() {
     };
 
     fetchSuggestions();
+    loadFriends();
   }, [user]);
+
+  // Load friends from API
+  const loadFriends = async () => {
+    if (!user) return;
+    try {
+      const friends = await getUserFriends(user.id);
+      setUserFriends(friends);
+    } catch (error) {
+      console.error("Failed to load friends:", error);
+    }
+  };
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
@@ -225,8 +237,8 @@ export default function Suggest() {
 
       // Show success feedback
       const friendNames = selectedFriends
-        .map((id) => userFriends.find((f) => f.id === id)?.name)
-        .filter(Boolean)
+        .map((id) => getFriendName(id, userFriends))
+        .filter((name) => name !== "Unknown")
         .join(", ");
 
       toast({
