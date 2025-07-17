@@ -15,6 +15,9 @@ import {
 import {
   handleGetMovies,
   handleSearchMovies,
+  handleGetMovieById,
+  handleUpdateMovie,
+  handleDeleteMovie,
   handleCreateSuggestion,
   handleGetSuggestions,
   handleUpdateWatchDesire,
