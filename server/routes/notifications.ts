@@ -11,7 +11,7 @@ export const handleGetNotifications: RequestHandler = async (req, res) => {
     console.log("Extracted userId:", userId);
     if (!userId) {
       console.log("No userId found, returning unauthorized");
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ success: false, error: "Unauthorized" });
     }
 
     const notifications = await withTransaction(async (db: Database) => {
@@ -22,10 +22,12 @@ export const handleGetNotifications: RequestHandler = async (req, res) => {
     });
 
     console.log("Sending notifications response");
-    res.json(notifications);
+    res.json({ success: true, data: notifications });
   } catch (error) {
     console.error("Failed to get notifications:", error);
-    res.status(500).json({ error: "Failed to get notifications" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to get notifications" });
   }
 };
 
@@ -37,7 +39,7 @@ export const handleGetUnreadCount: RequestHandler = async (req, res) => {
     console.log("Extracted userId:", userId);
     if (!userId) {
       console.log("No userId found, returning unauthorized");
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ success: false, error: "Unauthorized" });
     }
 
     const count = await withTransaction(async (db: Database) => {
@@ -50,10 +52,12 @@ export const handleGetUnreadCount: RequestHandler = async (req, res) => {
     });
 
     console.log("Sending unread count response:", count);
-    res.json({ count });
+    res.json({ success: true, data: { count } });
   } catch (error) {
     console.error("Failed to get unread count:", error);
-    res.status(500).json({ error: "Failed to get unread count" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to get unread count" });
   }
 };
 
