@@ -97,6 +97,11 @@ export function createServer() {
   app.post("/api/watched/:userId", handleMarkAsWatched);
   app.get("/api/watch-history/:userId", handleGetWatchHistory);
 
+  // TMDB integration routes
+  app.get("/api/tmdb/search", handleSearchMoviesExternal);
+  app.post("/api/tmdb/save-movie", handleSaveMovieFromTMDB);
+  app.get("/api/tmdb/rate-limit", handleGetRateLimit);
+
   // Friend management routes
   app.get("/api/friends/:userId", handleGetFriends);
   app.get("/api/friends/:userId/incoming", handleGetIncomingRequests);
