@@ -7,7 +7,7 @@ export const handleGetNotifications: RequestHandler = async (req, res) => {
   console.log("handleGetNotifications called for userId:", req.params.userId);
   console.log("User from JWT:", (req as any).user);
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     console.log("Extracted userId:", userId);
     if (!userId) {
       console.log("No userId found, returning unauthorized");
@@ -35,7 +35,7 @@ export const handleGetUnreadCount: RequestHandler = async (req, res) => {
   console.log("handleGetUnreadCount called for userId:", req.params.userId);
   console.log("User from JWT:", (req as any).user);
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     console.log("Extracted userId:", userId);
     if (!userId) {
       console.log("No userId found, returning unauthorized");
@@ -64,7 +64,7 @@ export const handleGetUnreadCount: RequestHandler = async (req, res) => {
 export const handleMarkAsRead: RequestHandler = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -93,7 +93,7 @@ export const handleMarkAsRead: RequestHandler = async (req, res) => {
 export const handleDeleteNotification: RequestHandler = async (req, res) => {
   try {
     const { notificationId } = req.params;
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -118,7 +118,7 @@ export const handleDeleteNotification: RequestHandler = async (req, res) => {
 
 export const handleClearAllNotifications: RequestHandler = async (req, res) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
@@ -168,7 +168,7 @@ interface NotificationPreferences {
 export const handleSubscribePush: RequestHandler = async (req, res) => {
   try {
     const { subscription } = req.body;
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -218,7 +218,7 @@ export const handleSubscribePush: RequestHandler = async (req, res) => {
 // Unsubscribe from push notifications
 export const handleUnsubscribePush: RequestHandler = async (req, res) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -254,7 +254,7 @@ export const handleGetNotificationPreferences: RequestHandler = async (
   res,
 ) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -287,7 +287,7 @@ export const handleSaveNotificationPreferences: RequestHandler = async (
   res,
 ) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     const preferences = req.body;
 
     if (!userId) {
@@ -331,7 +331,7 @@ export const handleSaveNotificationPreferences: RequestHandler = async (
 export const handleSendTestNotification: RequestHandler = async (req, res) => {
   try {
     const { type } = req.body;
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
