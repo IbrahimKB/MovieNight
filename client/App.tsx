@@ -24,6 +24,7 @@ import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import PushNotificationPrompt from "./components/PushNotificationPrompt";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <PWAInstallPrompt />
+        <PushNotificationPrompt />
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
