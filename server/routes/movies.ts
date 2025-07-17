@@ -12,6 +12,7 @@ import {
   Release,
 } from "../models/types";
 import { withTransaction, generateId } from "../utils/storage";
+import { tmdbService, MovieNightSearchResult } from "../services/tmdb";
 
 // Validation schemas
 const createSuggestionSchema = z.object({
