@@ -132,6 +132,14 @@ export function createServer() {
   app.post("/api/tmdb/save-movie", handleSaveMovieFromTMDB);
   app.get("/api/tmdb/rate-limit", handleGetRateLimit);
 
+  // Releases and JustWatch integration routes
+  app.get("/api/releases", handleGetReleases);
+  app.post("/api/releases/sync", handleSyncReleases);
+  app.get("/api/releases/upcoming", handleGetUpcomingReleases);
+  app.get("/api/releases/platform", handleGetReleasesByPlatform);
+  app.get("/api/releases/justwatch-status", handleGetJustWatchStatus);
+  app.post("/api/releases/weekly-sync", handleWeeklySync);
+
   // Friend management routes
   app.get("/api/friends/:userId", handleGetFriends);
   app.get("/api/friends/:userId/incoming", handleGetIncomingRequests);
