@@ -81,7 +81,7 @@ const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
 
   try {
     const response = await fetch(
-      `/api/tmdb/search?query=${encodeURIComponent(query)}`,
+      `/api/tmdb/search?q=${encodeURIComponent(query)}`,
       {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
