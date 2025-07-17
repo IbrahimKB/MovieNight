@@ -214,6 +214,23 @@ export function createServer() {
     handleClearAllNotifications,
   );
 
+  // Push notification routes (protected)
+  app.post("/api/notifications/subscribe", verifyJWT, handleSubscribePush);
+  app.post("/api/notifications/unsubscribe", verifyJWT, handleUnsubscribePush);
+  app.post("/api/notifications/test", verifyJWT, handleSendTestNotification);
+
+  // Notification preferences routes (protected)
+  app.get(
+    "/api/user/notification-preferences",
+    verifyJWT,
+    handleGetNotificationPreferences,
+  );
+  app.put(
+    "/api/user/notification-preferences",
+    verifyJWT,
+    handleSaveNotificationPreferences,
+  );
+
   // New suggestions router (replaces old suggestion routes)
   app.use("/api/suggestions", suggestionsRouter);
 
