@@ -138,7 +138,7 @@
   "notifications": [],
   "releases": [
     {
-      "id": "33bf9e57-f96c-4f32-a783-9e91307dfd72",
+      "id": "11c80bac-1789-4934-a4a3-bef3c4e9fdff",
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-18",
@@ -149,11 +149,11 @@
       "description": "Carmy and the crew return for another intense season.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
+      "createdAt": "2025-07-17T13:03:46.326Z",
+      "updatedAt": "2025-07-17T13:03:46.326Z"
     },
     {
-      "id": "10877914-5e42-40e7-b558-ef6490737dc5",
+      "id": "e4428a8e-8a60-4feb-8b4b-eaf3cf00660a",
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-20",
@@ -165,11 +165,11 @@
       "description": "The final season of the beloved supernatural series.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
+      "createdAt": "2025-07-17T13:03:46.326Z",
+      "updatedAt": "2025-07-17T13:03:46.326Z"
     },
     {
-      "id": "64106616-1aad-41d6-abea-f872f839a42b",
+      "id": "6f8dbd00-7306-409b-8c7e-7196c6ece80c",
       "title": "Blade Runner 2099",
       "platform": "Amazon Prime Video",
       "releaseDate": "2025-07-22",
@@ -180,92 +180,12 @@
       "description": "A new series set in the Blade Runner universe.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
-    },
-    {
-      "id": "31712cdf-0358-4cd6-803e-626134928663",
-      "title": "House of the Dragon: Season 3",
-      "platform": "HBO Max",
-      "releaseDate": "2025-07-30",
-      "genres": [
-        "Fantasy",
-        "Drama",
-        "Action"
-      ],
-      "description": "The Targaryen civil war continues in Westeros.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
-    },
-    {
-      "id": "27c535d2-7dfa-490b-99c9-93250a5e61ba",
-      "title": "Spider-Man: Beyond the Spider-Verse",
-      "platform": "Theaters, Netflix",
-      "releaseDate": "2025-08-02",
-      "genres": [
-        "Animation",
-        "Action",
-        "Adventure"
-      ],
-      "description": "The highly anticipated conclusion to the Spider-Verse trilogy.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
-    },
-    {
-      "id": "a2b053f8-5ca3-419c-ad8a-fbc42c8e4ed3",
-      "title": "The Mandalorian: Season 4",
-      "platform": "Disney+",
-      "releaseDate": "2025-08-05",
-      "genres": [
-        "Sci-Fi",
-        "Action",
-        "Adventure"
-      ],
-      "description": "Din Djarin and Grogu return for new adventures.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
-    },
-    {
-      "id": "3edc87f5-0be8-4c65-b245-25f12befc33a",
-      "title": "The Batman: Part II",
-      "platform": "HBO Max, Theaters",
-      "releaseDate": "2025-08-08",
-      "genres": [
-        "Action",
-        "Crime",
-        "Drama"
-      ],
-      "description": "Robert Pattinson returns as the Dark Knight.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
-    },
-    {
-      "id": "8fa983c2-a641-44ee-b8ee-168ca61c1441",
-      "title": "Wednesday: Season 2",
-      "platform": "Netflix",
-      "releaseDate": "2025-08-12",
-      "genres": [
-        "Comedy",
-        "Horror",
-        "Mystery"
-      ],
-      "description": "Wednesday Addams returns to Nevermore Academy.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T13:02:56.822Z",
-      "updatedAt": "2025-07-17T13:02:56.822Z"
+      "createdAt": "2025-07-17T13:03:46.326Z",
+      "updatedAt": "2025-07-17T13:03:46.326Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T13:02:57.050Z"
+    "lastUpdated": "2025-07-17T13:03:46.327Z"
   }
 }
