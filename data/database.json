@@ -6,55 +6,9 @@
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "tmdb_1513946_movie_1752767996856",
-      "title": "Tur De Zur",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Three best friends go through three different stories at an awful house party.",
-      "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:59:56.856Z",
-      "updatedAt": "2025-07-17T15:59:56.856Z"
-    },
-    {
-      "id": "tmdb_1512943_movie_1752767996856",
-      "title": "Desight",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Horror",
-        "Music"
-      ],
-      "description": "If you believe in parallel worlds, please pray that they will take us in.",
-      "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:59:56.856Z",
-      "updatedAt": "2025-07-17T15:59:56.856Z"
-    },
-    {
-      "id": "tmdb_248852_tv_1752767996859",
-      "title": "UNTAMED",
-      "platform": "TV",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Mystery",
-        "Drama"
-      ],
-      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
-      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:59:56.859Z",
-      "updatedAt": "2025-07-17T15:59:56.859Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T16:00:27.848Z"
+    "lastUpdated": "2025-07-17T16:00:36.273Z"
   }
 }
