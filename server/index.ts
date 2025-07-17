@@ -51,6 +51,7 @@ import {
   handleGetSchedulerStatus,
   handleTriggerManualSync,
 } from "./routes/releases";
+import suggestionsRouter from "./routes/suggestions";
 import { initializeDatabase } from "./utils/storage";
 import { schedulerService } from "./services/scheduler";
 
