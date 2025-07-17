@@ -169,7 +169,7 @@ router.get("/", verifyJWT, async (req, res) => {
 });
 
 // Update watch desire (respond to suggestion)
-router.post("/respond", authenticateToken, async (req, res) => {
+router.post("/respond", verifyJWT, async (req, res) => {
   try {
     const { suggestionId, rating } = req.body as UpdateWatchDesireRequest;
     const userId = req.user?.userId;
