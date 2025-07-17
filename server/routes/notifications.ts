@@ -205,7 +205,9 @@ export const handleSubscribePush: RequestHandler = async (req, res) => {
     res.json({ success: true, message: "Push subscription saved" });
   } catch (error) {
     console.error("Failed to save push subscription:", error);
-    res.status(500).json({ error: "Failed to save subscription" });
+    res
+      .status(500)
+      .json({ success: false, error: "Failed to save subscription" });
   }
 };
 
