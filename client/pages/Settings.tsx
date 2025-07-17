@@ -661,9 +661,7 @@ function NotificationPreferenceRow({
             variant="ghost"
             size="sm"
             onClick={() => onTest(type)}
-            disabled={
-              isTesting || !pref.enabled || (!pushEnabled && !pref.email)
-            }
+            disabled={isTesting || !pref.enabled || !pushEnabled}
           >
             <TestTube className="h-3 w-3 mr-1" />
             Test
@@ -678,31 +676,16 @@ function NotificationPreferenceRow({
       {/* Notification Methods */}
       {pref.enabled && (
         <div className="space-y-3 pl-6 border-l-2 border-muted">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Push Notifications */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Push</span>
-              </div>
-              <Switch
-                checked={pref.push && pushEnabled}
-                onCheckedChange={(checked) => onUpdate(type, "push", checked)}
-                disabled={!pushEnabled}
-              />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Push Notifications</span>
             </div>
-
-            {/* Email Notifications */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Email</span>
-              </div>
-              <Switch
-                checked={pref.email}
-                onCheckedChange={(checked) => onUpdate(type, "email", checked)}
-              />
-            </div>
+            <Switch
+              checked={pref.push && pushEnabled}
+              onCheckedChange={(checked) => onUpdate(type, "push", checked)}
+              disabled={!pushEnabled}
+            />
           </div>
 
           {/* Special Fields */}
