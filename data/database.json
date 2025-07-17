@@ -6,9 +6,25 @@
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [],
+  "releases": [
+    {
+      "id": "b8a540c3-3539-46c4-9112-989f4d756c87",
+      "title": "UNTAMED",
+      "platform": "TV",
+      "releaseDate": "2025-07-17",
+      "genres": [
+        "Mystery",
+        "Drama"
+      ],
+      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
+      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-17T23:51:27.757Z",
+      "updatedAt": "2025-07-17T23:51:27.757Z"
+    }
+  ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:51:03.065Z"
+    "lastUpdated": "2025-07-17T23:51:29.203Z"
   }
 }
