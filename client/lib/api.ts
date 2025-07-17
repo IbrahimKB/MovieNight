@@ -268,17 +268,17 @@ export async function getDashboardStats(
   userId: string,
 ): Promise<DashboardStats> {
   try {
-    // Get friends count
-    const friends = await getUserFriends(userId);
-
-    // Get active suggestions count
-    const response = await fetch("/api/suggestions", {
+    // Get friends count - API expects user ID from auth token, not parameter
+    const friendsResponse = await fetch(`/api/friends/${userId}`, {
       headers: getAuthHeaders(),
     });
-    const suggestionsData = await handleApiResponse<any[]>(response);
+    const friends = await handleApiResponse<Friend[]>(friendsResponse);
 
-    // Get unread notifications count for suggestions
-    const unreadCount = await getUnreadNotificationCount(userId);
+    // Get active suggestions count
+    const suggestionsResponse = await fetch("/api/suggestions", {
+      headers: getAuthHeaders(),
+    });
+    const suggestionsData = await handleApiResponse<any[]>(suggestionsResponse);
 
     return {
       totalFriends: friends.length,
