@@ -45,6 +45,22 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
+export interface DashboardStats {
+  totalFriends: number;
+  activeSuggestions: number;
+  moviesWatchedThisWeek: number;
+  suggestionAccuracy: number;
+}
+
+export interface TrendingMovie {
+  id: string;
+  title: string;
+  year: number;
+  rating: number;
+  watchCount: number;
+  genres: string[];
+}
+
 // Helper to get auth headers
 function getAuthHeaders() {
   const token = localStorage.getItem("movienight_token");
@@ -245,4 +261,73 @@ export function hasExistingRequest(
     } as any;
 
   return undefined;
+}
+
+// Dashboard and statistics
+export async function getDashboardStats(
+  userId: string,
+): Promise<DashboardStats> {
+  try {
+    // Get friends count
+    const friends = await getUserFriends(userId);
+
+    // Get active suggestions count
+    const response = await fetch("/api/suggestions", {
+      headers: getAuthHeaders(),
+    });
+    const suggestionsData = await handleApiResponse<any[]>(response);
+
+    // Get unread notifications count for suggestions
+    const unreadCount = await getUnreadNotificationCount(userId);
+
+    return {
+      totalFriends: friends.length,
+      activeSuggestions: suggestionsData.length,
+      moviesWatchedThisWeek: 0, // TODO: Implement watched movies tracking
+      suggestionAccuracy: 85, // TODO: Calculate from actual suggestion responses
+    };
+  } catch (error) {
+    console.error("Failed to load dashboard stats:", error);
+    // Return fallback stats
+    return {
+      totalFriends: 0,
+      activeSuggestions: 0,
+      moviesWatchedThisWeek: 0,
+      suggestionAccuracy: 0,
+    };
+  }
+}
+
+export async function getTrendingMovies(): Promise<TrendingMovie[]> {
+  try {
+    const response = await fetch("/api/movies", {
+      headers: getAuthHeaders(),
+    });
+    const movies = await handleApiResponse<any[]>(response);
+
+    // Transform movies to trending format with mock data for now
+    return movies.slice(0, 5).map((movie, index) => ({
+      id: movie.id,
+      title: movie.title,
+      year: movie.year,
+      rating: movie.imdbRating || 7.5,
+      watchCount: Math.max(1, 25 - index * 3), // Mock watch count
+      genres: movie.genres || [],
+    }));
+  } catch (error) {
+    console.error("Failed to load trending movies:", error);
+    return [];
+  }
+}
+
+export async function getUpcomingReleases(): Promise<any[]> {
+  try {
+    const response = await fetch("/api/releases/upcoming", {
+      headers: getAuthHeaders(),
+    });
+    return handleApiResponse<any[]>(response);
+  } catch (error) {
+    console.error("Failed to load upcoming releases:", error);
+    return [];
+  }
 }
