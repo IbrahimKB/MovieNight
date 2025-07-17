@@ -110,16 +110,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/stats"
-              element={
-                <ProtectedRoute>
-                  <Layout>
-                    <ReelTalk />
-                  </Layout>
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/admin"
               element={
