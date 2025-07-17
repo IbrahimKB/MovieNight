@@ -10,6 +10,17 @@
       "joinedAt": "2025-07-17T20:11:21.289Z",
       "createdAt": "2025-07-17T20:11:21.289Z",
       "updatedAt": "2025-07-17T20:11:21.289Z"
+    },
+    {
+      "id": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
+      "username": "testuser2",
+      "email": "test2@example.com",
+      "name": "Test User 2",
+      "password": "$2b$12$xr5VoP/8zo9A3IXirBOLY.drfamivaf9yOz66h8tm1sbQ2r0djAny",
+      "role": "user",
+      "joinedAt": "2025-07-17T20:11:26.145Z",
+      "createdAt": "2025-07-17T20:11:26.145Z",
+      "updatedAt": "2025-07-17T20:11:26.145Z"
     }
   ],
   "movies": [],
@@ -68,7 +79,7 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T20:11:21.293Z"
+    "lastUpdated": "2025-07-17T20:11:26.146Z"
   },
   "notificationPreferences": []
 }
