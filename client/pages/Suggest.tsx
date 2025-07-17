@@ -79,42 +79,65 @@ interface Suggestion {
 const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
   if (!query.trim()) return [];
 
+  console.log("🔍 Starting TMDB search for:", query);
+
   try {
     const token = localStorage.getItem("movienight_token");
     if (!token) {
-      console.error("No authentication token found");
+      console.error("❌ No authentication token found");
       return [];
     }
 
-    const response = await fetch(
-      `/api/tmdb/search?q=${encodeURIComponent(query)}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    const url = `/api/tmdb/search?q=${encodeURIComponent(query)}`;
+    console.log("🌐 Fetching URL:", url);
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+    });
+
+    console.log("📡 Response status:", response.status);
+    console.log(
+      "📡 Response headers:",
+      Object.fromEntries(response.headers.entries()),
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Search failed: ${response.status} - ${errorText}`);
+      console.error(`❌ Search failed: ${response.status} - ${errorText}`);
       throw new Error(`Search failed: ${response.status}`);
     }
 
-    const data: SearchResponse = await response.json();
+    const data = await response.json();
+    console.log("✅ Raw response data:", data);
 
-    // Ensure each result has proper structure
-    const results = data.results || [];
-    return results.map((movie) => ({
-      ...movie,
-      genres: movie.genres || [],
-      description: movie.description || "No description available",
-      poster: movie.poster || null,
-      rating: movie.rating || 0,
-    }));
+    // Check if it's in the expected format
+    if (!data || typeof data !== "object") {
+      console.error("❌ Invalid response format:", data);
+      return [];
+    }
+
+    const results = data.results || data.data || data || [];
+    console.log("📊 Results found:", results.length);
+
+    if (Array.isArray(results)) {
+      const processedResults = results.map((movie) => ({
+        ...movie,
+        genres: movie.genres || [],
+        description: movie.description || "No description available",
+        poster: movie.poster || null,
+        rating: movie.rating || 0,
+      }));
+      console.log("✅ Processed results:", processedResults);
+      return processedResults;
+    } else {
+      console.error("❌ Results is not an array:", results);
+      return [];
+    }
   } catch (error) {
-    console.error("Movie search error:", error);
+    console.error("❌ Movie search error:", error);
     return [];
   }
 };
