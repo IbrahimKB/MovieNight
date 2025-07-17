@@ -119,23 +119,37 @@ const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
       return [];
     }
 
-    const results = data.results || data.data || data || [];
-    console.log("📊 Results found:", results.length);
+    // Handle different possible response formats
+    let results = [];
 
-    if (Array.isArray(results)) {
-      const processedResults = results.map((movie) => ({
-        ...movie,
-        genres: movie.genres || [],
-        description: movie.description || "No description available",
-        poster: movie.poster || null,
-        rating: movie.rating || 0,
-      }));
-      console.log("✅ Processed results:", processedResults);
-      return processedResults;
+    if (data.success && data.data && Array.isArray(data.data.results)) {
+      // Format: { success: true, data: { results: [...] } }
+      results = data.data.results;
+    } else if (data.success && Array.isArray(data.data)) {
+      // Format: { success: true, data: [...] }
+      results = data.data;
+    } else if (Array.isArray(data.results)) {
+      // Format: { results: [...] }
+      results = data.results;
+    } else if (Array.isArray(data)) {
+      // Format: [...]
+      results = data;
     } else {
-      console.error("❌ Results is not an array:", results);
+      console.error("❌ Could not find results array in response:", data);
       return [];
     }
+
+    console.log("📊 Results found:", results.length);
+
+    const processedResults = results.map((movie) => ({
+      ...movie,
+      genres: movie.genres || [],
+      description: movie.description || "No description available",
+      poster: movie.poster || null,
+      rating: movie.rating || 0,
+    }));
+    console.log("✅ Processed results:", processedResults);
+    return processedResults;
   } catch (error) {
     console.error("❌ Movie search error:", error);
     return [];
