@@ -259,30 +259,42 @@ export default function ReleasesPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Upcoming Releases</h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
+            Upcoming Releases
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground hidden sm:block">
             Track when your favorite movies and shows are coming to streaming
             platforms
           </p>
+          <p className="text-sm text-muted-foreground sm:hidden">
+            Movies & shows releasing soon
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={handleWeeklySync}
             variant="outline"
             disabled={isRefreshing}
+            className="flex-1 sm:flex-none h-9 text-sm"
           >
             <Zap className="h-4 w-4 mr-2" />
-            Weekly Sync
+            <span className="hidden sm:inline">Weekly Sync</span>
+            <span className="sm:hidden">Sync</span>
           </Button>
-          <Button onClick={handleManualSync} disabled={isRefreshing}>
+          <Button
+            onClick={handleManualSync}
+            disabled={isRefreshing}
+            className="flex-1 sm:flex-none h-9 text-sm"
+          >
             {isRefreshing ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
             ) : (
               <RefreshCw className="h-4 w-4 mr-2" />
             )}
-            Refresh Now
+            <span className="hidden sm:inline">Refresh Now</span>
+            <span className="sm:hidden">Refresh</span>
           </Button>
         </div>
       </div>
