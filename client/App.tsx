@@ -12,7 +12,6 @@ import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
-import ReelTalk from "./pages/ReelTalk";
 import AdminDashboard from "./pages/AdminDashboard";
 import MovieSearch from "./pages/MovieSearch";
 import Releases from "./pages/Releases";
