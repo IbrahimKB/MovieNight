@@ -33,6 +33,15 @@ const signupSchema = z.object({
 // Login handler
 export const handleLogin: RequestHandler = async (req, res) => {
   try {
+    // Ensure req.body exists and is valid
+    if (!req.body) {
+      const response: ApiResponse = {
+        success: false,
+        error: "Request body is required",
+      };
+      return res.status(400).json(response);
+    }
+
     const body = loginSchema.parse(req.body) as LoginRequest;
 
     const result = await withTransaction(async (db) => {
