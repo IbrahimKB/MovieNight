@@ -15,7 +15,6 @@ import {
 import {
   handleGetMovies,
   handleSearchMovies,
-  handleGetReleases,
   handleCreateSuggestion,
   handleGetSuggestions,
   handleUpdateWatchDesire,
