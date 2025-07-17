@@ -6,6 +6,7 @@ import { Card, CardContent } from "./card";
 import { Badge } from "./badge";
 import { Skeleton } from "./skeleton";
 import { Alert, AlertDescription } from "./alert";
+import { PlatformLogo } from "./platform-logo";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
