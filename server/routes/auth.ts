@@ -307,3 +307,213 @@ export const handleSearchUsers: RequestHandler = async (req, res) => {
     res.status(500).json(response);
   }
 };
+
+// JWT verification middleware
+export const verifyJWT: RequestHandler = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    const response: ApiResponse = {
+      success: false,
+      error: "Access token required",
+    };
+    return res.status(401).json(response);
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    req.user = decoded;
+    next();
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: "Invalid or expired token",
+    };
+    return res.status(401).json(response);
+  }
+};
+
+// Admin role verification middleware
+export const requireAdmin: RequestHandler = (req, res, next) => {
+  if (!req.user) {
+    const response: ApiResponse = {
+      success: false,
+      error: "Authentication required",
+    };
+    return res.status(401).json(response);
+  }
+
+  if (req.user.role !== "admin") {
+    const response: ApiResponse = {
+      success: false,
+      error: "Admin access required",
+    };
+    return res.status(403).json(response);
+  }
+
+  next();
+};
+
+// Password reset schema
+const resetPasswordSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+// Reset password handler (admin only)
+export const handleResetPassword: RequestHandler = async (req, res) => {
+  try {
+    const body = resetPasswordSchema.parse(req.body) as ResetPasswordRequest;
+
+    const updatedUser = await withTransaction(async (db) => {
+      const userIndex = db.users.findIndex((u) => u.id === body.userId);
+
+      if (userIndex === -1) {
+        throw new Error("User not found");
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(body.newPassword, 12);
+
+      // Update user password
+      db.users[userIndex] = {
+        ...db.users[userIndex],
+        password: hashedPassword,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Return user without password
+      const { password, ...userWithoutPassword } = db.users[userIndex];
+      return userWithoutPassword;
+    });
+
+    const response: ApiResponse<Omit<User, "password">> = {
+      success: true,
+      data: updatedUser,
+      message: "Password reset successfully",
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Reset password error:", error);
+
+    if (error instanceof z.ZodError) {
+      const response: ApiResponse = {
+        success: false,
+        error: error.errors[0]?.message || "Validation error",
+      };
+      return res.status(400).json(response);
+    }
+
+    if (error instanceof Error) {
+      const response: ApiResponse = {
+        success: false,
+        error: error.message,
+      };
+      return res.status(400).json(response);
+    }
+
+    const response: ApiResponse = {
+      success: false,
+      error: "Internal server error",
+    };
+    res.status(500).json(response);
+  }
+};
+
+// Get all users (admin only)
+export const handleGetAllUsers: RequestHandler = async (req, res) => {
+  try {
+    const users = await withTransaction(async (db) => {
+      return db.users.map((user) => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+    });
+
+    const response: ApiResponse<Omit<User, "password">[]> = {
+      success: true,
+      data: users,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Get all users error:", error);
+
+    const response: ApiResponse = {
+      success: false,
+      error: "Internal server error",
+    };
+    res.status(500).json(response);
+  }
+};
+
+// Delete user (admin only)
+export const handleDeleteUser: RequestHandler = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    if (!userId) {
+      const response: ApiResponse = {
+        success: false,
+        error: "User ID is required",
+      };
+      return res.status(400).json(response);
+    }
+
+    const deletedUser = await withTransaction(async (db) => {
+      const userIndex = db.users.findIndex((u) => u.id === userId);
+
+      if (userIndex === -1) {
+        throw new Error("User not found");
+      }
+
+      // Don't allow deleting admin user
+      if (db.users[userIndex].role === "admin") {
+        throw new Error("Cannot delete admin user");
+      }
+
+      const deletedUser = db.users[userIndex];
+      db.users.splice(userIndex, 1);
+
+      // Also clean up related data
+      db.friendships = db.friendships.filter(
+        (f) => f.userId1 !== userId && f.userId2 !== userId,
+      );
+      db.suggestions = db.suggestions.filter(
+        (s) => s.suggestedBy !== userId && !s.suggestedTo.includes(userId),
+      );
+      db.watchDesires = db.watchDesires.filter((w) => w.userId !== userId);
+      db.watchedMovies = db.watchedMovies.filter((w) => w.userId !== userId);
+      db.notifications = db.notifications.filter((n) => n.userId !== userId);
+
+      const { password, ...userWithoutPassword } = deletedUser;
+      return userWithoutPassword;
+    });
+
+    const response: ApiResponse<Omit<User, "password">> = {
+      success: true,
+      data: deletedUser,
+      message: "User deleted successfully",
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error("Delete user error:", error);
+
+    if (error instanceof Error) {
+      const response: ApiResponse = {
+        success: false,
+        error: error.message,
+      };
+      return res.status(400).json(response);
+    }
+
+    const response: ApiResponse = {
+      success: false,
+      error: "Internal server error",
+    };
+    res.status(500).json(response);
+  }
+};
