@@ -232,7 +232,7 @@ export default function ReleasesPage() {
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      await Promise.all([loadReleases(), loadJustWatchStatus()]);
+      await Promise.all([loadReleases(), loadTMDBStatus()]);
       setIsLoading(false);
     };
 
