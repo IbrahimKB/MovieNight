@@ -64,8 +64,9 @@ export default function Layout({ children }: LayoutProps) {
     },
   ];
 
-  // Additional navigation items for desktop/drawer
-  const secondaryNavItems = [
+  // All navigation items (combining primary and secondary for desktop)
+  const allNavItems = [
+    ...navItems,
     {
       path: "/movie-night",
       label: "Movie Night",
