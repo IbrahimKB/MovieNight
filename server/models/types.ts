@@ -3,7 +3,8 @@ export interface User {
   username: string;
   email: string;
   name: string;
-  password: string; // In production, this would be hashed
+  password: string; // Hashed password
+  role: "user" | "admin";
   avatar?: string;
   joinedAt: string;
   createdAt: string;
