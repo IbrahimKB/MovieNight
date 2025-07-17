@@ -248,8 +248,9 @@ class TMDBService {
 
   async getUpcomingMovies(days: number = 30): Promise<UpcomingRelease[]> {
     try {
-      // Get current date and extend range for better results
+      // Include recent releases (last 2 weeks) and future releases for better variety
       const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 14); // Go back 2 weeks
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + days);
 
@@ -260,28 +261,34 @@ class TMDBService {
         `🎬 Fetching TMDB movies from ${startDateStr} to ${futureDateStr}`,
       );
 
-      // Get multiple pages of results for better variety
-      const [page1, page2] = await Promise.all([
+      // Get multiple pages and types of results for better variety
+      const [popularPage, recentPage, upcomingPage] = await Promise.all([
         this.makeRequest("/discover/movie", {
           "primary_release_date.gte": startDateStr,
           "primary_release_date.lte": futureDateStr,
           sort_by: "popularity.desc",
           page: 1,
           include_adult: false,
-          "vote_count.gte": 10, // Filter for movies with at least some votes
+          "vote_count.gte": 5, // Lower threshold for more results
         }),
         this.makeRequest("/discover/movie", {
           "primary_release_date.gte": startDateStr,
           "primary_release_date.lte": futureDateStr,
-          sort_by: "primary_release_date.asc",
+          sort_by: "primary_release_date.desc", // Recent releases
           page: 1,
           include_adult: false,
-          "vote_count.gte": 5, // Slightly lower threshold for newer releases
+        }),
+        this.makeRequest("/movie/upcoming", {
+          page: 1,
         }),
       ]);
 
       // Combine results and remove duplicates
-      const allResults = [...page1.results, ...page2.results];
+      const allResults = [
+        ...popularPage.results,
+        ...recentPage.results,
+        ...upcomingPage.results,
+      ];
       const uniqueResults = allResults.filter(
         (movie, index, self) =>
           index === self.findIndex((m) => m.id === movie.id),
@@ -299,8 +306,9 @@ class TMDBService {
 
   async getUpcomingTVShows(days: number = 30): Promise<UpcomingRelease[]> {
     try {
-      // Get current date and extend range for better results
+      // Include recent releases (last 2 weeks) and future releases for better variety
       const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 14); // Go back 2 weeks
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + days);
 
@@ -311,28 +319,34 @@ class TMDBService {
         `📺 Fetching TMDB TV shows from ${startDateStr} to ${futureDateStr}`,
       );
 
-      // Get multiple pages of results for better variety
-      const [page1, page2] = await Promise.all([
+      // Get multiple pages and types of results for better variety
+      const [popularPage, recentPage, airingPage] = await Promise.all([
         this.makeRequest("/discover/tv", {
           "first_air_date.gte": startDateStr,
           "first_air_date.lte": futureDateStr,
           sort_by: "popularity.desc",
           page: 1,
           include_adult: false,
-          "vote_count.gte": 10, // Filter for shows with at least some votes
+          "vote_count.gte": 5, // Lower threshold for more results
         }),
         this.makeRequest("/discover/tv", {
           "first_air_date.gte": startDateStr,
           "first_air_date.lte": futureDateStr,
-          sort_by: "first_air_date.asc",
+          sort_by: "first_air_date.desc", // Recent releases
           page: 1,
           include_adult: false,
-          "vote_count.gte": 5, // Slightly lower threshold for newer releases
+        }),
+        this.makeRequest("/tv/airing_today", {
+          page: 1,
         }),
       ]);
 
       // Combine results and remove duplicates
-      const allResults = [...page1.results, ...page2.results];
+      const allResults = [
+        ...popularPage.results,
+        ...recentPage.results,
+        ...airingPage.results,
+      ];
       const uniqueResults = allResults.filter(
         (show, index, self) =>
           index === self.findIndex((s) => s.id === show.id),
@@ -454,7 +468,7 @@ class TMDBService {
       const hasValidDate = releaseDate
         ? this.isValidReleaseDate(releaseDate, mediaType === "movie")
         : false;
-      const hasRating = item.vote_average > 0 && item.vote_count >= 3; // Require meaningful ratings
+      const hasRating = item.vote_average >= 0 && item.vote_count >= 0; // Allow all ratings including zero
 
       if (!hasReleaseDate) {
         console.log(
