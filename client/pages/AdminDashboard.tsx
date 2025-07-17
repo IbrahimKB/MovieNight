@@ -489,6 +489,15 @@ export default function AdminDashboard() {
             />
           </TabsContent>
 
+          <TabsContent value="releases">
+            <DataTable
+              title="Upcoming Releases"
+              data={releases}
+              columns={releaseColumns}
+              isLoading={loadingReleases}
+            />
+          </TabsContent>
+
           <TabsContent value="tmdb">
             <div className="space-y-6">
               {/* TMDB Status Card */}
