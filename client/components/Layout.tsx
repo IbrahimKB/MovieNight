@@ -44,9 +44,9 @@ export default function Layout({ children }: LayoutProps) {
       icon: Search,
     },
     {
-      path: "/suggest",
-      label: "Suggest",
-      icon: PlusCircle,
+      path: "/releases",
+      label: "Releases",
+      icon: Calendar,
     },
     {
       path: "/watchlist",
