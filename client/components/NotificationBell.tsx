@@ -306,11 +306,17 @@ export default function NotificationBell() {
           variant="ghost"
           size="sm"
           className="relative h-10 w-10 p-0 hover:bg-accent/50"
+          aria-label={`Notifications${unreadCount > 0 ? ` - ${unreadCount} unread` : ""}`}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5" aria-hidden="true" />
           {unreadCount > 0 && (
-            <div className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-xs text-white font-bold">
+            <div
+              className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center"
+              aria-label={`${unreadCount} unread notifications`}
+            >
+              <span className="text-xs text-white font-bold" aria-hidden="true">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             </div>
@@ -322,25 +328,37 @@ export default function NotificationBell() {
         align="end"
         className="w-80 p-0 bg-[#1a1a1a] border-border/50"
         sideOffset={8}
+        role="dialog"
+        aria-label="Notifications"
+        aria-describedby="notifications-description"
       >
         <Card className="border-0 bg-transparent shadow-2xl">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">🔔 Notifications</CardTitle>
+              <CardTitle className="text-lg" id="notifications-title">
+                <span role="img" aria-label="Bell">
+                  🔔
+                </span>{" "}
+                Notifications
+              </CardTitle>
               {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleMarkAllAsRead}
                   className="text-xs text-muted-foreground hover:text-foreground"
+                  aria-label="Mark all notifications as read"
                 >
-                  <Eye className="h-3 w-3 mr-1" />
+                  <Eye className="h-3 w-3 mr-1" aria-hidden="true" />
                   Mark all read
                 </Button>
               )}
             </div>
             {unreadCount > 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p
+                className="text-sm text-muted-foreground"
+                id="notifications-description"
+              >
                 {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
               </p>
             )}
@@ -349,8 +367,11 @@ export default function NotificationBell() {
           <CardContent className="p-0">
             <ScrollArea className="h-[300px]">
               {notifications.length === 0 ? (
-                <div className="p-6 text-center">
-                  <Bell className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <div className="p-6 text-center" role="status">
+                  <Bell
+                    className="h-8 w-8 text-muted-foreground mx-auto mb-2"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-muted-foreground">
                     No notifications yet
                   </p>
@@ -365,15 +386,27 @@ export default function NotificationBell() {
                       <div
                         key={notification.id}
                         className={cn(
-                          "flex items-start gap-3 p-3 hover:bg-accent/20 cursor-pointer transition-colors border-l-2",
+                          "flex items-start gap-3 p-3 hover:bg-accent/20 cursor-pointer transition-colors border-l-2 focus:outline-2 focus:outline-primary focus:outline-offset-2",
                           isUnread
                             ? "border-l-primary bg-primary/5"
                             : "border-l-transparent",
                         )}
                         onClick={() => handleNotificationClick(notification)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleNotificationClick(notification);
+                          }
+                        }}
+                        tabIndex={0}
+                        role="button"
+                        aria-label={`${notification.content} - ${formatTimeAgo(notification.createdAt)}${isUnread ? " (unread)" : ""}`}
                       >
                         {/* Icon */}
-                        <div className="text-lg shrink-0 mt-0.5">
+                        <div
+                          className="text-lg shrink-0 mt-0.5"
+                          aria-hidden="true"
+                        >
                           {getNotificationIcon(notification.type)}
                         </div>
 
@@ -398,6 +431,7 @@ export default function NotificationBell() {
                                 <Badge
                                   variant="secondary"
                                   className="text-xs px-1.5 py-0.5 h-4 bg-primary/20 text-primary"
+                                  aria-label="New notification"
                                 >
                                   New
                                 </Badge>
@@ -417,11 +451,18 @@ export default function NotificationBell() {
                                       handlePrimaryAction(e, notification)
                                     }
                                     disabled={isLoading}
+                                    aria-label={`${actions.primary} notification`}
                                   >
                                     {isLoading ? (
-                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      <Loader2
+                                        className="h-3 w-3 mr-1 animate-spin"
+                                        aria-hidden="true"
+                                      />
                                     ) : (
-                                      <Check className="h-3 w-3 mr-1" />
+                                      <Check
+                                        className="h-3 w-3 mr-1"
+                                        aria-hidden="true"
+                                      />
                                     )}
                                     {actions.primary}
                                   </Button>
@@ -435,8 +476,12 @@ export default function NotificationBell() {
                                       handleSecondaryAction(e, notification)
                                     }
                                     disabled={isLoading}
+                                    aria-label={`${actions.secondary} notification`}
                                   >
-                                    <X className="h-3 w-3 mr-1" />
+                                    <X
+                                      className="h-3 w-3 mr-1"
+                                      aria-hidden="true"
+                                    />
                                     {actions.secondary}
                                   </Button>
                                 )}
@@ -465,6 +510,7 @@ export default function NotificationBell() {
                       description: "This would open a full notifications page",
                     });
                   }}
+                  aria-label="View all notifications in separate page"
                 >
                   View All Notifications
                 </Button>
