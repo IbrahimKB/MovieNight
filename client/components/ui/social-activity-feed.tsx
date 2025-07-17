@@ -59,49 +59,18 @@ interface ActivityItem {
   };
 }
 
-// API function to fetch social activities
+// API function to fetch social activities - currently not implemented on server
 const fetchSocialActivities = async (): Promise<ActivityItem[]> => {
-  try {
-    const token = localStorage.getItem("movienight_token");
-    if (!token) return [];
-
-    const response = await fetch("/api/activities", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch activities");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching social activities:", error);
-    return [];
-  }
+  // TODO: Implement /api/activities endpoint on server
+  // For now, return empty array since endpoint doesn't exist
+  return [];
 };
 
-// API function to like/unlike an activity
+// API function to like/unlike an activity - currently not implemented on server
 const toggleActivityLike = async (activityId: string): Promise<boolean> => {
-  try {
-    const token = localStorage.getItem("movienight_token");
-    if (!token) return false;
-
-    const response = await fetch(`/api/activities/${activityId}/like`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error("Error toggling activity like:", error);
-    return false;
-  }
+  // TODO: Implement /api/activities/:id/like endpoint on server
+  // For now, return false since endpoint doesn't exist
+  return false;
 };
 
 interface SocialActivityFeedProps {
