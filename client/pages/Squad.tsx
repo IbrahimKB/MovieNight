@@ -59,6 +59,8 @@ export default function Squad() {
   const loadData = async () => {
     try {
       setIsLoading(true);
+      captureUserAction("load_friends_data", user.id);
+
       const [friends, incoming, outgoing] = await Promise.all([
         getUserFriends(user.id),
         getIncomingRequests(user.id),
@@ -68,8 +70,15 @@ export default function Squad() {
       setUserFriends(friends);
       setIncomingRequests(incoming);
       setOutgoingRequests(outgoing);
+
+      captureUserAction("friends_data_loaded", user.id, {
+        friendsCount: friends.length,
+        incomingCount: incoming.length,
+        outgoingCount: outgoing.length,
+      });
     } catch (error) {
       console.error("Failed to load data:", error);
+      captureApiError(error, "load_friends_data", user.id);
       toast({
         title: "Error",
         description: "Failed to load friends data. Please refresh the page.",
