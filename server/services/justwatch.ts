@@ -119,7 +119,11 @@ const simulatedReleases: JustWatchRelease[] = [
     id: 1011,
     title: "Fantastic Four: First Steps",
     object_type: "movie",
-    release_date: "2025-07-25",
+    release_date: validateReleaseDate(
+      "Fantastic Four: First Steps",
+      "2025-07-25",
+      2025,
+    ),
     genres: ["Action", "Adventure", "Sci-Fi"],
     providers: [
       { name: "Disney+", technical_name: "disney_plus" },
@@ -127,6 +131,34 @@ const simulatedReleases: JustWatchRelease[] = [
     ],
     year: 2025,
     short_description: "Marvel's First Family joins the MCU.",
+  },
+  {
+    id: 1012,
+    title: "Cobra Kai: Season 6 Part 3",
+    object_type: "show",
+    release_date: validateReleaseDate(
+      "Cobra Kai: Season 6 Part 3",
+      "2025-02-13",
+      2025,
+    ),
+    genres: ["Action", "Drama", "Comedy"],
+    providers: [{ name: "Netflix", technical_name: "netflix" }],
+    year: 2025,
+    short_description: "The final episodes of the acclaimed karate series.",
+  },
+  {
+    id: 1013,
+    title: "The White Lotus: Season 3",
+    object_type: "show",
+    release_date: validateReleaseDate(
+      "The White Lotus: Season 3",
+      "2025-02-16",
+      2025,
+    ),
+    genres: ["Drama", "Comedy", "Mystery"],
+    providers: [{ name: "HBO Max", technical_name: "hbo" }],
+    year: 2025,
+    short_description: "The next destination for dark resort comedy.",
   },
   {
     id: 1005,
