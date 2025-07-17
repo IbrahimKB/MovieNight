@@ -84,6 +84,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
         body: JSON.stringify({ email, password }),
       });
 
+      if (!response.ok) {
+        console.error(
+          "Login response not ok:",
+          response.status,
+          response.statusText,
+        );
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        setIsLoading(false);
+        return false;
+      }
+
       const result: ApiResponse<{ user: User; token: string }> =
         await response.json();
 
@@ -103,7 +115,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error details:", {
+        error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       setIsLoading(false);
       return false;
     }
