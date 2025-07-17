@@ -306,9 +306,12 @@ export default function AdminDashboard() {
   // Trigger manual sync
   const triggerManualSync = async () => {
     try {
-      const result: ApiResponse = await apiCall("/admin/scheduler/trigger", {
-        method: "POST",
-      });
+      const result: ApiResponse<any> = await apiCall(
+        "/admin/scheduler/trigger",
+        {
+          method: "POST",
+        },
+      );
       if (result.success) {
         toast.success("Manual sync triggered successfully");
         await loadSchedulerStatus();
