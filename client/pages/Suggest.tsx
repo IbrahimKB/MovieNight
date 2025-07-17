@@ -164,34 +164,84 @@ export default function Suggest() {
     );
   };
 
-  const handleSuggest = () => {
-    if (!selectedMovie || selectedFriends.length === 0) return;
+  const handleSuggest = async () => {
+    if (!selectedMovie || selectedFriends.length === 0 || !user) return;
 
-    // In a real app, this would make an API call
-    console.log("Suggesting:", {
-      movie: selectedMovie,
-      desireRating: desireRating[0],
-      friends: selectedFriends,
-      comment,
-    });
+    try {
+      // First, save the movie to the database if it doesn't exist
+      let movieId = selectedMovie.id;
 
-    // Show success feedback
-    const friendNames = selectedFriends
-      .map((id) => userFriends.find((f) => f.id === id)?.name)
-      .filter(Boolean)
-      .join(", ");
+      // If this is a prefilled movie from TMDB/external source, save it first
+      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+        const saveResponse = await fetch("/api/tmdb/save-movie", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            title: selectedMovie.title,
+            year: selectedMovie.year,
+            genres: selectedMovie.genres,
+            description: selectedMovie.description,
+            poster: selectedMovie.poster,
+          }),
+        });
 
-    toast({
-      title: "Movie suggested! 🎬",
-      description: `\"${selectedMovie.title}\" has been suggested to ${friendNames}`,
-    });
+        if (saveResponse.ok) {
+          const saveData = await saveResponse.json();
+          movieId = saveData.data.id;
+        } else {
+          throw new Error("Failed to save movie");
+        }
+      }
 
-    // Reset form
-    setSelectedMovie(null);
-    setDesireRating([7]);
-    setSelectedFriends([]);
-    setComment("");
-    setSearchTerm("");
+      // Create the suggestion
+      const response = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          movieId,
+          suggestedTo: selectedFriends,
+          desireRating: desireRating[0],
+          comment: comment || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create suggestion");
+      }
+
+      const data = await response.json();
+
+      // Show success feedback
+      const friendNames = selectedFriends
+        .map((id) => userFriends.find((f) => f.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
+
+      toast({
+        title: "Movie suggested! 🎬",
+        description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+      });
+
+      // Reset form
+      setSelectedMovie(null);
+      setDesireRating([7]);
+      setSelectedFriends([]);
+      setComment("");
+      setSearchTerm("");
+    } catch (error) {
+      console.error("Suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAcceptSuggestion = (
