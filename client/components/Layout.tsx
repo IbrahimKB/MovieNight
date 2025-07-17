@@ -167,36 +167,6 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
         </div>
-
-        {/* Mobile Menu Dropdown */}
-        {mobileMenuOpen && (
-          <div className="sm:hidden border-t border-border bg-card">
-            <div className="container mx-auto px-3 py-2">
-              <nav className="space-y-1">
-                {[...navItems, ...secondaryNavItems].map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors",
-                        isActive
-                          ? "text-primary bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Main Content */}
