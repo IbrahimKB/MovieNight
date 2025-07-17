@@ -4,8 +4,8 @@ export function initSentry() {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN || "", // Add your Sentry DSN
     integrations: [
-      new BrowserTracing(),
-      new Sentry.Replay({
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration({
         // Capture 10% of all sessions for replay
         sessionSampleRate: 0.1,
         // Capture 100% of sessions with an error for replay
