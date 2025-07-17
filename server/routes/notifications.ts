@@ -272,7 +272,7 @@ export const handleGetNotificationPreferences: RequestHandler = async (
       return userPrefs?.preferences || getDefaultNotificationPreferences();
     });
 
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error("Failed to get notification preferences:", error);
     res
