@@ -53,6 +53,10 @@ import {
   handleWeeklySync,
   handleGetSchedulerStatus,
   handleTriggerManualSync,
+  handleGetReleaseById,
+  handleCreateRelease,
+  handleUpdateRelease,
+  handleDeleteRelease,
 } from "./routes/releases";
 import suggestionsRouter from "./routes/suggestions";
 import analyticsRouter from "./routes/analytics";
