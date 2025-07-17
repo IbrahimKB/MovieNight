@@ -35,24 +35,58 @@ export const handleLogin: RequestHandler = async (req, res) => {
   try {
     const body = loginSchema.parse(req.body) as LoginRequest;
 
-    const user = await withTransaction(async (db) => {
+    const result = await withTransaction(async (db) => {
+      // Create admin user if it doesn't exist
+      const adminExists = db.users.find((u) => u.username === "admin");
+      if (!adminExists) {
+        const hashedPassword = await bcrypt.hash("admin123", 12);
+        const adminUser: User = {
+          id: generateId(),
+          username: "admin",
+          email: "admin@movienight.com",
+          name: "Administrator",
+          password: hashedPassword,
+          role: "admin",
+          joinedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        db.users.push(adminUser);
+      }
+
       // Find user by email or username
       const foundUser = db.users.find(
-        (u) =>
-          (u.email === body.email || u.username === body.email) &&
-          u.password === body.password,
+        (u) => u.email === body.email || u.username === body.email,
       );
 
       if (!foundUser) {
         return null;
       }
 
+      // Verify password
+      const isPasswordValid = await bcrypt.compare(
+        body.password,
+        foundUser.password,
+      );
+      if (!isPasswordValid) {
+        return null;
+      }
+
+      // Generate JWT token
+      const payload: JWTPayload = {
+        userId: foundUser.id,
+        role: foundUser.role,
+      };
+      const token = jwt.sign(payload, JWT_SECRET, {
+        expiresIn: JWT_EXPIRES_IN,
+      });
+
       // Return user without password
       const { password, ...userWithoutPassword } = foundUser;
-      return userWithoutPassword;
+      return { user: userWithoutPassword, token };
     });
 
-    if (!user) {
+    if (!result) {
       const response: ApiResponse = {
         success: false,
         error: "Invalid email/username or password",
@@ -60,9 +94,12 @@ export const handleLogin: RequestHandler = async (req, res) => {
       return res.status(401).json(response);
     }
 
-    const response: ApiResponse<Omit<User, "password">> = {
+    const response: ApiResponse<{
+      user: Omit<User, "password">;
+      token: string;
+    }> = {
       success: true,
-      data: user,
+      data: result,
       message: "Login successful",
     };
 
