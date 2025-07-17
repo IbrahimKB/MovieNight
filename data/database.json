@@ -1,74 +1,14 @@
 {
-  "users": [
-    {
-      "id": "30ab4cf9-99ce-427f-97c3-e9b90b03cafc",
-      "username": "kaysar",
-      "email": "kaysar@movienight.co.uk",
-      "name": "kaysar",
-      "password": "$2b$12$efpLtClqcChQurFFtwUgMuKf4KJJ3gTnH.L7d8C3DVofbwB4KDwqi",
-      "role": "user",
-      "joinedAt": "2025-07-17T23:35:44.940Z",
-      "createdAt": "2025-07-17T23:35:44.940Z",
-      "updatedAt": "2025-07-17T23:35:44.940Z"
-    }
-  ],
+  "users": [],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "6312b1e7-59bf-4cfc-9c1d-dad3e1012b76",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Carmy and the crew return for another intense season.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:33:37.999Z",
-      "updatedAt": "2025-07-17T23:33:37.999Z"
-    },
-    {
-      "id": "8bf95357-fd84-4be9-b26e-cbc962c34faf",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
-      "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
-      ],
-      "description": "The final season of the beloved supernatural series.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:33:37.999Z",
-      "updatedAt": "2025-07-17T23:33:37.999Z"
-    },
-    {
-      "id": "5e2e71d8-ec17-401a-8adc-18a301b5ed52",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:33:37.999Z",
-      "updatedAt": "2025-07-17T23:33:37.999Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:38:42.985Z"
-  },
-  "notificationPreferences": []
+    "lastUpdated": "2025-07-17T23:39:42.989Z"
+  }
 }
