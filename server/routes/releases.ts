@@ -5,6 +5,30 @@ import { withTransaction, generateId } from "../utils/storage";
 import { justWatchService } from "../services/justwatch";
 import { schedulerService } from "../services/scheduler";
 
+// Validation schemas
+const createReleaseSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  platform: z.string().min(1, "Platform is required"),
+  releaseDate: z.string().min(1, "Release date is required"),
+  genres: z.array(z.string()).min(1, "At least one genre is required"),
+  description: z.string().optional(),
+  poster: z.string().nullable().optional(),
+  year: z.number().min(1900).max(2030),
+});
+
+const updateReleaseSchema = z.object({
+  title: z.string().min(1, "Title is required").optional(),
+  platform: z.string().min(1, "Platform is required").optional(),
+  releaseDate: z.string().min(1, "Release date is required").optional(),
+  genres: z
+    .array(z.string())
+    .min(1, "At least one genre is required")
+    .optional(),
+  description: z.string().optional(),
+  poster: z.string().nullable().optional(),
+  year: z.number().min(1900).max(2030).optional(),
+});
+
 // Get all releases from database
 export const handleGetReleases: RequestHandler = async (req, res) => {
   try {
