@@ -368,4 +368,107 @@ async function getStoredPendingData() {
   return [];
 }
 
+// Notification helper functions
+function getNotificationActions(type) {
+  const baseActions = [
+    {
+      action: "view",
+      title: "View",
+      icon: "/icons/icon-72x72.svg",
+    },
+    {
+      action: "dismiss",
+      title: "Dismiss",
+    },
+  ];
+
+  switch (type) {
+    case "friend_request":
+      return [
+        {
+          action: "view",
+          title: "View Request",
+          icon: "/icons/icon-72x72.svg",
+        },
+        {
+          action: "dismiss",
+          title: "Later",
+        },
+      ];
+
+    case "movie_suggestion":
+      return [
+        {
+          action: "view",
+          title: "View Movie",
+          icon: "/icons/suggest-96x96.svg",
+        },
+        {
+          action: "dismiss",
+          title: "Not Interested",
+        },
+      ];
+
+    case "movie_night_invite":
+      return [
+        {
+          action: "view",
+          title: "Join Night",
+          icon: "/icons/movie-night-96x96.svg",
+        },
+        {
+          action: "dismiss",
+          title: "Can't Make It",
+        },
+      ];
+
+    case "movie_available":
+      return [
+        {
+          action: "view",
+          title: "Watch Now",
+          icon: "/icons/watchlist-96x96.svg",
+        },
+        {
+          action: "dismiss",
+          title: "Later",
+        },
+      ];
+
+    default:
+      return baseActions;
+  }
+}
+
+function trackNotificationEvent(event, type, action) {
+  try {
+    // Store notification analytics
+    const analytics = {
+      event,
+      type,
+      action,
+      timestamp: Date.now(),
+      userAgent: navigator.userAgent,
+    };
+
+    // In a real app, you might send this to an analytics endpoint
+    console.log("Notification analytics:", analytics);
+
+    // Store locally for later sync
+    if ("indexedDB" in self) {
+      // Could store in IndexedDB for offline analytics
+    }
+  } catch (error) {
+    console.error("Failed to track notification event:", error);
+  }
+}
+
+// Handle notification close events
+self.addEventListener("notificationclose", (event) => {
+  console.log("Notification closed:", event.notification.tag);
+
+  const notificationData = event.notification.data || {};
+  trackNotificationEvent("closed", notificationData.type);
+});
+
 console.log("MovieNight Service Worker loaded");
