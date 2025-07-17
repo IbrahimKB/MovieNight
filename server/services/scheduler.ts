@@ -17,9 +17,7 @@ class SchedulerService {
         await this.performWeeklySync();
       },
       {
-        scheduled: true,
         timezone: "UTC", // Use UTC for consistency
-        name: "weekly-releases-sync",
       },
     );
 
