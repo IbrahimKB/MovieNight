@@ -99,6 +99,30 @@ export default function Suggest() {
     Record<string, number>
   >({});
 
+  // Fetch suggestions on component mount
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (!user) return;
+
+      try {
+        const response = await fetch("/api/suggestions", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSuggestions(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch suggestions:", error);
+      }
+    };
+
+    fetchSuggestions();
+  }, [user]);
+
   // Check for pre-filled movie data from URL params
   useEffect(() => {
     const movieTitle = searchParams.get("title");
