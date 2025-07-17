@@ -21,8 +21,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "zod": "^3.23.8"
+
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.9.0",
