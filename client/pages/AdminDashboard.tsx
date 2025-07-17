@@ -316,6 +316,16 @@ export default function AdminDashboard() {
     { key: "title", label: "Title" },
     { key: "year", label: "Year" },
     {
+      key: "platform",
+      label: "Platform",
+      render: (value: string) =>
+        value ? (
+          <PlatformLogo platform={value} size="sm" />
+        ) : (
+          <PlatformLogo platform="Theaters" size="sm" />
+        ),
+    },
+    {
       key: "genres",
       label: "Genres",
       render: (value: string[]) => (
@@ -333,7 +343,6 @@ export default function AdminDashboard() {
         </div>
       ),
     },
-    { key: "platform", label: "Platform" },
     {
       key: "createdAt",
       label: "Added",
