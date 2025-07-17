@@ -325,15 +325,17 @@ export default function SocialActivityFeed({
                 <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
                   {/* Activity Header */}
                   <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                         {getActivityIcon(activity.type)}
-                        <span className="font-medium">
+                        <span className="font-medium text-sm sm:text-base truncate">
                           {activity.user.name}
                         </span>
-                        {getActivityText(activity)}
+                        <div className="text-sm sm:text-base min-w-0 flex-1">
+                          {getActivityText(activity)}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {formatTimeAgo(activity.timestamp)}
                       </div>
@@ -342,15 +344,15 @@ export default function SocialActivityFeed({
 
                   {/* Movie Details */}
                   {activity.movie && (
-                    <div className="flex items-center gap-3 p-3 bg-accent/30 rounded-md">
-                      <div className="w-12 h-16 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-6 w-6 text-muted-foreground" />
+                    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-accent/30 rounded-md">
+                      <div className="w-8 h-10 sm:w-12 sm:h-16 bg-muted rounded flex items-center justify-center shrink-0">
+                        <Film className="h-4 w-4 sm:h-6 sm:w-6 text-muted-foreground" />
                       </div>
-                      <div className="space-y-1">
-                        <h4 className="font-medium">
+                      <div className="space-y-1 min-w-0 flex-1">
+                        <h4 className="font-medium text-sm sm:text-base leading-tight">
                           {activity.movie.title} ({activity.movie.year})
                         </h4>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           {activity.movie.genres.slice(0, 2).map((genre) => (
                             <Badge
                               key={genre}
