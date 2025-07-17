@@ -183,5 +183,8 @@ export function createServer() {
   // New suggestions router (replaces old suggestion routes)
   app.use("/api/suggestions", suggestionsRouter);
 
+  // Analytics router for tracking suggestion accuracy and performance
+  app.use("/api/analytics", analyticsRouter);
+
   return app;
 }
