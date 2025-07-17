@@ -153,7 +153,7 @@ export default function ReleasesPage() {
   // Weekly sync
   const handleWeeklySync = async () => {
     try {
-      const result: ApiResponse = await apiCall("/releases/weekly-sync", {
+      const result: ApiResponse<any> = await apiCall("/releases/weekly-sync", {
         method: "POST",
       });
 
