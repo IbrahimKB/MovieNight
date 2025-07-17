@@ -6,6 +6,11 @@ import {
   handleSignup,
   handleGetProfile,
   handleSearchUsers,
+  verifyJWT,
+  requireAdmin,
+  handleResetPassword,
+  handleGetAllUsers,
+  handleDeleteUser,
 } from "./routes/auth";
 import {
   handleGetMovies,
