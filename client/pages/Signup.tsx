@@ -91,28 +91,28 @@ export default function Signup() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         {/* Logo/Brand */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">MovieNight</h1>
+          <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
+            <Film className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+            <h1 className="text-responsive-xl font-bold">MovieNight</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-responsive-sm text-muted-foreground px-2">
             Join the community and start planning movie nights with friends
           </p>
         </div>
 
         {/* Signup Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
+        <Card className="mobile-card border-0 sm:border shadow-none sm:shadow-sm">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-responsive-lg text-center">
               Create Account
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
