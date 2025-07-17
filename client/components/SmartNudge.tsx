@@ -19,41 +19,8 @@ interface SmartNudgeData {
   genres: string[];
 }
 
-// Mock nudge data
-const MOCK_NUDGES: SmartNudgeData[] = [
-  {
-    id: "nudge_1",
-    movieTitle: "The Menu",
-    movieYear: 2022,
-    platform: "Netflix",
-    score: 9,
-    suggestedBy: "Omar",
-    friendsWhoScored: ["2", "3"], // Omar, Sara
-    daysSinceSuggested: 8,
-    genres: ["Thriller", "Horror"],
-  },
-  {
-    id: "nudge_2",
-    movieTitle: "Glass Onion",
-    movieYear: 2022,
-    platform: "Netflix",
-    score: 8.5,
-    suggestedBy: "Sara",
-    friendsWhoScored: ["1", "3"], // Ibrahim, Sara
-    daysSinceSuggested: 12,
-    genres: ["Mystery", "Comedy"],
-  },
-  {
-    id: "nudge_3",
-    movieTitle: "Avatar: The Way of Water",
-    movieYear: 2022,
-    platform: "Disney+",
-    score: 8,
-    friendsWhoScored: ["1", "2", "5"], // Ibrahim, Omar, Maya
-    daysSinceSuggested: 15,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-  },
-];
+// Empty array - real nudge data will be loaded from API
+const MOCK_NUDGES: SmartNudgeData[] = [];
 
 interface SmartNudgeProps {
   onWatchTonight: (movieTitle: string) => void;
@@ -79,24 +46,8 @@ export default function SmartNudge({
   useEffect(() => {
     if (!user) return;
 
-    // Filter nudges based on logic
-    const validNudges = MOCK_NUDGES.filter((nudge) => {
-      // Skip if already dismissed
-      if (dismissedNudges.includes(nudge.id)) return false;
-
-      // Score >= 7
-      if (nudge.score < 7) return false;
-
-      // Suggested over 5 days ago
-      if (nudge.daysSinceSuggested <= 5) return false;
-
-      // User should be involved (either suggested it or scored it)
-      const userInvolved =
-        nudge.friendsWhoScored.includes(user.id) ||
-        (nudge.suggestedBy && nudge.suggestedBy === user.username);
-
-      return userInvolved;
-    });
+    // In real app, this would fetch nudges from API based on user activity
+    const validNudges: SmartNudgeData[] = [];
 
     if (validNudges.length > 0) {
       // Randomly pick one to show
