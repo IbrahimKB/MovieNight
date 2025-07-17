@@ -153,15 +153,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("movienight_user");
+    localStorage.removeItem("movienight_token");
   };
+
+  const isAdmin = user?.role === "admin";
 
   const value: AuthContextType = {
     user,
+    token,
     login,
     signup,
     logout,
     isLoading,
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
