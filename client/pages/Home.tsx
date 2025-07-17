@@ -191,14 +191,14 @@ export default function Home() {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column - Social Activity Feed */}
-        <div className="lg:col-span-2">
-          <SocialActivityFeed />
+        <div className="lg:col-span-2 order-2 lg:order-1">
+          <SocialActivityFeed className="space-y-3 sm:space-y-4" />
         </div>
 
         {/* Right Column - Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
           {/* Trending in Your Network */}
           <Card>
             <CardHeader className="pb-3">
