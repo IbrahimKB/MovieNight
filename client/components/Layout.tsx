@@ -39,14 +39,14 @@ export default function Layout({ children }: LayoutProps) {
       icon: Home,
     },
     {
+      path: "/discover",
+      label: "Discover",
+      icon: Search,
+    },
+    {
       path: "/suggest",
       label: "Suggest",
       icon: PlusCircle,
-    },
-    {
-      path: "/movie-night",
-      label: "Movie Night",
-      icon: Users,
     },
     {
       path: "/watchlist",
