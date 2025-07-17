@@ -307,19 +307,22 @@ export default function SocialActivityFeed({
       </div>
 
       {/* Activity Feed */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {activities.map((activity) => (
-          <Card key={activity.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex gap-3">
+          <Card
+            key={activity.id}
+            className="hover:shadow-md transition-shadow active:scale-[0.98] sm:active:scale-100"
+          >
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex gap-2 sm:gap-3">
                 {/* User Avatar */}
-                <Avatar className="h-10 w-10 shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
                     {activity.user.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1 space-y-3">
+                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
                   {/* Activity Header */}
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
