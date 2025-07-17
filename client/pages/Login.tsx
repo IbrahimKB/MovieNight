@@ -18,7 +18,7 @@ export default function Login() {
     email?: string;
     password?: string;
   }>({});
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, lastError, clearError } = useAuth();
   const navigate = useNavigate();
   const errorRef = useRef<HTMLDivElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -60,6 +60,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setFieldErrors({});
+    clearError();
 
     if (!validateFields()) {
       // Focus on first error field
@@ -75,8 +76,8 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
-    if (success) {
+    const result = await login(email, password);
+    if (result.success) {
       // Handle remember me functionality
       if (rememberMe) {
         localStorage.setItem("movienight_remember_email", email);
@@ -92,10 +93,14 @@ export default function Login() {
       } else {
         navigate("/");
       }
-    } else {
-      setError(
-        "Invalid email/username or password. Please check your credentials and try again.",
-      );
+    } else if (result.error) {
+      // Handle field-specific errors
+      if (result.error.field) {
+        setFieldErrors({ [result.error.field]: result.error.message });
+      } else {
+        setError(result.error.message);
+      }
+
       // Focus error for screen readers
       setTimeout(() => {
         if (errorRef.current) {
@@ -148,11 +153,15 @@ export default function Login() {
               aria-labelledby="login-title"
               id="main-content"
             >
-              {(error || Object.keys(fieldErrors).length > 0) && (
+              {(error || lastError || Object.keys(fieldErrors).length > 0) && (
                 <Alert variant="destructive" role="alert" aria-live="polite">
                   <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   <AlertDescription ref={errorRef} tabIndex={-1}>
-                    {error && <div className="font-medium">{error}</div>}
+                    {(error || lastError?.message) && (
+                      <div className="font-medium">
+                        {error || lastError?.message}
+                      </div>
+                    )}
                     {fieldErrors.email && <div>{fieldErrors.email}</div>}
                     {fieldErrors.password && <div>{fieldErrors.password}</div>}
                   </AlertDescription>
