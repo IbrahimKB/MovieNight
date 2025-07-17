@@ -360,7 +360,7 @@ export default function ReleasesPage() {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            JustWatch API Status: {rateLimitStatus.remaining} requests remaining
+            TMDB API Status: {rateLimitStatus.remaining} requests remaining
             {rateLimitStatus.isLimited && rateLimitStatus.resetTime && (
               <span className="text-destructive">
                 {" "}
