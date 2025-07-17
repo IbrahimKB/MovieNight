@@ -41,11 +41,6 @@ export default function Layout({ children }: LayoutProps) {
     },
     {
       path: "/suggest",
-      label: "Discover",
-      icon: Search,
-    },
-    {
-      path: "/suggest",
       label: "Suggest",
       icon: PlusCircle,
     },
@@ -58,6 +53,11 @@ export default function Layout({ children }: LayoutProps) {
       path: "/squad",
       label: "Squad",
       icon: UserPlus,
+    },
+    {
+      path: "/movie-night",
+      label: "Movie Night",
+      icon: Users,
     },
   ];
 
