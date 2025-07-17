@@ -177,3 +177,15 @@ export interface MarkAsWatchedRequest {
   originalScore?: number;
   reaction?: PostWatchReaction;
 }
+
+export interface ResetPasswordRequest {
+  userId: string;
+  newPassword: string;
+}
+
+export interface JWTPayload {
+  userId: string;
+  role: "user" | "admin";
+  iat?: number;
+  exp?: number;
+}
