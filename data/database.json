@@ -1,14 +1,177 @@
 {
-  "users": [],
-  "movies": [],
+  "users": [
+    {
+      "id": "user-1",
+      "username": "ibrahim",
+      "email": "ibrahim@example.com",
+      "name": "Ibrahim Kaysar",
+      "password": "password123",
+      "role": "user",
+      "joinedAt": "2024-01-01T00:00:00Z",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "user-2",
+      "username": "omar",
+      "email": "omar@example.com",
+      "name": "Omar",
+      "password": "password123",
+      "role": "user",
+      "joinedAt": "2024-01-02T00:00:00Z",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "user-3",
+      "username": "sara",
+      "email": "sara@example.com",
+      "name": "Sara",
+      "password": "password123",
+      "role": "user",
+      "joinedAt": "2024-01-03T00:00:00Z",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "user-4",
+      "username": "alex",
+      "email": "alex@example.com",
+      "name": "Alex",
+      "password": "password123",
+      "role": "user",
+      "joinedAt": "2024-01-04T00:00:00Z",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "user-5",
+      "username": "maya",
+      "email": "maya@example.com",
+      "name": "Maya",
+      "password": "password123",
+      "role": "user",
+      "joinedAt": "2024-01-05T00:00:00Z",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    }
+  ],
+  "movies": [
+    {
+      "id": "movie-1",
+      "title": "The Menu",
+      "year": 2022,
+      "genres": [
+        "Thriller",
+        "Horror"
+      ],
+      "description": "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
+      "imdbRating": 7.2,
+      "rtRating": 88,
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "movie-2",
+      "title": "Glass Onion: A Knives Out Mystery",
+      "year": 2022,
+      "genres": [
+        "Mystery",
+        "Comedy"
+      ],
+      "description": "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
+      "imdbRating": 7.1,
+      "rtRating": 85,
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "movie-3",
+      "title": "Avatar: The Way of Water",
+      "year": 2022,
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
+      "imdbRating": 7.6,
+      "rtRating": 76,
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    }
+  ],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [],
+  "friendships": [
+    {
+      "id": "friendship-1",
+      "userId1": "user-1",
+      "userId2": "user-2",
+      "status": "accepted",
+      "requestedBy": "user-1",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "friendship-2",
+      "userId1": "user-1",
+      "userId2": "user-3",
+      "status": "accepted",
+      "requestedBy": "user-3",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    }
+  ],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [],
+  "releases": [
+    {
+      "id": "release-1",
+      "title": "The Menu",
+      "platform": "Netflix",
+      "releaseDate": "2024-01-15",
+      "genres": [
+        "Thriller",
+        "Horror"
+      ],
+      "year": 2022,
+      "description": "A young couple travels to a remote island to eat at an exclusive restaurant.",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "release-2",
+      "title": "Glass Onion",
+      "platform": "Netflix",
+      "releaseDate": "2024-01-16",
+      "genres": [
+        "Mystery",
+        "Comedy"
+      ],
+      "year": 2022,
+      "description": "Detective Benoit Blanc travels to Greece to solve a mystery.",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    },
+    {
+      "id": "release-3",
+      "title": "Avatar: The Way of Water",
+      "platform": "Disney+",
+      "releaseDate": "2024-01-17",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Sci-Fi"
+      ],
+      "year": 2022,
+      "description": "Jake Sully continues his story on Pandora.",
+      "createdAt": "2025-07-17T14:35:28.855Z",
+      "updatedAt": "2025-07-17T14:35:28.855Z"
+    }
+  ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T14:34:59.386Z"
+    "lastUpdated": "2025-07-17T14:35:31.823Z"
   }
 }
