@@ -1,158 +1,27 @@
 {
   "users": [
     {
-      "id": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
-      "username": "testuser1",
-      "email": "test1@example.com",
-      "name": "Test User 1",
-      "password": "$2b$12$5GbLCx3vm4Se6vkoG87RXO8GcaeeeBe3a2VxlAus4z1AhDLURnhMW",
+      "id": "kaysar-user-id-12345",
+      "username": "kaysar",
+      "email": "kaysar@example.com",
+      "name": "Kaysar",
+      "password": "$2b$12$YQiiz/zGCJjN3wUHVQyeT.dRQ6cDq8.PUXxzBJpAB6sLNxGtEbr.u",
       "role": "user",
-      "joinedAt": "2025-07-17T20:11:21.289Z",
-      "createdAt": "2025-07-17T20:11:21.289Z",
-      "updatedAt": "2025-07-17T20:11:21.289Z"
-    },
-    {
-      "id": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "username": "testuser2",
-      "email": "test2@example.com",
-      "name": "Test User 2",
-      "password": "$2b$12$xr5VoP/8zo9A3IXirBOLY.drfamivaf9yOz66h8tm1sbQ2r0djAny",
-      "role": "user",
-      "joinedAt": "2025-07-17T20:11:26.145Z",
-      "createdAt": "2025-07-17T20:11:26.145Z",
-      "updatedAt": "2025-07-17T20:11:26.145Z"
-    },
-    {
-      "id": "3900a810-7e44-49c4-a875-5057dac839be",
-      "username": "testuser3",
-      "email": "test3@example.com",
-      "name": "Test User 3",
-      "password": "$2b$12$80Y7ryFG1dwLMsbwrYpYUegzZT0faLIo9B/F2J2QdzT7EtzQxDzzm",
-      "role": "user",
-      "joinedAt": "2025-07-17T20:16:10.348Z",
-      "createdAt": "2025-07-17T20:16:10.348Z",
-      "updatedAt": "2025-07-17T20:16:10.348Z"
+      "joinedAt": "2025-01-18T00:00:00.000Z",
+      "createdAt": "2025-01-18T00:00:00.000Z",
+      "updatedAt": "2025-01-18T00:00:00.000Z"
     }
   ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [
-    {
-      "id": "bea56e96-abdb-4842-94d3-759effbf12d2",
-      "userId1": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
-      "userId2": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "status": "accepted",
-      "requestedBy": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
-      "createdAt": "2025-07-17T20:11:31.233Z",
-      "updatedAt": "2025-07-17T20:11:51.678Z"
-    },
-    {
-      "id": "6d039e9c-7a0e-4c4c-9297-c993f81664c8",
-      "userId1": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "userId2": "3900a810-7e44-49c4-a875-5057dac839be",
-      "status": "pending",
-      "requestedBy": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "createdAt": "2025-07-17T20:16:15.893Z",
-      "updatedAt": "2025-07-17T20:16:15.893Z"
-    }
-  ],
+  "friendships": [],
   "watchedMovies": [],
-  "notifications": [
-    {
-      "id": "8c685052-fc5f-4046-b246-1a50f93d9b3b",
-      "userId": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-      "type": "friend_request",
-      "title": "New Friend Request",
-      "content": "Test User 1 sent you a friend request",
-      "read": false,
-      "actionData": {
-        "userId": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
-        "friendshipId": "bea56e96-abdb-4842-94d3-759effbf12d2"
-      },
-      "createdAt": "2025-07-17T20:11:31.233Z",
-      "updatedAt": "2025-07-17T20:11:31.233Z"
-    },
-    {
-      "id": "a32f37ac-bcbd-4496-8edf-812e08378e8d",
-      "userId": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
-      "type": "friend_request",
-      "title": "Friend Request Accepted",
-      "content": "Test User 2 accepted your friend request",
-      "read": false,
-      "actionData": {
-        "userId": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-        "friendshipId": "bea56e96-abdb-4842-94d3-759effbf12d2"
-      },
-      "createdAt": "2025-07-17T20:11:51.678Z",
-      "updatedAt": "2025-07-17T20:11:51.678Z"
-    },
-    {
-      "id": "d3fe310b-037d-47d3-b08d-824465107827",
-      "userId": "3900a810-7e44-49c4-a875-5057dac839be",
-      "type": "friend_request",
-      "title": "New Friend Request",
-      "content": "Test User 2 sent you a friend request",
-      "read": false,
-      "actionData": {
-        "userId": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
-        "friendshipId": "6d039e9c-7a0e-4c4c-9297-c993f81664c8"
-      },
-      "createdAt": "2025-07-17T20:16:15.893Z",
-      "updatedAt": "2025-07-17T20:16:15.893Z"
-    }
-  ],
-  "releases": [
-    {
-      "id": "2272f03c-d15c-4b8a-821d-50fe6f20edfe",
-      "title": "The Bear: Season 4",
-      "platform": "Hulu, Disney+",
-      "releaseDate": "2025-07-18",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Carmy and the crew return for another intense season.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:21:12.278Z",
-      "updatedAt": "2025-07-17T23:21:12.278Z"
-    },
-    {
-      "id": "ddaf7d62-c453-4e94-bfe0-abd687d563ca",
-      "title": "Stranger Things: Season 5",
-      "platform": "Netflix",
-      "releaseDate": "2025-07-20",
-      "genres": [
-        "Sci-Fi",
-        "Horror",
-        "Drama"
-      ],
-      "description": "The final season of the beloved supernatural series.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:21:12.278Z",
-      "updatedAt": "2025-07-17T23:21:12.278Z"
-    },
-    {
-      "id": "830bafc3-adc7-4a2b-a201-3922a0a68235",
-      "title": "Blade Runner 2099",
-      "platform": "Amazon Prime Video",
-      "releaseDate": "2025-07-22",
-      "genres": [
-        "Sci-Fi",
-        "Thriller"
-      ],
-      "description": "A new series set in the Blade Runner universe.",
-      "year": 2025,
-      "poster": null,
-      "createdAt": "2025-07-17T23:21:12.278Z",
-      "updatedAt": "2025-07-17T23:21:12.278Z"
-    }
-  ],
+  "notifications": [],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:21:12.279Z"
+    "lastUpdated": "2025-01-18T00:00:00.000Z"
   },
   "notificationPreferences": []
 }
