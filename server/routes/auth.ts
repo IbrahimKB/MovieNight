@@ -231,7 +231,12 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     res.status(201).json(response);
   } catch (error) {
-    console.error("Signup error:", error);
+    console.error("Signup error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: typeof error,
+      error: error,
+    });
 
     if (error instanceof z.ZodError) {
       const response: ApiResponse = {
