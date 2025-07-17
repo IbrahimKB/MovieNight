@@ -1,5 +1,39 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "30ab4cf9-99ce-427f-97c3-e9b90b03cafc",
+      "username": "kaysar",
+      "email": "kaysar@example.com",
+      "name": "Ibrahim Kaysar",
+      "password": "$2b$12$yGvM5P6B8H4xN9oQz7Kx8e8vL3mF1cR2dA5sJ7hK6bN4pW8fE9gT0",
+      "role": "admin",
+      "joinedAt": "2025-07-17T20:00:00.000Z",
+      "createdAt": "2025-07-17T20:00:00.000Z",
+      "updatedAt": "2025-07-17T20:00:00.000Z"
+    },
+    {
+      "id": "test-user-1",
+      "username": "alice",
+      "email": "alice@example.com",
+      "name": "Alice Johnson",
+      "password": "$2b$12$8Y6Yc9aIGZOv3jKxN2rJYOb7N5dE2uFcLpQm3vX1a9b8hG7f2C3d4e",
+      "role": "user",
+      "joinedAt": "2025-07-17T23:00:00.000Z",
+      "createdAt": "2025-07-17T23:00:00.000Z",
+      "updatedAt": "2025-07-17T23:00:00.000Z"
+    },
+    {
+      "id": "test-user-2",
+      "username": "bob",
+      "email": "bob@example.com",
+      "name": "Bob Smith",
+      "password": "$2b$12$8Y6Yc9aIGZOv3jKxN2rJYOb7N5dE2uFcLpQm3vX1a9b8hG7f2C3d4e",
+      "role": "user",
+      "joinedAt": "2025-07-17T23:01:00.000Z",
+      "createdAt": "2025-07-17T23:01:00.000Z",
+      "updatedAt": "2025-07-17T23:01:00.000Z"
+    }
+  ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
