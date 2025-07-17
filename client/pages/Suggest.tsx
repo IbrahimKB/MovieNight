@@ -125,8 +125,11 @@ export default function Suggest() {
     const moviePlatform = searchParams.get("platform");
     const movieDescription = searchParams.get("description");
     const fromHome = searchParams.get("isFromHome");
+    const fromMovieSearch = searchParams.get("isFromMovieSearch");
+    const tmdbId = searchParams.get("tmdbId");
+    const mediaType = searchParams.get("mediaType");
 
-    if (movieTitle && movieYear && fromHome) {
+    if (movieTitle && movieYear && (fromHome || fromMovieSearch)) {
       const prefilledMovie: Movie = {
         id: `prefilled_${Date.now()}`,
         title: movieTitle,
@@ -136,14 +139,15 @@ export default function Suggest() {
       };
 
       setSelectedMovie(prefilledMovie);
-      setIsFromHome(true);
+      setIsFromHome(!!fromHome);
 
       // Clear URL params after loading
       navigate("/suggest", { replace: true });
 
+      const source = fromHome ? "upcoming releases" : "movie search";
       toast({
         title: "Movie pre-selected! 🎬",
-        description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
+        description: `"${movieTitle}" was selected from ${source}. Add your rating and select friends below.`,
       });
     }
   }, [searchParams, navigate]);
