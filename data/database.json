@@ -12,7 +12,11 @@
       "title": "Deadpool & Wolverine",
       "platform": "Theaters, Disney+",
       "releaseDate": "2025-07-18",
-      "genres": ["Action", "Comedy", "Superhero"],
+      "genres": [
+        "Action",
+        "Comedy",
+        "Superhero"
+      ],
       "description": "The Merc with a Mouth teams up with Wolverine in this highly anticipated superhero adventure.",
       "poster": "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg",
       "year": 2025,
@@ -24,7 +28,11 @@
       "title": "Inside Out 2",
       "platform": "Theaters, Disney+",
       "releaseDate": "2025-07-19",
-      "genres": ["Animation", "Family", "Comedy"],
+      "genres": [
+        "Animation",
+        "Family",
+        "Comedy"
+      ],
       "description": "Joy, Sadness, and the crew are back for another emotional adventure inside Riley's mind.",
       "poster": "https://image.tmdb.org/t/p/w500/vpnVM9B6NMmQpWeZvzLvDESb2QY.jpg",
       "year": 2025,
@@ -36,7 +44,10 @@
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-20",
-      "genres": ["Comedy", "Drama"],
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
       "description": "Carmy and the crew return for another intense season in the kitchen.",
       "poster": "https://image.tmdb.org/t/p/w500/6P6tMtAunYiXbUtCX6Wm8uWSAsN.jpg",
       "year": 2025,
@@ -48,7 +59,11 @@
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-25",
-      "genres": ["Sci-Fi", "Horror", "Drama"],
+      "genres": [
+        "Sci-Fi",
+        "Horror",
+        "Drama"
+      ],
       "description": "The final season of the beloved supernatural series brings the story to an epic conclusion.",
       "poster": "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
       "year": 2025,
@@ -60,7 +75,11 @@
       "title": "Dune: Part Three",
       "platform": "Theaters",
       "releaseDate": "2025-08-15",
-      "genres": ["Sci-Fi", "Adventure", "Drama"],
+      "genres": [
+        "Sci-Fi",
+        "Adventure",
+        "Drama"
+      ],
       "description": "The epic conclusion to Paul Atreides' journey on the desert planet Arrakis.",
       "poster": "https://image.tmdb.org/t/p/w500/d5NXSklXo0qyIYkgV94XAgMIckC.jpg",
       "year": 2025,
@@ -70,6 +89,6 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T23:47:00.000Z"
+    "lastUpdated": "2025-07-17T23:47:32.497Z"
   }
 }
