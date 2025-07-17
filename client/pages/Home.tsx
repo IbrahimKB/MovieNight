@@ -201,39 +201,44 @@ export default function Home() {
         <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
           {/* Trending in Your Network */}
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Trending in Network
+                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Trending in Network</span>
+                  <span className="sm:hidden">Trending</span>
                 </CardTitle>
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                >
                   View All
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {trendingMovies.map((movie, index) => (
+            <CardContent className="space-y-2 sm:space-y-3">
+              {trendingMovies.slice(0, 3).map((movie, index) => (
                 <div
                   key={movie.id}
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
                   onClick={() => navigate("/movie-search")}
                 >
-                  <div className="w-8 h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                    <Film className="h-4 w-4 text-muted-foreground" />
+                  <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                    <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm leading-none">
+                      <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
                         {movie.title}
                       </p>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                         <span className="text-xs">{movie.rating}</span>
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {movie.watchCount} friends watched
+                      {movie.watchCount} friends
                     </p>
                   </div>
                 </div>
