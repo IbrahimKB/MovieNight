@@ -95,9 +95,11 @@ export const handleLogin: RequestHandler = async (req, res) => {
         console.log("New admin password test:", testNewPassword);
       }
 
-      // Find user by email or username
+      // Find user by email or username (case-insensitive)
       const foundUser = db.users.find(
-        (u) => u.email === body.email || u.username === body.email,
+        (u) =>
+          u.email.toLowerCase() === body.email.toLowerCase() ||
+          u.username.toLowerCase() === body.email.toLowerCase(),
       );
 
       console.log("User found:", foundUser ? "Yes" : "No");
