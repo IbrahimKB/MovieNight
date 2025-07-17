@@ -127,51 +127,54 @@
   "notifications": [],
   "releases": [
     {
-      "id": "release-1",
-      "title": "The Menu",
-      "platform": "Netflix",
-      "releaseDate": "2024-01-15",
+      "id": "053417f8-5d01-48bd-b406-32a4df215a09",
+      "title": "The Bear: Season 4",
+      "platform": "Hulu, Disney+",
+      "releaseDate": "2025-07-18",
       "genres": [
-        "Thriller",
-        "Horror"
+        "Comedy",
+        "Drama"
       ],
-      "year": 2022,
-      "description": "A young couple travels to a remote island to eat at an exclusive restaurant.",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
+      "description": "Carmy and the crew return for another intense season.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T15:28:24.950Z",
+      "updatedAt": "2025-07-17T15:28:24.950Z"
     },
     {
-      "id": "release-2",
-      "title": "Glass Onion",
+      "id": "4e46cc0f-6a40-46cf-952e-72b371578090",
+      "title": "Stranger Things: Season 5",
       "platform": "Netflix",
-      "releaseDate": "2024-01-16",
+      "releaseDate": "2025-07-20",
       "genres": [
-        "Mystery",
-        "Comedy"
+        "Sci-Fi",
+        "Horror",
+        "Drama"
       ],
-      "year": 2022,
-      "description": "Detective Benoit Blanc travels to Greece to solve a mystery.",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
+      "description": "The final season of the beloved supernatural series.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T15:28:24.950Z",
+      "updatedAt": "2025-07-17T15:28:24.950Z"
     },
     {
-      "id": "release-3",
-      "title": "Avatar: The Way of Water",
-      "platform": "Disney+",
-      "releaseDate": "2024-01-17",
+      "id": "b6152c92-24df-4798-a5bc-88f202f5f998",
+      "title": "Blade Runner 2099",
+      "platform": "Amazon Prime Video",
+      "releaseDate": "2025-07-22",
       "genres": [
-        "Action",
-        "Adventure",
-        "Sci-Fi"
+        "Sci-Fi",
+        "Thriller"
       ],
-      "year": 2022,
-      "description": "Jake Sully continues his story on Pandora.",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
+      "description": "A new series set in the Blade Runner universe.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T15:28:24.950Z",
+      "updatedAt": "2025-07-17T15:28:24.950Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T15:28:06.233Z"
+    "lastUpdated": "2025-07-17T15:28:24.951Z"
   }
 }

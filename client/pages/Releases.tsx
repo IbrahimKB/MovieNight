@@ -97,12 +97,11 @@ export default function ReleasesPage() {
     }
   };
 
-  // Load JustWatch status
-  const loadJustWatchStatus = async () => {
+  // Load TMDB status
+  const loadTMDBStatus = async () => {
     try {
-      const result: ApiResponse<RateLimitStatus> = await apiCall(
-        "/releases/justwatch-status",
-      );
+      const result: ApiResponse<RateLimitStatus & { service?: string }> =
+        await apiCall("/releases/tmdb-status");
       if (result.success && result.data) {
         setRateLimitStatus({
           ...result.data,
@@ -112,7 +111,7 @@ export default function ReleasesPage() {
         });
       }
     } catch (error) {
-      console.error("Failed to load JustWatch status:", error);
+      console.error("Failed to load TMDB status:", error);
     }
   };
 
