@@ -50,18 +50,23 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check for existing session on mount
   useEffect(() => {
     const storedUser = localStorage.getItem("movienight_user");
-    if (storedUser) {
+    const storedToken = localStorage.getItem("movienight_token");
+
+    if (storedUser && storedToken) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
+        setToken(storedToken);
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("movienight_user");
+        localStorage.removeItem("movienight_token");
       }
     }
     setIsLoading(false);
