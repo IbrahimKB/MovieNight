@@ -113,6 +113,14 @@ export default function AdminDashboard() {
     isLimited: boolean;
   } | null>(null);
 
+  // Scheduler state
+  const [schedulerStatus, setSchedulerStatus] = useState<{
+    isRunning: boolean;
+    nextScheduledRun: string | null;
+    schedule: string;
+    timezone: string;
+  } | null>(null);
+
   // Modal states
   const [resetPasswordModal, setResetPasswordModal] = useState<{
     open: boolean;
