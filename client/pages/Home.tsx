@@ -256,7 +256,15 @@ export default function Home() {
           )}
 
           {/* Smart Nudge */}
-          <SmartNudge />
+          <SmartNudge
+            onWatchTonight={(movieTitle) => {
+              console.log("Watch tonight:", movieTitle);
+              // Could navigate to movie or add to watchlist
+            }}
+            onDismiss={(nudgeId) => {
+              console.log("Dismissed nudge:", nudgeId);
+            }}
+          />
 
           {/* Upcoming Releases */}
           <Card className="lg:block">
