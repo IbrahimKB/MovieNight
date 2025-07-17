@@ -79,11 +79,9 @@ export function createServer() {
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Express({ app }),
-      new ProfilingIntegration(),
     ],
     environment: process.env.NODE_ENV || "development",
     tracesSampleRate: 0.1,
-    profilesSampleRate: 0.1,
   });
 
   // RequestHandler creates a separate execution context using domains, so that every
