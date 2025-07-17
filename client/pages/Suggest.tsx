@@ -276,6 +276,15 @@ export default function Suggest() {
     return () => clearTimeout(timeoutId);
   }, [searchTerm]);
 
+  // Reset form data when action mode changes
+  useEffect(() => {
+    setSelectedFriends([]);
+    setComment("");
+    setPersonalNotes("");
+    setDesireRating([7]);
+    setWatchedRating([8]);
+  }, [actionMode]);
+
   const handleSelectMovie = (movie: MovieSearchResult) => {
     // Convert MovieSearchResult to Movie format for consistency
     const convertedMovie: Movie = {
