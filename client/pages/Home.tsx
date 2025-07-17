@@ -17,6 +17,9 @@ import {
 import { cn } from "@/lib/utils";
 import SmartNudge from "@/components/SmartNudge";
 import SocialActivityFeed from "@/components/ui/social-activity-feed";
+import SuggestionAccuracy, {
+  SuggestionLeaderboard,
+} from "@/components/ui/suggestion-accuracy";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
