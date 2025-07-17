@@ -1,5 +1,17 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "3f4d359c-247d-46e8-bd41-62452a4a55f8",
+      "username": "kaysar",
+      "email": "kaysar@gmail.com",
+      "name": "kaysar",
+      "password": "$2b$12$nBVMYuB8OEmTX3Uu4BRO2OtHD2E6BgeI1FAH1N7FsdNgJzTrnmOFK",
+      "role": "user",
+      "joinedAt": "2025-07-17T16:04:23.752Z",
+      "createdAt": "2025-07-17T16:04:23.752Z",
+      "updatedAt": "2025-07-17T16:04:23.752Z"
+    }
+  ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
@@ -9,6 +21,6 @@
   "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T16:03:33.530Z"
+    "lastUpdated": "2025-07-17T16:04:53.791Z"
   }
 }
