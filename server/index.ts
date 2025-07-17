@@ -122,6 +122,18 @@ export function createServer() {
     requireAdmin,
     handleDeleteUser,
   );
+  app.get(
+    "/api/admin/scheduler/status",
+    verifyJWT,
+    requireAdmin,
+    handleGetSchedulerStatus,
+  );
+  app.post(
+    "/api/admin/scheduler/trigger",
+    verifyJWT,
+    requireAdmin,
+    handleTriggerManualSync,
+  );
 
   // Movie and suggestion routes
   app.get("/api/movies", handleGetMovies);
