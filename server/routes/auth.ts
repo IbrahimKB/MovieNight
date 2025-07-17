@@ -33,6 +33,13 @@ const signupSchema = z.object({
 // Login handler
 export const handleLogin: RequestHandler = async (req, res) => {
   try {
+    console.log("Login request received:", {
+      method: req.method,
+      headers: req.headers,
+      bodyExists: !!req.body,
+      body: req.body,
+    });
+
     // Ensure req.body exists and is valid
     if (!req.body) {
       const response: ApiResponse = {
