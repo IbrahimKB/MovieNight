@@ -8,167 +8,295 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, X, Eye } from "lucide-react";
+import { Bell, Check, X, Eye, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Notification,
-  MOCK_NOTIFICATIONS,
-  getNotificationIcon,
-  formatTimeAgo,
-  getUnreadCount,
+  getNotifications,
+  getUnreadNotificationCount,
   markNotificationAsRead,
-  markAllNotificationsAsRead,
-  getNotificationActionText,
-  sortNotificationsByDate,
-} from "@/lib/notificationData";
+  deleteNotification,
+  respondToFriendRequest,
+} from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
+
+function getNotificationIcon(type: string) {
+  switch (type) {
+    case "friend_request":
+      return "👥";
+    case "suggestion":
+      return "🎬";
+    case "movie_night":
+      return "🍿";
+    case "reminder":
+      return "⏰";
+    default:
+      return "🔔";
+  }
+}
+
+function formatTimeAgo(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  const diffInDays = Math.floor(diffInHours / 24);
+
+  if (diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function getNotificationActionText(notification: Notification) {
+  switch (notification.type) {
+    case "friend_request":
+      return { primary: "Accept", secondary: "Ignore" };
+    case "suggestion":
+      return { primary: "View", secondary: "Dismiss" };
+    case "movie_night":
+      return { primary: "Join", secondary: "Maybe Later" };
+    case "reminder":
+      return { primary: "Watch Now", secondary: "Dismiss" };
+    default:
+      return { primary: null, secondary: "Dismiss" };
+  }
+}
 
 export default function NotificationBell() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [notifications, setNotifications] =
-    useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!user) return null;
 
-  // Filter notifications for the current user
-  const userNotifications = sortNotificationsByDate(
-    notifications.filter((n) => {
-      // Include all notifications for demo, but in real app would filter by user
-      return true;
-    }),
-  );
+  // Load notifications and unread count
+  useEffect(() => {
+    loadNotifications();
+    loadUnreadCount();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(() => {
+      loadNotifications();
+      loadUnreadCount();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [user.id]);
 
-  const unreadCount = getUnreadCount(userNotifications);
+  const loadNotifications = async () => {
+    try {
+      const userNotifications = await getNotifications(user.id);
+      setNotifications(userNotifications);
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    }
+  };
 
-  // Mark all as read when dropdown opens
+  const loadUnreadCount = async () => {
+    try {
+      const count = await getUnreadNotificationCount(user.id);
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Failed to load unread count:", error);
+    }
+  };
+
+  // Mark notifications as read when dropdown opens
   useEffect(() => {
     if (isOpen && unreadCount > 0) {
-      // Delay marking as read to allow user to see the notifications
-      const timer = setTimeout(() => {
-        setNotifications((prev) => markAllNotificationsAsRead(prev));
+      const timer = setTimeout(async () => {
+        try {
+          // Mark unread notifications as read
+          const unreadNotifications = notifications.filter((n) => !n.read);
+          for (const notification of unreadNotifications) {
+            await markNotificationAsRead(user.id, notification.id);
+          }
+          // Refresh data
+          await loadNotifications();
+          await loadUnreadCount();
+        } catch (error) {
+          console.error("Failed to mark notifications as read:", error);
+        }
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, unreadCount]);
+  }, [isOpen, unreadCount, notifications, user.id]);
 
-  const handleNotificationClick = (notification: Notification) => {
-    // Mark as read
-    setNotifications((prev) => markNotificationAsRead(prev, notification.id));
+  const handleNotificationClick = async (notification: Notification) => {
+    try {
+      // Mark as read if not already
+      if (!notification.read) {
+        await markNotificationAsRead(user.id, notification.id);
+      }
 
-    // Handle navigation based on type
-    switch (notification.type) {
-      case "friend_request":
-        navigate("/friends");
-        break;
-      case "suggestion":
-        navigate("/suggest");
-        break;
-      case "movie_night":
-        navigate("/movie-night");
-        break;
-      case "reminder":
-        navigate("/watchlist");
-        break;
-      default:
-        break;
+      // Handle navigation based on type
+      switch (notification.type) {
+        case "friend_request":
+          navigate("/squad");
+          break;
+        case "suggestion":
+          navigate("/suggest");
+          break;
+        case "movie_night":
+          navigate("/movie-night");
+          break;
+        case "reminder":
+          navigate("/watchlist");
+          break;
+        default:
+          break;
+      }
+
+      setIsOpen(false);
+
+      // Refresh data
+      await loadNotifications();
+      await loadUnreadCount();
+    } catch (error) {
+      console.error("Failed to handle notification click:", error);
     }
-
-    setIsOpen(false);
   };
 
-  const handlePrimaryAction = (
+  const handlePrimaryAction = async (
     e: React.MouseEvent,
     notification: Notification,
   ) => {
     e.stopPropagation();
+    setIsLoading(true);
 
-    switch (notification.type) {
-      case "friend_request":
-        toast({
-          title: "Friend request accepted! 👥",
-          description: `You're now friends with ${notification.actionData?.username}`,
-        });
-        break;
-      case "suggestion":
-        navigate("/suggest");
-        break;
-      case "reminder":
-        toast({
-          title: "Added to tonight's queue! 🎬",
-          description: `${notification.actionData?.movieTitle} is ready for movie night`,
-        });
-        break;
-      case "movie_night":
-        navigate("/movie-night");
-        break;
+    try {
+      switch (notification.type) {
+        case "friend_request":
+          await respondToFriendRequest(
+            user.id,
+            notification.actionData?.friendshipId,
+            "accept",
+          );
+          toast({
+            title: "Friend request accepted! 👥",
+            description: `You're now friends with ${notification.actionData?.userId}`,
+          });
+          break;
+        case "suggestion":
+          navigate("/suggest");
+          break;
+        case "reminder":
+          toast({
+            title: "Added to tonight's queue! 🎬",
+            description: `${notification.actionData?.movieTitle} is ready for movie night`,
+          });
+          break;
+        case "movie_night":
+          navigate("/movie-night");
+          break;
+      }
+
+      // Remove notification after action for friend requests
+      if (notification.type === "friend_request") {
+        await deleteNotification(user.id, notification.id);
+      }
+
+      // Refresh data
+      await loadNotifications();
+      await loadUnreadCount();
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Failed to handle primary action:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process action. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    // Remove notification after action
-    setNotifications((prev) => prev.filter((n) => n.id !== notification.id));
-    setIsOpen(false);
   };
 
-  const handleSecondaryAction = (
+  const handleSecondaryAction = async (
     e: React.MouseEvent,
     notification: Notification,
   ) => {
     e.stopPropagation();
+    setIsLoading(true);
 
-    switch (notification.type) {
-      case "friend_request":
-        // Remove friend request notification when ignored
-        setNotifications((prev) =>
-          prev.filter((n) => n.id !== notification.id),
-        );
-        toast({
-          title: "Friend request ignored",
-          description: `Request from ${notification.actionData?.username} was declined`,
-        });
-        break;
-      case "suggestion":
-        // Mark suggestion as read when dismissed
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notification.id ? { ...n, read: true } : n,
-          ),
-        );
-        toast({
-          title: "Suggestion dismissed",
-          description: "You can view it later in your suggestions",
-        });
-        break;
-      case "reminder":
-        // Remove reminder when dismissed
-        setNotifications((prev) =>
-          prev.filter((n) => n.id !== notification.id),
-        );
-        toast({
-          title: "Reminder dismissed",
-          description: "We won't remind you about this again",
-        });
-        break;
-      default:
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notification.id ? { ...n, read: true } : n,
-          ),
-        );
-        toast({
-          title: "Notification dismissed",
-          description: "You can always view it later",
-        });
+    try {
+      switch (notification.type) {
+        case "friend_request":
+          await respondToFriendRequest(
+            user.id,
+            notification.actionData?.friendshipId,
+            "reject",
+          );
+          await deleteNotification(user.id, notification.id);
+          toast({
+            title: "Friend request ignored",
+            description: "Request has been declined",
+          });
+          break;
+        case "suggestion":
+          await markNotificationAsRead(user.id, notification.id);
+          toast({
+            title: "Suggestion dismissed",
+            description: "You can view it later in your suggestions",
+          });
+          break;
+        case "reminder":
+          await deleteNotification(user.id, notification.id);
+          toast({
+            title: "Reminder dismissed",
+            description: "We won't remind you about this again",
+          });
+          break;
+        default:
+          await markNotificationAsRead(user.id, notification.id);
+          toast({
+            title: "Notification dismissed",
+            description: "You can always view it later",
+          });
+      }
+
+      // Refresh data
+      await loadNotifications();
+      await loadUnreadCount();
+    } catch (error) {
+      console.error("Failed to handle secondary action:", error);
+      toast({
+        title: "Error",
+        description: "Failed to process action. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => markAllNotificationsAsRead(prev));
-    toast({
-      title: "All notifications marked as read",
-    });
+  const handleMarkAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter((n) => !n.read);
+      for (const notification of unreadNotifications) {
+        await markNotificationAsRead(user.id, notification.id);
+      }
+
+      await loadNotifications();
+      await loadUnreadCount();
+
+      toast({
+        title: "All notifications marked as read",
+      });
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark notifications as read",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -220,7 +348,7 @@ export default function NotificationBell() {
 
           <CardContent className="p-0">
             <ScrollArea className="h-[300px]">
-              {userNotifications.length === 0 ? (
+              {notifications.length === 0 ? (
                 <div className="p-6 text-center">
                   <Bell className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">
@@ -229,7 +357,7 @@ export default function NotificationBell() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {userNotifications.map((notification) => {
+                  {notifications.map((notification) => {
                     const actions = getNotificationActionText(notification);
                     const isUnread = !notification.read;
 
@@ -264,7 +392,7 @@ export default function NotificationBell() {
                             </p>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">
-                                {formatTimeAgo(notification.created_at)}
+                                {formatTimeAgo(notification.createdAt)}
                               </span>
                               {isUnread && (
                                 <Badge
@@ -288,8 +416,13 @@ export default function NotificationBell() {
                                     onClick={(e) =>
                                       handlePrimaryAction(e, notification)
                                     }
+                                    disabled={isLoading}
                                   >
-                                    <Check className="h-3 w-3 mr-1" />
+                                    {isLoading ? (
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <Check className="h-3 w-3 mr-1" />
+                                    )}
                                     {actions.primary}
                                   </Button>
                                 )}
@@ -301,6 +434,7 @@ export default function NotificationBell() {
                                     onClick={(e) =>
                                       handleSecondaryAction(e, notification)
                                     }
+                                    disabled={isLoading}
                                   >
                                     <X className="h-3 w-3 mr-1" />
                                     {actions.secondary}
@@ -317,7 +451,7 @@ export default function NotificationBell() {
             </ScrollArea>
 
             {/* Footer */}
-            {userNotifications.length > 0 && (
+            {notifications.length > 0 && (
               <div className="border-t border-border/50 p-3">
                 <Button
                   variant="ghost"
@@ -325,7 +459,7 @@ export default function NotificationBell() {
                   className="w-full text-sm text-muted-foreground hover:text-foreground"
                   onClick={() => {
                     setIsOpen(false);
-                    // In a real app, this would navigate to a full notifications page
+                    // Future: navigate to full notifications page
                     toast({
                       title: "All notifications",
                       description: "This would open a full notifications page",
