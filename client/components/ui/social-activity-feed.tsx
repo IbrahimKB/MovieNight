@@ -59,88 +59,50 @@ interface ActivityItem {
   };
 }
 
-// Mock social activity data
-const mockActivities: ActivityItem[] = [
-  {
-    id: "1",
-    type: "suggestion",
-    user: { id: "user-2", name: "Omar" },
-    movie: {
-      id: "1",
-      title: "The Menu",
-      year: 2022,
-      genres: ["Thriller", "Horror"],
-    },
-    metadata: {
-      desire_rating: 8,
-      comment: "Perfect for our horror movie night! 🍽️",
-      suggested_to: ["user-3", "user-4"],
-    },
-    timestamp: "2025-01-17T10:30:00Z",
-    interactions: { likes: 3, comments: 2, userLiked: false },
-  },
-  {
-    id: "2",
-    type: "watched",
-    user: { id: "user-3", name: "Sara" },
-    movie: {
-      id: "2",
-      title: "Glass Onion: A Knives Out Mystery",
-      year: 2022,
-      genres: ["Mystery", "Comedy"],
-    },
-    metadata: {
-      rating: 9,
-      watch_date: "2025-01-16",
-      platform: "Netflix",
-    },
-    timestamp: "2025-01-16T22:15:00Z",
-    interactions: { likes: 5, comments: 3, userLiked: true },
-  },
-  {
-    id: "3",
-    type: "movie_night",
-    user: { id: "user-4", name: "Alex" },
-    movie: {
-      id: "3",
-      title: "Avatar: The Way of Water",
-      year: 2022,
-      genres: ["Action", "Adventure", "Sci-Fi"],
-    },
-    metadata: {
-      watch_date: "2025-01-18T20:00:00Z",
-      comment: "Who's ready for an epic Friday night? 🌊",
-    },
-    timestamp: "2025-01-16T15:45:00Z",
-    interactions: { likes: 8, comments: 4, userLiked: false },
-  },
-  {
-    id: "4",
-    type: "friend_joined",
-    user: { id: "user-5", name: "Maya" },
-    metadata: {},
-    timestamp: "2025-01-16T09:20:00Z",
-    interactions: { likes: 12, comments: 0, userLiked: false },
-  },
-  {
-    id: "5",
-    type: "rated",
-    user: { id: "user-2", name: "Omar" },
-    movie: {
-      id: "4",
-      title: "The Batman",
-      year: 2022,
-      genres: ["Action", "Crime", "Drama"],
-    },
-    metadata: {
-      rating: 7,
-      desire_rating: 6,
-      comment: "Better than expected! Robert Pattinson nailed it 🦇",
-    },
-    timestamp: "2025-01-15T19:30:00Z",
-    interactions: { likes: 6, comments: 1, userLiked: true },
-  },
-];
+// API function to fetch social activities
+const fetchSocialActivities = async (): Promise<ActivityItem[]> => {
+  try {
+    const token = localStorage.getItem("movienight_token");
+    if (!token) return [];
+
+    const response = await fetch("/api/activities", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch activities");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching social activities:", error);
+    return [];
+  }
+};
+
+// API function to like/unlike an activity
+const toggleActivityLike = async (activityId: string): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem("movienight_token");
+    if (!token) return false;
+
+    const response = await fetch(`/api/activities/${activityId}/like`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error("Error toggling activity like:", error);
+    return false;
+  }
+};
 
 interface SocialActivityFeedProps {
   className?: string;
@@ -150,8 +112,21 @@ export default function SocialActivityFeed({
   className,
 }: SocialActivityFeedProps) {
   const { user } = useAuth();
-  const [activities, setActivities] = useState<ActivityItem[]>(mockActivities);
-  const [loading, setLoading] = useState(false);
+  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Load activities on component mount
+  useEffect(() => {
+    const loadActivities = async () => {
+      setLoading(true);
+      const fetchedActivities = await fetchSocialActivities();
+      setActivities(fetchedActivities);
+      setLoading(false);
+    };
+
+    loadActivities();
+  }, []);
 
   const formatTimeAgo = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -167,7 +142,8 @@ export default function SocialActivityFeed({
     return date.toLocaleDateString();
   };
 
-  const handleLike = (activityId: string) => {
+  const handleLike = async (activityId: string) => {
+    // Optimistic update
     setActivities((prev) =>
       prev.map((activity) => {
         if (activity.id === activityId) {
@@ -186,6 +162,35 @@ export default function SocialActivityFeed({
         return activity;
       }),
     );
+
+    // Try to sync with server
+    const success = await toggleActivityLike(activityId);
+    if (!success) {
+      // Revert optimistic update on failure
+      setActivities((prev) =>
+        prev.map((activity) => {
+          if (activity.id === activityId) {
+            const userLiked = !activity.interactions.userLiked;
+            return {
+              ...activity,
+              interactions: {
+                ...activity.interactions,
+                userLiked,
+                likes: userLiked
+                  ? activity.interactions.likes + 1
+                  : activity.interactions.likes - 1,
+              },
+            };
+          }
+          return activity;
+        }),
+      );
+      toast({
+        title: "Error",
+        description: "Failed to update like. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleComment = (activityId: string) => {
@@ -308,148 +313,174 @@ export default function SocialActivityFeed({
 
       {/* Activity Feed */}
       <div className="space-y-3 sm:space-y-4">
-        {activities.map((activity) => (
-          <Card
-            key={activity.id}
-            className="hover:shadow-md transition-shadow active:scale-[0.98] sm:active:scale-100"
-          >
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex gap-2 sm:gap-3">
-                {/* User Avatar */}
-                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
-                    {activity.user.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading activities...</p>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center py-8 space-y-2">
+            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+              <Users className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-medium">No activities yet</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              Start by adding friends and suggesting movies to see activity
+              here!
+            </p>
+          </div>
+        ) : (
+          activities.map((activity) => (
+            <Card
+              key={activity.id}
+              className="hover:shadow-md transition-shadow active:scale-[0.98] sm:active:scale-100"
+            >
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex gap-2 sm:gap-3">
+                  {/* User Avatar */}
+                  <Avatar className="h-8 w-8 sm:h-10 sm:w-10 shrink-0">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
+                      {activity.user.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
 
-                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
-                  {/* Activity Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                        {getActivityIcon(activity.type)}
-                        <span className="font-medium text-sm sm:text-base truncate">
-                          {activity.user.name}
-                        </span>
-                        <div className="text-sm sm:text-base min-w-0 flex-1">
-                          {getActivityText(activity)}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {formatTimeAgo(activity.timestamp)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Movie Details */}
-                  {activity.movie && (
-                    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-accent/30 rounded-md">
-                      <div className="w-8 h-10 sm:w-12 sm:h-16 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-4 w-4 sm:h-6 sm:w-6 text-muted-foreground" />
-                      </div>
+                  <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
+                    {/* Activity Header */}
+                    <div className="flex items-start justify-between">
                       <div className="space-y-1 min-w-0 flex-1">
-                        <h4 className="font-medium text-sm sm:text-base leading-tight">
-                          {activity.movie.title} ({activity.movie.year})
-                        </h4>
-                        <div className="flex gap-1 flex-wrap">
-                          {activity.movie.genres.slice(0, 2).map((genre) => (
-                            <Badge
-                              key={genre}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {genre}
-                            </Badge>
-                          ))}
+                        <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                          {getActivityIcon(activity.type)}
+                          <span className="font-medium text-sm sm:text-base truncate">
+                            {activity.user.name}
+                          </span>
+                          <div className="text-sm sm:text-base min-w-0 flex-1">
+                            {getActivityText(activity)}
+                          </div>
                         </div>
-                        {activity.metadata.platform && (
-                          <p className="text-xs text-muted-foreground">
-                            on {activity.metadata.platform}
-                          </p>
-                        )}
+                        <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {formatTimeAgo(activity.timestamp)}
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Comment */}
-                  {activity.metadata.comment && (
-                    <div className="bg-muted/50 p-3 rounded-md">
-                      <p className="text-sm italic">
-                        "{activity.metadata.comment}"
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Suggestion Accuracy Badge */}
-                  {activity.type === "rated" &&
-                    activity.metadata.desire_rating &&
-                    activity.metadata.rating && (
-                      <div className="flex items-center gap-2">
-                        {(() => {
-                          const accuracy = getSuggestionAccuracy(
-                            activity.metadata.desire_rating,
-                            activity.metadata.rating,
-                          );
-                          return (
-                            <Badge variant="outline" className={accuracy.color}>
-                              {accuracy.label}
-                            </Badge>
-                          );
-                        })()}
+                    {/* Movie Details */}
+                    {activity.movie && (
+                      <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-accent/30 rounded-md">
+                        <div className="w-8 h-10 sm:w-12 sm:h-16 bg-muted rounded flex items-center justify-center shrink-0">
+                          <Film className="h-4 w-4 sm:h-6 sm:w-6 text-muted-foreground" />
+                        </div>
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <h4 className="font-medium text-sm sm:text-base leading-tight">
+                            {activity.movie.title} ({activity.movie.year})
+                          </h4>
+                          <div className="flex gap-1 flex-wrap">
+                            {activity.movie.genres.slice(0, 2).map((genre) => (
+                              <Badge
+                                key={genre}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {genre}
+                              </Badge>
+                            ))}
+                          </div>
+                          {activity.metadata.platform && (
+                            <p className="text-xs text-muted-foreground">
+                              on {activity.metadata.platform}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
 
-                  {/* Interaction Buttons */}
-                  <div className="flex items-center gap-3 sm:gap-4 pt-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLike(activity.id)}
-                      className={cn(
-                        "h-8 px-2 sm:px-3 touch-manipulation active:scale-95",
-                        activity.interactions.userLiked && "text-red-500",
+                    {/* Comment */}
+                    {activity.metadata.comment && (
+                      <div className="bg-muted/50 p-3 rounded-md">
+                        <p className="text-sm italic">
+                          "{activity.metadata.comment}"
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Suggestion Accuracy Badge */}
+                    {activity.type === "rated" &&
+                      activity.metadata.desire_rating &&
+                      activity.metadata.rating && (
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const accuracy = getSuggestionAccuracy(
+                              activity.metadata.desire_rating,
+                              activity.metadata.rating,
+                            );
+                            return (
+                              <Badge
+                                variant="outline"
+                                className={accuracy.color}
+                              >
+                                {accuracy.label}
+                              </Badge>
+                            );
+                          })()}
+                        </div>
                       )}
-                    >
-                      <Heart
+
+                    {/* Interaction Buttons */}
+                    <div className="flex items-center gap-3 sm:gap-4 pt-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleLike(activity.id)}
                         className={cn(
-                          "h-4 w-4 mr-1",
-                          activity.interactions.userLiked && "fill-current",
+                          "h-8 px-2 sm:px-3 touch-manipulation active:scale-95",
+                          activity.interactions.userLiked && "text-red-500",
                         )}
-                      />
-                      <span className="text-sm">
-                        {activity.interactions.likes}
-                      </span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleComment(activity.id)}
-                      className="h-8 px-2 sm:px-3 touch-manipulation active:scale-95"
-                    >
-                      <MessageCircle className="h-4 w-4 mr-1" />
-                      <span className="text-sm">
-                        {activity.interactions.comments}
-                      </span>
-                    </Button>
+                      >
+                        <Heart
+                          className={cn(
+                            "h-4 w-4 mr-1",
+                            activity.interactions.userLiked && "fill-current",
+                          )}
+                        />
+                        <span className="text-sm">
+                          {activity.interactions.likes}
+                        </span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleComment(activity.id)}
+                        className="h-8 px-2 sm:px-3 touch-manipulation active:scale-95"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-1" />
+                        <span className="text-sm">
+                          {activity.interactions.comments}
+                        </span>
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {/* Load More */}
-      <div className="text-center">
-        <Button
-          variant="outline"
-          onClick={() => setLoading(true)}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "Load more activities"}
-        </Button>
-      </div>
+      {activities.length > 0 && (
+        <div className="text-center">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setLoadingMore(true);
+              // TODO: Implement pagination when backend supports it
+              setTimeout(() => setLoadingMore(false), 1000);
+            }}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading..." : "Load more activities"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
