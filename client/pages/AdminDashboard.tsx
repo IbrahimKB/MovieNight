@@ -85,6 +85,7 @@ export default function AdminDashboard() {
   // State for different data collections
   const [users, setUsers] = useState<User[]>([]);
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [releases, setReleases] = useState<Release[]>([]);
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
