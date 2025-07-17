@@ -80,21 +80,39 @@ const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
   if (!query.trim()) return [];
 
   try {
+    const token = localStorage.getItem("movienight_token");
+    if (!token) {
+      console.error("No authentication token found");
+      return [];
+    }
+
     const response = await fetch(
       `/api/tmdb/search?q=${encodeURIComponent(query)}`,
       {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       },
     );
 
     if (!response.ok) {
-      throw new Error("Search failed");
+      const errorText = await response.text();
+      console.error(`Search failed: ${response.status} - ${errorText}`);
+      throw new Error(`Search failed: ${response.status}`);
     }
 
     const data: SearchResponse = await response.json();
-    return data.results;
+
+    // Ensure each result has proper structure
+    const results = data.results || [];
+    return results.map((movie) => ({
+      ...movie,
+      genres: movie.genres || [],
+      description: movie.description || "No description available",
+      poster: movie.poster || null,
+      rating: movie.rating || 0,
+    }));
   } catch (error) {
     console.error("Movie search error:", error);
     return [];
@@ -554,15 +572,17 @@ export default function Suggest() {
                                 />
                               </div>
                               <div className="flex gap-1 flex-wrap">
-                                {movie.genres.slice(0, 2).map((genre) => (
-                                  <Badge
-                                    key={genre}
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    {genre}
-                                  </Badge>
-                                ))}
+                                {(movie.genres || [])
+                                  .slice(0, 2)
+                                  .map((genre) => (
+                                    <Badge
+                                      key={genre}
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
+                                      {genre}
+                                    </Badge>
+                                  ))}
                               </div>
                               <p className="text-xs text-muted-foreground line-clamp-2">
                                 {movie.description}
@@ -604,7 +624,7 @@ export default function Suggest() {
                           {selectedMovie.title} ({selectedMovie.year})
                         </h4>
                         <div className="flex gap-1">
-                          {selectedMovie.genres.map((genre) => (
+                          {(selectedMovie.genres || []).map((genre) => (
                             <Badge
                               key={genre}
                               variant="secondary"
@@ -753,7 +773,7 @@ export default function Suggest() {
                             </div>
                           )}
                           <div className="flex gap-1">
-                            {suggestion.movie.genres.map((genre) => (
+                            {(suggestion.movie.genres || []).map((genre) => (
                               <Badge
                                 key={genre}
                                 variant="secondary"
