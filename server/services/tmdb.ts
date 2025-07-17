@@ -280,14 +280,21 @@ class TMDBService {
 
   async getUpcomingTVShows(days: number = 30): Promise<UpcomingRelease[]> {
     try {
-      const today = new Date();
-      const futureDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+      // Start from 1 week ago to catch recent releases too
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + days);
 
-      const todayStr = today.toISOString().split("T")[0];
+      const startDateStr = startDate.toISOString().split("T")[0];
       const futureDateStr = futureDate.toISOString().split("T")[0];
 
+      console.log(
+        `📺 Fetching TMDB TV shows from ${startDateStr} to ${futureDateStr}`,
+      );
+
       const data = await this.makeRequest("/discover/tv", {
-        "first_air_date.gte": todayStr,
+        "first_air_date.gte": startDateStr,
         "first_air_date.lte": futureDateStr,
         sort_by: "first_air_date.asc",
         page: 1,
@@ -295,6 +302,7 @@ class TMDBService {
         with_original_language: "en", // Focus on English releases
       });
 
+      console.log(`📊 TMDB returned ${data.results?.length || 0} TV shows`);
       return this.formatReleases(data.results, "tv");
     } catch (error) {
       console.error("TMDB upcoming TV shows error:", error);
