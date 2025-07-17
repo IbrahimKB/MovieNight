@@ -34,8 +34,20 @@ export default function MovieSearchPage() {
   };
 
   const handleSuggestToFriends = () => {
-    // TODO: Implement suggest to friends functionality
-    console.log("Suggest to friends:", selectedMovie);
+    if (!selectedMovie) return;
+
+    // Navigate to suggest page with movie data
+    const params = new URLSearchParams({
+      title: selectedMovie.title,
+      year: selectedMovie.year.toString(),
+      genres: JSON.stringify(selectedMovie.genres),
+      description: selectedMovie.description,
+      tmdbId: selectedMovie.tmdbId.toString(),
+      mediaType: selectedMovie.mediaType,
+      isFromMovieSearch: "true",
+    });
+
+    navigate(`/suggest?${params.toString()}`);
     setSelectedMovie(null);
   };
 
