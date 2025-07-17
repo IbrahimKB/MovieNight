@@ -199,13 +199,16 @@ export default function AdminDashboard() {
 
     setResettingPassword(true);
     try {
-      const result: ApiResponse = await apiCall("/admin/users/reset-password", {
-        method: "POST",
-        body: JSON.stringify({
-          userId: resetPasswordModal.user.id,
-          newPassword: newPassword,
-        }),
-      });
+      const result: ApiResponse<any> = await apiCall(
+        "/admin/users/reset-password",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            userId: resetPasswordModal.user.id,
+            newPassword: newPassword,
+          }),
+        },
+      );
 
       if (result.success) {
         toast.success("Password reset successfully");
