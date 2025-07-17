@@ -24,6 +24,9 @@ import {
   Heart,
   Eye,
   MessageSquare,
+  Search,
+  Database,
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 
