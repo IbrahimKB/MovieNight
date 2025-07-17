@@ -401,13 +401,13 @@ export default function SocialActivityFeed({
                     )}
 
                   {/* Interaction Buttons */}
-                  <div className="flex items-center gap-4 pt-2">
+                  <div className="flex items-center gap-3 sm:gap-4 pt-2">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleLike(activity.id)}
                       className={cn(
-                        "h-8 px-2",
+                        "h-8 px-2 sm:px-3 touch-manipulation active:scale-95",
                         activity.interactions.userLiked && "text-red-500",
                       )}
                     >
@@ -417,16 +417,20 @@ export default function SocialActivityFeed({
                           activity.interactions.userLiked && "fill-current",
                         )}
                       />
-                      {activity.interactions.likes}
+                      <span className="text-sm">
+                        {activity.interactions.likes}
+                      </span>
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => handleComment(activity.id)}
-                      className="h-8 px-2"
+                      className="h-8 px-2 sm:px-3 touch-manipulation active:scale-95"
                     >
                       <MessageCircle className="h-4 w-4 mr-1" />
-                      {activity.interactions.comments}
+                      <span className="text-sm">
+                        {activity.interactions.comments}
+                      </span>
                     </Button>
                   </div>
                 </div>
