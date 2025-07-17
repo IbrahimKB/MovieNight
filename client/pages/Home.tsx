@@ -1,19 +1,20 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Calendar, Search, Filter, Share2 } from "lucide-react";
+  Calendar,
+  TrendingUp,
+  Users,
+  Film,
+  Star,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import SmartNudge from "@/components/SmartNudge";
-import { toast } from "@/components/ui/use-toast";
+import SocialActivityFeed from "@/components/ui/social-activity-feed";
+import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 interface MovieRelease {
