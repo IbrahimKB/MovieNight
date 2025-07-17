@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Film, Eye, EyeOff } from "lucide-react";
+import { Loader2, Film, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
@@ -14,8 +14,14 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
-  const { login, isLoading } = useAuth();
+  const [fieldErrors, setFieldErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+  const { login, isLoading, lastError, clearError } = useAuth();
   const navigate = useNavigate();
+  const errorRef = useRef<HTMLDivElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   // Load saved credentials if available
   useEffect(() => {
@@ -28,17 +34,50 @@ export default function Login() {
     }
   }, []);
 
+  const validateFields = () => {
+    const errors: { email?: string; password?: string } = {};
+
+    if (!email.trim()) {
+      errors.email = "Email or username is required";
+    } else if (
+      email.includes("@") &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      errors.password = "Password is required";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters long";
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
+    clearError();
 
-    if (!email || !password) {
-      setError("Please fill in all fields");
+    if (!validateFields()) {
+      // Focus on first error field
+      if (fieldErrors.email && emailRef.current) {
+        emailRef.current.focus();
+      }
+      // Announce error to screen readers
+      setTimeout(() => {
+        if (errorRef.current) {
+          errorRef.current.focus();
+        }
+      }, 100);
       return;
     }
 
-    const success = await login(email, password);
-    if (success) {
+    const result = await login(email, password);
+    if (result.success) {
       // Handle remember me functionality
       if (rememberMe) {
         localStorage.setItem("movienight_remember_email", email);
@@ -54,48 +93,90 @@ export default function Login() {
       } else {
         navigate("/");
       }
-    } else {
-      setError("Invalid email/username or password");
+    } else if (result.error) {
+      // Handle field-specific errors
+      if (result.error.field) {
+        setFieldErrors({ [result.error.field]: result.error.message });
+      } else {
+        setError(result.error.message);
+      }
+
+      // Focus error for screen readers
+      setTimeout(() => {
+        if (errorRef.current) {
+          errorRef.current.focus();
+        }
+      }, 100);
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      {/* Skip to main content link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50"
+      >
+        Skip to main content
+      </a>
+
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
         {/* Logo/Brand */}
-        <div className="text-center">
+        <header className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
-            <Film className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+            <Film
+              className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
+              aria-hidden="true"
+            />
             <h1 className="text-responsive-xl font-bold">MovieNight</h1>
           </div>
           <p className="text-responsive-sm text-muted-foreground px-2">
             Sign in to discover and plan movie nights with friends
           </p>
-        </div>
+        </header>
 
         {/* Login Form */}
         <Card className="mobile-card border-0 sm:border shadow-none sm:shadow-sm">
           <CardHeader className="pb-4 sm:pb-6">
-            <CardTitle className="text-responsive-lg text-center">
+            <CardTitle
+              className="text-responsive-lg text-center"
+              id="login-title"
+            >
               Welcome Back
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 sm:space-y-5"
+              noValidate
+              aria-labelledby="login-title"
+              id="main-content"
+            >
+              {(error || lastError || Object.keys(fieldErrors).length > 0) && (
+                <Alert variant="destructive" role="alert" aria-live="polite">
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  <AlertDescription ref={errorRef} tabIndex={-1}>
+                    {(error || lastError?.message) && (
+                      <div className="font-medium">
+                        {error || lastError?.message}
+                      </div>
+                    )}
+                    {fieldErrors.email && <div>{fieldErrors.email}</div>}
+                    {fieldErrors.password && <div>{fieldErrors.password}</div>}
+                  </AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="email"
-                  className="text-responsive-sm font-medium"
+                  className="text-responsive-sm font-medium block"
                 >
-                  Email or Username
+                  Email or Username *
                 </label>
                 <Input
+                  ref={emailRef}
                   id="email"
                   type="text"
                   placeholder="Enter your email or username"
@@ -104,15 +185,29 @@ export default function Login() {
                   disabled={isLoading}
                   autoComplete="username"
                   className="input-mobile h-12 text-base"
+                  aria-required="true"
+                  aria-invalid={fieldErrors.email ? "true" : "false"}
+                  aria-describedby={
+                    fieldErrors.email ? "email-error" : undefined
+                  }
                 />
+                {fieldErrors.email && (
+                  <div
+                    id="email-error"
+                    className="text-sm text-destructive"
+                    role="alert"
+                  >
+                    {fieldErrors.email}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="password"
-                  className="text-responsive-sm font-medium"
+                  className="text-responsive-sm font-medium block"
                 >
-                  Password
+                  Password *
                 </label>
                 <div className="relative">
                   <Input
@@ -124,6 +219,13 @@ export default function Login() {
                     disabled={isLoading}
                     autoComplete="current-password"
                     className="input-mobile h-12 text-base pr-12"
+                    aria-required="true"
+                    aria-invalid={fieldErrors.password ? "true" : "false"}
+                    aria-describedby={
+                      fieldErrors.password
+                        ? "password-error"
+                        : "password-toggle-desc"
+                    }
                   />
                   <Button
                     type="button"
@@ -131,14 +233,31 @@ export default function Login() {
                     size="sm"
                     className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                    aria-describedby="password-toggle-desc"
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
+                      <EyeOff className="h-5 w-5" aria-hidden="true" />
                     ) : (
-                      <Eye className="h-5 w-5" />
+                      <Eye className="h-5 w-5" aria-hidden="true" />
                     )}
                   </Button>
+                  <div id="password-toggle-desc" className="sr-only">
+                    Toggle password visibility
+                  </div>
                 </div>
+                {fieldErrors.password && (
+                  <div
+                    id="password-error"
+                    className="text-sm text-destructive"
+                    role="alert"
+                  >
+                    {fieldErrors.password}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center space-x-3 py-1">
@@ -150,6 +269,7 @@ export default function Login() {
                   }
                   disabled={isLoading}
                   className="h-5 w-5"
+                  aria-describedby="remember-me-desc"
                 />
                 <label
                   htmlFor="remember-me"
@@ -157,6 +277,9 @@ export default function Login() {
                 >
                   Remember me
                 </label>
+                <div id="remember-me-desc" className="sr-only">
+                  Keep me logged in on this device
+                </div>
               </div>
 
               <Button
@@ -164,16 +287,26 @@ export default function Login() {
                 className="w-full btn-touch h-12 text-base font-medium animate-press"
                 disabled={isLoading}
                 size="lg"
+                aria-describedby="submit-desc"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Signing in...
+                    <Loader2
+                      className="mr-2 h-5 w-5 animate-spin"
+                      aria-hidden="true"
+                    />
+                    <span>Signing in...</span>
+                    <span className="sr-only">
+                      Please wait while we sign you in
+                    </span>
                   </>
                 ) : (
                   "Sign In"
                 )}
               </Button>
+              <div id="submit-desc" className="sr-only">
+                Submit the login form to access your MovieNight account
+              </div>
             </form>
 
             <div className="mt-6 sm:mt-8 text-center">
@@ -182,7 +315,8 @@ export default function Login() {
               </span>
               <Link
                 to="/signup"
-                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm"
+                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm focus:outline-2 focus:outline-primary focus:outline-offset-2"
+                aria-label="Go to sign up page to create a new account"
               >
                 Sign up
               </Link>

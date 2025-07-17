@@ -179,11 +179,6 @@ export function handlePWAShortcuts(): void {
 export async function initializePWA(): Promise<void> {
   console.log("Initializing PWA features...");
 
-  // Register service worker in production
-  if (isProduction) {
-    await registerServiceWorker();
-  }
-
   // Handle PWA shortcuts
   handlePWAShortcuts();
 

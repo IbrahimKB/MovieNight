@@ -6,6 +6,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initializePWA } from "./lib/pwa";
+import { registerSW } from "virtual:pwa-register";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "./pages/Home";
@@ -33,6 +34,19 @@ document.documentElement.classList.add("dark");
 
 // Initialize PWA features
 initializePWA();
+
+// Register service worker for PWA
+if ("serviceWorker" in navigator) {
+  registerSW({
+    onNeedRefresh() {
+      console.log("New app version available");
+      // You can show a toast or prompt here
+    },
+    onOfflineReady() {
+      console.log("App ready for offline use");
+    },
+  });
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

@@ -18,37 +18,15 @@ export default defineConfig(({ mode }) => ({
     expressPlugin(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["movienight-favicon.svg", "robots.txt"],
-      manifest: {
-        name: "MovieNight - Discover & Share Movies with Friends",
-        short_name: "MovieNight",
-        description:
-          "Discover movies, suggest to friends, and build your perfect movie night with MovieNight.",
-        theme_color: "#dc2626",
-        background_color: "#0a0a0a",
-        display: "standalone",
-        orientation: "portrait-primary",
-        scope: "/",
-        start_url: "/",
-        icons: [
-          {
-            src: "icons/icon-192x192.svg",
-            sizes: "192x192",
-            type: "image/svg+xml",
-          },
-          {
-            src: "icons/icon-512x512.svg",
-            sizes: "512x512",
-            type: "image/svg+xml",
-          },
-          {
-            src: "icons/icon-512x512.svg",
-            sizes: "512x512",
-            type: "image/svg+xml",
-            purpose: "any maskable",
-          },
-        ],
-      },
+      includeAssets: [
+        "movienight-favicon.svg",
+        "robots.txt",
+        "icons/*.svg",
+        "icons/*.png",
+      ],
+      manifest: false, // Use external manifest.json instead
+      injectRegister: "auto",
+      strategies: "generateSW",
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         runtimeCaching: [

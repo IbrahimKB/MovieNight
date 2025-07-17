@@ -6,10 +6,57 @@
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [],
+  "releases": [
+    {
+      "id": "d5a2fbbc-e73a-4250-9e41-0c224aa26c67",
+      "title": "The Bear: Season 4",
+      "platform": "Hulu, Disney+",
+      "releaseDate": "2025-07-18",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "description": "Carmy and the crew return for another intense season.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T17:51:04.687Z",
+      "updatedAt": "2025-07-17T17:51:04.687Z"
+    },
+    {
+      "id": "a1877adc-5c39-4a3e-b20d-a91331892354",
+      "title": "Stranger Things: Season 5",
+      "platform": "Netflix",
+      "releaseDate": "2025-07-20",
+      "genres": [
+        "Sci-Fi",
+        "Horror",
+        "Drama"
+      ],
+      "description": "The final season of the beloved supernatural series.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T17:51:04.687Z",
+      "updatedAt": "2025-07-17T17:51:04.687Z"
+    },
+    {
+      "id": "6172d459-7e0d-4917-952a-187e4b49544b",
+      "title": "Blade Runner 2099",
+      "platform": "Amazon Prime Video",
+      "releaseDate": "2025-07-22",
+      "genres": [
+        "Sci-Fi",
+        "Thriller"
+      ],
+      "description": "A new series set in the Blade Runner universe.",
+      "year": 2025,
+      "poster": null,
+      "createdAt": "2025-07-17T17:51:04.687Z",
+      "updatedAt": "2025-07-17T17:51:04.687Z"
+    }
+  ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T17:24:35.844Z"
+    "lastUpdated": "2025-07-17T17:51:04.688Z"
   },
   "notificationPreferences": []
 }

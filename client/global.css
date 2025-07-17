@@ -252,4 +252,102 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Accessibility Improvements */
+
+  /* Enhanced focus indicators */
+  .focus-visible:focus-visible,
+  [data-focus-visible]:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove default focus outline when using custom indicators */
+  .focus-visible:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Interactive element minimum sizes (WCAG 2.5.5) */
+  button:not(.btn-sm),
+  [role="button"]:not(.btn-sm),
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Error state indicators */
+  [aria-invalid="true"] {
+    border-color: hsl(var(--destructive));
+    box-shadow: 0 0 0 1px hsl(var(--destructive));
+  }
+
+  [aria-invalid="true"]:focus {
+    box-shadow:
+      0 0 0 1px hsl(var(--destructive)),
+      0 0 0 3px hsl(var(--destructive) / 0.3);
+  }
+
+  /* High contrast focus for form controls */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 0;
+    border-color: hsl(var(--primary));
+  }
+
+  /* Skip links */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 600;
+    z-index: 1000;
+    transition: top 0.3s;
+  }
+
+  .skip-link:focus {
+    top: 6px;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .animate-pulse,
+    .animate-spin,
+    .animate-bounce {
+      animation: none !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 0 0% 0%;
+      --border: 0 0% 50%;
+      --primary: 240 100% 50%;
+    }
+
+    .dark {
+      --background: 0 0% 0%;
+      --foreground: 0 0% 100%;
+      --border: 0 0% 75%;
+    }
+  }
 }
