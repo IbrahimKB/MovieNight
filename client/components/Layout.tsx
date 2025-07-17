@@ -10,6 +10,7 @@ import {
   LogOut,
   User,
   Settings,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
