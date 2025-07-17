@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PlatformLogo } from "@/components/ui/platform-logo";
+import { PlatformLogo, PlatformBadges } from "@/components/ui/platform-logo";
 import {
   Users,
   UserCheck,
