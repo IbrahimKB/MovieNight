@@ -128,7 +128,7 @@ export const handleSignup: RequestHandler = async (req, res) => {
   try {
     const body = signupSchema.parse(req.body) as SignupRequest;
 
-    const newUser = await withTransaction(async (db) => {
+    const result = await withTransaction(async (db) => {
       // Check if user already exists
       const existingUser = db.users.find(
         (u) => u.email === body.email || u.username === body.username,
@@ -138,13 +138,17 @@ export const handleSignup: RequestHandler = async (req, res) => {
         throw new Error("User with this email or username already exists");
       }
 
+      // Hash password
+      const hashedPassword = await bcrypt.hash(body.password, 12);
+
       // Create new user
       const user: User = {
         id: generateId(),
         username: body.username,
         email: body.email,
         name: body.name,
-        password: body.password, // In production, hash this
+        password: hashedPassword,
+        role: "user", // Default role is user
         joinedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -152,14 +156,26 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
       db.users.push(user);
 
+      // Generate JWT token
+      const payload: JWTPayload = {
+        userId: user.id,
+        role: user.role,
+      };
+      const token = jwt.sign(payload, JWT_SECRET, {
+        expiresIn: JWT_EXPIRES_IN,
+      });
+
       // Return user without password
       const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
+      return { user: userWithoutPassword, token };
     });
 
-    const response: ApiResponse<Omit<User, "password">> = {
+    const response: ApiResponse<{
+      user: Omit<User, "password">;
+      token: string;
+    }> = {
       success: true,
-      data: newUser,
+      data: result,
       message: "Account created successfully",
     };
 
