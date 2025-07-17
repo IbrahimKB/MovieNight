@@ -240,7 +240,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      const result: ApiResponse = await apiCall(
+      const result: ApiResponse<any> = await apiCall(
         `/admin/users/${userToDelete.id}`,
         {
           method: "DELETE",
