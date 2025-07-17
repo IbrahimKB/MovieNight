@@ -71,6 +71,16 @@ const App = () => (
               }
             />
             <Route
+              path="/movie-search"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <MovieSearch />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/releases"
               element={
                 <ProtectedRoute>
