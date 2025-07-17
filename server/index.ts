@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import * as Sentry from "@sentry/node";
+import { ProfilingIntegration } from "@sentry/profiling-node";
 import { handleDemo } from "./routes/demo";
 import {
   handleLogin,
