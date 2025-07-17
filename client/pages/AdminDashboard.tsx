@@ -773,6 +773,12 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
+          <TabsContent value="notifications">
+            <div className="space-y-6">
+              <AdminPushDemo />
+            </div>
+          </TabsContent>
+
           <TabsContent value="friendships">
             <DataTable
               title="Friendship Management"
