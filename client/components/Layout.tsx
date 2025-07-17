@@ -13,6 +13,7 @@ import {
   Shield,
   Search,
   Calendar,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -135,9 +136,11 @@ export default function Layout({ children }: LayoutProps) {
                     </p>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="flex items-center w-full">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Settings
+                    </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <>

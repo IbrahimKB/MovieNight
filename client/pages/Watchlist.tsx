@@ -75,109 +75,14 @@ interface HistoryItem {
   reaction?: PostWatchReaction;
 }
 
-// Mock data
-const mockFriends: Friend[] = [
-  { id: "1", name: "Ibrahim" },
-  { id: "2", name: "Omar" },
-  { id: "3", name: "Sara" },
-  { id: "4", name: "Alex" },
-  { id: "5", name: "Maya" },
-];
-
-const mockWatchlist: WatchlistItem[] = [
-  {
-    id: "1",
-    title: "The Menu",
-    year: 2022,
-    genres: ["Thriller", "Horror"],
-    platform: "Netflix",
-    description:
-      "A young couple travels to a remote island to eat at an exclusive restaurant.",
-    releaseDate: "2024-01-15",
-    userDesireScore: 9,
-    selectedFriends: ["2", "3"],
-    suggestedBy: "Omar",
-    dateAdded: "2024-01-10",
-    isWatched: false,
-  },
-  {
-    id: "2",
-    title: "Glass Onion",
-    year: 2022,
-    genres: ["Mystery", "Comedy"],
-    platform: "Netflix",
-    description: "Detective Benoit Blanc travels to Greece to solve a mystery.",
-    releaseDate: "2024-01-16",
-    userDesireScore: 8,
-    selectedFriends: ["1", "4"],
-    dateAdded: "2024-01-12",
-    isWatched: false,
-  },
-  {
-    id: "3",
-    title: "Avatar: The Way of Water",
-    year: 2022,
-    genres: ["Action", "Adventure", "Sci-Fi"],
-    platform: "Disney+",
-    description: "Jake Sully continues his story on Pandora.",
-    releaseDate: "2024-01-17",
-    userDesireScore: 7,
-    selectedFriends: ["2", "5"],
-    dateAdded: "2024-01-08",
-    isWatched: false,
-  },
-];
-
-const mockHistory: HistoryItem[] = [
-  {
-    id: "1",
-    title: "Everything Everywhere All at Once",
-    year: 2022,
-    genres: ["Sci-Fi", "Comedy", "Drama"],
-    platform: "Amazon Prime",
-    watchedDate: "2024-01-05",
-    watchedWith: ["2", "3"], // Omar, Sara
-    originalScore: 8,
-    actualRating: 9,
-  },
-  {
-    id: "2",
-    title: "Top Gun: Maverick",
-    year: 2022,
-    genres: ["Action", "Drama"],
-    platform: "Paramount+",
-    watchedDate: "2023-12-28",
-    watchedWith: ["1", "4"], // Ibrahim, Alex
-    originalScore: 7,
-    actualRating: 8,
-  },
-  {
-    id: "3",
-    title: "The Bear Season 2",
-    year: 2023,
-    genres: ["Comedy", "Drama"],
-    platform: "Hulu",
-    watchedDate: "2023-12-20",
-    watchedWith: ["5"], // Maya
-    originalScore: 9,
-    actualRating: 10,
-  },
-  {
-    id: "4",
-    title: "Wednesday",
-    year: 2022,
-    genres: ["Comedy", "Horror", "Mystery"],
-    platform: "Netflix",
-    watchedDate: "2023-12-15",
-    watchedWith: ["2", "3", "5"], // Omar, Sara, Maya
-    originalScore: 7,
-    actualRating: 8,
-  },
-];
+// Empty arrays - real data will be loaded from API
+const mockFriends: Friend[] = [];
+const mockWatchlist: WatchlistItem[] = [];
+const mockHistory: HistoryItem[] = [];
 
 export default function Watchlist() {
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>(mockWatchlist);
-  const [history] = useState<HistoryItem[]>(mockHistory);
+  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+  const [history] = useState<HistoryItem[]>([]);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [markAsWatchedItem, setMarkAsWatchedItem] = useState<string | null>(
     null,
@@ -274,7 +179,8 @@ export default function Watchlist() {
   };
 
   const getFriendName = (friendId: string) => {
-    return mockFriends.find((f) => f.id === friendId)?.name || "Unknown";
+    // In real app, this would get friend name from API/context
+    return "Friend";
   };
 
   const formatDate = (dateString: string) => {
@@ -293,12 +199,7 @@ export default function Watchlist() {
     }
 
     if (selectedFriend !== "All Friends") {
-      const friendId = mockFriends.find((f) => f.name === selectedFriend)?.id;
-      if (friendId) {
-        filtered = filtered.filter((item) =>
-          item.watchedWith.includes(friendId),
-        );
-      }
+      // In real app, this would filter by actual friend data
     }
 
     return filtered.sort(
@@ -439,35 +340,10 @@ export default function Watchlist() {
                               Who to watch with
                             </label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {mockFriends.map((friend) => (
-                                <div
-                                  key={friend.id}
-                                  className={cn(
-                                    "flex items-center space-x-2 p-2 rounded border transition-colors",
-                                    editingItem === item.id
-                                      ? "cursor-pointer hover:bg-accent"
-                                      : "opacity-75",
-                                  )}
-                                  onClick={() =>
-                                    editingItem === item.id &&
-                                    handleFriendsChange(item.id, friend.id)
-                                  }
-                                >
-                                  <Checkbox
-                                    id={`${item.id}-${friend.id}`}
-                                    checked={item.selectedFriends.includes(
-                                      friend.id,
-                                    )}
-                                    disabled={editingItem !== item.id}
-                                  />
-                                  <label
-                                    htmlFor={`${item.id}-${friend.id}`}
-                                    className="text-sm font-medium leading-none cursor-pointer"
-                                  >
-                                    {friend.name}
-                                  </label>
-                                </div>
-                              ))}
+                              {/* Friends will be loaded from API */}
+                              <p className="text-sm text-muted-foreground col-span-full text-center py-2">
+                                Add friends to select who to watch with
+                              </p>
                             </div>
                           </div>
 
@@ -528,11 +404,7 @@ export default function Watchlist() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All Friends">All Friends</SelectItem>
-                {mockFriends.map((friend) => (
-                  <SelectItem key={friend.id} value={friend.name}>
-                    {friend.name}
-                  </SelectItem>
-                ))}
+                {/* Friends will be loaded from API */}
               </SelectContent>
             </Select>
           </div>
@@ -680,22 +552,10 @@ export default function Watchlist() {
                 Who did you watch with?
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {mockFriends.map((friend) => (
-                  <div
-                    key={friend.id}
-                    className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:bg-accent"
-                    onClick={() =>
-                      setWatchedWith((prev) =>
-                        prev.includes(friend.id)
-                          ? prev.filter((id) => id !== friend.id)
-                          : [...prev, friend.id],
-                      )
-                    }
-                  >
-                    <Checkbox checked={watchedWith.includes(friend.id)} />
-                    <span className="text-sm">{friend.name}</span>
-                  </div>
-                ))}
+                {/* Friends will be loaded from API */}
+                <p className="text-sm text-muted-foreground col-span-full text-center py-2">
+                  Add friends to select who you watched with
+                </p>
               </div>
             </div>
             <div className="flex gap-2">

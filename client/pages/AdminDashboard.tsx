@@ -30,6 +30,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import AdminPushDemo from "@/components/AdminPushDemo";
 
 interface User {
   id: string;
@@ -512,11 +513,12 @@ export default function AdminDashboard() {
 
         {/* Data Management Tabs */}
         <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7">
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="movies">Movies</TabsTrigger>
             <TabsTrigger value="releases">Releases</TabsTrigger>
             <TabsTrigger value="tmdb">TMDB</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="friendships">Friendships</TabsTrigger>
             <TabsTrigger value="suggestions">Suggestions</TabsTrigger>
           </TabsList>
@@ -768,6 +770,12 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <div className="space-y-6">
+              <AdminPushDemo />
             </div>
           </TabsContent>
 

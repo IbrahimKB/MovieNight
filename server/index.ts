@@ -38,6 +38,12 @@ import {
   handleMarkAsRead,
   handleDeleteNotification,
   handleClearAllNotifications,
+  handleSubscribePush,
+  handleUnsubscribePush,
+  handleGetNotificationPreferences,
+  handleSaveNotificationPreferences,
+  handleSendTestNotification,
+  handleSendNotificationToUsers,
 } from "./routes/notifications";
 import {
   handleSearchMoviesExternal,
@@ -197,16 +203,45 @@ export function createServer() {
   app.delete("/api/friends/:userId/:friendshipId", handleRemoveFriend);
 
   // Notification routes
-  app.get("/api/notifications/:userId", handleGetNotifications);
-  app.get("/api/notifications/:userId/unread-count", handleGetUnreadCount);
-  app.post("/api/notifications/:userId/mark-read", handleMarkAsRead);
+  app.get("/api/notifications/:userId", verifyJWT, handleGetNotifications);
+  app.get(
+    "/api/notifications/:userId/unread-count",
+    verifyJWT,
+    handleGetUnreadCount,
+  );
+  app.post("/api/notifications/:userId/mark-read", verifyJWT, handleMarkAsRead);
   app.delete(
     "/api/notifications/:userId/:notificationId",
+    verifyJWT,
     handleDeleteNotification,
   );
   app.delete(
     "/api/notifications/:userId/clear-all",
+    verifyJWT,
     handleClearAllNotifications,
+  );
+
+  // Push notification routes (protected)
+  app.post("/api/notifications/subscribe", verifyJWT, handleSubscribePush);
+  app.post("/api/notifications/unsubscribe", verifyJWT, handleUnsubscribePush);
+  app.post("/api/notifications/test", verifyJWT, handleSendTestNotification);
+  app.post(
+    "/api/notifications/send",
+    verifyJWT,
+    requireAdmin,
+    handleSendNotificationToUsers,
+  );
+
+  // Notification preferences routes (protected)
+  app.get(
+    "/api/user/notification-preferences",
+    verifyJWT,
+    handleGetNotificationPreferences,
+  );
+  app.put(
+    "/api/user/notification-preferences",
+    verifyJWT,
+    handleSaveNotificationPreferences,
   );
 
   // New suggestions router (replaces old suggestion routes)

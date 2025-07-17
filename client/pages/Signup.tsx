@@ -91,36 +91,39 @@ export default function Signup() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         {/* Logo/Brand */}
         <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">MovieNight</h1>
+          <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
+            <Film className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+            <h1 className="text-responsive-xl font-bold">MovieNight</h1>
           </div>
-          <p className="text-muted-foreground">
+          <p className="text-responsive-sm text-muted-foreground px-2">
             Join the community and start planning movie nights with friends
           </p>
         </div>
 
         {/* Signup Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
+        <Card className="mobile-card border-0 sm:border shadow-none sm:shadow-sm">
+          <CardHeader className="pb-4 sm:pb-6">
+            <CardTitle className="text-responsive-lg text-center">
               Create Account
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <CardContent className="p-4 sm:p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
 
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
+              <div className="space-y-2 sm:space-y-3">
+                <label
+                  htmlFor="name"
+                  className="text-responsive-sm font-medium"
+                >
                   Full Name
                 </label>
                 <Input
@@ -131,11 +134,15 @@ export default function Signup() {
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   disabled={isLoading}
                   autoComplete="name"
+                  className="input-mobile h-12 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium">
+              <div className="space-y-2 sm:space-y-3">
+                <label
+                  htmlFor="username"
+                  className="text-responsive-sm font-medium"
+                >
                   Username
                 </label>
                 <Input
@@ -148,11 +155,15 @@ export default function Signup() {
                   }
                   disabled={isLoading}
                   autoComplete="username"
+                  className="input-mobile h-12 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
+              <div className="space-y-2 sm:space-y-3">
+                <label
+                  htmlFor="email"
+                  className="text-responsive-sm font-medium"
+                >
                   Email
                 </label>
                 <Input
@@ -163,11 +174,15 @@ export default function Signup() {
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   disabled={isLoading}
                   autoComplete="email"
+                  className="input-mobile h-12 text-base"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
+              <div className="space-y-2 sm:space-y-3">
+                <label
+                  htmlFor="password"
+                  className="text-responsive-sm font-medium"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -181,19 +196,19 @@ export default function Signup() {
                     }
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="pr-10"
+                    className="input-mobile h-12 text-base pr-12"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                 </div>
@@ -226,10 +241,10 @@ export default function Signup() {
                 )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="confirmPassword"
-                  className="text-sm font-medium"
+                  className="text-responsive-sm font-medium"
                 >
                   Confirm Password
                 </label>
@@ -244,37 +259,37 @@ export default function Signup() {
                     }
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="pr-10"
+                    className="input-mobile h-12 text-base pr-12"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </Button>
                   {formData.confirmPassword &&
                     formData.password === formData.confirmPassword && (
-                      <Check className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+                      <Check className="absolute right-12 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
                     )}
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full btn-touch h-12 text-base font-medium animate-press"
                 disabled={isLoading}
                 size="lg"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Creating account...
                   </>
                 ) : (
@@ -283,13 +298,13 @@ export default function Signup() {
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">
+            <div className="mt-6 sm:mt-8 text-center">
+              <span className="text-responsive-sm text-muted-foreground">
                 Already have an account?{" "}
               </span>
               <Link
                 to="/login"
-                className="text-primary hover:underline font-medium"
+                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm"
               >
                 Sign in
               </Link>

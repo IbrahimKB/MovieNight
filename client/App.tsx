@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { initializePWA } from "./lib/pwa";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Home from "./pages/Home";
@@ -13,6 +14,7 @@ import MovieNight from "./pages/MovieNight";
 import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
 import AdminDashboard from "./pages/AdminDashboard";
+import Settings from "./pages/Settings";
 
 import Releases from "./pages/Releases";
 import Login from "./pages/Login";
@@ -21,11 +23,16 @@ import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import PushNotificationPrompt from "./components/PushNotificationPrompt";
 
 const queryClient = new QueryClient();
 
 // Set dark mode by default
 document.documentElement.classList.add("dark");
+
+// Initialize PWA features
+initializePWA();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,6 +40,8 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PWAInstallPrompt />
+        <PushNotificationPrompt />
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
@@ -107,6 +116,16 @@ const App = () => (
                 <ProtectedRoute>
                   <Layout>
                     <Squad />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Settings />
                   </Layout>
                 </ProtectedRoute>
               }
