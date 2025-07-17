@@ -113,6 +113,27 @@ export interface Release {
   updatedAt: string;
 }
 
+export interface UserPushSubscription {
+  id: string;
+  userId: string;
+  subscription: {
+    endpoint: string;
+    keys: {
+      p256dh: string;
+      auth: string;
+    };
+  };
+  userAgent?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserNotificationPreferences {
+  userId: string;
+  preferences: Record<string, any>;
+  updatedAt: string;
+}
+
 // Database structure
 export interface Database {
   users: User[];
@@ -123,6 +144,8 @@ export interface Database {
   watchedMovies: WatchedMovie[];
   notifications: Notification[];
   releases: Release[];
+  pushSubscriptions?: UserPushSubscription[];
+  notificationPreferences?: UserNotificationPreferences[];
   metadata: {
     version: string;
     lastUpdated: string;
