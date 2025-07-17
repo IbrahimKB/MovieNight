@@ -370,6 +370,7 @@ export default function Suggest() {
       setSelectedFriends([]);
       setComment("");
       setSearchTerm("");
+      setActionMode("suggest");
     } catch (error) {
       console.error("Suggestion error:", error);
       toast({
@@ -461,6 +462,80 @@ export default function Suggest() {
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
     setSuggestionRatings((prev) => ({ ...prev, [suggestionId]: rating[0] }));
+  };
+
+  const handleMarkAsWatched = async () => {
+    if (!selectedMovie || !user) return;
+
+    try {
+      // First, save the movie to the database if it doesn't exist
+      let movieId = selectedMovie.id;
+
+      // If this is a prefilled movie from TMDB/external source, save it first
+      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+        const saveResponse = await fetch("/api/tmdb/save-movie", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+          },
+          body: JSON.stringify({
+            title: selectedMovie.title,
+            year: selectedMovie.year,
+            genres: selectedMovie.genres,
+            description: selectedMovie.description,
+            poster: selectedMovie.poster,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const saveData = await saveResponse.json();
+          movieId = saveData.data.id;
+        } else {
+          throw new Error("Failed to save movie");
+        }
+      }
+
+      // Mark as watched
+      const response = await fetch(`/api/watched/${user.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
+        },
+        body: JSON.stringify({
+          movieId,
+          rating: watchedRating[0],
+          watchDate,
+          notes: personalNotes || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to mark as watched");
+      }
+
+      // Show success feedback
+      toast({
+        title: "Movie added to watch history! 🎬",
+        description: `"${selectedMovie.title}" has been marked as watched with a ${watchedRating[0]}/10 rating.`,
+      });
+
+      // Reset form
+      setSelectedMovie(null);
+      setWatchedRating([8]);
+      setWatchDate(new Date().toISOString().split("T")[0]);
+      setPersonalNotes("");
+      setSearchTerm("");
+      setActionMode("suggest");
+    } catch (error) {
+      console.error("Mark as watched error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark movie as watched. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
