@@ -1,4 +1,4 @@
-import cron from "node-cron";
+import * as cron from "node-cron";
 import { justWatchService } from "./justwatch";
 import { withTransaction } from "../utils/storage";
 
