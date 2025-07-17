@@ -206,7 +206,7 @@ export const NOTIFICATION_META: Record<
 export class PushNotificationManager {
   private static instance: PushNotificationManager;
   private subscription: globalThis.PushSubscription | null = null;
-  private vapidPublicKey: string = process.env.VITE_VAPID_PUBLIC_KEY || "";
+  private vapidPublicKey: string = import.meta.env.VITE_VAPID_PUBLIC_KEY || "";
 
   static getInstance(): PushNotificationManager {
     if (!PushNotificationManager.instance) {
