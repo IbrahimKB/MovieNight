@@ -411,6 +411,138 @@ export default function AdminDashboard() {
             />
           </TabsContent>
 
+          <TabsContent value="tmdb">
+            <div className="space-y-6">
+              {/* TMDB Status Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    TMDB API Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loadingRateLimit ? (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                      <span>Loading rate limit info...</span>
+                    </div>
+                  ) : rateLimitInfo ? (
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">
+                          {rateLimitInfo.remaining}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Searches Remaining
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">
+                          {40 - rateLimitInfo.remaining}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Searches Used
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">
+                          {rateLimitInfo.isLimited ? (
+                            <Badge variant="destructive">Limited</Badge>
+                          ) : (
+                            <Badge variant="default">Active</Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          API Status
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground">
+                      Unable to load TMDB status
+                    </div>
+                  )}
+
+                  {rateLimitInfo?.resetTime && (
+                    <div className="mt-4 p-4 bg-muted rounded-lg">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4" />
+                        <span>
+                          Rate limit resets at:{" "}
+                          {rateLimitInfo.resetTime.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-4 flex gap-2">
+                    <Button
+                      onClick={loadRateLimit}
+                      disabled={loadingRateLimit}
+                      variant="outline"
+                    >
+                      Refresh Status
+                    </Button>
+                    <Button asChild>
+                      <a
+                        href="/discover"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Test Movie Search
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* API Configuration Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>API Configuration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        TMDB API Key
+                      </Label>
+                      <div className="mt-1 font-mono text-sm bg-muted p-2 rounded">
+                        {process.env.TMDB_API_KEY
+                          ? "✓ Configured"
+                          : "⚠️ Not configured"}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Set the TMDB_API_KEY environment variable to enable
+                        movie search
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Rate Limits</Label>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        <p>• 40 requests per 10 seconds</p>
+                        <p>• Searches are automatically debounced</p>
+                        <p>• Rate limit status updates in real-time</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Features</Label>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        <p>• Search movies and TV shows</p>
+                        <p>• Save search results to local database</p>
+                        <p>• Suggest movies to friends</p>
+                        <p>• Real-time rate limit monitoring</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           <TabsContent value="friendships">
             <DataTable
               title="Friendship Management"
