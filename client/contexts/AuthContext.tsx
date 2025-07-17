@@ -18,6 +18,7 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (
     username: string,
@@ -27,6 +28,7 @@ interface AuthContextType {
   ) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
