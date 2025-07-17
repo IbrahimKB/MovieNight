@@ -1,179 +1,26 @@
 {
   "users": [
     {
-      "id": "user-1",
-      "username": "ibrahim",
-      "email": "ibrahim@example.com",
-      "name": "Ibrahim Kaysar",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-01T00:00:00Z",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "user-2",
-      "username": "omar",
-      "email": "omar@example.com",
-      "name": "Omar",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-02T00:00:00Z",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "user-3",
-      "username": "sara",
-      "email": "sara@example.com",
-      "name": "Sara",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-03T00:00:00Z",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "user-4",
-      "username": "alex",
-      "email": "alex@example.com",
-      "name": "Alex",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-04T00:00:00Z",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "user-5",
-      "username": "maya",
-      "email": "maya@example.com",
-      "name": "Maya",
-      "password": "password123",
-      "role": "user",
-      "joinedAt": "2024-01-05T00:00:00Z",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
+      "id": "f4283d03-f3e8-4ece-821b-4a5ad87f38a7",
+      "username": "admin",
+      "email": "admin@movienight.com",
+      "name": "Administrator",
+      "password": "$2b$12$oj6FDBpbN4IPFPTAS/ar3OfWWrEqCGO5mK8XIv9SLiJng3MkcBW1a",
+      "role": "admin",
+      "joinedAt": "2025-07-17T15:36:47.656Z",
+      "createdAt": "2025-07-17T15:36:47.656Z",
+      "updatedAt": "2025-07-17T15:36:47.656Z"
     }
   ],
-  "movies": [
-    {
-      "id": "movie-1",
-      "title": "The Menu",
-      "year": 2022,
-      "genres": [
-        "Thriller",
-        "Horror"
-      ],
-      "description": "A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.",
-      "imdbRating": 7.2,
-      "rtRating": 88,
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "movie-2",
-      "title": "Glass Onion: A Knives Out Mystery",
-      "year": 2022,
-      "genres": [
-        "Mystery",
-        "Comedy"
-      ],
-      "description": "Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.",
-      "imdbRating": 7.1,
-      "rtRating": 85,
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "movie-3",
-      "title": "Avatar: The Way of Water",
-      "year": 2022,
-      "genres": [
-        "Action",
-        "Adventure",
-        "Sci-Fi"
-      ],
-      "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
-      "imdbRating": 7.6,
-      "rtRating": 76,
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    }
-  ],
+  "movies": [],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [
-    {
-      "id": "friendship-1",
-      "userId1": "user-1",
-      "userId2": "user-2",
-      "status": "accepted",
-      "requestedBy": "user-1",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    },
-    {
-      "id": "friendship-2",
-      "userId1": "user-1",
-      "userId2": "user-3",
-      "status": "accepted",
-      "requestedBy": "user-3",
-      "createdAt": "2025-07-17T15:27:54.483Z",
-      "updatedAt": "2025-07-17T15:27:54.483Z"
-    }
-  ],
+  "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [
-    {
-      "id": "tmdb_1513946_movie_1752766441700",
-      "title": "Tur De Zur",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Comedy",
-        "Drama"
-      ],
-      "description": "Three best friends go through three different stories at an awful house party.",
-      "poster": "https://image.tmdb.org/t/p/w500/vjbkECIThaRHdGB8JGdhu0IWERb.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:34:01.700Z",
-      "updatedAt": "2025-07-17T15:34:01.700Z"
-    },
-    {
-      "id": "tmdb_1512943_movie_1752766441700",
-      "title": "Desight",
-      "platform": "Streaming",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Horror",
-        "Music"
-      ],
-      "description": "If you believe in parallel worlds, please pray that they will take us in.",
-      "poster": "https://image.tmdb.org/t/p/w500/weTmxCQbZMrHbXG3NyNCCOLiCeE.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:34:01.700Z",
-      "updatedAt": "2025-07-17T15:34:01.700Z"
-    },
-    {
-      "id": "tmdb_248852_tv_1752766441700",
-      "title": "UNTAMED",
-      "platform": "TV",
-      "releaseDate": "2025-07-17",
-      "genres": [
-        "Mystery",
-        "Drama"
-      ],
-      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
-      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
-      "year": 2025,
-      "createdAt": "2025-07-17T15:34:01.700Z",
-      "updatedAt": "2025-07-17T15:34:01.700Z"
-    }
-  ],
+  "releases": [],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T15:35:09.082Z"
+    "lastUpdated": "2025-07-17T15:36:48.010Z"
   }
 }
