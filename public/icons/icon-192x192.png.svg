@@ -1,0 +1,25 @@
+<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="192" height="192" rx="32" fill="#0a0a0a"/>
+  
+  <!-- Movie projector/camera body -->
+  <rect x="48" y="64" width="96" height="64" rx="8" fill="#dc2626"/>
+  
+  <!-- Lens circles -->
+  <circle cx="72" cy="88" r="8" fill="#0a0a0a"/>
+  <circle cx="120" cy="88" r="8" fill="#0a0a0a"/>
+  
+  <!-- Film strip at bottom -->
+  <rect x="64" y="136" width="64" height="16" fill="#dc2626"/>
+  <rect x="68" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="76" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="84" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="92" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="100" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="108" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="116" y="140" width="4" height="8" fill="#0a0a0a"/>
+  <rect x="124" y="140" width="4" height="8" fill="#0a0a0a"/>
+  
+  <!-- Movie night text effect -->
+  <text x="96" y="170" text-anchor="middle" fill="#dc2626" font-family="Arial, sans-serif" font-size="16" font-weight="bold">MovieNight</text>
+</svg>
