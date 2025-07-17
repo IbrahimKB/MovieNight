@@ -121,6 +121,7 @@ export async function initializeDatabase(): Promise<void> {
         email: "ibrahim@example.com",
         name: "Ibrahim Kaysar",
         password: "password123", // In production, hash this
+        role: "user" as const,
         joinedAt: "2024-01-01T00:00:00Z",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -131,6 +132,7 @@ export async function initializeDatabase(): Promise<void> {
         email: "omar@example.com",
         name: "Omar",
         password: "password123",
+        role: "user" as const,
         joinedAt: "2024-01-02T00:00:00Z",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
