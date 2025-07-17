@@ -57,16 +57,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const storedUser = localStorage.getItem("movienight_user");
     const storedToken = localStorage.getItem("movienight_token");
+    const loginTime = localStorage.getItem("movienight_login_time");
 
     if (storedUser && storedToken) {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setToken(storedToken);
+        // Check if session is still valid (optional: implement session timeout)
+        const loginTimestamp = loginTime ? parseInt(loginTime) : 0;
+        const now = Date.now();
+        const sessionDuration = now - loginTimestamp;
+        const maxSessionAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+        if (sessionDuration < maxSessionAge) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setToken(storedToken);
+        } else {
+          // Session expired, clear storage
+          localStorage.removeItem("movienight_user");
+          localStorage.removeItem("movienight_token");
+          localStorage.removeItem("movienight_login_time");
+        }
       } catch (error) {
         console.error("Error parsing stored user:", error);
         localStorage.removeItem("movienight_user");
         localStorage.removeItem("movienight_token");
+        localStorage.removeItem("movienight_login_time");
       }
     }
     setIsLoading(false);
@@ -102,11 +117,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (result.success && result.data) {
         setUser(result.data.user);
         setToken(result.data.token);
+
+        // Always store user and token for session persistence
         localStorage.setItem(
           "movienight_user",
           JSON.stringify(result.data.user),
         );
         localStorage.setItem("movienight_token", result.data.token);
+
+        // Store login timestamp for better session management
+        localStorage.setItem("movienight_login_time", Date.now().toString());
+
         setIsLoading(false);
         return true;
       } else {
@@ -170,8 +191,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     setUser(null);
     setToken(null);
+
+    // Clear all auth-related localStorage items
     localStorage.removeItem("movienight_user");
     localStorage.removeItem("movienight_token");
+    localStorage.removeItem("movienight_login_time");
+
+    // Only clear remember me if user explicitly logs out
+    // Keep remember_email and remember_me for next login
   };
 
   const isAdmin = user?.role === "admin";
