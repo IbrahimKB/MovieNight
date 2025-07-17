@@ -106,18 +106,24 @@ export default function ReleasesPage() {
   // Load TMDB status
   const loadTMDBStatus = async () => {
     try {
+      console.log("🔄 Loading TMDB status...");
       const result: ApiResponse<RateLimitStatus & { service?: string }> =
         await apiCall("/releases/tmdb-status");
+      console.log("✅ TMDB status API response:", result);
+
       if (result.success && result.data) {
+        console.log("📝 Setting TMDB status:", result.data);
         setRateLimitStatus({
           ...result.data,
           resetTime: result.data.resetTime
             ? new Date(result.data.resetTime)
             : null,
         });
+      } else {
+        console.error("❌ TMDB status API error:", result.error);
       }
     } catch (error) {
-      console.error("Failed to load TMDB status:", error);
+      console.error("❌ TMDB status load exception:", error);
     }
   };
 
