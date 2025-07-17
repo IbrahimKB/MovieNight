@@ -280,11 +280,30 @@ export async function getDashboardStats(
     });
     const suggestionsData = await handleApiResponse<any[]>(suggestionsResponse);
 
+    // Calculate real suggestion accuracy
+    let suggestionAccuracy = 0;
+    try {
+      const accuracyResponse = await fetch(
+        `/api/analytics/suggestion-accuracy/${userId}`,
+        {
+          headers: getAuthHeaders(),
+        },
+      );
+      if (accuracyResponse.ok) {
+        const accuracyData = await handleApiResponse<{ accuracy: number }>(
+          accuracyResponse,
+        );
+        suggestionAccuracy = Math.round(accuracyData.accuracy || 0);
+      }
+    } catch (error) {
+      console.log("Could not load suggestion accuracy:", error);
+    }
+
     return {
       totalFriends: friends.length,
       activeSuggestions: suggestionsData.length,
       moviesWatchedThisWeek: 0, // TODO: Implement watched movies tracking
-      suggestionAccuracy: 85, // TODO: Calculate from actual suggestion responses
+      suggestionAccuracy,
     };
   } catch (error) {
     console.error("Failed to load dashboard stats:", error);
