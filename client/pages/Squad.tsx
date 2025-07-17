@@ -31,6 +31,7 @@ import {
   hasExistingRequest,
 } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
+import { captureUserAction, captureApiError } from "@/lib/sentry";
 
 export default function Squad() {
   const { user } = useAuth();
