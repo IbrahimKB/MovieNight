@@ -250,30 +250,83 @@ export default function Suggest() {
     }
   };
 
-  const handleAcceptSuggestion = (
+  const handleAcceptSuggestion = async (
     suggestionId: string,
     movieTitle: string,
     suggestedBy: string,
   ) => {
     const rating = suggestionRatings[suggestionId] || 5;
 
-    toast({
-      title: "Suggestion accepted! ✅",
-      description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
-    });
+    try {
+      const response = await fetch("/api/suggestions/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          suggestionId,
+          rating,
+        }),
+      });
 
-    // Remove from suggestions
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      if (response.ok) {
+        toast({
+          title: "Suggestion accepted! ✅",
+          description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
+        });
+
+        // Remove from suggestions
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      } else {
+        throw new Error("Failed to respond to suggestion");
+      }
+    } catch (error) {
+      console.error("Accept suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleIgnoreSuggestion = (suggestionId: string, movieTitle: string) => {
-    toast({
-      title: "Suggestion ignored",
-      description: `"${movieTitle}" has been removed from your suggestions.`,
-    });
+  const handleIgnoreSuggestion = async (
+    suggestionId: string,
+    movieTitle: string,
+  ) => {
+    try {
+      const response = await fetch("/api/suggestions/respond", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          suggestionId,
+          rating: 1, // Low rating indicates rejection
+        }),
+      });
 
-    // Remove from suggestions
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      if (response.ok) {
+        toast({
+          title: "Suggestion ignored",
+          description: `"${movieTitle}" has been removed from your suggestions.`,
+        });
+
+        // Remove from suggestions
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      } else {
+        throw new Error("Failed to respond to suggestion");
+      }
+    } catch (error) {
+      console.error("Ignore suggestion error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to ignore suggestion. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
