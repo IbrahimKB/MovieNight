@@ -13,7 +13,7 @@ import {
 const router = Router();
 
 // Create a new suggestion
-router.post("/", authenticateToken, async (req, res) => {
+router.post("/", verifyJWT, async (req, res) => {
   try {
     const { movieId, suggestedTo, desireRating, comment } =
       req.body as CreateSuggestionRequest;
