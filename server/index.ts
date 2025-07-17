@@ -78,7 +78,12 @@ export function createServer() {
     dsn: process.env.SENTRY_DSN || "", // Add your Sentry DSN
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.Express({ app }),
+      new Sentry.Integrations.Express({
+        app,
+        router: true,
+        ip: true,
+        user: ["id", "username", "email"],
+      }),
     ],
     environment: process.env.NODE_ENV || "development",
     tracesSampleRate: 0.1,
