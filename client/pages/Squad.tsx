@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,36 +19,65 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  Friend,
+  FriendRequest,
   getUserFriends,
   getIncomingRequests,
   getOutgoingRequests,
   searchUsers,
   sendFriendRequest,
-  acceptFriendRequest,
-  rejectFriendRequest,
-  getFriendActivity,
+  respondToFriendRequest,
   areFriends,
   hasExistingRequest,
-  Friend,
-} from "@/lib/userData";
+} from "@/lib/api";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Squad() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{
     type: "success" | "error" | "info";
     text: string;
   } | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Real data from API
+  const [userFriends, setUserFriends] = useState<Friend[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<FriendRequest[]>([]);
 
   if (!user) return null;
 
-  // Get current user's data
-  const userFriends = getUserFriends(user.id);
-  const incomingRequests = getIncomingRequests(user.id);
-  const outgoingRequests = getOutgoingRequests(user.id);
+  // Load initial data
+  useEffect(() => {
+    loadData();
+  }, [user.id]);
+
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const [friends, incoming, outgoing] = await Promise.all([
+        getUserFriends(user.id),
+        getIncomingRequests(user.id),
+        getOutgoingRequests(user.id),
+      ]);
+
+      setUserFriends(friends);
+      setIncomingRequests(incoming);
+      setOutgoingRequests(outgoing);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load friends data. Please refresh the page.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -57,22 +86,28 @@ export default function Squad() {
     }
 
     setIsSearching(true);
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const results = await searchUsers(searchQuery);
+      // Filter out current user from results
+      const filteredResults = results.filter((u) => u.id !== user.id);
+      setSearchResults(filteredResults);
 
-    const results = searchUsers(searchQuery, user.id);
-    setSearchResults(results);
-    setIsSearching(false);
-
-    if (results.length === 0) {
-      setMessage({ type: "error", text: "User not found" });
+      if (filteredResults.length === 0) {
+        setMessage({ type: "error", text: "User not found" });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setMessage({ type: "error", text: "Search failed. Please try again." });
       setTimeout(() => setMessage(null), 3000);
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleSendRequest = async (targetUserId: string, username: string) => {
     // Check if already friends
-    if (areFriends(user.id, targetUserId)) {
+    if (areFriends(user.id, targetUserId, userFriends)) {
       setMessage({
         type: "info",
         text: `You're already friends with @${username}`,
@@ -82,7 +117,12 @@ export default function Squad() {
     }
 
     // Check if request already exists
-    const existingRequest = hasExistingRequest(user.id, targetUserId);
+    const existingRequest = hasExistingRequest(
+      user.id,
+      targetUserId,
+      incomingRequests,
+      outgoingRequests,
+    );
     if (existingRequest) {
       setMessage({
         type: "info",
@@ -92,35 +132,56 @@ export default function Squad() {
       return;
     }
 
-    const success = sendFriendRequest(user.id, targetUserId);
-    if (success) {
+    try {
+      await sendFriendRequest(user.id, targetUserId);
       setMessage({ type: "success", text: `Request sent to @${username}` });
-      setRefreshKey((prev) => prev + 1);
       setTimeout(() => setMessage(null), 3000);
-    } else {
+
+      // Refresh data to show updated state
+      await loadData();
+    } catch (error) {
+      console.error("Send request error:", error);
       setMessage({ type: "error", text: "Failed to send request" });
       setTimeout(() => setMessage(null), 3000);
     }
   };
 
-  const handleAcceptRequest = (requestId: string, username: string) => {
-    const success = acceptFriendRequest(requestId);
-    if (success) {
+  const handleAcceptRequest = async (requestId: string, username: string) => {
+    try {
+      await respondToFriendRequest(user.id, requestId, "accept");
       setMessage({
         type: "success",
         text: `You're now friends with @${username}!`,
       });
-      setRefreshKey((prev) => prev + 1);
       setTimeout(() => setMessage(null), 3000);
+
+      // Refresh data to show updated state
+      await loadData();
+    } catch (error) {
+      console.error("Accept request error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to accept friend request",
+        variant: "destructive",
+      });
     }
   };
 
-  const handleRejectRequest = (requestId: string, username: string) => {
-    const success = rejectFriendRequest(requestId);
-    if (success) {
+  const handleRejectRequest = async (requestId: string, username: string) => {
+    try {
+      await respondToFriendRequest(user.id, requestId, "reject");
       setMessage({ type: "info", text: `Declined request from @${username}` });
-      setRefreshKey((prev) => prev + 1);
       setTimeout(() => setMessage(null), 3000);
+
+      // Refresh data to show updated state
+      await loadData();
+    } catch (error) {
+      console.error("Reject request error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to reject friend request",
+        variant: "destructive",
+      });
     }
   };
 
@@ -132,8 +193,13 @@ export default function Squad() {
   };
 
   const getStatusForUser = (targetUserId: string) => {
-    if (areFriends(user.id, targetUserId)) return "friends";
-    const existingRequest = hasExistingRequest(user.id, targetUserId);
+    if (areFriends(user.id, targetUserId, userFriends)) return "friends";
+    const existingRequest = hasExistingRequest(
+      user.id,
+      targetUserId,
+      incomingRequests,
+      outgoingRequests,
+    );
     if (existingRequest) {
       if (existingRequest.fromUserId === user.id) return "sent";
       return "received";
@@ -141,8 +207,27 @@ export default function Squad() {
     return "none";
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <UserPlus className="h-6 w-6 text-primary" />
+            <h1 className="text-3xl font-bold">Squad</h1>
+          </div>
+          <p className="text-muted-foreground text-lg">
+            Manage your movie-watching circle and connect with friends.
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8" key={refreshKey}>
+    <div className="space-y-8">
       {/* Page Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
@@ -356,9 +441,9 @@ export default function Squad() {
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium">{request.toUser.name}</p>
+                          <p className="font-medium">{request.toUser?.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            @{request.toUser.username} •{" "}
+                            @{request.toUser?.username} •{" "}
                             {formatDate(request.sentAt)}
                           </p>
                         </div>
@@ -400,63 +485,57 @@ export default function Squad() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {userFriends.map((friend) => {
-                const activity = getFriendActivity(friend.id);
-                return (
-                  <Card
-                    key={friend.id}
-                    className="border-l-4 border-l-primary/50 hover:border-l-primary transition-colors"
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        {/* Friend Info */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                            <span className="text-lg">
-                              {friend.name.charAt(0).toUpperCase()}
+              {userFriends.map((friend) => (
+                <Card
+                  key={friend.id}
+                  className="border-l-4 border-l-primary/50 hover:border-l-primary transition-colors"
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Friend Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                          <span className="text-lg">
+                            {friend.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{friend.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            @{friend.username}
+                          </p>
+                        </div>
+                        <div className="text-2xl">🎭</div>
+                      </div>
+
+                      {/* Friends Since */}
+                      {friend.friendsSince && (
+                        <div className="bg-accent/30 p-3 rounded-lg">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Users className="h-4 w-4 text-primary" />
+                            <span className="text-muted-foreground">
+                              Friends since:
                             </span>
                           </div>
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{friend.name}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              @{friend.username}
-                            </p>
-                          </div>
-                          <div className="text-2xl">🎭</div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatDate(friend.friendsSince)}
+                          </p>
                         </div>
+                      )}
 
-                        {/* Last Watched */}
-                        {activity?.lastWatched && (
-                          <div className="bg-accent/30 p-3 rounded-lg">
-                            <div className="flex items-center gap-2 text-sm">
-                              <Film className="h-4 w-4 text-primary" />
-                              <span className="text-muted-foreground">
-                                Last watched:
-                              </span>
-                            </div>
-                            <p className="font-medium mt-1">
-                              {activity.lastWatched.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {formatDate(activity.lastWatched.date)}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* No Activity */}
-                        {!activity?.lastWatched && (
-                          <div className="bg-accent/20 p-3 rounded-lg text-center">
-                            <div className="text-2xl mb-1">🍿</div>
-                            <p className="text-xs text-muted-foreground">
-                              No recent activity
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      {/* No Activity Placeholder */}
+                      {!friend.friendsSince && (
+                        <div className="bg-accent/20 p-3 rounded-lg text-center">
+                          <div className="text-2xl mb-1">🍿</div>
+                          <p className="text-xs text-muted-foreground">
+                            Ready for movie night!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>
