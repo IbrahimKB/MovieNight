@@ -16,6 +16,7 @@ import {
   ThumbsUp,
   Eye,
   TrendingUp,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
