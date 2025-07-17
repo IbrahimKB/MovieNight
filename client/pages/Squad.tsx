@@ -189,6 +189,10 @@ export default function Squad() {
 
   const handleRejectRequest = async (requestId: string, username: string) => {
     try {
+      captureUserAction("reject_friend_request", user.id, {
+        requestId,
+        username,
+      });
       await respondToFriendRequest(user.id, requestId, "reject");
       setMessage({ type: "info", text: `Declined request from @${username}` });
       setTimeout(() => setMessage(null), 3000);
@@ -197,6 +201,7 @@ export default function Squad() {
       await loadData();
     } catch (error) {
       console.error("Reject request error:", error);
+      captureApiError(error, "reject_friend_request", user.id);
       toast({
         title: "Error",
         description: "Failed to reject friend request",
