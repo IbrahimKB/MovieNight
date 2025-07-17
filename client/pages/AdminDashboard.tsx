@@ -92,6 +92,7 @@ export default function AdminDashboard() {
   // Loading states
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [loadingMovies, setLoadingMovies] = useState(false);
+  const [loadingReleases, setLoadingReleases] = useState(false);
   const [loadingRateLimit, setLoadingRateLimit] = useState(false);
 
   // TMDB state
