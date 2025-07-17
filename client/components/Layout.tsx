@@ -50,6 +50,11 @@ export default function Layout({ children }: LayoutProps) {
       icon: Users,
     },
     {
+      path: "/watchlist",
+      label: "Watchlist",
+      icon: Bookmark,
+    },
+    {
       path: "/releases",
       label: "Releases",
       icon: Calendar,
