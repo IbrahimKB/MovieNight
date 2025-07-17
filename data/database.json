@@ -26,9 +26,34 @@
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
-  "friendships": [],
+  "friendships": [
+    {
+      "id": "bea56e96-abdb-4842-94d3-759effbf12d2",
+      "userId1": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
+      "userId2": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
+      "status": "pending",
+      "requestedBy": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
+      "createdAt": "2025-07-17T20:11:31.233Z",
+      "updatedAt": "2025-07-17T20:11:31.233Z"
+    }
+  ],
   "watchedMovies": [],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "8c685052-fc5f-4046-b246-1a50f93d9b3b",
+      "userId": "561c52f9-612b-48d7-b3a1-8484ff7e47f2",
+      "type": "friend_request",
+      "title": "New Friend Request",
+      "content": "Test User 1 sent you a friend request",
+      "read": false,
+      "actionData": {
+        "userId": "ff5dd32a-2efe-4dd5-b761-e2006cf84081",
+        "friendshipId": "bea56e96-abdb-4842-94d3-759effbf12d2"
+      },
+      "createdAt": "2025-07-17T20:11:31.233Z",
+      "updatedAt": "2025-07-17T20:11:31.233Z"
+    }
+  ],
   "releases": [
     {
       "id": "41c7aba5-c66e-4f10-a113-c6cbf69819f9",
@@ -79,7 +104,7 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T20:11:26.146Z"
+    "lastUpdated": "2025-07-17T20:11:31.233Z"
   },
   "notificationPreferences": []
 }
