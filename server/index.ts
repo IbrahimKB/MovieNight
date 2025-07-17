@@ -74,6 +74,25 @@ import { schedulerService } from "./services/scheduler";
 export function createServer() {
   const app = express();
 
+  // Initialize Sentry
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN || "", // Add your Sentry DSN
+    integrations: [
+      new Sentry.Integrations.Http({ tracing: true }),
+      new Sentry.Integrations.Express({ app }),
+      new ProfilingIntegration(),
+    ],
+    environment: process.env.NODE_ENV || "development",
+    tracesSampleRate: 0.1,
+    profilesSampleRate: 0.1,
+  });
+
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
+
   // Initialize database on server start
   initializeDatabase().catch(console.error);
 
