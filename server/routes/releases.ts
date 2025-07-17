@@ -70,8 +70,22 @@ export const handleSyncReleases: RequestHandler = async (req, res) => {
       return res.status(400).json(response);
     }
 
-    // Get releases from JustWatch
-    const newReleases = await justWatchService.getUpcomingReleases(days);
+    // Get releases from TMDB
+    const tmdbReleases = await tmdbService.getUpcomingReleases(days);
+
+    // Convert to Release format
+    const newReleases: Release[] = tmdbReleases.map((release) => ({
+      id: release.id,
+      title: release.title,
+      platform: release.platform,
+      releaseDate: release.releaseDate,
+      genres: release.genres,
+      description: release.description,
+      poster: release.poster,
+      year: release.year,
+      createdAt: release.createdAt,
+      updatedAt: release.updatedAt,
+    }));
 
     // Update database
     const result = await withTransaction(async (db) => {
