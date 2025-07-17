@@ -256,7 +256,7 @@ router.post("/respond", verifyJWT, async (req, res) => {
 });
 
 // Get suggestions sent by current user
-router.get("/sent", authenticateToken, async (req, res) => {
+router.get("/sent", verifyJWT, async (req, res) => {
   try {
     const userId = req.user?.userId;
 
