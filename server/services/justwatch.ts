@@ -132,7 +132,7 @@ const simulatedReleases: JustWatchRelease[] = [
     id: 1005,
     title: "Avatar: Fire and Ash",
     object_type: "movie",
-    release_date: "2026-12-19",
+    release_date: validateReleaseDate("Avatar 3", "2026-12-19", 2026),
     genres: ["Action", "Adventure", "Sci-Fi"],
     providers: [
       { name: "Disney+", technical_name: "disney_plus" },
