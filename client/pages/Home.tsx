@@ -235,6 +235,15 @@ export default function Home() {
             </CardContent>
           </Card>
 
+          {/* Suggestion Accuracy */}
+          {user && (
+            <SuggestionAccuracy
+              userId={user.id}
+              showDetails={true}
+              className="border-2 border-primary/10"
+            />
+          )}
+
           {/* Smart Nudge */}
           <SmartNudge />
 
