@@ -648,7 +648,7 @@ export default function AdminDashboard() {
                         TMDB API Key
                       </Label>
                       <div className="mt-1 font-mono text-sm bg-muted p-2 rounded">
-                        {process.env.TMDB_API_KEY
+                        {tmdbStatus?.status === "success"
                           ? "✓ Configured"
                           : "⚠️ Not configured"}
                       </div>
