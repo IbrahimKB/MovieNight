@@ -324,13 +324,17 @@ export async function getTrendingMovies(): Promise<TrendingMovie[]> {
     });
     const movies = await handleApiResponse<any[]>(response);
 
-    // Transform movies to trending format with mock data for now
-    return movies.slice(0, 5).map((movie, index) => ({
+    // Transform movies to trending format - if no movies exist, return empty array
+    if (!movies || movies.length === 0) {
+      return [];
+    }
+
+    return movies.slice(0, 5).map((movie) => ({
       id: movie.id,
       title: movie.title,
       year: movie.year,
-      rating: movie.imdbRating || 7.5,
-      watchCount: Math.max(1, 25 - index * 3), // Mock watch count
+      rating: movie.imdbRating || movie.rating || 0,
+      watchCount: 0, // TODO: Implement real watch count tracking
       genres: movie.genres || [],
     }));
   } catch (error) {
