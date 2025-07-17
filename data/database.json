@@ -1,5 +1,17 @@
 {
-  "users": [],
+  "users": [
+    {
+      "id": "ee324e11-5f2d-4cdf-83a2-ec621ab42ad2",
+      "username": "admin",
+      "email": "admin@movienight.com",
+      "name": "Administrator",
+      "password": "$2b$12$lCnPiO8eNT2dUqXCnS6pre.16OS.fU9pIsZ5JQO1yuuYjiwd7Zxb2",
+      "role": "admin",
+      "joinedAt": "2025-07-17T14:21:00.479Z",
+      "createdAt": "2025-07-17T14:21:00.479Z",
+      "updatedAt": "2025-07-17T14:21:00.479Z"
+    }
+  ],
   "movies": [],
   "suggestions": [],
   "watchDesires": [],
@@ -136,6 +148,6 @@
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T14:20:29.620Z"
+    "lastUpdated": "2025-07-17T14:21:17.070Z"
   }
 }
