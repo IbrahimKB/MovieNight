@@ -56,7 +56,7 @@ export const handleGetReleases: RequestHandler = async (req, res) => {
   }
 };
 
-// Sync releases from JustWatch (manual refresh)
+// Sync releases from TMDB (manual refresh)
 export const handleSyncReleases: RequestHandler = async (req, res) => {
   try {
     const daysParam = req.query.days as string;
