@@ -220,11 +220,13 @@ export default function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 pb-24">{children}</main>
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 pb-20 lg:pb-6">
+        {children}
+      </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-t border-border">
-        <div className="flex justify-around items-center py-2">
+      {/* Bottom Navigation - Mobile Only */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-lg supports-[backdrop-filter]:bg-card/90 border-t border-border safe-area-pb">
+        <div className="flex justify-around items-center py-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
@@ -234,18 +236,29 @@ export default function Layout({ children }: LayoutProps) {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center justify-center p-3 rounded-lg transition-colors min-w-0 flex-1",
+                  "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all min-w-0 flex-1 touch-manipulation",
                   isActive
-                    ? "text-primary bg-primary/10"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                    ? "text-primary bg-primary/15 scale-105"
+                    : "text-muted-foreground hover:text-foreground active:scale-95",
                 )}
               >
-                <Icon className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon
+                  className={cn("h-5 w-5 mb-1", isActive && "animate-pulse")}
+                />
+                <span
+                  className={cn(
+                    "text-xs font-medium leading-tight",
+                    isActive ? "font-semibold" : "font-normal",
+                  )}
+                >
+                  {item.label}
+                </span>
               </Link>
             );
           })}
         </div>
+        {/* Safe area for home indicator on iOS */}
+        <div className="h-safe-area-inset-bottom" />
       </nav>
     </div>
   );
