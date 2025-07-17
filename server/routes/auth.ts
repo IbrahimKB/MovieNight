@@ -1,12 +1,21 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import {
   ApiResponse,
   LoginRequest,
   SignupRequest,
+  ResetPasswordRequest,
   User,
+  JWTPayload,
 } from "../models/types";
 import { withTransaction, generateId } from "../utils/storage";
+
+// JWT secret (in production, use environment variable)
+const JWT_SECRET =
+  process.env.JWT_SECRET || "movienight_dev_secret_key_change_in_production";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 // Validation schemas
 const loginSchema = z.object({
