@@ -141,7 +141,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
           // Update user role if not set
           if (!foundUser.role) {
-            foundUser.role = "user";
+            (foundUser as any).role = "user";
           }
 
           console.log("User password migrated to bcrypt hash");
