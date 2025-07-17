@@ -168,6 +168,23 @@ export default function AdminDashboard() {
     }
   };
 
+  // Load releases
+  const loadReleases = async () => {
+    setLoadingReleases(true);
+    try {
+      const result: ApiResponse<Release[]> = await apiCall("/releases");
+      if (result.success && result.data) {
+        setReleases(result.data);
+      } else {
+        toast.error(result.error || "Failed to load releases");
+      }
+    } catch (error) {
+      toast.error("Failed to load releases");
+    } finally {
+      setLoadingReleases(false);
+    }
+  };
+
   // Reset user password
   const resetPassword = async () => {
     if (!resetPasswordModal.user || !newPassword) return;
