@@ -175,7 +175,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Bottom Navigation - Mobile Only */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/98 backdrop-blur-lg supports-[backdrop-filter]:bg-card/90 border-t border-border safe-area-pb">
         <div className="flex justify-around items-center py-1">
-          {navItems.map((item) => {
+          {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
 
