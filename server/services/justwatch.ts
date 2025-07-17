@@ -71,15 +71,15 @@ const simulatedReleases: JustWatchRelease[] = [
   },
   {
     id: 1005,
-    title: "Avatar 3",
+    title: "Avatar: Fire and Ash",
     object_type: "movie",
-    release_date: "2025-07-28",
+    release_date: "2026-12-19",
     genres: ["Action", "Adventure", "Sci-Fi"],
     providers: [
       { name: "Disney+", technical_name: "disney_plus" },
       { name: "Theaters", technical_name: "theaters" },
     ],
-    year: 2025,
+    year: 2026,
     short_description: "The next chapter in James Cameron's Avatar saga.",
   },
   {
