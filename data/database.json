@@ -15,10 +15,11 @@
       "username": "omar",
       "email": "omar@example.com",
       "name": "Omar",
-      "password": "password123",
+      "password": "$2b$12$18v1yWb33fJ1SisC56boqOZPcL3Qbmast46miuwMoKs1yschaL23S",
       "joinedAt": "2024-01-02T00:00:00Z",
       "createdAt": "2025-07-16T21:34:38.678Z",
-      "updatedAt": "2025-07-16T21:34:38.678Z"
+      "updatedAt": "2025-07-17T12:33:45.364Z",
+      "role": "user"
     },
     {
       "id": "user-3",
@@ -136,7 +137,7 @@
   "notifications": [],
   "releases": [
     {
-      "id": "22d79859-0534-4fa4-a8be-2af775b0f971",
+      "id": "78db3b80-7442-4be8-8d7f-114b9429e0dd",
       "title": "The Bear: Season 4",
       "platform": "Hulu, Disney+",
       "releaseDate": "2025-07-18",
@@ -147,11 +148,11 @@
       "description": "Carmy and the crew return for another intense season.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:31:51.020Z",
-      "updatedAt": "2025-07-17T12:31:51.020Z"
+      "createdAt": "2025-07-17T12:33:26.867Z",
+      "updatedAt": "2025-07-17T12:33:26.867Z"
     },
     {
-      "id": "9812eacc-7570-46e4-9b79-f61e261f0d3e",
+      "id": "5f63d915-5165-4d50-b202-f462550f6f52",
       "title": "Stranger Things: Season 5",
       "platform": "Netflix",
       "releaseDate": "2025-07-20",
@@ -163,11 +164,11 @@
       "description": "The final season of the beloved supernatural series.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:31:51.020Z",
-      "updatedAt": "2025-07-17T12:31:51.020Z"
+      "createdAt": "2025-07-17T12:33:26.867Z",
+      "updatedAt": "2025-07-17T12:33:26.867Z"
     },
     {
-      "id": "dda9f059-7a3d-4304-8a71-e4a4940451ea",
+      "id": "278f4f85-315a-4d4d-947f-dd7b6b7056f9",
       "title": "Blade Runner 2099",
       "platform": "Amazon Prime Video",
       "releaseDate": "2025-07-22",
@@ -178,12 +179,12 @@
       "description": "A new series set in the Blade Runner universe.",
       "year": 2025,
       "poster": null,
-      "createdAt": "2025-07-17T12:31:51.020Z",
-      "updatedAt": "2025-07-17T12:31:51.020Z"
+      "createdAt": "2025-07-17T12:33:26.867Z",
+      "updatedAt": "2025-07-17T12:33:26.867Z"
     }
   ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-17T12:32:58.114Z"
+    "lastUpdated": "2025-07-17T12:33:46.656Z"
   }
 }
