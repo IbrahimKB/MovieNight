@@ -65,11 +65,6 @@ export default function Layout({ children }: LayoutProps) {
   const allNavItems = [
     ...bottomNavItems,
     {
-      path: "/movie-night",
-      label: "Movie Night",
-      icon: Users,
-    },
-    {
       path: "/releases",
       label: "Releases",
       icon: Calendar,
