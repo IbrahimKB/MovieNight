@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Friend, getUserFriends } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +23,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface Friend {
-  id: string;
-  name: string;
-  avatar?: string;
-}
-
 interface MovieWithScores {
   id: string;
   title: string;
@@ -45,15 +41,6 @@ interface SurpriseMovie {
   movie: MovieWithScores;
   isVisible: boolean;
 }
-
-// Mock data
-const mockFriends: Friend[] = [
-  { id: "1", name: "Ibrahim" },
-  { id: "2", name: "Omar" },
-  { id: "3", name: "Sara" },
-  { id: "4", name: "Alex" },
-  { id: "5", name: "Maya" },
-];
 
 const mockMoviesWithScores: MovieWithScores[] = [
   {
@@ -173,6 +160,8 @@ const genres = [
 ];
 
 export default function MovieNight() {
+  const { user } = useAuth();
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [presentFriends, setPresentFriends] = useState<string[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("All Genres");
   const [filteredMovies, setFilteredMovies] = useState<MovieWithScores[]>([]);
@@ -180,6 +169,26 @@ export default function MovieNight() {
   const [surpriseMovie, setSurpriseMovie] = useState<SurpriseMovie | null>(
     null,
   );
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load friends data
+  useEffect(() => {
+    if (user) {
+      loadFriends();
+    }
+  }, [user]);
+
+  const loadFriends = async () => {
+    try {
+      setIsLoading(true);
+      const userFriends = await getUserFriends(user!.id);
+      setFriends(userFriends);
+    } catch (error) {
+      console.error("Failed to load friends:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
