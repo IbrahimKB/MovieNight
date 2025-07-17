@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import MovieSearch from "@/components/ui/movie-search";
+import { PlatformLogo } from "@/components/ui/platform-logo";
 import { Film, Tv, Star, Calendar, Users, MessageSquare } from "lucide-react";
 
 interface MovieSearchResult {
