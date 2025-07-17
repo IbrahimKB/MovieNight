@@ -126,11 +126,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
         body: JSON.stringify({ username, email, password, name }),
       });
 
-      const result: ApiResponse<User> = await response.json();
+      const result: ApiResponse<{ user: User; token: string }> =
+        await response.json();
 
       if (result.success && result.data) {
-        setUser(result.data);
-        localStorage.setItem("movienight_user", JSON.stringify(result.data));
+        setUser(result.data.user);
+        setToken(result.data.token);
+        localStorage.setItem(
+          "movienight_user",
+          JSON.stringify(result.data.user),
+        );
+        localStorage.setItem("movienight_token", result.data.token);
         setIsLoading(false);
         return true;
       } else {
