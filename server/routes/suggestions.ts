@@ -40,65 +40,59 @@ router.post("/", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await withTransaction(async (db) => db);
+    const suggestion = await withTransaction(async (database) => {
+      // Check if movie exists
+      const movie = database.movies.find((m) => m.id === movieId);
+      if (!movie) {
+        throw new Error("Movie not found");
+      }
 
-    // Check if movie exists
-    const movie = database.movies.find((m) => m.id === movieId);
-    if (!movie) {
-      return res.status(404).json({
-        success: false,
-        error: "Movie not found",
-      } as ApiResponse);
-    }
+      // Check if all suggested users exist
+      const invalidUsers = suggestedTo.filter(
+        (id) => !database.users.find((u) => u.id === id),
+      );
+      if (invalidUsers.length > 0) {
+        throw new Error(`Invalid user IDs: ${invalidUsers.join(", ")}`);
+      }
 
-    // Check if all suggested users exist
-    const invalidUsers = suggestedTo.filter(
-      (id) => !database.users.find((u) => u.id === id),
-    );
-    if (invalidUsers.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Invalid user IDs: ${invalidUsers.join(", ")}`,
-      } as ApiResponse);
-    }
-
-    // Create the suggestion
-    const suggestion: Suggestion = {
-      id: generateId(),
-      movieId,
-      suggestedBy: userId,
-      suggestedTo,
-      desireRating,
-      comment: comment || undefined,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    database.suggestions.push(suggestion);
-
-    // Create notifications for each recipient
-    const suggestedByUser = database.users.find((u) => u.id === userId);
-    suggestedTo.forEach((recipientId) => {
-      const notification = {
+      // Create the suggestion
+      const suggestion: Suggestion = {
         id: generateId(),
-        userId: recipientId,
-        type: "suggestion" as const,
-        title: "New Movie Suggestion",
-        content: `${suggestedByUser?.name || "Someone"} suggested "${movie.title}" to you`,
-        read: false,
-        actionData: {
-          suggestionId: suggestion.id,
-          movieId,
-          userId,
-        },
+        movieId,
+        suggestedBy: userId,
+        suggestedTo,
+        desireRating,
+        comment: comment || undefined,
+        status: "pending",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      database.notifications.push(notification);
-    });
 
-    saveDatabase(database);
+      database.suggestions.push(suggestion);
+
+      // Create notifications for each recipient
+      const suggestedByUser = database.users.find((u) => u.id === userId);
+      suggestedTo.forEach((recipientId) => {
+        const notification = {
+          id: generateId(),
+          userId: recipientId,
+          type: "suggestion" as const,
+          title: "New Movie Suggestion",
+          content: `${suggestedByUser?.name || "Someone"} suggested "${movie.title}" to you`,
+          read: false,
+          actionData: {
+            suggestionId: suggestion.id,
+            movieId,
+            userId,
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        database.notifications.push(notification);
+      });
+
+      return suggestion;
+    });
 
     res.json({
       success: true,
