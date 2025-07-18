@@ -233,7 +233,7 @@ router.post("/respond", verifyJWT, async (req, res) => {
 
     res.json({
       success: true,
-      data: { suggestionId, rating, status: responseType },
+      data: result,
       message: `Suggestion ${responseType} successfully`,
     } as ApiResponse);
   } catch (error) {
