@@ -321,48 +321,43 @@ router.delete("/:suggestionId", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await withTransaction(async (db) => db);
+    const deletedSuggestion = await withTransaction(async (database) => {
+      // Find the suggestion
+      const suggestionIndex = database.suggestions.findIndex(
+        (s) => s.id === suggestionId,
+      );
 
-    // Find the suggestion
-    const suggestionIndex = database.suggestions.findIndex(
-      (s) => s.id === suggestionId,
-    );
+      if (suggestionIndex === -1) {
+        throw new Error("Suggestion not found");
+      }
 
-    if (suggestionIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: "Suggestion not found",
-      } as ApiResponse);
-    }
+      const suggestion = database.suggestions[suggestionIndex];
 
-    const suggestion = database.suggestions[suggestionIndex];
+      // Check if user is the owner of this suggestion
+      if (suggestion.suggestedBy !== userId) {
+        throw new Error("You can only delete your own suggestions");
+      }
 
-    // Check if user is the owner of this suggestion
-    if (suggestion.suggestedBy !== userId) {
-      return res.status(403).json({
-        success: false,
-        error: "You can only delete your own suggestions",
-      } as ApiResponse);
-    }
+      // Remove the suggestion
+      const deletedSuggestion = database.suggestions.splice(
+        suggestionIndex,
+        1,
+      )[0];
 
-    // Remove the suggestion
-    const deletedSuggestion = database.suggestions.splice(
-      suggestionIndex,
-      1,
-    )[0];
+      // Clean up related data
+      // Remove associated watch desires
+      database.watchDesires = database.watchDesires.filter(
+        (wd) => wd.suggestionId !== suggestionId,
+      );
 
-    // Clean up related data
-    // Remove associated watch desires
-    database.watchDesires = database.watchDesires.filter(
-      (wd) => wd.suggestionId !== suggestionId,
-    );
+      // Remove associated notifications
+      database.notifications = database.notifications.filter(
+        (notification) =>
+          notification.actionData?.suggestionId !== suggestionId,
+      );
 
-    // Remove associated notifications
-    database.notifications = database.notifications.filter(
-      (notification) => notification.actionData?.suggestionId !== suggestionId,
-    );
-
-    saveDatabase(database);
+      return deletedSuggestion;
+    });
 
     res.json({
       success: true,
