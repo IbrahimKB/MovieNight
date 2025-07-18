@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "./auth";
-import { loadDatabase, saveDatabase, generateId } from "../utils/storage";
+import { withTransaction, generateId } from "../utils/storage";
 import {
   CreateSuggestionRequest,
   UpdateWatchDesireRequest,
@@ -40,65 +40,59 @@ router.post("/", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const suggestion = await withTransaction(async (database) => {
+      // Check if movie exists
+      const movie = database.movies.find((m) => m.id === movieId);
+      if (!movie) {
+        throw new Error("Movie not found");
+      }
 
-    // Check if movie exists
-    const movie = database.movies.find((m) => m.id === movieId);
-    if (!movie) {
-      return res.status(404).json({
-        success: false,
-        error: "Movie not found",
-      } as ApiResponse);
-    }
+      // Check if all suggested users exist
+      const invalidUsers = suggestedTo.filter(
+        (id) => !database.users.find((u) => u.id === id),
+      );
+      if (invalidUsers.length > 0) {
+        throw new Error(`Invalid user IDs: ${invalidUsers.join(", ")}`);
+      }
 
-    // Check if all suggested users exist
-    const invalidUsers = suggestedTo.filter(
-      (id) => !database.users.find((u) => u.id === id),
-    );
-    if (invalidUsers.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Invalid user IDs: ${invalidUsers.join(", ")}`,
-      } as ApiResponse);
-    }
-
-    // Create the suggestion
-    const suggestion: Suggestion = {
-      id: generateId(),
-      movieId,
-      suggestedBy: userId,
-      suggestedTo,
-      desireRating,
-      comment: comment || undefined,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    database.suggestions.push(suggestion);
-
-    // Create notifications for each recipient
-    const suggestedByUser = database.users.find((u) => u.id === userId);
-    suggestedTo.forEach((recipientId) => {
-      const notification = {
+      // Create the suggestion
+      const suggestion: Suggestion = {
         id: generateId(),
-        userId: recipientId,
-        type: "suggestion" as const,
-        title: "New Movie Suggestion",
-        content: `${suggestedByUser?.name || "Someone"} suggested "${movie.title}" to you`,
-        read: false,
-        actionData: {
-          suggestionId: suggestion.id,
-          movieId,
-          userId,
-        },
+        movieId,
+        suggestedBy: userId,
+        suggestedTo,
+        desireRating,
+        comment: comment || undefined,
+        status: "pending",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      database.notifications.push(notification);
-    });
 
-    saveDatabase(database);
+      database.suggestions.push(suggestion);
+
+      // Create notifications for each recipient
+      const suggestedByUser = database.users.find((u) => u.id === userId);
+      suggestedTo.forEach((recipientId) => {
+        const notification = {
+          id: generateId(),
+          userId: recipientId,
+          type: "suggestion" as const,
+          title: "New Movie Suggestion",
+          content: `${suggestedByUser?.name || "Someone"} suggested "${movie.title}" to you`,
+          read: false,
+          actionData: {
+            suggestionId: suggestion.id,
+            movieId,
+            userId,
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        database.notifications.push(notification);
+      });
+
+      return suggestion;
+    });
 
     res.json({
       success: true,
@@ -126,7 +120,7 @@ router.get("/", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Get suggestions sent to the current user
     const userSuggestions = database.suggestions
@@ -188,62 +182,58 @@ router.post("/respond", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const result = await withTransaction(async (database) => {
+      // Find the suggestion
+      const suggestion = database.suggestions.find(
+        (s) => s.id === suggestionId,
+      );
+      if (!suggestion) {
+        throw new Error("Suggestion not found");
+      }
 
-    // Find the suggestion
-    const suggestion = database.suggestions.find((s) => s.id === suggestionId);
-    if (!suggestion) {
-      return res.status(404).json({
-        success: false,
-        error: "Suggestion not found",
-      } as ApiResponse);
-    }
+      // Check if user is a recipient of this suggestion
+      if (!suggestion.suggestedTo.includes(userId)) {
+        throw new Error("You are not a recipient of this suggestion");
+      }
 
-    // Check if user is a recipient of this suggestion
-    if (!suggestion.suggestedTo.includes(userId)) {
-      return res.status(403).json({
-        success: false,
-        error: "You are not a recipient of this suggestion",
-      } as ApiResponse);
-    }
+      // Check if user already responded
+      const existingDesire = database.watchDesires.find(
+        (wd) => wd.suggestionId === suggestionId && wd.userId === userId,
+      );
 
-    // Check if user already responded
-    const existingDesire = database.watchDesires.find(
-      (wd) => wd.suggestionId === suggestionId && wd.userId === userId,
-    );
+      if (existingDesire) {
+        // Update existing response
+        existingDesire.rating = rating;
+        existingDesire.updatedAt = new Date().toISOString();
+      } else {
+        // Create new watch desire
+        const watchDesire: WatchDesire = {
+          id: generateId(),
+          userId,
+          movieId: suggestion.movieId,
+          suggestionId,
+          rating,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        database.watchDesires.push(watchDesire);
+      }
 
-    if (existingDesire) {
-      // Update existing response
-      existingDesire.rating = rating;
-      existingDesire.updatedAt = new Date().toISOString();
-    } else {
-      // Create new watch desire
-      const watchDesire: WatchDesire = {
-        id: generateId(),
-        userId,
-        movieId: suggestion.movieId,
-        suggestionId,
-        rating,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      database.watchDesires.push(watchDesire);
-    }
+      // Update suggestion status if this is the first response
+      if (suggestion.status === "pending") {
+        suggestion.status = rating >= 6 ? "accepted" : "rejected";
+        suggestion.updatedAt = new Date().toISOString();
+      }
 
-    // Update suggestion status if this is the first response
-    if (suggestion.status === "pending") {
-      suggestion.status = rating >= 6 ? "accepted" : "rejected";
-      suggestion.updatedAt = new Date().toISOString();
-    }
+      const movie = database.movies.find((m) => m.id === suggestion.movieId);
+      const responseType = rating >= 6 ? "accepted" : "rejected";
 
-    saveDatabase(database);
-
-    const movie = database.movies.find((m) => m.id === suggestion.movieId);
-    const responseType = rating >= 6 ? "accepted" : "rejected";
+      return { suggestionId, rating, status: responseType };
+    });
 
     res.json({
       success: true,
-      data: { suggestionId, rating, status: responseType },
+      data: result,
       message: `Suggestion ${responseType} successfully`,
     } as ApiResponse);
   } catch (error) {
@@ -267,7 +257,7 @@ router.get("/sent", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     const sentSuggestions = database.suggestions
       .filter((s) => s.suggestedBy === userId)
@@ -331,48 +321,43 @@ router.delete("/:suggestionId", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const deletedSuggestion = await withTransaction(async (database) => {
+      // Find the suggestion
+      const suggestionIndex = database.suggestions.findIndex(
+        (s) => s.id === suggestionId,
+      );
 
-    // Find the suggestion
-    const suggestionIndex = database.suggestions.findIndex(
-      (s) => s.id === suggestionId,
-    );
+      if (suggestionIndex === -1) {
+        throw new Error("Suggestion not found");
+      }
 
-    if (suggestionIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: "Suggestion not found",
-      } as ApiResponse);
-    }
+      const suggestion = database.suggestions[suggestionIndex];
 
-    const suggestion = database.suggestions[suggestionIndex];
+      // Check if user is the owner of this suggestion
+      if (suggestion.suggestedBy !== userId) {
+        throw new Error("You can only delete your own suggestions");
+      }
 
-    // Check if user is the owner of this suggestion
-    if (suggestion.suggestedBy !== userId) {
-      return res.status(403).json({
-        success: false,
-        error: "You can only delete your own suggestions",
-      } as ApiResponse);
-    }
+      // Remove the suggestion
+      const deletedSuggestion = database.suggestions.splice(
+        suggestionIndex,
+        1,
+      )[0];
 
-    // Remove the suggestion
-    const deletedSuggestion = database.suggestions.splice(
-      suggestionIndex,
-      1,
-    )[0];
+      // Clean up related data
+      // Remove associated watch desires
+      database.watchDesires = database.watchDesires.filter(
+        (wd) => wd.suggestionId !== suggestionId,
+      );
 
-    // Clean up related data
-    // Remove associated watch desires
-    database.watchDesires = database.watchDesires.filter(
-      (wd) => wd.suggestionId !== suggestionId,
-    );
+      // Remove associated notifications
+      database.notifications = database.notifications.filter(
+        (notification) =>
+          notification.actionData?.suggestionId !== suggestionId,
+      );
 
-    // Remove associated notifications
-    database.notifications = database.notifications.filter(
-      (notification) => notification.actionData?.suggestionId !== suggestionId,
-    );
-
-    saveDatabase(database);
+      return deletedSuggestion;
+    });
 
     res.json({
       success: true,

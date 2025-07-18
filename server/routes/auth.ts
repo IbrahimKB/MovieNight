@@ -47,57 +47,11 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const result = await withTransaction(async (db) => {
       console.log("Login attempt:", { email: body.email, password: "***" });
 
-      // Create admin user if it doesn't exist or recreate if password doesn't work
-      let adminExists = db.users.find((u) => u.username === "admin");
-
-      if (adminExists) {
-        // Test if existing admin password works
-        const testPassword = await bcrypt.compare(
-          "admin123",
-          adminExists.password,
-        );
-        console.log("Testing existing admin password:", testPassword);
-
-        if (!testPassword) {
-          console.log(
-            "Existing admin password invalid, recreating admin user...",
-          );
-          // Remove old admin user
-          db.users = db.users.filter((u) => u.username !== "admin");
-          adminExists = null;
-        } else {
-          console.log("Admin user exists with valid password");
-        }
-      }
-
-      if (!adminExists) {
-        console.log("Creating new admin user...");
-        const hashedPassword = await bcrypt.hash("admin123", 12);
-        const adminUser: User = {
-          id: generateId(),
-          username: "admin",
-          email: "admin@movienight.com",
-          name: "Administrator",
-          password: hashedPassword,
-          role: "admin",
-          joinedAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        db.users.push(adminUser);
-        console.log("Admin user created successfully");
-
-        // Test the new password immediately
-        const testNewPassword = await bcrypt.compare(
-          "admin123",
-          hashedPassword,
-        );
-        console.log("New admin password test:", testNewPassword);
-      }
-
-      // Find user by email or username
+      // Find user by email or username (case-insensitive)
       const foundUser = db.users.find(
-        (u) => u.email === body.email || u.username === body.email,
+        (u) =>
+          u.email.toLowerCase() === body.email.toLowerCase() ||
+          u.username.toLowerCase() === body.email.toLowerCase(),
       );
 
       console.log("User found:", foundUser ? "Yes" : "No");
@@ -189,7 +143,13 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: typeof error,
+      errorString: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+    });
+    console.error("Raw login error:", error);
 
     if (error instanceof z.ZodError) {
       const response: ApiResponse = {
@@ -201,7 +161,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     const response: ApiResponse = {
       success: false,
-      error: "Internal server error",
+      error: error instanceof Error ? error.message : "Internal server error",
     };
     res.status(500).json(response);
   }
@@ -213,13 +173,20 @@ export const handleSignup: RequestHandler = async (req, res) => {
     const body = signupSchema.parse(req.body) as SignupRequest;
 
     const result = await withTransaction(async (db) => {
-      // Check if user already exists
+      // Check if user already exists (case-insensitive)
       const existingUser = db.users.find(
-        (u) => u.email === body.email || u.username === body.username,
+        (u) =>
+          u.email.toLowerCase() === body.email.toLowerCase() ||
+          u.username.toLowerCase() === body.username.toLowerCase(),
       );
 
       if (existingUser) {
-        throw new Error("User with this email or username already exists");
+        // Provide specific error message for better UX
+        if (existingUser.email.toLowerCase() === body.email.toLowerCase()) {
+          throw new Error("An account with this email already exists");
+        } else {
+          throw new Error("This username is already taken");
+        }
       }
 
       // Hash password
@@ -265,7 +232,12 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     res.status(201).json(response);
   } catch (error) {
-    console.error("Signup error:", error);
+    console.error("Signup error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      type: typeof error,
+      error: error,
+    });
 
     if (error instanceof z.ZodError) {
       const response: ApiResponse = {

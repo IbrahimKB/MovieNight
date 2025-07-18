@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "./auth";
-import { loadDatabase } from "../utils/storage";
+import { withTransaction } from "../utils/storage";
 import { ApiResponse } from "../models/types";
 
 const router = Router();
@@ -17,7 +17,7 @@ router.get("/suggestion-accuracy/:userId", verifyJWT, async (req, res) => {
       // For now, allow viewing any user's accuracy
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Find all suggestions made by this user
     const userSuggestions = database.suggestions.filter(
@@ -154,7 +154,7 @@ router.get("/suggestion-accuracy/:userId", verifyJWT, async (req, res) => {
 // Get leaderboard of best predictors
 router.get("/suggestion-leaderboard", verifyJWT, async (req, res) => {
   try {
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Calculate accuracy for all users who have made suggestions
     const userAccuracies = database.users
@@ -223,7 +223,7 @@ router.get("/suggestion-leaderboard", verifyJWT, async (req, res) => {
 router.get("/suggestion-impact/:userId", verifyJWT, async (req, res) => {
   try {
     const { userId } = req.params;
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     const userSuggestions = database.suggestions.filter(
       (s) => s.suggestedBy === userId,

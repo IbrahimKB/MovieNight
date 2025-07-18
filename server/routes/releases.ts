@@ -56,7 +56,7 @@ export const handleGetReleases: RequestHandler = async (req, res) => {
   }
 };
 
-// Sync releases from JustWatch (manual refresh)
+// Sync releases from TMDB (manual refresh)
 export const handleSyncReleases: RequestHandler = async (req, res) => {
   try {
     const daysParam = req.query.days as string;
@@ -236,7 +236,7 @@ export const handleGetTMDBStatus: RequestHandler = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("Get JustWatch status error:", error);
+    console.error("Get TMDB status error:", error);
 
     const response: ApiResponse = {
       success: false,

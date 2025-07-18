@@ -187,7 +187,7 @@ export function createServer() {
   app.post("/api/tmdb/save-movie", handleSaveMovieFromTMDB);
   app.get("/api/tmdb/rate-limit", handleGetRateLimit);
 
-  // Releases and JustWatch integration routes
+  // Releases and TMDB integration routes
   app.get("/api/releases", handleGetReleases);
   app.get("/api/releases/upcoming", handleGetUpcomingReleases);
   app.get("/api/releases/platform", handleGetReleasesByPlatform);

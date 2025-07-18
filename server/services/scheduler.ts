@@ -1,6 +1,7 @@
 import * as cron from "node-cron";
-import { justWatchService } from "./justwatch";
-import { withTransaction } from "../utils/storage";
+import { tmdbService } from "./tmdb";
+import { withTransaction, generateId } from "../utils/storage";
+import { Release } from "../models/types";
 
 class SchedulerService {
   private weeklyReleasesCron: cron.ScheduledTask | null = null;
@@ -25,11 +26,11 @@ class SchedulerService {
       "✅ Weekly releases sync scheduled for every Monday at 1:00 AM UTC",
     );
 
-    // Optional: Run a sync 30 seconds after startup for testing/initialization
+    // Optional: Run a sync 5 seconds after startup for testing/initialization
     setTimeout(async () => {
-      console.log("🚀 Running initial releases sync...");
+      console.log("🚀 Running improved initial releases sync...");
       await this.performWeeklySync();
-    }, 30000);
+    }, 5000);
   }
 
   public stop() {
@@ -46,12 +47,29 @@ class SchedulerService {
   private async performWeeklySync() {
     const startTime = new Date();
     console.log(
-      `🔄 [${startTime.toISOString()}] Starting automatic weekly releases sync...`,
+      `🔄 [${startTime.toISOString()}] Starting automatic weekly TMDB releases sync...`,
     );
 
     try {
-      // Get releases from JustWatch for the next 30 days
-      const syncResult = await justWatchService.syncWeeklyReleases();
+      // Get upcoming releases from TMDB for the next 60 days for better variety
+      console.log(
+        "🎬 Fetching upcoming releases from TMDB for next 60 days...",
+      );
+      const tmdbReleases = await tmdbService.getUpcomingReleases(60);
+
+      // Convert TMDB releases to our Release format
+      const newReleases: Release[] = tmdbReleases.map((release) => ({
+        id: generateId(), // Generate new UUID for each release
+        title: release.title,
+        platform: release.platform,
+        releaseDate: release.releaseDate,
+        genres: release.genres,
+        description: release.description || "",
+        poster: release.poster || null,
+        year: release.year,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
 
       // Update database with new releases
       const dbResult = await withTransaction(async (db) => {
@@ -62,7 +80,7 @@ class SchedulerService {
         db.releases = [];
 
         // Add new releases
-        db.releases.push(...syncResult.newReleases);
+        db.releases.push(...newReleases);
 
         // Sort by release date
         db.releases.sort(
@@ -82,7 +100,7 @@ class SchedulerService {
       const duration = endTime.getTime() - startTime.getTime();
 
       console.log(
-        `✅ [${endTime.toISOString()}] Weekly sync completed successfully:`,
+        `✅ [${endTime.toISOString()}] Weekly TMDB sync completed successfully:`,
       );
       console.log(`   📊 Previous releases: ${dbResult.previousCount}`);
       console.log(`   📊 New releases: ${dbResult.newCount}`);
@@ -91,7 +109,7 @@ class SchedulerService {
       );
       console.log(`   ⏱️  Duration: ${duration}ms`);
       console.log(
-        `   🔥 Rate limit remaining: ${justWatchService.getRateLimitStatus().remaining}`,
+        `   🔥 TMDB rate limit remaining: ${tmdbService.getRateLimitStatus().remaining}`,
       );
 
       // Log successful sync for monitoring
@@ -100,13 +118,16 @@ class SchedulerService {
         timestamp: endTime.toISOString(),
         releasesCount: dbResult.newCount,
         duration,
-        rateLimitRemaining: justWatchService.getRateLimitStatus().remaining,
+        rateLimitRemaining: tmdbService.getRateLimitStatus().remaining,
       });
     } catch (error) {
       const endTime = new Date();
       const duration = endTime.getTime() - startTime.getTime();
 
-      console.error(`❌ [${endTime.toISOString()}] Weekly sync failed:`, error);
+      console.error(
+        `❌ [${endTime.toISOString()}] Weekly TMDB sync failed:`,
+        error,
+      );
       console.error(`   ⏱️  Duration: ${duration}ms`);
 
       // Log failed sync for monitoring
@@ -199,7 +220,8 @@ class SchedulerService {
       nextScheduledRun: this.getNextScheduledRun(),
       schedule: "Every Monday at 1:00 AM UTC",
       timezone: "UTC",
-      rateLimitStatus: justWatchService.getRateLimitStatus(),
+      rateLimitStatus: tmdbService.getRateLimitStatus(),
+      dataSource: "TMDB",
     };
   }
 }
