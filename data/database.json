@@ -6,9 +6,1603 @@
   "friendships": [],
   "watchedMovies": [],
   "notifications": [],
-  "releases": [],
+  "releases": [
+    {
+      "id": "a0c94eed-f15b-4288-96cb-bac865633c84",
+      "title": "Sesame Street",
+      "platform": "TV",
+      "releaseDate": "1969-11-10",
+      "genres": [
+        "Kids",
+        "Comedy"
+      ],
+      "description": "On a special inner city street, the inhabitants—human and muppet—teach preschoolers basic educational and social concepts using comedy, cartoons, games, and songs.",
+      "poster": "https://image.tmdb.org/t/p/w500/14k9BfZ2p4rQBMeJ5crKTfUZVwD.jpg",
+      "year": 1969,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e61fe956-a4c6-4b0f-aa48-f014eab37f5b",
+      "title": "Jeopardy!",
+      "platform": "TV",
+      "releaseDate": "1984-09-10",
+      "genres": [
+        "Reality",
+        "Family"
+      ],
+      "description": "America's favorite quiz show where contestants are presented with general knowledge clues in the form of answers, and must phrase their responses in question form.",
+      "poster": "https://image.tmdb.org/t/p/w500/11rWvQOEZBouD7wet0sWHwu7NDs.jpg",
+      "year": 1984,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "bb1a13f2-a9de-446e-b8bf-6f1cba5370d3",
+      "title": "Home and Away",
+      "platform": "TV",
+      "releaseDate": "1988-01-18",
+      "genres": [
+        "Drama",
+        "Soap"
+      ],
+      "description": "Home and Away is set in the fictional town of Summer Bay, a coastal town in New South Wales, and follows the personal and professional lives of the people living in the area. The show initially focused on the Fletcher family, Pippa and Tom Fletcher and their five foster children Frank Morgan, Carly Morris, Steven Matheson, Lynn Davenport and Sally Keating, who would go on to become one of the show's longest-running characters. The show also originally and currently focuses on the Stewart family. During the early 2000s, the central storylines focused on the Sutherlands and later, the Hunters. Home and Away had proved popular when it premiered in 1988 and had risen to become a hit in Australia, and after only a few weeks, the show tackled its first major and disturbing storyline, the rape of Carly Morris; it was one of the first shows to feature such storylines during the early timeslot. H&A has tackled many adult-themed and controversial storylines; something rarely found in its restricted timeslot.",
+      "poster": "https://image.tmdb.org/t/p/w500/vn0eKMiG69bhQtxb7qLRo8SSqu5.jpg",
+      "year": 1988,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "2ddc412b-92af-4e92-a3ca-0cac1b103a94",
+      "title": "LIVE with Kelly and Mark",
+      "platform": "TV",
+      "releaseDate": "1988-09-05",
+      "genres": [
+        "Talk"
+      ],
+      "description": "A morning talk show with A-list celebrity guests, top-notch performances and one-of-a-kind segments that are unrivaled on daytime television, plus spontaneous, hilarious and unpredictable talk.",
+      "poster": "https://image.tmdb.org/t/p/w500/hBkyypWN3EcOzkozatiCm5VeaG.jpg",
+      "year": 1988,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "b1833727-5f5f-4e42-af49-d7b16bfbf5a8",
+      "title": "The Daily Show",
+      "platform": "TV",
+      "releaseDate": "1996-07-22",
+      "genres": [
+        "News",
+        "Comedy"
+      ],
+      "description": "The World's Fakest News Team tackle the biggest stories in news, politics and pop culture.",
+      "poster": "https://image.tmdb.org/t/p/w500/ixcfyK7it6FjRM36Te4OdblAq4X.jpg",
+      "year": 1996,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e5cd0530-24b2-4612-a044-a55e429eeec3",
+      "title": "Family Guy",
+      "platform": "TV",
+      "releaseDate": "1999-01-31",
+      "genres": [
+        "Animation",
+        "Comedy"
+      ],
+      "description": "Sick, twisted, politically incorrect and Freakin' Sweet animated series featuring the adventures of the dysfunctional Griffin family. Bumbling Peter and long-suffering Lois have three kids. Stewie (a brilliant but sadistic baby bent on killing his mother and taking over the world), Meg (the oldest, and is the most unpopular girl in town) and Chris (the middle kid, he's not very bright but has a passion for movies). The final member of the family is Brian - a talking dog and much more than a pet, he keeps Stewie in check whilst sipping Martinis and sorting through his own life issues.",
+      "poster": "https://image.tmdb.org/t/p/w500/8o8kiBkWFK3gVytHdyzEWUBXVfK.jpg",
+      "year": 1999,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "42d2d62e-f370-4a32-a151-c816405f91d0",
+      "title": "Jimmy Kimmel Live!",
+      "platform": "TV",
+      "releaseDate": "2003-01-26",
+      "genres": [
+        "Talk",
+        "Comedy"
+      ],
+      "description": "Jimmy Kimmel Live! is an American late-night talk show, created and hosted by Jimmy Kimmel and broadcast on ABC.",
+      "poster": "https://image.tmdb.org/t/p/w500/hs35wiiaNq34wvo4wd9xByKDcHH.jpg",
+      "year": 2003,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d09dfaa7-6c7b-4db1-9dc4-e299f9b27fb6",
+      "title": "Dahoam is Dahoam",
+      "platform": "TV",
+      "releaseDate": "2007-10-08",
+      "genres": [
+        "Soap"
+      ],
+      "description": "The lives of the residents of the fictitious village of Lansing in Upper Bavaria.",
+      "poster": "https://image.tmdb.org/t/p/w500/tGXZEUgSbgufoOpXMImSKPDd5A3.jpg",
+      "year": 2007,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "fa6b5c25-4933-486c-bf2a-e88a7d7087e1",
+      "title": "Bob's Burgers",
+      "platform": "TV",
+      "releaseDate": "2011-01-09",
+      "genres": [
+        "Animation",
+        "Comedy"
+      ],
+      "description": "Bob's Burgers follows a third-generation restaurateur, Bob, as he runs Bob's Burgers with the help of his wife and their three kids. Bob and his quirky family have big ideas about burgers, but fall short on service and sophistication. Despite the greasy counters, lousy location and a dearth of customers, Bob and his family are determined to make Bob's Burgers \"grand re-re-re-opening\" a success.",
+      "poster": "https://image.tmdb.org/t/p/w500/yVz5foNr6nCfathj0igg8RLVGfn.jpg",
+      "year": 2011,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "0f2a1ea2-3424-4f89-842c-3e305758a402",
+      "title": "Impractical Jokers",
+      "platform": "TV",
+      "releaseDate": "2011-12-15",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "This hidden-camera series follows four lifelong friends -- Brian \"Q\"' Quinn, James \"Murr\"' Murray, Joe Gatto and Sal Vulcano -- who take dares to an outrageous level. To find out who is best under pressure, the guys compete in awkward and outrageous hidden-camera hijinks with the loser performing what is deemed to be the most-mortifying challenge yet.",
+      "poster": "https://image.tmdb.org/t/p/w500/tgwncYaLPoqdxzhHrlDuQdHqkS4.jpg",
+      "year": 2011,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "1dfd9559-7069-4bab-a1cd-c98955b0ed17",
+      "title": "The Tonight Show Starring Jimmy Fallon",
+      "platform": "TV",
+      "releaseDate": "2014-02-17",
+      "genres": [
+        "Comedy",
+        "Talk"
+      ],
+      "description": "After Jay Leno's second retirement from the program, Jimmy Fallon stepped in as his permanent replacement. After 42 years in Los Angeles the program was brought back to New York.",
+      "poster": "https://image.tmdb.org/t/p/w500/if7ECoH4xaYw5S8gomNIEmtwTxP.jpg",
+      "year": 2014,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "529d32e8-ae97-4863-ad1f-660a8472637a",
+      "title": "Late Night with Seth Meyers",
+      "platform": "TV",
+      "releaseDate": "2014-02-25",
+      "genres": [
+        "Talk",
+        "Comedy"
+      ],
+      "description": "Seth Meyers, who is \"Saturday Night Live’s\" longest serving anchor on the show’s wildly popular \"Weekend Update,\" takes over as host of NBC’s \"Late Night\" — home to A-list celebrity guests, memorable comedy and the best in musical talent. As the Emmy Award-winning head writer for \"SNL,\" Meyers has established a reputation for sharp wit and perfectly timed comedy, and has gained fame for his spot-on jokes and satire. Meyers takes his departure from \"SNL\" to his new post at \"Late Night,\" as Jimmy Fallon moves to \"The Tonight Show\".",
+      "poster": "https://image.tmdb.org/t/p/w500/rw0QaegwgKbRoB2CZe2lfewltT9.jpg",
+      "year": 2014,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d49e0757-9803-428f-b934-3ca7658a6d70",
+      "title": "The Late Show with Stephen Colbert",
+      "platform": "TV",
+      "releaseDate": "2015-09-08",
+      "genres": [
+        "Comedy",
+        "Talk"
+      ],
+      "description": "Stephen Colbert brings his signature satire and comedy to The Late Show with Stephen Colbert, the #1 show in late night, where he talks with an eclectic mix of guests about what is new and relevant in the worlds of politics, entertainment, business, music, technology, and more. Featuring bandleader Jon Batiste with his band Stay Human, the Emmy Award-nominated show is broadcast from the historic Ed Sullivan Theater. Stephen Colbert, Chris Licht, Tom Purcell, and Jon Stewart are executive producers. Barry Julien and Denise Rehrig serve as co-executive producers.",
+      "poster": "https://image.tmdb.org/t/p/w500/9jkThAGYj2yp8jsS6Nriy5mzKFT.jpg",
+      "year": 2015,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "39d10b74-49f2-4888-94a0-25170e0d1d69",
+      "title": "Suidooster",
+      "platform": "TV",
+      "releaseDate": "2015-11-16",
+      "genres": [
+        "Soap"
+      ],
+      "description": "Suidooster is a South African television soap opera produced by Suidooster Films which revolves around a matriarch, her family, friends and the people of Suidooster, a small shopping and business centre in the fictional Cape Town suburb of Ruiterbosch.",
+      "poster": "https://image.tmdb.org/t/p/w500/naCgSiacvV685kait6fBvhVhdce.jpg",
+      "year": 2015,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "4143603b-1787-4ee6-87e6-642ea8e8fa46",
+      "title": "Tomorrow Is Ours",
+      "platform": "TV",
+      "releaseDate": "2017-07-17",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Soap"
+      ],
+      "description": "The story revolves around the people of Sète, France. Their lives are punctuated by family rivalries, romance and scenes from daily life, but also by plots involving police investigations, secrets and betrayals.",
+      "poster": "https://image.tmdb.org/t/p/w500/zMWldNZF0wS3L5XkDVFHxYhclcL.jpg",
+      "year": 2017,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "9951f785-b3e0-4e58-972c-1ecda334e8c2",
+      "title": "Ici tout commence",
+      "platform": "TV",
+      "releaseDate": "2020-11-02",
+      "genres": [
+        "Soap",
+        "Drama"
+      ],
+      "description": "This television drama series is centered around the prestigious culinary school of renowned chef Auguste Armand. The show follows the lives of students and staff as they navigate the challenges and pressures of the culinary world—delving into their personal and professional lives, revealing secrets, rivalries, and complex relationships.",
+      "poster": "https://image.tmdb.org/t/p/w500/x9HeaagUAyyGl1fQ6exQcpELBxP.jpg",
+      "year": 2020,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "82c55f8e-ae46-4602-9d35-ca1a476349e3",
+      "title": "Foundation",
+      "platform": "TV",
+      "releaseDate": "2021-09-23",
+      "genres": [
+        "Sci-Fi & Fantasy",
+        "Drama"
+      ],
+      "description": "Follow a band of exiles on their monumental journey to save humanity and rebuild civilization amid the fall of the Galactic Empire.",
+      "poster": "https://image.tmdb.org/t/p/w500/tg9I5pOY4M9CKj8U0cxVBTsm5eh.jpg",
+      "year": 2021,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "3ed15646-f1bc-428c-a5d6-7d72c7385b42",
+      "title": "Spider-Man: Across the Spider-Verse",
+      "platform": "Streaming",
+      "releaseDate": "2023-05-31",
+      "genres": [
+        "Animation",
+        "Action",
+        "Adventure",
+        "Science Fiction"
+      ],
+      "description": "After reuniting with Gwen Stacy, Brooklyn’s full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse, where he encounters the Spider Society, a team of Spider-People charged with protecting the Multiverse’s very existence. But when the heroes clash on how to handle a new threat, Miles finds himself pitted against the other Spiders and must set out on his own to save those he loves most.",
+      "poster": "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+      "year": 2023,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "a8433614-1040-4ee6-965d-d68446314242",
+      "title": "Dreams of Liberty",
+      "platform": "TV",
+      "releaseDate": "2024-02-25",
+      "genres": [
+        "Drama",
+        "Soap"
+      ],
+      "description": "Begoña Montes is a woman who lives trapped in a toxic marriage and seeks the long-awaited freedom in Spain in 1958.",
+      "poster": "https://image.tmdb.org/t/p/w500/nlZZPRCQo1H4e32wsQll2VWxEDt.jpg",
+      "year": 2024,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d7dfe69d-eb94-48d2-900b-228a6bf13508",
+      "title": "Kelders van Geheime",
+      "platform": "TV",
+      "releaseDate": "2024-05-06",
+      "genres": [
+        "Soap"
+      ],
+      "description": "Kelders van Geheime (Cellars of Secrets) is a South African, Afrikaans-language telenovela based on the wheeling's and dealings of the community that lives on Soebatskloof (a wine farm in the Cape). The series focuses on three families: the Abrahams, Syster and Marais households. These families will have to stand together, agree (or agree to disagree), and work together to earn their bread and butter – and a glass of wine.",
+      "poster": "https://image.tmdb.org/t/p/w500/r0hqXxOTJ7pTEYQYl7HWrD50ym0.jpg",
+      "year": 2024,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e81ad662-6dfe-49e2-91e4-5675c003a3a6",
+      "title": "Flight Risk",
+      "platform": "Streaming",
+      "releaseDate": "2025-01-22",
+      "genres": [
+        "Action",
+        "Thriller"
+      ],
+      "description": "A U.S. Marshal escorts a government witness to trial after he's accused of getting involved with a mob boss, only to discover that the pilot who is transporting them is also a hitman sent to assassinate the informant. After they subdue him, they're forced to fly together after discovering that there are others attempting to eliminate them.",
+      "poster": "https://image.tmdb.org/t/p/w500/q0bCG4NX32iIEsRFZqRtuvzNCyZ.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "021596b1-c374-44db-aa31-e8833738d5e6",
+      "title": "Spermageddon",
+      "platform": "Streaming",
+      "releaseDate": "2025-02-21",
+      "genres": [
+        "Animation",
+        "Comedy",
+        "Adventure"
+      ],
+      "description": "Two narrative threads - one is an emerging love story between two awkward teens, Jens and Lisa, who are having sex for the first time and the other is an eventful quest of Simon the Semen and his friends to reach the golden goal, the Egg.",
+      "poster": "https://image.tmdb.org/t/p/w500/n7SFxle8CVzMXzfV8GNCXqdg78m.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "8a531442-60a9-43ac-add6-bb0861b99ec5",
+      "title": "The Ritual",
+      "platform": "Theaters",
+      "releaseDate": "2025-04-18",
+      "genres": [
+        "Horror"
+      ],
+      "description": "Two priests, one in crisis with his faith and the other confronting a turbulent past, must overcome their differences to perform a risky exorcism.",
+      "poster": "https://image.tmdb.org/t/p/w500/ktqPs5QyuF8SpKnipvVHb3fwD8d.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "93e046c0-00c0-4f6e-b8f9-8b65e3f25dc3",
+      "title": "The Legend of Ochi",
+      "platform": "Streaming",
+      "releaseDate": "2025-04-18",
+      "genres": [
+        "Family",
+        "Fantasy",
+        "Adventure"
+      ],
+      "description": "In a remote village on the island of Carpathia, a shy farm girl named Yuri is raised to fear an elusive animal species known as ochi. But when Yuri discovers a wounded baby ochi has been left behind, she escapes on a quest to bring him home.",
+      "poster": "https://image.tmdb.org/t/p/w500/wVujUVvY4qvKARAslItQ4ARKqtz.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "051d50ae-d67f-4a52-b1b3-9c8a80851815",
+      "title": "Until Dawn",
+      "platform": "Streaming",
+      "releaseDate": "2025-04-23",
+      "genres": [
+        "Horror",
+        "Drama",
+        "Mystery"
+      ],
+      "description": "One year after her sister Melanie mysteriously disappeared, Clover and her friends head into the remote valley where she vanished in search of answers. Exploring an abandoned visitor center, they find themselves stalked by a masked killer and horrifically murdered one by one...only to wake up and find themselves back at the beginning of the same evening.",
+      "poster": "https://image.tmdb.org/t/p/w500/bLY5yN4MKVynZ2HMZWElTOGBgBe.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "968b7e1c-0871-4876-9005-a354112f1fff",
+      "title": "Karate Kid: Legends",
+      "platform": "Theaters",
+      "releaseDate": "2025-05-08",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Drama"
+      ],
+      "description": "After a family tragedy, kung fu prodigy Li Fong is uprooted from his home in Beijing and forced to move to New York City with his mother. When a new friend needs his help, Li enters a karate competition – but his skills alone aren't enough. Li's kung fu teacher Mr. Han enlists original Karate Kid Daniel LaRusso for help, and Li learns a new way to fight, merging their two styles into one for the ultimate martial arts showdown.",
+      "poster": "https://image.tmdb.org/t/p/w500/AEgggzRr1vZCLY86MAp93li43z.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "a1907eb1-52bd-4610-a8b4-1bd1f9d9eafa",
+      "title": "The Phoenician Scheme",
+      "platform": "Streaming",
+      "releaseDate": "2025-05-23",
+      "genres": [
+        "Adventure",
+        "Comedy"
+      ],
+      "description": "Wealthy businessman Zsa-zsa Korda appoints his only daughter, a nun, as sole heir to his estate. As Korda embarks on a new enterprise, they soon become the target of scheming tycoons, foreign terrorists, and determined assassins.",
+      "poster": "https://image.tmdb.org/t/p/w500/jtEqpy0K1iVuCebRwWqT6BZ6jLN.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "279c0c7c-d910-4055-811c-4b76b2e99e5e",
+      "title": "Bring Her Back",
+      "platform": "Theaters",
+      "releaseDate": "2025-05-28",
+      "genres": [
+        "Horror"
+      ],
+      "description": "Following the death of their father, a brother and sister are introduced to their new sibling by their foster mother, only to learn that she has a terrifying secret.",
+      "poster": "https://image.tmdb.org/t/p/w500/tObSf1VzzHt9xB0csanFtb3DRjf.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "c4633fda-2c59-4eee-aaa7-84cf219bcc8d",
+      "title": "Ballerina",
+      "platform": "Theaters",
+      "releaseDate": "2025-06-04",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "description": "Taking place during the events of John Wick: Chapter 3 – Parabellum, Eve Macarro begins her training in the assassin traditions of the Ruska Roma.",
+      "poster": "https://image.tmdb.org/t/p/w500/2VUmvqsHb6cEtdfscEA6fqqVzLg.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "77a3c121-5f5b-42e2-bff2-97dbc46f9cea",
+      "title": "Chespirito: Not Really on Purpose",
+      "platform": "TV",
+      "releaseDate": "2025-06-05",
+      "genres": [
+        "Drama",
+        "Comedy"
+      ],
+      "description": "Miniseries that follow the life and career of Mexican actor, comedian and producer Roberto Gómez Bolaños, known for being the creator of El Chavo del 8, El Chapulín Colorado and Chespirito.",
+      "poster": "https://image.tmdb.org/t/p/w500/mwsuIxLL84wfJGWhN7oOrFfpZ6d.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d13f9878-7207-4bce-a948-623fa85aaf0e",
+      "title": "Materialists",
+      "platform": "Streaming",
+      "releaseDate": "2025-06-12",
+      "genres": [
+        "Romance",
+        "Drama"
+      ],
+      "description": "A young, ambitious New York City matchmaker finds herself torn between the perfect match and her imperfect ex.",
+      "poster": "https://image.tmdb.org/t/p/w500/eDo0pNruy0Qgj6BdTyHIR4cxHY8.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "4a754290-6cc8-437d-812b-44029823316e",
+      "title": "Smurfs",
+      "platform": "Streaming",
+      "releaseDate": "2025-06-30",
+      "genres": [
+        "Animation",
+        "Family",
+        "Fantasy"
+      ],
+      "description": "When Papa Smurf is mysteriously taken by evil wizards, Razamel and Gargamel, Smurfette leads the Smurfs on a mission into the real world to save him. With the help of new friends, the Smurfs must discover what defines their destiny to save the universe.",
+      "poster": "https://image.tmdb.org/t/p/w500/8o6lkhL32xQJeB52IIG1us5BVey.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "3edbf69b-614f-49fc-a0d6-1455b31e9933",
+      "title": "Jurassic World Rebirth",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-01",
+      "genres": [
+        "Science Fiction",
+        "Adventure",
+        "Action"
+      ],
+      "description": "Five years after the events of Jurassic World Dominion, covert operations expert Zora Bennett is contracted to lead a skilled team on a top-secret mission to secure genetic material from the world's three most massive dinosaurs. When Zora's operation intersects with a civilian family whose boating expedition was capsized, they all find themselves stranded on an island where they come face-to-face with a sinister, shocking discovery that's been hidden from the world for decades.",
+      "poster": "https://image.tmdb.org/t/p/w500/q0fGCmjLu42MPlSO9OYWpI5w86I.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "ad6eab5b-1801-4fa0-992a-b8c96af94cfa",
+      "title": "Sharks Up Close with Bertie Gregory",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-05",
+      "genres": [
+        "Documentary",
+        "TV Movie"
+      ],
+      "description": "Bertie heads to South Africa for his most audacious mission yet. The wild waters here are a hotspot for one of the ocean’s most famous and feared predators, the great white shark. Diving in the shallows without a cage, Bertie will attempt to film these huge sharks. By entering their domain, he discovers the challenges they face on our rapidly changing planet.",
+      "poster": "https://image.tmdb.org/t/p/w500/q9CxXe4Q8lpbLd2DdHzuk7rB1Xx.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "0db2a27b-4373-4dd7-a960-b340d3c6f193",
+      "title": "Gachiakuta",
+      "platform": "TV",
+      "releaseDate": "2025-07-06",
+      "genres": [
+        "Animation",
+        "Action & Adventure",
+        "Drama",
+        "Sci-Fi & Fantasy"
+      ],
+      "description": "In a floating city where the rich discard their waste—and people—Rudo is framed for murder and thrown into the Pit, where a hellscape of mutated garbage beasts dwell. To survive, he must wield a new power and join the rogue Cleaners. Rudo doesn’t just aim to battle monsters, but the corrupt who cast him into Hell.",
+      "poster": "https://image.tmdb.org/t/p/w500/oU2SBv5VQCdOHfw3Aw8B0UeAsim.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "05266f31-b8f1-489f-a616-b9c7513d30eb",
+      "title": "The Summer Hikaru Died",
+      "platform": "TV",
+      "releaseDate": "2025-07-06",
+      "genres": [
+        "Animation",
+        "Mystery"
+      ],
+      "description": "Six months ago, Hikaru vanished for a week. Now, as his best friend Yoshiki senses something amiss and confronts him, the harrowing truth emerges.",
+      "poster": "https://image.tmdb.org/t/p/w500/x0wiTO87UMiVCUe24nKaHlp7AIc.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "3a9a6eff-c1e7-40e5-9a57-b9f253f1f90a",
+      "title": "The Fragrant Flower Blooms with Dignity",
+      "platform": "TV",
+      "releaseDate": "2025-07-06",
+      "genres": [
+        "Animation",
+        "Drama",
+        "Comedy"
+      ],
+      "description": "When the intimidating Rintaro meets the open-minded Kaoruko, the unlikely duo grows closer. The issue? Their neighboring high schools hate each other.",
+      "poster": "https://image.tmdb.org/t/p/w500/fcAKLwLJf6G8QaoGdJyxrVCHBnY.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "282842ed-7cbb-4791-aaad-9050028e3160",
+      "title": "Trainwreck: The Real Project X",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-07",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "A night of drunken chaos rocks a quiet Dutch town in this shocking documentary about a teen's birthday invite that accidentally went viral on Facebook.",
+      "poster": "https://image.tmdb.org/t/p/w500/p6NQOlvAcdK6VJ4CoZMzLUQLtfL.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "2b059ac4-de69-4b7c-a61d-a1b38b3b5c06",
+      "title": "Simple Plan: The Kids in the Crowd",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-07",
+      "genres": [
+        "Documentary",
+        "Music"
+      ],
+      "description": "A captivating and nostalgic look at one of the most popular pop-punk bands of the 2000s. Packed with never-before-seen archival footage and exclusive access to their sold-out 2024 World Tour, the members of Simple Plan and a cast of punk-rock superstars recount the highs and lows of the first 25 years of their career. Stage-dive into a story of brotherhood, fans and resilience.",
+      "poster": "https://image.tmdb.org/t/p/w500/AgVgrIabxTBkFSfFpcfjMVcoqaG.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "23b0f250-4a1e-467c-b206-720301b5bf71",
+      "title": "Amanecer",
+      "platform": "TV",
+      "releaseDate": "2025-07-07",
+      "genres": [
+        "Soap",
+        "Drama",
+        "Comedy",
+        "Action & Adventure"
+      ],
+      "description": "The telenovela revolves around Leonel Carranza (Fernando Colunga), a man who lives in Villa Escarlata and owns the Montoro estate. His routine changes completely when his wife and best friend disappear together, leaving him so angry and disillusioned that he thinks they're dead, which could have serious consequences for him in the future.",
+      "poster": "https://image.tmdb.org/t/p/w500/lSPRgElD3bCqqgR8upkz3trilkI.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "48ecc686-2a0f-47f4-b02a-60cc568d97c5",
+      "title": "Superman",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Science Fiction",
+        "Adventure",
+        "Action"
+      ],
+      "description": "Superman, a journalist in Metropolis, embarks on a journey to reconcile his Kryptonian heritage with his human upbringing as Clark Kent.",
+      "poster": "https://image.tmdb.org/t/p/w500/ombsmhYUqR4qqOLOxAyr5V8hbyv.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "3c74abd2-67d2-4cb5-8eee-45482a63da96",
+      "title": "Ziam",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Horror",
+        "Thriller",
+        "Action"
+      ],
+      "description": "In a fight for survival against a horrifying army of zombies, a former Muay Thai fighter must use skill, speed and grit to save his girlfriend.",
+      "poster": "https://image.tmdb.org/t/p/w500/yHYj2t3NzsjkHVYa0bPri4sMBsg.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "c3889500-b321-465c-9866-e83ef58ca176",
+      "title": "Brick",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Thriller",
+        "Science Fiction"
+      ],
+      "description": "When a mysterious brick wall encloses their apartment building overnight, Tim and Olivia must unite with their wary neighbors to get out alive.",
+      "poster": "https://image.tmdb.org/t/p/w500/vTX9CxFNEQOlfXsgqec7xmc5UtD.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "f32a8cc8-c52b-498f-ac04-c60a08dca6d7",
+      "title": "I Love Peru",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "An eccentric actor abandons his friends while chasing success. After a troubling vision during self-reflection, he embarks on a spiritual quest to Peru.",
+      "poster": "https://image.tmdb.org/t/p/w500/9lK7aJkx2QvkdxyEixN7X80Uzkk.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "862a13da-a3e0-418f-9edd-ef1878d41f24",
+      "title": "Ballard",
+      "platform": "TV",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "description": "Detective Renée Ballard plunges into a web of murder and corruption as she hunts a ruthless serial killer and uncovers a sinister police conspiracy that threatens everything she stands for. With her own demons nipping at her heels, Ballard must outwit both criminals and colleagues to bring long-overdue justice to the victims and their families.",
+      "poster": "https://image.tmdb.org/t/p/w500/vHQGu6ducKC7JcDU6lqWyx7tWW5.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "982c2348-4296-4c25-85a3-1e2c8adf2feb",
+      "title": "The Gringo Hunters",
+      "platform": "TV",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Crime"
+      ],
+      "description": "A top Mexican police unit hunts down fleeing U.S. fugitives as a nefarious scheme unfolds within their force.",
+      "poster": "https://image.tmdb.org/t/p/w500/2ZsZMe1KhSFgyzf6AQTkG7kGhu3.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "01ab71a7-21db-4328-8ad6-6c5a67228abd",
+      "title": "Under a Dark Sun",
+      "platform": "TV",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Crime",
+        "Mystery",
+        "Drama"
+      ],
+      "description": "On the run from her troubled past, a young mother is accused of killing her new boss at a flower farm just before discovering he's actually her father.",
+      "poster": "https://image.tmdb.org/t/p/w500/6RGtQX4tqYDZ2nwnTDP8ReK2S8V.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "da1efb46-e7b9-4614-a6b3-2e4a63815933",
+      "title": "Menem: The President Show",
+      "platform": "TV",
+      "releaseDate": "2025-07-09",
+      "genres": [
+        "Drama"
+      ],
+      "description": "Menem, an extravagant and charismatic politician, becomes president of a troubled nation. His term, marked by privatization of public enterprises, dollarization of the economy, and consulting fortunetellers, is overshadowed by terrorist attacks and the death of his son. His photographer, Olegario Salas, witnesses his life change along with Argentine society amid economic recovery and corruption.",
+      "poster": "https://image.tmdb.org/t/p/w500/vQAfWpbme4JJzczx3Ys9DaENtby.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "b4cb2f1c-92b4-47c7-a9e5-831998225db8",
+      "title": "Almost Cops",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Crime",
+        "Mystery"
+      ],
+      "description": "When an overeager community officer and a reckless ex-detective are forced to team up, plenty of chaos ensues on the streets of Rotterdam.",
+      "poster": "https://image.tmdb.org/t/p/w500/7bcndiaTgu1Kj5a6qyCmsWYdtI.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "084e39b0-a6b7-47f9-80cf-a9e02a865273",
+      "title": "Z-O-M-B-I-E-S 4: Dawn of the Vampires",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Music",
+        "Adventure",
+        "Romance",
+        "Comedy",
+        "Family"
+      ],
+      "description": "A new adventure dawns for Zed and Addison when their summer road trip takes an unexpected detour, landing them in the middle of yet another monster rivalry: Daywalkers vs. Vampires. Tensions flare when Zed and Addison find themselves acting as camp counselors between the two opposing supernatural factions. With the help of Eliza and Willa, they must convince sworn enemies Nova and Victor to try to unite their warring worlds before an even greater threat endangers them all.",
+      "poster": "https://image.tmdb.org/t/p/w500/qIipTUGmAVjMH7ERtdzKkPuVYhP.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "28c753d4-09ab-49c4-ac8e-739818433a37",
+      "title": "Madea's Destination Wedding",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "description": "Madea packs her best floral dresses and a whole lot of chaos when the Simmons family heads to the Bahamas for her grandniece's whirlwind wedding.",
+      "poster": "https://image.tmdb.org/t/p/w500/jwMwRucnAROgWo9WLLmIqzHmmzi.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "91013c58-8829-4763-bbfd-50247e818fde",
+      "title": "Sore: Istri Dari Masa Depan",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Fantasy",
+        "Romance",
+        "Drama",
+        "Science Fiction"
+      ],
+      "description": "A woman comes from the future to change her partner’s life for the better. Her name is Sore. She has only one mission: to fix Jonathan’s bad habits and lifestyle before it’s too late. But when Sore reveals the secrets of the future, something unexpected happens.",
+      "poster": "https://image.tmdb.org/t/p/w500/u4pNXPmBuYeTtksakUCZgJ1zpSB.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "92455976-36bd-4e56-b0da-2827b37709e1",
+      "title": "Dedalus",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Thriller"
+      ],
+      "description": "Michele, Tiziana, Nino, Antonella, Filippo and Linda are the six aspiring content creators selected to participate in Dedalus, a new social game that promises to make the winner rich and famous. Locked up in an isolated arena, the contestants participate in trials that prove increasingly dangerous. What seemed like a simple game slowly turns into something completely different and the contestants, find themselves both executioners and victims of an elaborate revenge.",
+      "poster": "https://image.tmdb.org/t/p/w500/4qJTi8FGc8bdJnHhh4Xlt2TJ1Dw.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "6687d235-5302-48c6-96bf-fc85e23bc011",
+      "title": "Too Much",
+      "platform": "TV",
+      "releaseDate": "2025-07-10",
+      "genres": [
+        "Comedy",
+        "Drama"
+      ],
+      "description": "When a heartbroken New Yorker moves to London hoping for a love story, she falls for an indie musician who's anything but the typical romantic hero.",
+      "poster": "https://image.tmdb.org/t/p/w500/jZXS6VgFhVsAqkT6oHuIo5VeCkw.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "cdd086d4-33ba-4142-a91b-b81a21c7a57d",
+      "title": "Aap Jaisa Koi",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-11",
+      "genres": [
+        "Romance",
+        "Comedy"
+      ],
+      "description": "Shrirenu lives by tradition. Madhu lives unapologetically. When their paths cross, a tender romance unfolds — awkward, sweet but shadowed by patriarchy.",
+      "poster": "https://image.tmdb.org/t/p/w500/fV9dswGQCvbpVsj1JOTrYCeos8w.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "6d59a6c6-5693-40ea-9258-cf47eb25df49",
+      "title": "Sovereign",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-11",
+      "genres": [
+        "Crime",
+        "Drama",
+        "Thriller"
+      ],
+      "description": "Struggling single father Jerry indoctrinates his son Joe into the sovereign citizen movement, teaching him that laws are mere illusions and freedom is something you take. But, as Jerry’s ideology consumes them, they are set on a collision course with a police chief who has spent his life upholding the rules that Jerry has spent his tearing down.",
+      "poster": "https://image.tmdb.org/t/p/w500/cWXUMfnMj4ioReprwsDZgt8sghK.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "90656062-dd00-4934-85a4-84fe14e3352e",
+      "title": "S Line",
+      "platform": "TV",
+      "releaseDate": "2025-07-11",
+      "genres": [
+        "Sci-Fi & Fantasy",
+        "Drama",
+        "Mystery"
+      ],
+      "description": "The show will present of a cryptic red line that appears over head of the people in the show.",
+      "poster": "https://image.tmdb.org/t/p/w500/7TGolwcia6AI6uvInBOoedAi9Il.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e4f69fbd-3ac5-42c1-95cf-afa21e07eac3",
+      "title": "The Stage",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-12",
+      "genres": [
+        "Drama",
+        "Comedy"
+      ],
+      "description": "During the Republican era, wars and conflicts were frequent. On stage, the \"Overlord\" sings with resounding passion, while below, the absurd spectacle of life unfolds. They must both secure the opera troupe's livelihood and appease the audience in their seats. Once the curtain rises, how should this play be performed?",
+      "poster": "https://image.tmdb.org/t/p/w500/wSFGtkoz8SW6yIgu1Xvxs584QQt.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "8c8af5f0-b7f4-4fe6-b0d3-f41c4e30190d",
+      "title": "Dexter: Resurrection",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "description": "Dexter Morgan awakens from a coma to find Harrison gone without a trace. Realizing the weight of what he put his son through, Dexter sets out for New York City, determined to find him and make things right. But closure won't come easy. When Miami Metro's Angel Batista arrives with questions, Dexter realizes his past is catching up to him fast. As father and son navigate their own darkness in the city that never sleeps, they soon find themselves deeper than they ever imagined - and that the only way out is together.",
+      "poster": "https://image.tmdb.org/t/p/w500/jSoRKtjlqQi9Hb1hmGQ8cbDnCbj.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "dcb3263e-ef67-419c-90f5-fc6093c777fc",
+      "title": "The Institute",
+      "platform": "TV",
+      "releaseDate": "2025-07-13",
+      "genres": [
+        "Mystery",
+        "Sci-Fi & Fantasy"
+      ],
+      "description": "When 14 year old genius Luke Ellis is kidnapped, he awakens at The Institute, a facility full of children who all got there the same way he did, and who are all possessed of unusual abilities. In a nearby town, haunted former police officer Tim Jamieson has come looking to start a new life, but the peace and quiet won’t last, as his story and Luke’s are destined to collide.",
+      "poster": "https://image.tmdb.org/t/p/w500/7JXZdWifaa6wL0XLRi0GJOlOA8y.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "2ae0046b-d693-4c72-a712-f1b2bd2c447b",
+      "title": "Trainwreck: Balloon Boy",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-14",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "A homemade flying saucer lifts off, and a 6-year-old boy might be inside. National panic ensues — but what truly happened? This documentary investigates.",
+      "poster": "https://image.tmdb.org/t/p/w500/4QpWZlGZMYrAnlQizjVIMnAXnv0.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "ed3e6286-5a49-4ba0-813c-67c93b0783af",
+      "title": "I Know What You Did Last Summer",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-16",
+      "genres": [
+        "Horror",
+        "Mystery",
+        "Thriller"
+      ],
+      "description": "When five friends inadvertently cause a deadly car accident, they cover up their involvement and make a pact to keep it a secret rather than face the consequences. A year later, their past comes back to haunt them and they're forced to confront a horrifying truth: someone knows what they did last summer…and is hell-bent on revenge.",
+      "poster": "https://image.tmdb.org/t/p/w500/A06yXys3hrCWu8xiNoHCFLTG5SH.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "b66c5f91-f2d3-4e89-89cf-219063c1657c",
+      "title": "UNTAMED",
+      "platform": "TV",
+      "releaseDate": "2025-07-17",
+      "genres": [
+        "Mystery",
+        "Drama"
+      ],
+      "description": "In the vast expanse of Yosemite National Park, a woman's death draws a federal agent into lawless terrain — where nature obeys no rules but its own.",
+      "poster": "https://image.tmdb.org/t/p/w500/wCJSNZcLT7EuKKW35my9VLmrkR7.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "074d51ee-baf1-4560-a5b7-3a267e9740ca",
+      "title": "Demon Slayer: Kimetsu no Yaiba Infinity Castle",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-18",
+      "genres": [
+        "Animation",
+        "Action",
+        "Fantasy",
+        "Thriller"
+      ],
+      "description": "As the Demon Slayer Corps members and Hashira engaged in a group strength training program, the Hashira Training, in preparation for the forthcoming battle against the demons, Muzan Kibutsuji appears at the Ubuyashiki Mansion. With the head of the Demon Corps in danger, Tanjiro and the Hashira rush to the headquarters but are plunged into a deep descent to a mysterious space by the hands of Muzan Kibutsuji.  The destination of where Tanjiro and Demon Slayer Corps have fallen is the demons' stronghold – the Infinity Castle. And so, the battleground is set as the final battle between the Demon Slayer Corps and the demons ignites.",
+      "poster": "https://image.tmdb.org/t/p/w500/aFRDH3P7TX61FVGpaLhKr6QiOC1.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "3bf6de00-02f5-4381-8ca4-fa153686c7b2",
+      "title": "The Fantastic Four: First Steps",
+      "platform": "Theaters",
+      "releaseDate": "2025-07-23",
+      "genres": [
+        "Science Fiction",
+        "Adventure"
+      ],
+      "description": "Against the vibrant backdrop of a 1960s-inspired, retro-futuristic world, Marvel's First Family is forced to balance their roles as heroes with the strength of their family bond, while defending Earth from a ravenous space god called Galactus and his enigmatic Herald, Silver Surfer.",
+      "poster": "https://image.tmdb.org/t/p/w500/x26MtUlwtWD26d0G0FXcppxCJio.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "4c8099c6-21e7-40fb-acc7-086445f3cb57",
+      "title": "The Bad Guys 2",
+      "platform": "Streaming",
+      "releaseDate": "2025-07-25",
+      "genres": [
+        "Family",
+        "Comedy",
+        "Crime",
+        "Adventure",
+        "Animation"
+      ],
+      "description": "The now-reformed Bad Guys are trying (very, very hard) to be good, but instead find themselves hijacked into a high-stakes, globe-trotting heist, masterminded by a new team of criminals they never saw coming: The Bad Girls.",
+      "poster": "https://image.tmdb.org/t/p/w500/iPYgLLhQ69vIvgDtGFtAln4TYtM.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "74edd91e-e90d-459e-a245-0b8a5ba1183c",
+      "title": "Freakier Friday",
+      "platform": "Streaming",
+      "releaseDate": "2025-08-06",
+      "genres": [
+        "Family",
+        "Fantasy",
+        "Comedy"
+      ],
+      "description": "Years after Tess and Anna endured an identity crisis, Anna now has a daughter of her own and a soon-to-be stepdaughter. As they navigate the myriad challenges that come when two families merge, Tess and Anna discover lightning might indeed strike twice.",
+      "poster": "https://image.tmdb.org/t/p/w500/9wV65OmsjLAqBfDnYTkMPutXH8j.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e3a010d7-fc86-4233-9556-2313b5be3d74",
+      "title": "Няня Оксана",
+      "platform": "TV",
+      "releaseDate": "2025-09-01",
+      "genres": [
+        "Comedy",
+        "Family"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/1acCE1x5G7Tl0Wa9Q5wTdezaiPG.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d69d0a30-4cb0-4943-a4d2-3fd24857d8f7",
+      "title": "SUGA: Ride or Die",
+      "platform": "TV",
+      "releaseDate": "2025-09-04",
+      "genres": [
+        "Crime",
+        "Drama"
+      ],
+      "description": "After the tragic death of his daughter, Suga, Pres of a notorious motorcycle gang, struggles to keep his family and his gang together. With rival gangs and a ruthless prosecutor hot on his trail, Suga’s world comes crashing down when his own brotherhood betrays him. Now, he faces an impossible choice: reclaim his power or protect his grieving family.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "9524773c-786e-48da-8a2e-8386156b4cf1",
+      "title": "The Paper",
+      "platform": "TV",
+      "releaseDate": "2025-09-04",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "The documentary crew that immortalized Dunder Mifflin's Scranton branch is in search of a new subject when they discover a historic Toledo newspaper, The Truth Teller, and the eager publisher trying to revive it.",
+      "poster": "https://image.tmdb.org/t/p/w500/pGfyuHrcuCJxOSxZzZvPhVquFGo.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "c016f6bb-1530-4d8b-b111-274724bfb8da",
+      "title": "NCIS: Tony & Ziva",
+      "platform": "TV",
+      "releaseDate": "2025-09-04",
+      "genres": [
+        "Action & Adventure",
+        "Drama"
+      ],
+      "description": "When his security company is attacked, Tony and Ziva must go on the run across Europe, try to figure out who is after them and maybe even learn to trust each other again so that they can finally have their unconventional happily ever after.",
+      "poster": "https://image.tmdb.org/t/p/w500/rQ4XSxR3YXPu94rYRox6a7xNa5c.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "cdcab3c5-830b-4ca9-8922-dab8e9ad4a19",
+      "title": "My Youth",
+      "platform": "TV",
+      "releaseDate": "2025-09-05",
+      "genres": [
+        "Drama"
+      ],
+      "description": "The story of novelist Seonwoo Hae and team leader Seong Je Yeon who reunite 15 years later while struggling on their own stages.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "7936744f-61b1-4680-9007-583b1f1e96e6",
+      "title": "The Mantis: Original Sin",
+      "platform": "TV",
+      "releaseDate": "2025-09-05",
+      "genres": [
+        "Crime",
+        "Mystery",
+        "Drama"
+      ],
+      "description": "Cha Su-yeol, a police officer who has long despised his mother, the notorious 'Mantis' serial killer, must reluctantly turn to her for help when a copycat killer emerges.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "b5674ef1-d41d-46c3-876f-183920dde67e",
+      "title": "Intuition",
+      "platform": "TV",
+      "releaseDate": "2025-09-06",
+      "genres": [],
+      "description": "No description available",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "8b711f69-5d1e-4f34-902d-f72e8fbc0e31",
+      "title": "The Confidence Man KR",
+      "platform": "TV",
+      "releaseDate": "2025-09-06",
+      "genres": [
+        "Crime",
+        "Comedy"
+      ],
+      "description": "No description available",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "6ad4331b-3c2a-4cc5-b077-d5cb7dd19d67",
+      "title": "Kamen Rider Zeztz",
+      "platform": "TV",
+      "releaseDate": "2025-09-07",
+      "genres": [],
+      "description": "In a world shaped by the dreams we see in our sleep, Zeztz enters people's dreams as an agent on a mission. Equipped with a cutting-edge Rider belt worn across the chest, Zeztz brings a bold new form to the battle.",
+      "poster": "https://image.tmdb.org/t/p/w500/hmx4Oxsg3g1WDA0fffMzMUBh7Y2.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "21795299-0071-4431-ad11-efa62de11e0d",
+      "title": "K-Town Girls",
+      "platform": "TV",
+      "releaseDate": "2025-09-10",
+      "genres": [
+        "Drama"
+      ],
+      "description": "K-Town Girls tells the story of four spunky girls in New York City.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "6974df21-04f2-4308-aed4-ab35b710f1f9",
+      "title": "Love Is Blind: France",
+      "platform": "TV",
+      "releaseDate": "2025-09-10",
+      "genres": [
+        "Reality"
+      ],
+      "description": "Divided into pods, French singles date and get engaged — sight unseen. Is love truly blind? A social experiment hosted by Luthna Plocus and Teddy Riner.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "46cf5037-e223-413c-a95e-e85a1ef83cfb",
+      "title": "The Girlfriend",
+      "platform": "TV",
+      "releaseDate": "2025-09-10",
+      "genres": [
+        "Drama"
+      ],
+      "description": "Laura has it all: a glittering career, a loving husband, and her precious son, Daniel. But her perfect life unravels when Daniel brings home Cherry, a girlfriend who changes everything. After a tense introduction, Laura becomes convinced Cherry is hiding something. Is she a manipulative social climber, or is Laura just paranoid? The truth is a matter of perspective.",
+      "poster": "https://image.tmdb.org/t/p/w500/aNTmXO9dFywvIbmunRCcmDMKo5l.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "f9eabdb6-463f-4537-b9f2-56ae7cb00032",
+      "title": "Diary of a Ditched Girl",
+      "platform": "TV",
+      "releaseDate": "2025-09-11",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "Amanda and her friends face the complexities of modern dating on apps and in bars, meeting a wide array of men but struggling to move past first dates.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "734d777e-570e-48f5-a10d-8d3ffba67bce",
+      "title": "Niesamowite przygody skarpetek 2. Skarpetki górą!",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Animation",
+        "Adventure",
+        "Family"
+      ],
+      "description": "No description available",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "14f06767-507b-40ee-b8a6-cde7e9bf3ef2",
+      "title": "Women in Christ",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Documentary",
+        "Drama"
+      ],
+      "description": "More than a documentary—Women in Christ is a call to every woman who’s ever wondered if her story matters. It does. Because when we see these women, we see the Savior.",
+      "poster": "https://image.tmdb.org/t/p/w500/oBtGwxD1Y4M7PoPxLvZSRFnKo7O.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "806abe6e-49ea-4292-9912-6daf12144e01",
+      "title": "Catane",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [],
+      "description": "In the remote Romanian village of Catane, a community of villagers, long surviving on disability benefits obtained through ambiguous means, faces exposure when a local inquiry descends. What unfolds is not a story of deception, but of unexpected ingenuity as the villagers craft a disarmingly poetic and humorous response to the absurdities of a broken system. In reinventing their way of life, they reveal not only a means of survival—but a radical model of communal resilience in a fractured world.",
+      "poster": "https://image.tmdb.org/t/p/w500/XvNvMQ8yZgfMwgB0vOKzgrSSDW.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "dfdd180e-a184-4a3e-a03f-cea47ee3f5ea",
+      "title": "Beethoven Fabrication",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "History",
+        "Music"
+      ],
+      "description": "Beethoven was a musician who overcame an incurable deafness disease and left behind many masterpieces. However, in reality, he was a vulgar and dirty old man. This film depicts the story of Schindler, the secretary who \"fabricated\" the sublime image of Beethoven that is conveyed to the public. Driven by a sense of mission to absolutely protect Beethoven, who saved him from rock bottom, Schindler changes Beethoven's image after his death from a \"vulgar and dirty old man\" to a \"sacred and genius musician.\"",
+      "poster": "https://image.tmdb.org/t/p/w500/jT89KMf8yYPuRhWJSttiX7QyISC.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "092c9067-19d5-485f-bf6e-7fe952d7cb89",
+      "title": "Billions Club Live with Miley Cyrus: A Concert Film",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Documentary",
+        "Music"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/hMgwupitZ3EEC0SKFmyNhRSpId5.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "ecd067cc-e1f8-43a1-9b6c-df26bb61e140",
+      "title": "Reflejos cotidianos",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-12",
+      "genres": [],
+      "description": "Eva moves into a new apartment, where she finds an old wardrobe that serves as a supernatural portal, allowing her to discover different versions of herself.",
+      "poster": "https://image.tmdb.org/t/p/w500/frQBQr6x0KnRuGdCPjy68gYxHPS.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "c9235899-5e1f-4a19-81b0-91391bdd5fa2",
+      "title": "Ben Tuval: Most Likely to Get Sick (or Hurt in a Freak Accident)",
+      "platform": "TV",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Comedy",
+        "Talk"
+      ],
+      "description": "A compilation of stand-up from 2024, recorded in New York. It’s about love, death, dogs, and health insurance — so basically it’s comedy.",
+      "poster": "https://image.tmdb.org/t/p/w500/68mXHSeekwd3HnfDffsw5VqAuDW.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "79c334d1-528f-4f3d-807d-0f50a07b80cc",
+      "title": "Mandate",
+      "platform": "TV",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Drama"
+      ],
+      "description": "When Dr. Nong joins politics to protect his sister, he walks straight into a trap—set by the man who claims to admire him.",
+      "poster": "https://image.tmdb.org/t/p/w500/zsj5GVVkB2jYdevkbysJUFkcMr9.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "45ce8a4b-32af-4c27-b397-72931e6cc3b4",
+      "title": "Let's Go to the Moon",
+      "platform": "TV",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Drama"
+      ],
+      "description": "Amid job insecurity and mounting debt, a group of young people sets out on an unexpected journey, exploring their dreams and struggles in a world of abundance and inequality.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d89f9cd6-35b6-44a6-8d48-54bc4a412b8f",
+      "title": "The Moon Flows in This River",
+      "platform": "TV",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Drama"
+      ],
+      "description": "In Joseon, a vengeful crown prince and a memory-lost merchant mysteriously swap bodies, unraveling a web of chaos, secrets, and unexpected fate.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e585128c-0795-472a-aa8b-4a5fe785c74c",
+      "title": "Breslau",
+      "platform": "TV",
+      "releaseDate": "2025-09-12",
+      "genres": [
+        "Drama",
+        "Crime"
+      ],
+      "description": "Follow commissioner Franz Podolsky, who investigates a brutal murder. Because of the upcoming Olympic Games, the pressure is on to catch the murderer.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "59a0ea24-a66c-478b-9f02-ff96c49afc0f",
+      "title": "Disney Channel Mitmachkino - September 2025",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-13",
+      "genres": [],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/zF57abpwl9bpFCv31oUSg9KkRGv.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "c65cce6a-627c-4045-b28c-8d8dd7b9a1f1",
+      "title": "OKTAGON 74: Bolander vs. Szabová",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-13",
+      "genres": [
+        "Action"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/aE8HZbX3BEqteSVivEz0h9r5oef.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "0a2bd1a7-2170-4f89-a783-98b2d3123828",
+      "title": "Mystery Inc.",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-13",
+      "genres": [
+        "Mystery",
+        "Thriller",
+        "Horror"
+      ],
+      "description": "When a string of murders begin to take place around the quaint town of Coolsville, four teenagers must come together and stop this sinister force, before it is too late.",
+      "poster": "https://image.tmdb.org/t/p/w500/aGSJA5bPyJuKf0tZCiimMT1yG0B.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "0068c13a-a47d-4b24-9555-04e520aeac19",
+      "title": "UFC 320",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-13",
+      "genres": [],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/3Jb8hkXhU8AflqfNo3YN7KecZVN.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "f0ec1e5d-c755-4c0d-ba5f-99a697d98b8b",
+      "title": "A Death in the Family",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-14",
+      "genres": [
+        "Drama"
+      ],
+      "description": "After his estranged father's death, Noah returns home to witness the body's final rites. Through quiet rituals and unspoken grief, he confronts mortality, memory, and the fragile boundary between the living and the dead.",
+      "poster": "https://image.tmdb.org/t/p/w500/34fVXIqR2tvAltN7ht3TkyuqrlG.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "4a00a79b-3cdc-4567-845b-e5203b61c3c7",
+      "title": "Portfolio",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-14",
+      "genres": [
+        "Thriller",
+        "Romance"
+      ],
+      "description": "After being expelled from business school, 19-year-old Theo is desperate to claw his way into the high-stakes world of finance. Armed with nothing but confidence and a web of lies, he fakes his credentials and sets his sights on Piper Marsden — the charming and intelligent daughter of a powerful financial mogul",
+      "poster": "https://image.tmdb.org/t/p/w500/n5GTQ1DVR2RX69Te1jUiKL6n08q.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "8e399fb7-26f7-400f-8ee6-06ee17c46aec",
+      "title": "Untitled shittentsofparedesdecoura Documentary",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-14",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "An insight into the ferocious world of camping inside a summer festival, through the lens of one of its victims.",
+      "poster": "https://image.tmdb.org/t/p/w500/6AviPw1eeUinVIgzEwSmOv1q2mE.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "479e930a-702a-477d-bf1a-e6ff87468a38",
+      "title": "POR AMOR AL ARTE",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-14",
+      "genres": [
+        "Romance",
+        "Comedy",
+        "Music"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/cWRyGZfOUNgxa5QUye9drBy6LK3.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "e3f86105-3634-4c8a-a651-3ec2beda731d",
+      "title": "Mar afuera",
+      "platform": "TV",
+      "releaseDate": "2025-09-14",
+      "genres": [
+        "Drama"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/8PZXZrrNE0aXJoNMS3wIdMwEops.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "ba463613-2c1b-4aec-841c-943b8ace0523",
+      "title": "Der Wanderer der Nacht",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-15",
+      "genres": [
+        "Fantasy",
+        "Drama",
+        "Horror"
+      ],
+      "description": "No description available",
+      "poster": "https://image.tmdb.org/t/p/w500/c0wPavg0NcOclPRURF1qvo3Il7u.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.186Z",
+      "updatedAt": "2025-07-18T00:07:43.186Z"
+    },
+    {
+      "id": "d3f178b8-ac24-4a7c-8147-83f7f0e49663",
+      "title": "Escapism: A Search Inside",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-15",
+      "genres": [],
+      "description": "When everything seems impossible, Alex, a screenwriter, goes on a journey inside his head in search for inspiration and self discovery.",
+      "poster": "https://image.tmdb.org/t/p/w500/170PekYdrn9SIHsC29o1EsrXBKG.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    },
+    {
+      "id": "e1063ecd-a209-4d6b-8c1d-338e1a63e285",
+      "title": "Existential Risk",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-15",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "Existential Risk is a film about the possibility of human extinction or civilizational collapse, as these questions (and others) are grappled with in Cambridge, England. A personal documentary in which the filmmaker's own existential crisis (micro) is contrasted with planetary risk (macro).",
+      "poster": "https://image.tmdb.org/t/p/w500/4cIAfc8cxtCckviSQxpp9WjlUVg.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    },
+    {
+      "id": "0bae3461-a95a-4212-b219-4014736a10b5",
+      "title": "New President Project",
+      "platform": "TV",
+      "releaseDate": "2025-09-15",
+      "genres": [
+        "Comedy"
+      ],
+      "description": "A comic drama that tells the story of CEO Sin, who mediates disputes for people who are on the edge of a cliff with a 0% chance of winning.\n\nCEO Sin is a character who runs a fried chicken restaurant in a small town while keeping a secret hidden behind a veil and clashes with villains with his 'verbal skills' and body. The drama will focus on CEO Sin's process of solving various incidents around him, despite his attempts to ignore them.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    },
+    {
+      "id": "67470336-abab-45c8-9653-ffec5f5eafb6",
+      "title": "Calandra",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-16",
+      "genres": [
+        "Documentary"
+      ],
+      "description": "Nieves works in an industrial laundry and dreams of having a rabbit, after years marked by a surgery she did not choose.",
+      "poster": null,
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    },
+    {
+      "id": "5d4bb469-2fe5-4072-8be5-bfaec2c2a95f",
+      "title": "Blood Weekend",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-16",
+      "genres": [
+        "Horror"
+      ],
+      "description": "Witness the debut of a brand-new crazed masked killer, The Necrobutcher! Ingrid & her gal pals hike into the woods for a rustic bachelorette party at an isolated farm. Meanwhile, Professor Michelle Pleasant has let the crazed killer The Necrobutcher escape and must team up with psychic detective Graveyard John to track down this psycho. Blood and guts fly in Blood Weekend!",
+      "poster": "https://image.tmdb.org/t/p/w500/1pPcLWfA1yQPCHh1DLqCkxQmaTo.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    },
+    {
+      "id": "5c2d1670-fd8b-420b-a335-d157dbbc7ce3",
+      "title": "El fin de la cosa",
+      "platform": "Streaming",
+      "releaseDate": "2025-09-16",
+      "genres": [
+        "Documentary",
+        "Science Fiction"
+      ],
+      "description": "San Millán de la Cogolla welcomes the visit of an artist who has been given carte blanche to develop and exhibit his new project, which will take place in what seems to be the last days of the village.",
+      "poster": "https://image.tmdb.org/t/p/w500/mxqUxy4KETbfdYqh2XymLYBG8p8.jpg",
+      "year": 2025,
+      "createdAt": "2025-07-18T00:07:43.187Z",
+      "updatedAt": "2025-07-18T00:07:43.187Z"
+    }
+  ],
   "metadata": {
     "version": "1.0.0",
-    "lastUpdated": "2025-07-18T00:07:41.269Z"
+    "lastUpdated": "2025-07-18T00:07:43.188Z"
   }
 }
