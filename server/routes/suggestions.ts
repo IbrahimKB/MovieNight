@@ -182,58 +182,54 @@ router.post("/respond", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await withTransaction(async (db) => db);
+    const result = await withTransaction(async (database) => {
+      // Find the suggestion
+      const suggestion = database.suggestions.find(
+        (s) => s.id === suggestionId,
+      );
+      if (!suggestion) {
+        throw new Error("Suggestion not found");
+      }
 
-    // Find the suggestion
-    const suggestion = database.suggestions.find((s) => s.id === suggestionId);
-    if (!suggestion) {
-      return res.status(404).json({
-        success: false,
-        error: "Suggestion not found",
-      } as ApiResponse);
-    }
+      // Check if user is a recipient of this suggestion
+      if (!suggestion.suggestedTo.includes(userId)) {
+        throw new Error("You are not a recipient of this suggestion");
+      }
 
-    // Check if user is a recipient of this suggestion
-    if (!suggestion.suggestedTo.includes(userId)) {
-      return res.status(403).json({
-        success: false,
-        error: "You are not a recipient of this suggestion",
-      } as ApiResponse);
-    }
+      // Check if user already responded
+      const existingDesire = database.watchDesires.find(
+        (wd) => wd.suggestionId === suggestionId && wd.userId === userId,
+      );
 
-    // Check if user already responded
-    const existingDesire = database.watchDesires.find(
-      (wd) => wd.suggestionId === suggestionId && wd.userId === userId,
-    );
+      if (existingDesire) {
+        // Update existing response
+        existingDesire.rating = rating;
+        existingDesire.updatedAt = new Date().toISOString();
+      } else {
+        // Create new watch desire
+        const watchDesire: WatchDesire = {
+          id: generateId(),
+          userId,
+          movieId: suggestion.movieId,
+          suggestionId,
+          rating,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        database.watchDesires.push(watchDesire);
+      }
 
-    if (existingDesire) {
-      // Update existing response
-      existingDesire.rating = rating;
-      existingDesire.updatedAt = new Date().toISOString();
-    } else {
-      // Create new watch desire
-      const watchDesire: WatchDesire = {
-        id: generateId(),
-        userId,
-        movieId: suggestion.movieId,
-        suggestionId,
-        rating,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      database.watchDesires.push(watchDesire);
-    }
+      // Update suggestion status if this is the first response
+      if (suggestion.status === "pending") {
+        suggestion.status = rating >= 6 ? "accepted" : "rejected";
+        suggestion.updatedAt = new Date().toISOString();
+      }
 
-    // Update suggestion status if this is the first response
-    if (suggestion.status === "pending") {
-      suggestion.status = rating >= 6 ? "accepted" : "rejected";
-      suggestion.updatedAt = new Date().toISOString();
-    }
+      const movie = database.movies.find((m) => m.id === suggestion.movieId);
+      const responseType = rating >= 6 ? "accepted" : "rejected";
 
-    saveDatabase(database);
-
-    const movie = database.movies.find((m) => m.id === suggestion.movieId);
-    const responseType = rating >= 6 ? "accepted" : "rejected";
+      return { suggestionId, rating, status: responseType };
+    });
 
     res.json({
       success: true,
