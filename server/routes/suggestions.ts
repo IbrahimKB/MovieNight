@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "./auth";
-import { loadDatabase, saveDatabase, generateId } from "../utils/storage";
+import { withTransaction, generateId } from "../utils/storage";
 import {
   CreateSuggestionRequest,
   UpdateWatchDesireRequest,
@@ -40,7 +40,7 @@ router.post("/", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Check if movie exists
     const movie = database.movies.find((m) => m.id === movieId);
@@ -126,7 +126,7 @@ router.get("/", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Get suggestions sent to the current user
     const userSuggestions = database.suggestions
@@ -188,7 +188,7 @@ router.post("/respond", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Find the suggestion
     const suggestion = database.suggestions.find((s) => s.id === suggestionId);
@@ -267,7 +267,7 @@ router.get("/sent", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     const sentSuggestions = database.suggestions
       .filter((s) => s.suggestedBy === userId)
@@ -331,7 +331,7 @@ router.delete("/:suggestionId", verifyJWT, async (req, res) => {
       } as ApiResponse);
     }
 
-    const database = await loadDatabase();
+    const database = await withTransaction(async (db) => db);
 
     // Find the suggestion
     const suggestionIndex = database.suggestions.findIndex(
