@@ -1,0 +1,182 @@
+//////////////////////////////////////////////////////////////
+// GENERATOR + DATASOURCE
+//////////////////////////////////////////////////////////////
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["movienight"]
+}
+
+//////////////////////////////////////////////////////////////
+// MOVIES
+//////////////////////////////////////////////////////////////
+
+model Movie {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String
+  year        Int
+  genres      String[]
+  platform    String?
+  poster      String?
+  description String
+  imdbRating  Float?
+  rtRating    Int?
+  releaseDate DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  suggestions   Suggestion[]
+  watchDesires  WatchDesire[]
+  watchedMovies WatchedMovie[]
+  releases      Release[]
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// SUGGESTIONS
+//////////////////////////////////////////////////////////////
+
+model Suggestion {
+  id           String   @id @default(uuid()) @db.Uuid
+  movieId      String   @db.Uuid
+  suggestedBy  String   @db.Uuid
+  suggestedTo  String[]
+  desireRating Int
+  comment      String?
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// WATCH DESIRES
+//////////////////////////////////////////////////////////////
+
+model WatchDesire {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  movieId      String   @db.Uuid
+  suggestionId String   @db.Uuid
+  rating       Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// FRIENDSHIPS
+//////////////////////////////////////////////////////////////
+
+model Friendship {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId1     String   @db.Uuid
+  userId2     String   @db.Uuid
+  requestedBy String   @db.Uuid
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// WATCH HISTORY
+//////////////////////////////////////////////////////////////
+
+model WatchedMovie {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  movieId       String   @db.Uuid
+  watchedDate   DateTime
+  watchedWith   String[]
+  originalScore Int?
+  actualRating  Int?
+  reaction      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// NOTIFICATIONS
+//////////////////////////////////////////////////////////////
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  type      String
+  title     String
+  content   String
+  read      Boolean  @default(false)
+  actionData Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// RELEASE CALENDAR
+//////////////////////////////////////////////////////////////
+
+model Release {
+  id          String   @id @default(uuid()) @db.Uuid
+  movieId     String   @db.Uuid
+  title       String
+  platform    String
+  releaseDate DateTime
+  genres      String[]
+  description String?
+  poster      String?
+  year        Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// PUSH SUBSCRIPTIONS
+//////////////////////////////////////////////////////////////
+
+model UserPushSubscription {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  subscription Json
+  userAgent   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// NOTIFICATION PREFERENCES
+//////////////////////////////////////////////////////////////
+
+model UserNotificationPreferences {
+  userId     String   @id @db.Uuid
+  preferences Json
+  updatedAt  DateTime @updatedAt
+
+  @@schema("movienight")
+}

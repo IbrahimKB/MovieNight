@@ -1,4 +1,4 @@
-# Logs
+# ─── Logs ───────────────────────────────────────────────────────────
 logs
 *.log
 npm-debug.log*
@@ -7,12 +7,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ─── Dependencies ───────────────────────────────────────────────────
 node_modules
+
+# ─── Build Output ───────────────────────────────────────────────────
 dist
 dist-ssr
-*.local
+.build
+.svelte-kit
+.next
+.cache
 
-# Editor directories and files
+# ─── Local Environment ──────────────────────────────────────────────
+.env
+.env.*
+.env.save
+.env.save.*
+
+.local
+.tmp
+
+# ─── Prisma ─────────────────────────────────────────────────────────
+/prisma/migrations/
+/prisma/dev.db
+/generated/prisma
+prisma/generated/
+*.db
+
+# ─── Runtime / Server Files ─────────────────────────────────────────
+start
+node
+cloudflared.deb
+
+# ─── Data (do not commit local cache) ───────────────────────────────
+data/
+database.json
+*.sqlite
+*.db
+
+# ─── Editor directories and files ───────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,4 +56,5 @@ dist-ssr
 *.sln
 *.sw?
 
+# ─── System Files ───────────────────────────────────────────────────
 .config/
