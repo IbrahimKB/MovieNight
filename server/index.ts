@@ -1,7 +1,10 @@
+// server/index.ts — FINAL SQL-ONLY VERSION (no Prisma, no JSON fallbacks)
+
 import express from "express";
 import cors from "cors";
 import * as Sentry from "@sentry/node";
-import { handleDemo } from "./routes/demo.js";
+
+// Auth routes
 import {
   handleLogin,
   handleSignup,
@@ -13,44 +16,24 @@ import {
   handleGetAllUsers,
   handleDeleteUser,
 } from "./routes/auth.js";
+
+// Movies (now SQL-only)
 import {
   handleGetMovies,
   handleSearchMovies,
   handleGetMovieById,
   handleUpdateMovie,
   handleDeleteMovie,
-  handleCreateSuggestion,
-  handleGetSuggestions,
-  handleUpdateWatchDesire,
-  handleMarkAsWatched,
-  handleGetWatchHistory,
 } from "./routes/movies.js";
-import {
-  handleGetFriends,
-  handleGetIncomingRequests,
-  handleGetOutgoingRequests,
-  handleSendFriendRequest,
-  handleRespondToFriendRequest,
-  handleRemoveFriend,
-} from "./routes/friends.js";
-import {
-  handleGetNotifications,
-  handleGetUnreadCount,
-  handleMarkAsRead,
-  handleDeleteNotification,
-  handleClearAllNotifications,
-  handleSubscribePush,
-  handleUnsubscribePush,
-  handleGetNotificationPreferences,
-  handleSaveNotificationPreferences,
-  handleSendTestNotification,
-  handleSendNotificationToUsers,
-} from "./routes/notifications.js";
+
+// TMDB API handlers (unchanged)
 import {
   handleSearchMoviesExternal,
   handleSaveMovieFromTMDB,
   handleGetRateLimit,
 } from "./routes/tmdb.js";
+
+// Releases: still JSON-backed TEMPORARILY until you convert them
 import {
   handleGetReleases,
   handleSyncReleases,
@@ -66,8 +49,33 @@ import {
   handleDeleteRelease,
 } from "./routes/releases.js";
 
-import suggestionsRouter from "./routes/suggestions.js";
+// Friends / Notifications
+import {
+  handleGetFriends,
+  handleGetIncomingRequests,
+  handleGetOutgoingRequests,
+  handleSendFriendRequest,
+  handleRespondToFriendRequest,
+  handleRemoveFriend,
+} from "./routes/friends.js";
+
+import {
+  handleGetNotifications,
+  handleGetUnreadCount,
+  handleMarkAsRead,
+  handleDeleteNotification,
+  handleClearAllNotifications,
+  handleSubscribePush,
+  handleUnsubscribePush,
+  handleGetNotificationPreferences,
+  handleSaveNotificationPreferences,
+  handleSendTestNotification,
+  handleSendNotificationToUsers,
+} from "./routes/notifications.js";
+
 import analyticsRouter from "./routes/analytics.js";
+import suggestionsRouter from "./routes/suggestions.js"; // FULL SQL NOW
+
 import { schedulerService } from "./services/scheduler.js";
 
 export function createServer() {
@@ -85,20 +93,17 @@ export function createServer() {
     app.use(Sentry.Handlers.tracingHandler());
   }
 
-  // Start scheduler service
+  // Scheduler
   schedulerService.start();
 
-  // Standard middleware
+  // Middleware
   app.use(cors());
-
-  // Body parsing MUST be above request logging
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-  // Request logger (now req.body will be populated)
-  app.use((req, res, next) => {
+  // Request Logger (very helpful for debugging)
+  app.use((req, _res, next) => {
     console.log(`${req.method} ${req.path}`, {
-      contentType: req.headers["content-type"],
       hasBody: !!req.body,
       bodyKeys: req.body ? Object.keys(req.body) : [],
     });
@@ -108,56 +113,51 @@ export function createServer() {
   // Health check
   app.get("/api/ping", (_req, res) => {
     res.json({
-      message: "MovieNight API v1.0.0",
+      message: "MovieNight API v1.0.0 (SQL-only)",
       timestamp: new Date().toISOString(),
     });
   });
 
-  app.post("/api/test", (req, res) => {
-    console.log("Test endpoint body:", req.body);
-    res.json({
-      success: true,
-      receivedBody: req.body,
-      bodyType: typeof req.body,
-      bodyKeys: req.body ? Object.keys(req.body) : [],
-    });
-  });
-
-  // Legacy demo route
-  app.get("/api/demo", handleDemo);
-
-  // Auth routes
+  // ----------------------------------------
+  // AUTH
+  // ----------------------------------------
   app.post("/api/auth/login", handleLogin);
   app.post("/api/auth/signup", handleSignup);
   app.get("/api/auth/profile/:userId", handleGetProfile);
   app.get("/api/auth/search-users", handleSearchUsers);
 
-  // Admin routes
+  // Admin
   app.get("/api/admin/users", verifyJWT, requireAdmin, handleGetAllUsers);
   app.post("/api/admin/users/reset-password", verifyJWT, requireAdmin, handleResetPassword);
   app.delete("/api/admin/users/:userId", verifyJWT, requireAdmin, handleDeleteUser);
+
   app.get("/api/admin/scheduler/status", verifyJWT, requireAdmin, handleGetSchedulerStatus);
   app.post("/api/admin/scheduler/trigger", verifyJWT, requireAdmin, handleTriggerManualSync);
 
-  // Movies + suggestions
+  // ----------------------------------------
+  // MOVIES (SQL ONLY)
+  // ----------------------------------------
   app.get("/api/movies", handleGetMovies);
   app.get("/api/movies/search", handleSearchMovies);
   app.get("/api/movies/:movieId", handleGetMovieById);
   app.put("/api/movies/:movieId", verifyJWT, handleUpdateMovie);
   app.delete("/api/movies/:movieId", verifyJWT, requireAdmin, handleDeleteMovie);
 
-  app.post("/api/suggestions/:userId", handleCreateSuggestion);
-  app.get("/api/suggestions/:userId", handleGetSuggestions);
-  app.post("/api/watch-desire/:userId", handleUpdateWatchDesire);
-  app.post("/api/watched/:userId", handleMarkAsWatched);
-  app.get("/api/watch-history/:userId", handleGetWatchHistory);
+  // ----------------------------------------
+  // SUGGESTIONS (FULLY SQL)
+  // ----------------------------------------
+  app.use("/api/suggestions", suggestionsRouter);
 
+  // ----------------------------------------
   // TMDB
+  // ----------------------------------------
   app.get("/api/tmdb/search", handleSearchMoviesExternal);
   app.post("/api/tmdb/save-movie", handleSaveMovieFromTMDB);
   app.get("/api/tmdb/rate-limit", handleGetRateLimit);
 
-  // Releases
+  // ----------------------------------------
+  // RELEASES (still JSON fallback)
+  // ----------------------------------------
   app.get("/api/releases", handleGetReleases);
   app.get("/api/releases/upcoming", handleGetUpcomingReleases);
   app.get("/api/releases/platform", handleGetReleasesByPlatform);
@@ -169,7 +169,9 @@ export function createServer() {
   app.post("/api/releases/sync", handleSyncReleases);
   app.post("/api/releases/weekly-sync", handleWeeklySync);
 
-  // Friends
+  // ----------------------------------------
+  // FRIENDS
+  // ----------------------------------------
   app.get("/api/friends/:userId", handleGetFriends);
   app.get("/api/friends/:userId/incoming", handleGetIncomingRequests);
   app.get("/api/friends/:userId/outgoing", handleGetOutgoingRequests);
@@ -177,14 +179,16 @@ export function createServer() {
   app.post("/api/friends/:userId/respond", handleRespondToFriendRequest);
   app.delete("/api/friends/:userId/:friendshipId", handleRemoveFriend);
 
-  // Notifications
+  // ----------------------------------------
+  // NOTIFICATIONS
+  // ----------------------------------------
   app.get("/api/notifications/:userId", verifyJWT, handleGetNotifications);
   app.get("/api/notifications/:userId/unread-count", verifyJWT, handleGetUnreadCount);
   app.post("/api/notifications/:userId/mark-read", verifyJWT, handleMarkAsRead);
   app.delete("/api/notifications/:userId/:notificationId", verifyJWT, handleDeleteNotification);
   app.delete("/api/notifications/:userId/clear-all", verifyJWT, handleClearAllNotifications);
 
-  // Push Notifications
+  // Push notifications
   app.post("/api/notifications/subscribe", verifyJWT, handleSubscribePush);
   app.post("/api/notifications/unsubscribe", verifyJWT, handleUnsubscribePush);
   app.post("/api/notifications/test", verifyJWT, handleSendTestNotification);
@@ -194,10 +198,9 @@ export function createServer() {
   app.get("/api/user/notification-preferences", verifyJWT, handleGetNotificationPreferences);
   app.put("/api/user/notification-preferences", verifyJWT, handleSaveNotificationPreferences);
 
-  // Suggestions router
-  app.use("/api/suggestions", suggestionsRouter);
-
-  // Analytics router
+  // ----------------------------------------
+  // ANALYTICS
+  // ----------------------------------------
   app.use("/api/analytics", analyticsRouter);
 
   // Sentry error handler
@@ -205,8 +208,8 @@ export function createServer() {
     app.use(Sentry.Handlers.errorHandler());
   }
 
-  // Fallback error handler
-  app.use((err, req, res, next) => {
+  // Generic error handler
+  app.use((err, req, res, _next) => {
     console.error("Unhandled error:", err);
     res.status(500).json({
       success: false,

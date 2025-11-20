@@ -1,372 +1,449 @@
+// server/routes/suggestions.ts
 import { Router } from "express";
 import { verifyJWT } from "./auth.js";
-import { withTransaction, generateId } from "../utils/storage.js";
 import {
+  ApiResponse,
   CreateSuggestionRequest,
   UpdateWatchDesireRequest,
-  ApiResponse,
   Suggestion,
-  WatchDesire,
   Movie,
+  JWTPayload,
 } from "../models/types.js";
+import { sql } from "../db/sql.js";
 
 const router = Router();
 
-// Create a new suggestion
+/**
+ * Helper: get current userId from JWT
+ */
+function getUserIdFromRequest(req: any): string | null {
+  const payload = req.user as JWTPayload | undefined;
+  return payload?.userId ?? null;
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * POST /api/suggestions
+ * Create a new suggestion (PG-only)
+ * Body: CreateSuggestionRequest { movieId, suggestedTo[], desireRating, comment? }
+ * ---------------------------------------------------------------------------
+ */
 router.post("/", verifyJWT, async (req, res) => {
+  const userId = getUserIdFromRequest(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    } as ApiResponse);
+  }
+
+  const body = req.body as CreateSuggestionRequest | undefined;
+
+  if (
+    !body ||
+    !body.movieId ||
+    !Array.isArray(body.suggestedTo) ||
+    body.suggestedTo.length === 0 ||
+    typeof body.desireRating !== "number"
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid request body",
+    } as ApiResponse);
+  }
+
+  const { movieId, suggestedTo, desireRating, comment } = body;
+
   try {
-    const { movieId, suggestedTo, desireRating, comment } =
-      req.body as CreateSuggestionRequest;
-    const userId = req.user?.userId;
+    // 1) Ensure movie exists
+    const movieResult = await sql<Movie>(
+      `
+      SELECT *
+      FROM movienight."Movie"
+      WHERE id = $1
+      LIMIT 1;
+      `,
+      [movieId],
+    );
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User not authenticated",
-      } as ApiResponse);
-    }
-
-    if (!movieId || !suggestedTo || suggestedTo.length === 0) {
+    if (movieResult.rows.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "Movie ID and at least one recipient are required",
+        error: "Movie not found",
       } as ApiResponse);
     }
 
-    if (desireRating < 1 || desireRating > 10) {
+    // 2) Validate that all suggestedTo user IDs exist in auth."User"
+    const usersResult = await sql<{ id: string }>(
+      `
+      SELECT "id"
+      FROM auth."User"
+      WHERE "id" = ANY($1::text[]);
+      `,
+      [suggestedTo],
+    );
+
+    const foundIds = new Set(usersResult.rows.map((r) => r.id));
+    const invalidUserIds = suggestedTo.filter((id) => !foundIds.has(id));
+
+    if (invalidUserIds.length > 0) {
       return res.status(400).json({
         success: false,
-        error: "Desire rating must be between 1 and 10",
+        error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
       } as ApiResponse);
     }
 
-    const suggestion = await withTransaction(async (database) => {
-      // Check if movie exists
-      const movie = database.movies.find((m) => m.id === movieId);
-      if (!movie) {
-        throw new Error("Movie not found");
-      }
+    // 3) Insert suggestion into movienight."Suggestion"
+    const suggestionResult = await sql<Suggestion & { suggestedTo: string[] }>(
+      `
+      INSERT INTO movienight."Suggestion" (
+        id,
+        "movieId",
+        "suggestedBy",
+        "suggestedTo",
+        "desireRating",
+        comment,
+        status
+      )
+      VALUES (
+        gen_random_uuid(),
+        $1::uuid,
+        $2::uuid,
+        $3::text[],
+        $4::integer,
+        $5::text,
+        'pending'
+      )
+      RETURNING
+        id,
+        "movieId",
+        "suggestedBy",
+        "suggestedTo",
+        "desireRating",
+        comment,
+        status,
+        "createdAt",
+        "updatedAt";
+      `,
+      [movieId, userId, suggestedTo, desireRating, comment ?? null],
+    );
 
-      // Check if all suggested users exist
-      const invalidUsers = suggestedTo.filter(
-        (id) => !database.users.find((u) => u.id === id),
-      );
-      if (invalidUsers.length > 0) {
-        throw new Error(`Invalid user IDs: ${invalidUsers.join(", ")}`);
-      }
+    const suggestion = suggestionResult.rows[0];
 
-      // Create the suggestion
-      const suggestion: Suggestion = {
-        id: generateId(),
-        movieId,
-        suggestedBy: userId,
-        suggestedTo,
-        desireRating,
-        comment: comment || undefined,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      database.suggestions.push(suggestion);
-
-      // Create notifications for each recipient
-      const suggestedByUser = database.users.find((u) => u.id === userId);
-      suggestedTo.forEach((recipientId) => {
-        const notification = {
-          id: generateId(),
-          userId: recipientId,
-          type: "suggestion" as const,
-          title: "New Movie Suggestion",
-          content: `${suggestedByUser?.name || "Someone"} suggested "${movie.title}" to you`,
-          read: false,
-          actionData: {
-            suggestionId: suggestion.id,
-            movieId,
-            userId,
-          },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        database.notifications.push(notification);
-      });
-
-      return suggestion;
+    // (Optional) Insert notifications into movienight."Notification"
+    // Only if your Notification schema matches this shape; otherwise tweak.
+    await sql(
+      `
+      INSERT INTO movienight."Notification" (
+        id,
+        "userId",
+        type,
+        payload
+      )
+      SELECT
+        gen_random_uuid(),
+        u."id",
+        'new_suggestion',
+        jsonb_build_object(
+          'suggestionId', $1,
+          'movieId', $2,
+          'fromUserId', $3
+        )
+      FROM auth."User" u
+      WHERE u."id" = ANY($4::text[]);
+      `,
+      [suggestion.id, movieId, userId, suggestedTo],
+    ).catch((err) => {
+      // Don't fail the whole request if notifications break
+      console.error("Failed to insert notifications for suggestion:", err);
     });
 
-    res.json({
+    return res.json({
       success: true,
       data: suggestion,
-      message: "Suggestion created successfully",
-    } as ApiResponse<Suggestion>);
+      message: "Suggestion created",
+    } as ApiResponse);
   } catch (error) {
     console.error("Create suggestion error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "Internal server error",
     } as ApiResponse);
   }
 });
 
-// Get suggestions for current user
+/**
+ * ---------------------------------------------------------------------------
+ * GET /api/suggestions
+ * Get suggestions *for the current user* (they were suggested TO you)
+ * Returns Suggestion + Movie + suggestedByUser + optional userRating
+ * ---------------------------------------------------------------------------
+ */
 router.get("/", verifyJWT, async (req, res) => {
+  const userId = getUserIdFromRequest(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    } as ApiResponse);
+  }
+
   try {
-    const userId = req.user?.userId;
+    const result = await sql<
+      Suggestion & {
+        movie: Movie;
+        suggestedByUser: { id: string; username: string; name: string | null };
+        userRating: number | null;
+      }
+    >(
+      `
+      SELECT
+        s.id,
+        s."movieId",
+        s."suggestedBy",
+        s."suggestedTo",
+        s."desireRating",
+        s.comment,
+        s.status,
+        s."createdAt",
+        s."updatedAt",
+        json_build_object(
+          'id', m.id,
+          'title', m.title,
+          'year', m.year,
+          'poster', m.poster,
+          'rating', m.rating,
+          'genres', m.genres
+        ) AS "movie",
+        json_build_object(
+          'id', ub.id,
+          'username', ub.username,
+          'name', ub.name
+        ) AS "suggestedByUser",
+        wd.rating AS "userRating"
+      FROM movienight."Suggestion" s
+      JOIN movienight."Movie" m
+        ON m.id = s."movieId"
+      JOIN auth."User" ub
+        ON s."suggestedBy"::text = ub."id"
+      LEFT JOIN movienight."WatchDesire" wd
+        ON wd."suggestionId" = s.id
+       AND wd."userId" = $1
+      WHERE $1 = ANY(s."suggestedTo")
+      ORDER BY s."createdAt" DESC;
+      `,
+      [userId],
+    );
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User not authenticated",
-      } as ApiResponse);
-    }
-
-    const database = await withTransaction(async (db) => db);
-
-    // Get suggestions sent to the current user
-    const userSuggestions = database.suggestions
-      .filter((s) => s.suggestedTo.includes(userId))
-      .map((suggestion) => {
-        const movie = database.movies.find((m) => m.id === suggestion.movieId);
-        const suggestedBy = database.users.find(
-          (u) => u.id === suggestion.suggestedBy,
-        );
-        const userDesire = database.watchDesires.find(
-          (wd) => wd.suggestionId === suggestion.id && wd.userId === userId,
-        );
-
-        return {
-          ...suggestion,
-          movie,
-          suggestedByUser: suggestedBy
-            ? { id: suggestedBy.id, name: suggestedBy.name }
-            : null,
-          userRating: userDesire?.rating,
-        };
-      })
-      .filter((s) => s.movie && s.suggestedByUser)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-
-    res.json({
+    return res.json({
       success: true,
-      data: userSuggestions,
+      data: result.rows,
     } as ApiResponse);
   } catch (error) {
     console.error("Get suggestions error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "Internal server error",
     } as ApiResponse);
   }
 });
 
-// Update watch desire (respond to suggestion)
+/**
+ * ---------------------------------------------------------------------------
+ * POST /api/suggestions/respond
+ * Accept / ignore a suggestion by setting your WatchDesire rating.
+ *
+ * Body: UpdateWatchDesireRequest { suggestionId, rating }
+ * - rating high (e.g. >= 5) → treated as "accepted"
+ * - rating low  (e.g. <= 3) → treated as "rejected"
+ * ---------------------------------------------------------------------------
+ */
 router.post("/respond", verifyJWT, async (req, res) => {
+  const userId = getUserIdFromRequest(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    } as ApiResponse);
+  }
+
+  const body = req.body as UpdateWatchDesireRequest | undefined;
+
+  if (!body || !body.suggestionId || typeof body.rating !== "number") {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid request body",
+    } as ApiResponse);
+  }
+
+  const { suggestionId, rating } = body;
+
   try {
-    const { suggestionId, rating } = req.body as UpdateWatchDesireRequest;
-    const userId = req.user?.userId;
+    // 1) Get the suggestion & its movie
+    const suggestionResult = await sql<{ movieId: string }>(
+      `
+      SELECT "movieId"
+      FROM movienight."Suggestion"
+      WHERE id = $1::uuid
+      LIMIT 1;
+      `,
+      [suggestionId],
+    );
 
-    if (!userId) {
-      return res.status(401).json({
+    if (suggestionResult.rows.length === 0) {
+      return res.status(404).json({
         success: false,
-        error: "User not authenticated",
+        error: "Suggestion not found",
       } as ApiResponse);
     }
 
-    if (!suggestionId || rating < 1 || rating > 10) {
-      return res.status(400).json({
-        success: false,
-        error: "Valid suggestion ID and rating (1-10) are required",
-      } as ApiResponse);
+    const movieId = suggestionResult.rows[0].movieId;
+
+    // 2) Upsert WatchDesire for this user + suggestion
+    const existingResult = await sql<{ id: string }>(
+      `
+      SELECT id
+      FROM movienight."WatchDesire"
+      WHERE "userId" = $1
+        AND "suggestionId" = $2::uuid
+      LIMIT 1;
+      `,
+      [userId, suggestionId],
+    );
+
+    if (existingResult.rows.length > 0) {
+      await sql(
+        `
+        UPDATE movienight."WatchDesire"
+        SET rating = $3,
+            "updatedAt" = CURRENT_TIMESTAMP
+        WHERE id = $4;
+        `,
+        [userId, suggestionId, rating, existingResult.rows[0].id],
+      );
+    } else {
+      await sql(
+        `
+        INSERT INTO movienight."WatchDesire" (
+          id,
+          "userId",
+          "movieId",
+          "suggestionId",
+          rating
+        )
+        VALUES (
+          gen_random_uuid(),
+          $1,
+          $2::uuid,
+          $3::uuid,
+          $4
+        );
+        `,
+        [userId, movieId, suggestionId, rating],
+      );
     }
 
-    const result = await withTransaction(async (database) => {
-      // Find the suggestion
-      const suggestion = database.suggestions.find(
-        (s) => s.id === suggestionId,
-      );
-      if (!suggestion) {
-        throw new Error("Suggestion not found");
-      }
+    // 3) Update suggestion status based on rating
+    const newStatus = rating <= 3 ? "rejected" : "accepted";
 
-      // Check if user is a recipient of this suggestion
-      if (!suggestion.suggestedTo.includes(userId)) {
-        throw new Error("You are not a recipient of this suggestion");
-      }
+    await sql(
+      `
+      UPDATE movienight."Suggestion"
+      SET status = $2,
+          "updatedAt" = CURRENT_TIMESTAMP
+      WHERE id = $1::uuid;
+      `,
+      [suggestionId, newStatus],
+    );
 
-      // Check if user already responded
-      const existingDesire = database.watchDesires.find(
-        (wd) => wd.suggestionId === suggestionId && wd.userId === userId,
-      );
-
-      if (existingDesire) {
-        // Update existing response
-        existingDesire.rating = rating;
-        existingDesire.updatedAt = new Date().toISOString();
-      } else {
-        // Create new watch desire
-        const watchDesire: WatchDesire = {
-          id: generateId(),
-          userId,
-          movieId: suggestion.movieId,
-          suggestionId,
-          rating,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        database.watchDesires.push(watchDesire);
-      }
-
-      // Update suggestion status if this is the first response
-      if (suggestion.status === "pending") {
-        suggestion.status = rating >= 6 ? "accepted" : "rejected";
-        suggestion.updatedAt = new Date().toISOString();
-      }
-
-      const movie = database.movies.find((m) => m.id === suggestion.movieId);
-      const responseType = rating >= 6 ? "accepted" : "rejected";
-
-      return { suggestionId, rating, status: responseType };
-    });
-
-    res.json({
+    return res.json({
       success: true,
-      data: result,
-      message: `Suggestion ${responseType} successfully`,
+      data: {
+        suggestionId,
+        rating,
+        status: newStatus,
+      },
+      message: "Suggestion response recorded",
     } as ApiResponse);
   } catch (error) {
     console.error("Respond to suggestion error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "Internal server error",
     } as ApiResponse);
   }
 });
 
-// Get suggestions sent by current user
-router.get("/sent", verifyJWT, async (req, res) => {
-  try {
-    const userId = req.user?.userId;
+/**
+ * ---------------------------------------------------------------------------
+ * DELETE /api/suggestions/:id
+ * (Optional) Hard-delete a suggestion + its WatchDesire rows
+ * ---------------------------------------------------------------------------
+ */
+router.delete("/:id", verifyJWT, async (req, res) => {
+  const userId = getUserIdFromRequest(req);
+  const { id } = req.params;
 
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: "User not authenticated",
-      } as ApiResponse);
-    }
-
-    const database = await withTransaction(async (db) => db);
-
-    const sentSuggestions = database.suggestions
-      .filter((s) => s.suggestedBy === userId)
-      .map((suggestion) => {
-        const movie = database.movies.find((m) => m.id === suggestion.movieId);
-        const recipients = suggestion.suggestedTo.map((id) => {
-          const user = database.users.find((u) => u.id === id);
-          const desire = database.watchDesires.find(
-            (wd) => wd.suggestionId === suggestion.id && wd.userId === id,
-          );
-          return {
-            id,
-            name: user?.name || "Unknown",
-            rating: desire?.rating,
-            responded: !!desire,
-          };
-        });
-
-        return {
-          ...suggestion,
-          movie,
-          recipients,
-        };
-      })
-      .filter((s) => s.movie)
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-      );
-
-    res.json({
-      success: true,
-      data: sentSuggestions,
-    } as ApiResponse);
-  } catch (error) {
-    console.error("Get sent suggestions error:", error);
-    res.status(500).json({
+  if (!userId) {
+    return res.status(401).json({
       success: false,
-      error: "Internal server error",
+      error: "Unauthorized",
     } as ApiResponse);
   }
-});
 
-// Delete a suggestion
-router.delete("/:suggestionId", verifyJWT, async (req, res) => {
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: "Suggestion ID is required",
+    } as ApiResponse);
+  }
+
   try {
-    const { suggestionId } = req.params;
-    const userId = req.user?.userId;
+    // Delete WatchDesire rows first to avoid orphans
+    await sql(
+      `
+      DELETE FROM movienight."WatchDesire"
+      WHERE "suggestionId" = $1::uuid;
+      `,
+      [id],
+    );
 
-    if (!userId) {
-      return res.status(401).json({
+    const deleted = await sql<Suggestion>(
+      `
+      DELETE FROM movienight."Suggestion"
+      WHERE id = $1::uuid
+      RETURNING
+        id,
+        "movieId",
+        "suggestedBy",
+        "suggestedTo",
+        "desireRating",
+        comment,
+        status,
+        "createdAt",
+        "updatedAt";
+      `,
+      [id],
+    );
+
+    if (deleted.rows.length === 0) {
+      return res.status(404).json({
         success: false,
-        error: "User not authenticated",
+        error: "Suggestion not found",
       } as ApiResponse);
     }
 
-    if (!suggestionId) {
-      return res.status(400).json({
-        success: false,
-        error: "Suggestion ID is required",
-      } as ApiResponse);
-    }
-
-    const deletedSuggestion = await withTransaction(async (database) => {
-      // Find the suggestion
-      const suggestionIndex = database.suggestions.findIndex(
-        (s) => s.id === suggestionId,
-      );
-
-      if (suggestionIndex === -1) {
-        throw new Error("Suggestion not found");
-      }
-
-      const suggestion = database.suggestions[suggestionIndex];
-
-      // Check if user is the owner of this suggestion
-      if (suggestion.suggestedBy !== userId) {
-        throw new Error("You can only delete your own suggestions");
-      }
-
-      // Remove the suggestion
-      const deletedSuggestion = database.suggestions.splice(
-        suggestionIndex,
-        1,
-      )[0];
-
-      // Clean up related data
-      // Remove associated watch desires
-      database.watchDesires = database.watchDesires.filter(
-        (wd) => wd.suggestionId !== suggestionId,
-      );
-
-      // Remove associated notifications
-      database.notifications = database.notifications.filter(
-        (notification) =>
-          notification.actionData?.suggestionId !== suggestionId,
-      );
-
-      return deletedSuggestion;
-    });
-
-    res.json({
+    return res.json({
       success: true,
-      data: deletedSuggestion,
+      data: deleted.rows[0],
       message: "Suggestion and related data deleted successfully",
     } as ApiResponse);
   } catch (error) {
     console.error("Delete suggestion error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "Internal server error",
     } as ApiResponse);
