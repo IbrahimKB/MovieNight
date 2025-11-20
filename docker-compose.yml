@@ -1,6 +1,38 @@
 version: "3.8"
 
 services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SuperSecurePassword123
+      POSTGRES_DB: boksh_apps
+    volumes:
+      - /srv/storage/postgres:/var/lib/postgresql/data
+    networks:
+      - movienight_net
+    ports:
+      - "5432:5432"
+
+  movienight:
+    build: .
+    image: movienight:prod
+    container_name: movienight
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - movienight_net
+    ports:
+      - "127.0.0.1:3000:3000"
+
   proxy:
     image: nginx:alpine
     container_name: nginx-proxy
@@ -13,20 +45,6 @@ services:
       - ./certs:/etc/nginx/certs:ro
     depends_on:
       - movienight
-    networks:
-      - movienight_net
-
-  movienight:
-    build: .
-    image: movienight:prod
-    container_name: movienight
-    ports:
-      - "127.0.0.1:3000:3000"
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-    volumes:
-      - ./data:/app/data
     networks:
       - movienight_net
 

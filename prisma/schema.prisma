@@ -9,7 +9,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["movienight"]
+  schemas  = ["movienight", "auth"]
 }
 
 //////////////////////////////////////////////////////////////
@@ -179,4 +179,25 @@ model UserNotificationPreferences {
   updatedAt  DateTime @updatedAt
 
   @@schema("movienight")
+}
+
+//////////////////////////////////////////////////////////////
+// AUTH USERS (auth.users)
+//////////////////////////////////////////////////////////////
+
+model AuthUser {
+  id        String   @id @default(uuid()) @db.Uuid
+  puid      String   @unique     // public user ID (UUID string)
+  username  String   @unique
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("user")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  @@schema("auth")
+  @@map("users")
+
 }

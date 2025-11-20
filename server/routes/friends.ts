@@ -5,8 +5,8 @@ import {
   Friendship,
   SendFriendRequestRequest,
   RespondToFriendRequestRequest,
-} from "../models/types";
-import { withTransaction, generateId } from "../utils/storage";
+} from "../models/types.js";
+import { withTransaction, generateId } from "../utils/storage.js";
 
 // Validation schemas
 const sendFriendRequestSchema = z.object({

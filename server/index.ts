@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import * as Sentry from "@sentry/node";
-import { handleDemo } from "./routes/demo";
+import { handleDemo } from "./routes/demo.js";
 import {
   handleLogin,
   handleSignup,
@@ -12,7 +12,7 @@ import {
   handleResetPassword,
   handleGetAllUsers,
   handleDeleteUser,
-} from "./routes/auth";
+} from "./routes/auth.js";
 import {
   handleGetMovies,
   handleSearchMovies,
@@ -24,7 +24,7 @@ import {
   handleUpdateWatchDesire,
   handleMarkAsWatched,
   handleGetWatchHistory,
-} from "./routes/movies";
+} from "./routes/movies.js";
 import {
   handleGetFriends,
   handleGetIncomingRequests,
@@ -32,7 +32,7 @@ import {
   handleSendFriendRequest,
   handleRespondToFriendRequest,
   handleRemoveFriend,
-} from "./routes/friends";
+} from "./routes/friends.js";
 import {
   handleGetNotifications,
   handleGetUnreadCount,
@@ -45,12 +45,12 @@ import {
   handleSaveNotificationPreferences,
   handleSendTestNotification,
   handleSendNotificationToUsers,
-} from "./routes/notifications";
+} from "./routes/notifications.js";
 import {
   handleSearchMoviesExternal,
   handleSaveMovieFromTMDB,
   handleGetRateLimit,
-} from "./routes/tmdb";
+} from "./routes/tmdb.js";
 import {
   handleGetReleases,
   handleSyncReleases,
@@ -64,11 +64,11 @@ import {
   handleCreateRelease,
   handleUpdateRelease,
   handleDeleteRelease,
-} from "./routes/releases";
-import suggestionsRouter from "./routes/suggestions";
-import analyticsRouter from "./routes/analytics";
-import { initializeDatabase } from "./utils/storage";
-import { schedulerService } from "./services/scheduler";
+} from "./routes/releases.js";
+import suggestionsRouter from "./routes/suggestions.js";
+import analyticsRouter from "./routes/analytics.js";
+import { initializeDatabase } from "./utils/storage.js";
+import { schedulerService } from "./services/scheduler.js";
 
 export function createServer() {
   const app = express();

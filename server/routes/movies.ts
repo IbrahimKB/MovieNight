@@ -10,10 +10,10 @@ import {
   MarkAsWatchedRequest,
   WatchedMovie,
   Release,
-} from "../models/types";
-import { withTransaction, generateId } from "../utils/storage";
-import { tmdbService, MovieNightSearchResult } from "../services/tmdb";
-import { dbMovies } from "../services/dbMovies";
+} from "../models/types.js";
+import { withTransaction, generateId } from "../utils/storage.js";
+import { tmdbService, MovieNightSearchResult } from "../services/tmdb.js";
+import { dbMovies } from "../services/dbMovies.js";
 
 // Validation schemas
 const createSuggestionSchema = z.object({

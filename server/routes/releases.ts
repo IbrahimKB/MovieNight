@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
-import { ApiResponse, Release } from "../models/types";
-import { withTransaction, generateId } from "../utils/storage";
-import { tmdbService } from "../services/tmdb";
-import { schedulerService } from "../services/scheduler";
+import { ApiResponse, Release } from "../models/types.js";
+import { withTransaction, generateId } from "../utils/storage.js";
+import { tmdbService } from "../services/tmdb.js";
+import { schedulerService } from "../services/scheduler.js";
 
 // Validation schemas
 const createReleaseSchema = z.object({

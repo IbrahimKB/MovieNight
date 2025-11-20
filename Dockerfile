@@ -1,6 +1,4 @@
-# ────────────────────────────────────────────────
-# Stage 1: Builder — install deps, generate Prisma, build app
-# ────────────────────────────────────────────────
+# Stage 1: Builder – install deps, generate Prisma, build app
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -13,16 +11,15 @@ RUN npm ci --legacy-peer-deps
 # 3. Copy full source code
 COPY . .
 
-# 4. Generate Prisma client INSIDE container
+# 4. Generate Prisma Client INSIDE container
 RUN npx prisma generate
 
 # 5. Build both client + server
 RUN npm run build
 
 
-# ────────────────────────────────────────────────
-# Stage 2: Production image — minimal runtime
-# ────────────────────────────────────────────────
+
+# Stage 2: Production image – minimal runtime
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -38,8 +35,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
-# 4. Port for your SSR server
+# 4. ❗️ COPY THE PRISMA SCHEMA ITSELF (this was missing)
+COPY --from=builder /app/prisma ./prisma
+
+# 5. Port for your SSR server
 EXPOSE 3000
 
-# 5. Run server
+# 6. Run server
 CMD ["npm", "start"]

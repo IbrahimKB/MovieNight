@@ -1,7 +1,9 @@
+// server/routes/auth.ts
 import { RequestHandler } from "express";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "crypto";
 import {
   ApiResponse,
   LoginRequest,
@@ -9,17 +11,37 @@ import {
   ResetPasswordRequest,
   User,
   JWTPayload,
-} from "../models/types";
-import { withTransaction, generateId } from "../utils/storage";
+} from "../models/types.js";
+import { sql } from "../db/sql.js";
 
-// JWT secret (in production, use environment variable)
+// ---------------------------------------------------------------------------
+// Local DB type matching auth."User"
+// ---------------------------------------------------------------------------
+interface AuthUserRow {
+  id: string;
+  username: string;
+  email: string;
+  passwordHash: string;
+  createdAt: Date;
+  updatedAt: Date;
+  name: string | null;
+  role: string | null;
+  joinedAt: Date | null;
+  puid: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// JWT config
+// ---------------------------------------------------------------------------
 const JWT_SECRET =
   process.env.JWT_SECRET || "movienight_dev_secret_key_change_in_production";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
+// ---------------------------------------------------------------------------
 // Validation schemas
+// ---------------------------------------------------------------------------
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required"),
+  email: z.string().min(1, "Email or username is required"),
   password: z.string().min(1, "Password is required"),
 });
 
@@ -30,10 +52,149 @@ const signupSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
+const resetPasswordSchema = z.object({
+  userId: z.string().min(1, "User ID is required"), // can be id or puid
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+// ---------------------------------------------------------------------------
+// Helper: map DB row → API User
+// ---------------------------------------------------------------------------
+function mapAuthUserToUserRow(authUser: AuthUserRow): User {
+  // Prefer public user id (puid) if present, else fallback to internal id
+  const id = authUser.puid ?? authUser.id;
+
+  const joinedAtSource = authUser.joinedAt ?? authUser.createdAt;
+
+  return {
+    id,
+    username: authUser.username,
+    email: authUser.email,
+    // name is optional in DB; fallback to username if missing
+    name: authUser.name ?? authUser.username,
+    // password is NEVER exposed
+    password: "",
+    role: (authUser.role as any) ?? "user",
+    joinedAt: joinedAtSource.toISOString(),
+    createdAt: authUser.createdAt.toISOString(),
+    updatedAt: authUser.updatedAt.toISOString(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Helper: create JWT
+// ---------------------------------------------------------------------------
+function createJwtForUser(user: User): string {
+  const payload: JWTPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+  } as SignOptions);
+}
+
+// ---------------------------------------------------------------------------
+// DB helpers
+// ---------------------------------------------------------------------------
+
+async function findUserByIdentifier(
+  identifier: string,
+): Promise<AuthUserRow | null> {
+  const lowered = identifier.trim().toLowerCase();
+
+  const result = await sql<AuthUserRow>(
+    `
+    SELECT
+      "id",
+      "username",
+      "email",
+      "passwordHash",
+      "createdAt",
+      "updatedAt",
+      "name",
+      "role",
+      "joinedAt",
+      "puid"
+    FROM auth."User"
+    WHERE lower("email") = $1
+       OR lower("username") = $1
+    LIMIT 1;
+    `,
+    [lowered],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function findUserByPublicId(
+  userId: string,
+): Promise<AuthUserRow | null> {
+  const result = await sql<AuthUserRow>(
+    `
+    SELECT
+      "id",
+      "username",
+      "email",
+      "passwordHash",
+      "createdAt",
+      "updatedAt",
+      "name",
+      "role",
+      "joinedAt",
+      "puid"
+    FROM auth."User"
+    WHERE "puid" = $1
+       OR "id" = $1
+    LIMIT 1;
+    `,
+    [userId],
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function searchUsers(
+  query: string,
+  excludeUserId?: string,
+): Promise<AuthUserRow[]> {
+  const searchTerm = `%${query.trim()}%`;
+
+  // If excludeUserId is provided, we exclude rows where id or puid matches it
+  const result = await sql<AuthUserRow>(
+    `
+    SELECT
+      "id",
+      "username",
+      "email",
+      "passwordHash",
+      "createdAt",
+      "updatedAt",
+      "name",
+      "role",
+      "joinedAt",
+      "puid"
+    FROM auth."User"
+    WHERE
+      ($1 IS NULL OR ("puid" <> $1 AND "id" <> $1))
+      AND (
+        "username" ILIKE $2
+        OR "name" ILIKE $2
+      )
+    ORDER BY "createdAt" ASC;
+    `,
+    [excludeUserId ?? null, searchTerm],
+  );
+
+  return result.rows;
+}
+
+// ---------------------------------------------------------------------------
 // Login handler
+// ---------------------------------------------------------------------------
 export const handleLogin: RequestHandler = async (req, res) => {
   try {
-    // Validate request body
     if (!req.body || typeof req.body !== "object") {
       const response: ApiResponse = {
         success: false,
@@ -43,86 +204,16 @@ export const handleLogin: RequestHandler = async (req, res) => {
     }
 
     const body = loginSchema.parse(req.body) as LoginRequest;
+    const identifier = body.email.trim().toLowerCase();
 
-    const result = await withTransaction(async (db) => {
-      console.log("Login attempt:", { email: body.email, password: "***" });
+    console.log("Login attempt:", { identifier, password: "***" });
 
-      // Find user by email or username (case-insensitive)
-      const foundUser = db.users.find(
-        (u) =>
-          u.email.toLowerCase() === body.email.toLowerCase() ||
-          u.username.toLowerCase() === body.email.toLowerCase(),
-      );
+    const foundUser = await findUserByIdentifier(identifier);
 
-      console.log("User found:", foundUser ? "Yes" : "No");
-      console.log(
-        "Available users:",
-        db.users.map((u) => ({
-          username: u.username,
-          email: u.email,
-          hasPassword: !!u.password,
-        })),
-      );
+    console.log("User found:", foundUser ? "Yes" : "No");
 
-      if (!foundUser) {
-        console.log("User not found for:", body.email);
-        return null;
-      }
-
-      // Verify password - handle both hashed and plaintext for migration
-      console.log("Verifying password...");
-      let isPasswordValid = false;
-
-      // Check if password is already hashed (starts with $2b$ for bcrypt)
-      if (foundUser.password.startsWith("$2b$")) {
-        // Use bcrypt compare for hashed passwords
-        isPasswordValid = await bcrypt.compare(
-          body.password,
-          foundUser.password,
-        );
-        console.log("Password validation (bcrypt):", isPasswordValid);
-      } else {
-        // Plain text comparison for legacy users, then hash and update
-        isPasswordValid = body.password === foundUser.password;
-        console.log("Password validation (plaintext):", isPasswordValid);
-
-        if (isPasswordValid) {
-          console.log("Migrating user to hashed password...");
-          // Hash the password and update user record
-          const hashedPassword = await bcrypt.hash(body.password, 12);
-          foundUser.password = hashedPassword;
-          foundUser.updatedAt = new Date().toISOString();
-
-          // Update user role if not set
-          if (!foundUser.role) {
-            (foundUser as any).role = "user";
-          }
-
-          console.log("User password migrated to bcrypt hash");
-        }
-      }
-
-      if (!isPasswordValid) {
-        console.log("Password verification failed");
-        return null;
-      }
-
-      // Generate JWT token
-      const payload: JWTPayload = {
-        userId: foundUser.id,
-        role: foundUser.role,
-      };
-      const token = jwt.sign(payload, JWT_SECRET, {
-        expiresIn: JWT_EXPIRES_IN,
-      } as SignOptions);
-
-      // Return user without password
-      const { password, ...userWithoutPassword } = foundUser;
-      return { user: userWithoutPassword, token };
-    });
-
-    if (!result) {
-      console.log("Login failed: Invalid credentials");
+    if (!foundUser) {
+      console.log("User not found for:", identifier);
       const response: ApiResponse = {
         success: false,
         error: "Invalid email/username or password",
@@ -130,14 +221,36 @@ export const handleLogin: RequestHandler = async (req, res) => {
       return res.status(401).json(response);
     }
 
-    console.log("Login successful for user:", result.user.username);
+    console.log("Verifying password with bcrypt...");
+    const isPasswordValid = await bcrypt.compare(
+      body.password,
+      foundUser.passwordHash,
+    );
+
+    console.log("Password validation:", isPasswordValid);
+
+    if (!isPasswordValid) {
+      const response: ApiResponse = {
+        success: false,
+        error: "Invalid email/username or password",
+      };
+      return res.status(401).json(response);
+    }
+
+    const user = mapAuthUserToUserRow(foundUser);
+    const token = createJwtForUser(user);
+
+    console.log("Login successful for user:", user.username);
 
     const response: ApiResponse<{
       user: Omit<User, "password">;
       token: string;
     }> = {
       success: true,
-      data: result,
+      data: {
+        user,
+        token,
+      },
       message: "Login successful",
     };
 
@@ -147,7 +260,6 @@ export const handleLogin: RequestHandler = async (req, res) => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       type: typeof error,
-      errorString: JSON.stringify(error, Object.getOwnPropertyNames(error)),
     });
     console.error("Raw login error:", error);
 
@@ -167,66 +279,77 @@ export const handleLogin: RequestHandler = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // Signup handler
+// ---------------------------------------------------------------------------
 export const handleSignup: RequestHandler = async (req, res) => {
   try {
     const body = signupSchema.parse(req.body) as SignupRequest;
 
-    const result = await withTransaction(async (db) => {
-      // Check if user already exists (case-insensitive)
-      const existingUser = db.users.find(
-        (u) =>
-          u.email.toLowerCase() === body.email.toLowerCase() ||
-          u.username.toLowerCase() === body.username.toLowerCase(),
-      );
+    const username = body.username.trim().toLowerCase();
+    const email = body.email.trim().toLowerCase();
+    const name = body.name.trim();
 
-      if (existingUser) {
-        // Provide specific error message for better UX
-        if (existingUser.email.toLowerCase() === body.email.toLowerCase()) {
-          throw new Error("An account with this email already exists");
-        } else {
-          throw new Error("This username is already taken");
-        }
+    // Check if user already exists (email or username)
+    const existing = await sql<Pick<AuthUserRow, "id" | "email" | "username">>(
+      `
+      SELECT "id", "email", "username"
+      FROM auth."User"
+      WHERE lower("email") = $1 OR lower("username") = $2
+      LIMIT 1;
+      `,
+      [email, username],
+    );
+
+    const existingUser = existing.rows[0];
+
+    if (existingUser) {
+      if (existingUser.email.toLowerCase() === email) {
+        throw new Error("An account with this email already exists");
+      } else {
+        throw new Error("This username is already taken");
       }
+    }
 
-      // Hash password
-      const hashedPassword = await bcrypt.hash(body.password, 12);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(body.password, 12);
 
-      // Create new user
-      const user: User = {
-        id: generateId(),
-        username: body.username,
-        email: body.email,
-        name: body.name,
-        password: hashedPassword,
-        role: "user", // Default role is user
-        joinedAt: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+    // Generate internal id + public id
+    const internalId = crypto.randomUUID();
+    const puid = crypto.randomUUID();
 
-      db.users.push(user);
+    const created = await sql<AuthUserRow>(
+      `
+      INSERT INTO auth."User"
+        ("id", "username", "email", "passwordHash", "name", "role", "createdAt", "updatedAt", "joinedAt", "puid")
+      VALUES
+        ($1, $2, $3, $4, $5, 'user', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $6)
+      RETURNING
+        "id",
+        "username",
+        "email",
+        "passwordHash",
+        "createdAt",
+        "updatedAt",
+        "name",
+        "role",
+        "joinedAt",
+        "puid";
+      `,
+      [internalId, username, email, hashedPassword, name, puid],
+    );
 
-      // Generate JWT token
-      const payload: JWTPayload = {
-        userId: user.id,
-        role: user.role,
-      };
-      const token = jwt.sign(payload, JWT_SECRET, {
-        expiresIn: JWT_EXPIRES_IN,
-      } as SignOptions);
+    const createdUser = created.rows[0];
 
-      // Return user without password
-      const { password, ...userWithoutPassword } = user;
-      return { user: userWithoutPassword, token };
-    });
+    const user = mapAuthUserToUserRow(createdUser);
+    const token = createJwtForUser(user);
 
     const response: ApiResponse<{
       user: Omit<User, "password">;
       token: string;
     }> = {
       success: true,
-      data: result,
+      data: { user, token },
       message: "Account created successfully",
     };
 
@@ -236,7 +359,7 @@ export const handleSignup: RequestHandler = async (req, res) => {
       message: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
       type: typeof error,
-      error: error,
+      error,
     });
 
     if (error instanceof z.ZodError) {
@@ -263,7 +386,9 @@ export const handleSignup: RequestHandler = async (req, res) => {
   }
 };
 
-// Get current user profile
+// ---------------------------------------------------------------------------
+// Get current user profile (by public id or raw id)
+// ---------------------------------------------------------------------------
 export const handleGetProfile: RequestHandler = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -276,25 +401,17 @@ export const handleGetProfile: RequestHandler = async (req, res) => {
       return res.status(400).json(response);
     }
 
-    const user = await withTransaction(async (db) => {
-      const foundUser = db.users.find((u) => u.id === userId);
+    const authUser = await findUserByPublicId(userId);
 
-      if (!foundUser) {
-        return null;
-      }
-
-      // Return user without password
-      const { password, ...userWithoutPassword } = foundUser;
-      return userWithoutPassword;
-    });
-
-    if (!user) {
+    if (!authUser) {
       const response: ApiResponse = {
         success: false,
         error: "User not found",
       };
       return res.status(404).json(response);
     }
+
+    const user = mapAuthUserToUserRow(authUser);
 
     const response: ApiResponse<Omit<User, "password">> = {
       success: true,
@@ -313,11 +430,13 @@ export const handleGetProfile: RequestHandler = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // Search users
+// ---------------------------------------------------------------------------
 export const handleSearchUsers: RequestHandler = async (req, res) => {
   try {
     const query = req.query.q as string;
-    const excludeUserId = req.query.exclude as string;
+    const excludeUserId = req.query.exclude as string | undefined;
 
     if (!query || query.trim().length === 0) {
       const response: ApiResponse = {
@@ -327,29 +446,12 @@ export const handleSearchUsers: RequestHandler = async (req, res) => {
       return res.status(400).json(response);
     }
 
-    const users = await withTransaction(async (db) => {
-      const searchTerm = query.toLowerCase().trim();
-
-      return db.users
-        .filter((user) => {
-          // Exclude current user if specified
-          if (excludeUserId && user.id === excludeUserId) return false;
-
-          return (
-            user.username.toLowerCase().includes(searchTerm) ||
-            user.name.toLowerCase().includes(searchTerm)
-          );
-        })
-        .map((user) => {
-          // Return user without password
-          const { password, ...userWithoutPassword } = user;
-          return userWithoutPassword;
-        });
-    });
+    const users = await searchUsers(query, excludeUserId);
+    const mapped = users.map(mapAuthUserToUserRow);
 
     const response: ApiResponse<Omit<User, "password">[]> = {
       success: true,
-      data: users,
+      data: mapped,
     };
 
     res.json(response);
@@ -364,7 +466,9 @@ export const handleSearchUsers: RequestHandler = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // JWT verification middleware
+// ---------------------------------------------------------------------------
 export const verifyJWT: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -379,6 +483,7 @@ export const verifyJWT: RequestHandler = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    // @ts-expect-error - req.user is added at runtime
     req.user = decoded;
     next();
   } catch (error) {
@@ -390,8 +495,11 @@ export const verifyJWT: RequestHandler = (req, res, next) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // Admin role verification middleware
+// ---------------------------------------------------------------------------
 export const requireAdmin: RequestHandler = (req, res, next) => {
+  // @ts-expect-error - req.user is added at runtime
   if (!req.user) {
     const response: ApiResponse = {
       success: false,
@@ -400,6 +508,7 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
     return res.status(401).json(response);
   }
 
+  // @ts-expect-error - req.user is added at runtime
   if (req.user.role !== "admin") {
     const response: ApiResponse = {
       success: false,
@@ -411,42 +520,49 @@ export const requireAdmin: RequestHandler = (req, res, next) => {
   next();
 };
 
-// Password reset schema
-const resetPasswordSchema = z.object({
-  userId: z.string().min(1, "User ID is required"),
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-});
-
+// ---------------------------------------------------------------------------
 // Reset password handler (admin only)
+// ---------------------------------------------------------------------------
 export const handleResetPassword: RequestHandler = async (req, res) => {
   try {
     const body = resetPasswordSchema.parse(req.body) as ResetPasswordRequest;
 
-    const updatedUser = await withTransaction(async (db) => {
-      const userIndex = db.users.findIndex((u) => u.id === body.userId);
+    const hashedPassword = await bcrypt.hash(body.newPassword, 12);
 
-      if (userIndex === -1) {
-        throw new Error("User not found");
-      }
+    const result = await sql<AuthUserRow>(
+      `
+      UPDATE auth."User"
+      SET "passwordHash" = $1,
+          "updatedAt" = CURRENT_TIMESTAMP
+      WHERE "puid" = $2 OR "id" = $2
+      RETURNING
+        "id",
+        "username",
+        "email",
+        "passwordHash",
+        "createdAt",
+        "updatedAt",
+        "name",
+        "role",
+        "joinedAt",
+        "puid";
+      `,
+      [hashedPassword, body.userId],
+    );
 
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(body.newPassword, 12);
-
-      // Update user password
-      db.users[userIndex] = {
-        ...db.users[userIndex],
-        password: hashedPassword,
-        updatedAt: new Date().toISOString(),
+    if (result.rows.length === 0) {
+      const response: ApiResponse = {
+        success: false,
+        error: "User not found",
       };
+      return res.status(404).json(response);
+    }
 
-      // Return user without password
-      const { password, ...userWithoutPassword } = db.users[userIndex];
-      return userWithoutPassword;
-    });
+    const user = mapAuthUserToUserRow(result.rows[0]);
 
     const response: ApiResponse<Omit<User, "password">> = {
       success: true,
-      data: updatedUser,
+      data: user,
       message: "Password reset successfully",
     };
 
@@ -478,19 +594,34 @@ export const handleResetPassword: RequestHandler = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // Get all users (admin only)
+// ---------------------------------------------------------------------------
 export const handleGetAllUsers: RequestHandler = async (req, res) => {
   try {
-    const users = await withTransaction(async (db) => {
-      return db.users.map((user) => {
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      });
-    });
+    const result = await sql<AuthUserRow>(
+      `
+      SELECT
+        "id",
+        "username",
+        "email",
+        "passwordHash",
+        "createdAt",
+        "updatedAt",
+        "name",
+        "role",
+        "joinedAt",
+        "puid"
+      FROM auth."User"
+      ORDER BY "createdAt" ASC;
+      `,
+    );
+
+    const mapped = result.rows.map(mapAuthUserToUserRow);
 
     const response: ApiResponse<Omit<User, "password">[]> = {
       success: true,
-      data: users,
+      data: mapped,
     };
 
     res.json(response);
@@ -505,10 +636,12 @@ export const handleGetAllUsers: RequestHandler = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
 // Delete user (admin only)
+// ---------------------------------------------------------------------------
 export const handleDeleteUser: RequestHandler = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = req.params.userId; // can be id or puid
 
     if (!userId) {
       const response: ApiResponse = {
@@ -518,39 +651,38 @@ export const handleDeleteUser: RequestHandler = async (req, res) => {
       return res.status(400).json(response);
     }
 
-    const deletedUser = await withTransaction(async (db) => {
-      const userIndex = db.users.findIndex((u) => u.id === userId);
+    const result = await sql<AuthUserRow>(
+      `
+      DELETE FROM auth."User"
+      WHERE "puid" = $1 OR "id" = $1
+      RETURNING
+        "id",
+        "username",
+        "email",
+        "passwordHash",
+        "createdAt",
+        "updatedAt",
+        "name",
+        "role",
+        "joinedAt",
+        "puid";
+      `,
+      [userId],
+    );
 
-      if (userIndex === -1) {
-        throw new Error("User not found");
-      }
+    if (result.rows.length === 0) {
+      const response: ApiResponse = {
+        success: false,
+        error: "User not found",
+      };
+      return res.status(404).json(response);
+    }
 
-      // Don't allow deleting admin user
-      if (db.users[userIndex].role === "admin") {
-        throw new Error("Cannot delete admin user");
-      }
-
-      const deletedUser = db.users[userIndex];
-      db.users.splice(userIndex, 1);
-
-      // Also clean up related data
-      db.friendships = db.friendships.filter(
-        (f) => f.userId1 !== userId && f.userId2 !== userId,
-      );
-      db.suggestions = db.suggestions.filter(
-        (s) => s.suggestedBy !== userId && !s.suggestedTo.includes(userId),
-      );
-      db.watchDesires = db.watchDesires.filter((w) => w.userId !== userId);
-      db.watchedMovies = db.watchedMovies.filter((w) => w.userId !== userId);
-      db.notifications = db.notifications.filter((n) => n.userId !== userId);
-
-      const { password, ...userWithoutPassword } = deletedUser;
-      return userWithoutPassword;
-    });
+    const user = mapAuthUserToUserRow(result.rows[0]);
 
     const response: ApiResponse<Omit<User, "password">> = {
       success: true,
-      data: deletedUser,
+      data: user,
       message: "User deleted successfully",
     };
 

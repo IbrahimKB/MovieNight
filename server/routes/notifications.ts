@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
-import { withTransaction } from "../utils/storage";
-import { Database } from "../models/types";
+import { withTransaction } from "../utils/storage.js";
+import { Database } from "../models/types.js";
 
 // Original notification functions
 export const handleGetNotifications: RequestHandler = async (req, res) => {

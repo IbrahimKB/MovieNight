@@ -1,5 +1,5 @@
-import { Release } from "../models/types";
-import { generateId } from "../utils/storage";
+import { Release } from "../models/types.js";
+import { generateId } from "../utils/storage.js";
 
 // JustWatch API configuration (simulated)
 const JUSTWATCH_API_KEY =

@@ -1,4 +1,4 @@
-import { JWTPayload } from "../models/types";
+import { JWTPayload } from "../models/types.js";
 
 declare global {
   namespace Express {

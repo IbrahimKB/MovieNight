@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
-import { ApiResponse, Movie } from "../models/types";
-import { withTransaction, generateId } from "../utils/storage";
-import { tmdbService, MovieNightSearchResult } from "../services/tmdb";
+import { ApiResponse, Movie } from "../models/types.js";
+import { withTransaction, generateId } from "../utils/storage.js";
+import { tmdbService, MovieNightSearchResult } from "../services/tmdb.js";
 
 // Search movies via TMDB
 export const handleSearchMoviesExternal: RequestHandler = async (req, res) => {

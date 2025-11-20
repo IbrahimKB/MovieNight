@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { verifyJWT } from "./auth";
-import { withTransaction, generateId } from "../utils/storage";
+import { verifyJWT } from "./auth.js";
+import { withTransaction, generateId } from "../utils/storage.js";
 import {
   CreateSuggestionRequest,
   UpdateWatchDesireRequest,
@@ -8,7 +8,7 @@ import {
   Suggestion,
   WatchDesire,
   Movie,
-} from "../models/types";
+} from "../models/types.js";
 
 const router = Router();
 

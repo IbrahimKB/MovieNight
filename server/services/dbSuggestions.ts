@@ -1,6 +1,6 @@
-import { prisma } from "../utils/prisma";
-import { Suggestion } from "../models/types";
-import { generateId } from "../utils/storage";
+import { prisma } from "../utils/prisma.js";
+import { Suggestion } from "../models/types.js";
+import { generateId } from "../utils/storage.js";
 
 export const dbSuggestions = {
   /** ------------------------------------------------------------------

@@ -1,3 +1,4 @@
+!prisma/
 node_modules
 dist
 .git

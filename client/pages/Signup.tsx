@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Film, Eye, EyeOff, Check } from "lucide-react";
+import { Loader2, Film, Eye, EyeOff, Check, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Signup() {
@@ -15,67 +15,69 @@ export default function Signup() {
     password: "",
     confirmPassword: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const [generalError, setGeneralError] = useState("");
+
   const { signup, isLoading } = useAuth();
   const navigate = useNavigate();
+  const errorRef = useRef<HTMLDivElement>(null);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Validation logic
   const validateForm = () => {
-    if (
-      !formData.username ||
-      !formData.email ||
-      !formData.name ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      return "Please fill in all fields";
-    }
+    const errors: { [key: string]: string } = {};
 
-    if (formData.username.length < 3) {
-      return "Username must be at least 3 characters";
-    }
+    if (!formData.name.trim()) errors.name = "Full name is required";
+    if (!formData.username.trim()) errors.username = "Username is required";
+    else if (formData.username.trim().length < 3)
+      errors.username = "Username must be at least 3 characters";
 
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      return "Please enter a valid email address";
-    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()))
+      errors.email = "Please enter a valid email address";
 
-    if (formData.password.length < 6) {
-      return "Password must be at least 6 characters";
-    }
+    if (!formData.password || formData.password.length < 6)
+      errors.password = "Password must be at least 6 characters";
 
-    if (formData.password !== formData.confirmPassword) {
-      return "Passwords do not match";
-    }
+    if (formData.password !== formData.confirmPassword)
+      errors.confirmPassword = "Passwords do not match";
 
-    return null;
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setGeneralError("");
+    setFieldErrors({});
 
-    const validationError = validateForm();
-    if (validationError) {
-      setError(validationError);
+    if (!validateForm()) {
+      setTimeout(() => errorRef.current?.focus(), 50);
       return;
     }
 
-    const success = await signup(
-      formData.username,
-      formData.email,
+    const result = await signup(
+      formData.username.toLowerCase(),
+      formData.email.toLowerCase(),
       formData.password,
-      formData.name,
+      formData.name.trim()
     );
 
-    if (success) {
+    if (result.success) {
       navigate("/");
-    } else {
-      setError("Username or email already exists");
+    } else if (result.error) {
+      if (result.error.field) {
+        setFieldErrors({ [result.error.field]: result.error.message });
+      } else {
+        setGeneralError(result.error.message);
+      }
+
+      setTimeout(() => errorRef.current?.focus(), 50);
     }
   };
 
@@ -93,7 +95,7 @@ export default function Signup() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
-        {/* Logo/Brand */}
+        {/* Logo */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
             <Film className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
@@ -111,19 +113,24 @@ export default function Signup() {
               Create Account
             </CardTitle>
           </CardHeader>
+
           <CardContent className="p-4 sm:p-6">
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-              {error && (
+              {(generalError || Object.keys(fieldErrors).length > 0) && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                  <AlertDescription tabIndex={-1} ref={errorRef}>
+                    {generalError && <div>{generalError}</div>}
+                    {Object.values(fieldErrors).map((err, i) => (
+                      <div key={i}>{err}</div>
+                    ))}
+                  </AlertDescription>
                 </Alert>
               )}
 
+              {/* Full Name */}
               <div className="space-y-2 sm:space-y-3">
-                <label
-                  htmlFor="name"
-                  className="text-responsive-sm font-medium"
-                >
+                <label htmlFor="name" className="text-responsive-sm font-medium">
                   Full Name
                 </label>
                 <Input
@@ -133,11 +140,10 @@ export default function Signup() {
                   value={formData.name}
                   onChange={(e) => handleInputChange("name", e.target.value)}
                   disabled={isLoading}
-                  autoComplete="name"
-                  className="input-mobile h-12 text-base"
                 />
               </div>
 
+              {/* Username */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="username"
@@ -155,10 +161,10 @@ export default function Signup() {
                   }
                   disabled={isLoading}
                   autoComplete="username"
-                  className="input-mobile h-12 text-base"
                 />
               </div>
 
+              {/* Email */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="email"
@@ -173,11 +179,10 @@ export default function Signup() {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   disabled={isLoading}
-                  autoComplete="email"
-                  className="input-mobile h-12 text-base"
                 />
               </div>
 
+              {/* Password */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="password"
@@ -196,13 +201,14 @@ export default function Signup() {
                     }
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="input-mobile h-12 text-base pr-12"
+                    className="pr-12"
                   />
+
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-12 w-12"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -212,6 +218,7 @@ export default function Signup() {
                     )}
                   </Button>
                 </div>
+
                 {formData.password && (
                   <div className="space-y-1">
                     <div className="flex gap-1">
@@ -223,24 +230,18 @@ export default function Signup() {
                               ? level <= 2
                                 ? "bg-red-500"
                                 : level === 3
-                                  ? "bg-yellow-500"
-                                  : "bg-green-500"
+                                ? "bg-yellow-500"
+                                : "bg-green-500"
                               : "bg-muted"
                           }`}
                         />
                       ))}
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {passwordStrength === 0 && "Password too weak"}
-                      {passwordStrength === 1 && "Weak password"}
-                      {passwordStrength === 2 && "Fair password"}
-                      {passwordStrength === 3 && "Good password"}
-                      {passwordStrength === 4 && "Strong password"}
-                    </p>
                   </div>
                 )}
               </div>
 
+              {/* Confirm Password */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="confirmPassword"
@@ -248,6 +249,7 @@ export default function Signup() {
                 >
                   Confirm Password
                 </label>
+
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -259,14 +261,17 @@ export default function Signup() {
                     }
                     disabled={isLoading}
                     autoComplete="new-password"
-                    className="input-mobile h-12 text-base pr-12"
+                    className="pr-12"
                   />
+
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-0 top-0 h-12 w-12"
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-5 w-5" />
@@ -274,22 +279,23 @@ export default function Signup() {
                       <Eye className="h-5 w-5" />
                     )}
                   </Button>
+
                   {formData.confirmPassword &&
                     formData.password === formData.confirmPassword && (
-                      <Check className="absolute right-12 top-1/2 transform -translate-y-1/2 h-5 w-5 text-green-500" />
+                      <Check className="absolute right-12 top-1/2 -translate-y-1/2 h-5 w-5 text-green-500" />
                     )}
                 </div>
               </div>
 
               <Button
                 type="submit"
-                className="w-full btn-touch h-12 text-base font-medium animate-press"
+                className="w-full h-12 text-base font-medium animate-press"
                 disabled={isLoading}
                 size="lg"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Creating account...
                   </>
                 ) : (
@@ -304,7 +310,7 @@ export default function Signup() {
               </span>
               <Link
                 to="/login"
-                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm"
+                className="text-responsive-sm text-primary hover:underline font-medium"
               >
                 Sign in
               </Link>
