@@ -53,7 +53,7 @@ const signupSchema = z.object({
 });
 
 const resetPasswordSchema = z.object({
-  userId: z.string().min(1, "User ID is required"), // can be id or puid
+  userId: z.string().min(1, "User ID is required"),
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -61,18 +61,14 @@ const resetPasswordSchema = z.object({
 // Helper: map DB row → API User
 // ---------------------------------------------------------------------------
 function mapAuthUserToUserRow(authUser: AuthUserRow): User {
-  // Prefer public user id (puid) if present, else fallback to internal id
   const id = authUser.puid ?? authUser.id;
-
   const joinedAtSource = authUser.joinedAt ?? authUser.createdAt;
 
   return {
     id,
     username: authUser.username,
     email: authUser.email,
-    // name is optional in DB; fallback to username if missing
     name: authUser.name ?? authUser.username,
-    // password is NEVER exposed
     password: "",
     role: (authUser.role as any) ?? "user",
     joinedAt: joinedAtSource.toISOString(),
@@ -98,7 +94,6 @@ function createJwtForUser(user: User): string {
 // ---------------------------------------------------------------------------
 // DB helpers
 // ---------------------------------------------------------------------------
-
 async function findUserByIdentifier(
   identifier: string,
 ): Promise<AuthUserRow | null> {
@@ -145,8 +140,7 @@ async function findUserByPublicId(
       "joinedAt",
       "puid"
     FROM auth."User"
-    WHERE "puid" = $1
-       OR "id" = $1
+    WHERE "puid" = $1 OR "id" = $1
     LIMIT 1;
     `,
     [userId],
@@ -161,7 +155,6 @@ async function searchUsers(
 ): Promise<AuthUserRow[]> {
   const searchTerm = `%${query.trim()}%`;
 
-  // If excludeUserId is provided, we exclude rows where id or puid matches it
   const result = await sql<AuthUserRow>(
     `
     SELECT
@@ -177,10 +170,13 @@ async function searchUsers(
       "puid"
     FROM auth."User"
     WHERE
-      ($1 IS NULL OR ("puid" <> $1 AND "id" <> $1))
+      (
+        $1::text IS NULL OR 
+        ("puid" <> $1::text AND "id" <> $1::text)
+      )
       AND (
-        "username" ILIKE $2
-        OR "name" ILIKE $2
+        "username" ILIKE $2::text
+        OR "name" ILIKE $2::text
       )
     ORDER BY "createdAt" ASC;
     `,
@@ -206,14 +202,9 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const body = loginSchema.parse(req.body) as LoginRequest;
     const identifier = body.email.trim().toLowerCase();
 
-    console.log("Login attempt:", { identifier, password: "***" });
-
     const foundUser = await findUserByIdentifier(identifier);
 
-    console.log("User found:", foundUser ? "Yes" : "No");
-
     if (!foundUser) {
-      console.log("User not found for:", identifier);
       const response: ApiResponse = {
         success: false,
         error: "Invalid email/username or password",
@@ -221,13 +212,10 @@ export const handleLogin: RequestHandler = async (req, res) => {
       return res.status(401).json(response);
     }
 
-    console.log("Verifying password with bcrypt...");
     const isPasswordValid = await bcrypt.compare(
       body.password,
       foundUser.passwordHash,
     );
-
-    console.log("Password validation:", isPasswordValid);
 
     if (!isPasswordValid) {
       const response: ApiResponse = {
@@ -239,8 +227,6 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     const user = mapAuthUserToUserRow(foundUser);
     const token = createJwtForUser(user);
-
-    console.log("Login successful for user:", user.username);
 
     const response: ApiResponse<{
       user: Omit<User, "password">;
@@ -256,26 +242,19 @@ export const handleLogin: RequestHandler = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error("Login error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: typeof error,
-    });
-    console.error("Raw login error:", error);
+    console.error("Login error details:", error);
 
     if (error instanceof z.ZodError) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.errors[0]?.message || "Validation error",
-      };
-      return res.status(400).json(response);
+      });
     }
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
@@ -290,8 +269,9 @@ export const handleSignup: RequestHandler = async (req, res) => {
     const email = body.email.trim().toLowerCase();
     const name = body.name.trim();
 
-    // Check if user already exists (email or username)
-    const existing = await sql<Pick<AuthUserRow, "id" | "email" | "username">>(
+    const existing = await sql<
+      Pick<AuthUserRow, "id" | "email" | "username">
+    >(
       `
       SELECT "id", "email", "username"
       FROM auth."User"
@@ -311,10 +291,8 @@ export const handleSignup: RequestHandler = async (req, res) => {
       }
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(body.password, 12);
 
-    // Generate internal id + public id
     const internalId = crypto.randomUUID();
     const puid = crypto.randomUUID();
 
@@ -355,78 +333,65 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     res.status(201).json(response);
   } catch (error) {
-    console.error("Signup error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      type: typeof error,
-      error,
-    });
+    console.error("Signup error details:", error);
 
     if (error instanceof z.ZodError) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.errors[0]?.message || "Validation error",
-      };
-      return res.status(400).json(response);
+      });
     }
 
     if (error instanceof Error) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.message,
-      };
-      return res.status(400).json(response);
+      });
     }
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
 // ---------------------------------------------------------------------------
-// Get current user profile (by public id or raw id)
+// Get current user profile
 // ---------------------------------------------------------------------------
 export const handleGetProfile: RequestHandler = async (req, res) => {
   try {
     const userId = req.params.userId;
 
     if (!userId) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: "User ID is required",
-      };
-      return res.status(400).json(response);
+      });
     }
 
     const authUser = await findUserByPublicId(userId);
 
     if (!authUser) {
-      const response: ApiResponse = {
+      return res.status(404).json({
         success: false,
         error: "User not found",
-      };
-      return res.status(404).json(response);
+      });
     }
 
     const user = mapAuthUserToUserRow(authUser);
 
-    const response: ApiResponse<Omit<User, "password">> = {
+    res.json({
       success: true,
       data: user,
-    };
-
-    res.json(response);
+    });
   } catch (error) {
     console.error("Get profile error:", error);
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
@@ -439,30 +404,26 @@ export const handleSearchUsers: RequestHandler = async (req, res) => {
     const excludeUserId = req.query.exclude as string | undefined;
 
     if (!query || query.trim().length === 0) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: "Search query is required",
-      };
-      return res.status(400).json(response);
+      });
     }
 
     const users = await searchUsers(query, excludeUserId);
     const mapped = users.map(mapAuthUserToUserRow);
 
-    const response: ApiResponse<Omit<User, "password">[]> = {
+    res.json({
       success: true,
       data: mapped,
-    };
-
-    res.json(response);
+    });
   } catch (error) {
     console.error("Search users error:", error);
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
@@ -474,54 +435,50 @@ export const verifyJWT: RequestHandler = (req, res, next) => {
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    const response: ApiResponse = {
+    return res.status(401).json({
       success: false,
       error: "Access token required",
-    };
-    return res.status(401).json(response);
+    });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    // @ts-expect-error - req.user is added at runtime
+    // @ts-expect-error
     req.user = decoded;
     next();
   } catch (error) {
-    const response: ApiResponse = {
+    return res.status(401).json({
       success: false,
       error: "Invalid or expired token",
-    };
-    return res.status(401).json(response);
+    });
   }
 };
 
 // ---------------------------------------------------------------------------
-// Admin role verification middleware
+// Admin role verification
 // ---------------------------------------------------------------------------
 export const requireAdmin: RequestHandler = (req, res, next) => {
-  // @ts-expect-error - req.user is added at runtime
+  // @ts-expect-error
   if (!req.user) {
-    const response: ApiResponse = {
+    return res.status(401).json({
       success: false,
       error: "Authentication required",
-    };
-    return res.status(401).json(response);
+    });
   }
 
-  // @ts-expect-error - req.user is added at runtime
+  // @ts-expect-error
   if (req.user.role !== "admin") {
-    const response: ApiResponse = {
+    return res.status(403).json({
       success: false,
       error: "Admin access required",
-    };
-    return res.status(403).json(response);
+    });
   }
 
   next();
 };
 
 // ---------------------------------------------------------------------------
-// Reset password handler (admin only)
+// Reset password (admin only)
 // ---------------------------------------------------------------------------
 export const handleResetPassword: RequestHandler = async (req, res) => {
   try {
@@ -551,46 +508,40 @@ export const handleResetPassword: RequestHandler = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      const response: ApiResponse = {
+      return res.status(404).json({
         success: false,
         error: "User not found",
-      };
-      return res.status(404).json(response);
+      });
     }
 
     const user = mapAuthUserToUserRow(result.rows[0]);
 
-    const response: ApiResponse<Omit<User, "password">> = {
+    res.json({
       success: true,
       data: user,
       message: "Password reset successfully",
-    };
-
-    res.json(response);
+    });
   } catch (error) {
     console.error("Reset password error:", error);
 
     if (error instanceof z.ZodError) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.errors[0]?.message || "Validation error",
-      };
-      return res.status(400).json(response);
+      });
     }
 
     if (error instanceof Error) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.message,
-      };
-      return res.status(400).json(response);
+      });
     }
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
@@ -619,20 +570,17 @@ export const handleGetAllUsers: RequestHandler = async (req, res) => {
 
     const mapped = result.rows.map(mapAuthUserToUserRow);
 
-    const response: ApiResponse<Omit<User, "password">[]> = {
+    res.json({
       success: true,
       data: mapped,
-    };
-
-    res.json(response);
+    });
   } catch (error) {
     console.error("Get all users error:", error);
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
 
@@ -641,14 +589,13 @@ export const handleGetAllUsers: RequestHandler = async (req, res) => {
 // ---------------------------------------------------------------------------
 export const handleDeleteUser: RequestHandler = async (req, res) => {
   try {
-    const userId = req.params.userId; // can be id or puid
+    const userId = req.params.userId;
 
     if (!userId) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: "User ID is required",
-      };
-      return res.status(400).json(response);
+      });
     }
 
     const result = await sql<AuthUserRow>(
@@ -671,37 +618,32 @@ export const handleDeleteUser: RequestHandler = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      const response: ApiResponse = {
+      return res.status(404).json({
         success: false,
         error: "User not found",
-      };
-      return res.status(404).json(response);
+      });
     }
 
     const user = mapAuthUserToUserRow(result.rows[0]);
 
-    const response: ApiResponse<Omit<User, "password">> = {
+    res.json({
       success: true,
       data: user,
       message: "User deleted successfully",
-    };
-
-    res.json(response);
+    });
   } catch (error) {
     console.error("Delete user error:", error);
 
     if (error instanceof Error) {
-      const response: ApiResponse = {
+      return res.status(400).json({
         success: false,
         error: error.message,
-      };
-      return res.status(400).json(response);
+      });
     }
 
-    const response: ApiResponse = {
+    res.status(500).json({
       success: false,
       error: "Internal server error",
-    };
-    res.status(500).json(response);
+    });
   }
 };
