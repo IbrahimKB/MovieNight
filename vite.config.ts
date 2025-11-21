@@ -2,7 +2,6 @@ import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
-import { createServer } from "./server";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -24,7 +23,7 @@ export default defineConfig(({ mode }) => ({
         "icons/*.svg",
         "icons/*.png",
       ],
-      manifest: false, // Use external manifest.json instead
+      manifest: false, // Using external manifest.json
       injectRegister: "auto",
       strategies: "generateSW",
       workbox: {
@@ -78,14 +77,17 @@ export default defineConfig(({ mode }) => ({
   },
 }));
 
+// ⚠️ IMPORTANT FIX:
+// - We removed the top-level `import { createServer } from "./server"`
+// - This prevents backend imports at build time (which require DATABASE_URL)
+// - Instead, we lazy-load the backend ONLY during development mode
 function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
-    apply: "serve", // Only apply during development (serve mode)
-    configureServer(server) {
+    apply: "serve", // Only apply during Vite dev server
+    async configureServer(server) {
+      const { createServer } = await import("./server");
       const app = createServer();
-
-      // Add Express app as middleware to Vite dev server
       server.middlewares.use(app);
     },
   };

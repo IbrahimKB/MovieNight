@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { verifyJWT } from "./auth";
-import { withTransaction } from "../utils/storage";
-import { ApiResponse } from "../models/types";
+import { verifyJWT } from "./auth.js";
+import { withTransaction } from "../utils/storage.js";
+import { ApiResponse } from "../models/types.js";
 
 const router = Router();
 

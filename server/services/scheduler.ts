@@ -1,7 +1,7 @@
 import * as cron from "node-cron";
-import { tmdbService } from "./tmdb";
-import { withTransaction, generateId } from "../utils/storage";
-import { Release } from "../models/types";
+import { tmdbService } from "./tmdb.js";
+import { withTransaction, generateId } from "../utils/storage.js";
+import { Release } from "../models/types.js";
 
 class SchedulerService {
   private weeklyReleasesCron: cron.ScheduledTask | null = null;

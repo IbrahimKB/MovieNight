@@ -39,6 +39,8 @@ interface Movie {
   poster?: string;
   description: string;
   rating?: number;
+  tmdbId?: number;
+  mediaType?: "movie" | "tv";
 }
 
 interface MovieSearchResult {
@@ -62,7 +64,7 @@ interface SearchResponse {
   };
 }
 
-interface Friend {
+interface LocalFriend {
   id: string;
   name: string;
   avatar?: string;
@@ -71,7 +73,7 @@ interface Friend {
 interface Suggestion {
   id: string;
   movie: Movie;
-  suggestedBy: Friend;
+  suggestedBy: LocalFriend;
   comment?: string;
   suggestedAt: string;
   myRating?: number;
@@ -122,7 +124,7 @@ const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
     }
 
     // Handle different possible response formats
-    let results = [];
+    let results: any[] = [];
 
     if (data.success && data.data && Array.isArray(data.data.results)) {
       // Format: { success: true, data: { results: [...] } }
@@ -143,7 +145,7 @@ const searchMovies = async (query: string): Promise<MovieSearchResult[]> => {
 
     console.log("📊 Results found:", results.length);
 
-    const processedResults = results.map((movie) => ({
+    const processedResults = results.map((movie: any) => ({
       ...movie,
       genres: movie.genres || [],
       description: movie.description || "No description available",
@@ -234,16 +236,27 @@ export default function Suggest() {
     const movieDescription = searchParams.get("description");
     const fromHome = searchParams.get("isFromHome");
     const fromMovieSearch = searchParams.get("isFromMovieSearch");
-    const tmdbId = searchParams.get("tmdbId");
-    const mediaType = searchParams.get("mediaType");
+    const tmdbIdParam = searchParams.get("tmdbId");
+    const mediaTypeParam = searchParams.get("mediaType") as
+      | "movie"
+      | "tv"
+      | null;
 
     if (movieTitle && movieYear && (fromHome || fromMovieSearch)) {
+      const tmdbId = tmdbIdParam ? Number(tmdbIdParam) : undefined;
+      const mediaType: "movie" | "tv" =
+        mediaTypeParam === "tv" || mediaTypeParam === "movie"
+          ? mediaTypeParam
+          : "movie";
+
       const prefilledMovie: Movie = {
-        id: `prefilled_${Date.now()}`,
+        id: tmdbId ? `tmdb_${tmdbId}` : `prefilled_${Date.now()}`,
         title: movieTitle,
         year: parseInt(movieYear),
         genres: movieGenres ? JSON.parse(movieGenres) : [],
         description: movieDescription || "",
+        tmdbId,
+        mediaType,
       };
 
       setSelectedMovie(prefilledMovie);
@@ -295,6 +308,8 @@ export default function Suggest() {
       poster: movie.poster || undefined,
       description: movie.description,
       rating: movie.rating,
+      tmdbId: movie.tmdbId,
+      mediaType: movie.mediaType,
     };
     setSelectedMovie(convertedMovie);
     setSearchTerm("");
@@ -316,8 +331,23 @@ export default function Suggest() {
       // First, save the movie to the database if it doesn't exist
       let movieId = selectedMovie.id;
 
-      // If this is a prefilled movie from TMDB/external source, save it first
-      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+      // If this is a TMDB-sourced movie, save it first
+      if (movieId.startsWith("tmdb_")) {
+        const tmdbId =
+          (selectedMovie as Movie).tmdbId ??
+          Number(movieId.replace("tmdb_", ""));
+
+        if (!tmdbId || Number.isNaN(tmdbId)) {
+          console.error("Missing TMDB ID for selected movie", {
+            movieId,
+            selectedMovie,
+          });
+          throw new Error("Missing TMDB ID for selected movie");
+        }
+
+        const mediaType: "movie" | "tv" =
+          (selectedMovie as Movie).mediaType ?? "movie";
+
         const saveResponse = await fetch("/api/tmdb/save-movie", {
           method: "POST",
           headers: {
@@ -325,11 +355,14 @@ export default function Suggest() {
             Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
           body: JSON.stringify({
+            tmdbId,
             title: selectedMovie.title,
             year: selectedMovie.year,
-            genres: selectedMovie.genres,
+            genres: selectedMovie.genres || [],
             description: selectedMovie.description,
-            poster: selectedMovie.poster,
+            poster: selectedMovie.poster ?? null,
+            mediaType,
+            rating: selectedMovie.rating ?? 0,
           }),
         });
 
@@ -337,6 +370,8 @@ export default function Suggest() {
           const saveData = await saveResponse.json();
           movieId = saveData.data.id;
         } else {
+          const errorText = await saveResponse.text();
+          console.error("Failed to save movie:", errorText);
           throw new Error("Failed to save movie");
         }
       }
@@ -431,10 +466,7 @@ export default function Suggest() {
     }
   };
 
-  const handleIgnoreSuggestion = async (
-    suggestionId: string,
-    movieTitle: string,
-  ) => {
+  const handleIgnoreSuggestion = async (suggestionId: string, movieTitle: string) => {
     try {
       const response = await fetch("/api/suggestions/respond", {
         method: "POST",
@@ -480,8 +512,22 @@ export default function Suggest() {
       // First, save the movie to the database if it doesn't exist
       let movieId = selectedMovie.id;
 
-      // If this is a prefilled movie from TMDB/external source, save it first
-      if (movieId.startsWith("prefilled_") || movieId.startsWith("tmdb_")) {
+      if (movieId.startsWith("tmdb_")) {
+        const tmdbId =
+          (selectedMovie as Movie).tmdbId ??
+          Number(movieId.replace("tmdb_", ""));
+
+        if (!tmdbId || Number.isNaN(tmdbId)) {
+          console.error("Missing TMDB ID for selected movie", {
+            movieId,
+            selectedMovie,
+          });
+          throw new Error("Missing TMDB ID for selected movie");
+        }
+
+        const mediaType: "movie" | "tv" =
+          (selectedMovie as Movie).mediaType ?? "movie";
+
         const saveResponse = await fetch("/api/tmdb/save-movie", {
           method: "POST",
           headers: {
@@ -489,11 +535,14 @@ export default function Suggest() {
             Authorization: `Bearer ${localStorage.getItem("movienight_token")}`,
           },
           body: JSON.stringify({
+            tmdbId,
             title: selectedMovie.title,
             year: selectedMovie.year,
-            genres: selectedMovie.genres,
+            genres: selectedMovie.genres || [],
             description: selectedMovie.description,
-            poster: selectedMovie.poster,
+            poster: selectedMovie.poster ?? null,
+            mediaType,
+            rating: selectedMovie.rating ?? 0,
           }),
         });
 
@@ -501,6 +550,8 @@ export default function Suggest() {
           const saveData = await saveResponse.json();
           movieId = saveData.data.id;
         } else {
+          const errorText = await saveResponse.text();
+          console.error("Failed to save movie:", errorText);
           throw new Error("Failed to save movie");
         }
       }

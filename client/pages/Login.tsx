@@ -63,11 +63,9 @@ export default function Login() {
     clearError();
 
     if (!validateFields()) {
-      // Focus on first error field
       if (fieldErrors.email && emailRef.current) {
         emailRef.current.focus();
       }
-      // Announce error to screen readers
       setTimeout(() => {
         if (errorRef.current) {
           errorRef.current.focus();
@@ -77,8 +75,9 @@ export default function Login() {
     }
 
     const result = await login(email, password);
+
     if (result.success) {
-      // Handle remember me functionality
+      // Remember me
       if (rememberMe) {
         localStorage.setItem("movienight_remember_email", email);
         localStorage.setItem("movienight_remember_me", "true");
@@ -87,21 +86,22 @@ export default function Login() {
         localStorage.removeItem("movienight_remember_me");
       }
 
-      // Check if we should redirect to admin after login
-      if (email === "admin@movienight.co.uk" || email === "admin") {
+      // Read stored user from AuthContext
+      const storedUserStr = localStorage.getItem("movienight_user");
+      const storedUser = storedUserStr ? JSON.parse(storedUserStr) : null;
+
+      if (storedUser?.role === "admin") {
         navigate("/admin");
       } else {
         navigate("/");
       }
     } else if (result.error) {
-      // Handle field-specific errors
       if (result.error.field) {
         setFieldErrors({ [result.error.field]: result.error.message });
       } else {
         setError(result.error.message);
       }
 
-      // Focus error for screen readers
       setTimeout(() => {
         if (errorRef.current) {
           errorRef.current.focus();
@@ -124,10 +124,7 @@ export default function Login() {
         {/* Logo/Brand */}
         <header className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4 sm:mb-6">
-            <Film
-              className="h-8 w-8 sm:h-10 sm:w-10 text-primary"
-              aria-hidden="true"
-            />
+            <Film className="h-8 w-8 sm:h-10 sm:w-10 text-primary" aria-hidden="true" />
             <h1 className="text-responsive-xl font-bold">MovieNight</h1>
           </div>
           <p className="text-responsive-sm text-muted-foreground px-2">
@@ -138,13 +135,11 @@ export default function Login() {
         {/* Login Form */}
         <Card className="mobile-card border-0 sm:border shadow-none sm:shadow-sm">
           <CardHeader className="pb-4 sm:pb-6">
-            <CardTitle
-              className="text-responsive-lg text-center"
-              id="login-title"
-            >
+            <CardTitle className="text-responsive-lg text-center" id="login-title">
               Welcome Back
             </CardTitle>
           </CardHeader>
+
           <CardContent className="p-4 sm:p-6">
             <form
               onSubmit={handleSubmit}
@@ -158,9 +153,7 @@ export default function Login() {
                   <AlertCircle className="h-4 w-4" aria-hidden="true" />
                   <AlertDescription ref={errorRef} tabIndex={-1}>
                     {(error || lastError?.message) && (
-                      <div className="font-medium">
-                        {error || lastError?.message}
-                      </div>
+                      <div className="font-medium">{error || lastError?.message}</div>
                     )}
                     {fieldErrors.email && <div>{fieldErrors.email}</div>}
                     {fieldErrors.password && <div>{fieldErrors.password}</div>}
@@ -168,6 +161,7 @@ export default function Login() {
                 </Alert>
               )}
 
+              {/* Email */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="email"
@@ -187,21 +181,16 @@ export default function Login() {
                   className="input-mobile h-12 text-base"
                   aria-required="true"
                   aria-invalid={fieldErrors.email ? "true" : "false"}
-                  aria-describedby={
-                    fieldErrors.email ? "email-error" : undefined
-                  }
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                 />
                 {fieldErrors.email && (
-                  <div
-                    id="email-error"
-                    className="text-sm text-destructive"
-                    role="alert"
-                  >
+                  <div id="email-error" className="text-sm text-destructive" role="alert">
                     {fieldErrors.email}
                   </div>
                 )}
               </div>
 
+              {/* Password */}
               <div className="space-y-2 sm:space-y-3">
                 <label
                   htmlFor="password"
@@ -222,9 +211,7 @@ export default function Login() {
                     aria-required="true"
                     aria-invalid={fieldErrors.password ? "true" : "false"}
                     aria-describedby={
-                      fieldErrors.password
-                        ? "password-error"
-                        : "password-toggle-desc"
+                      fieldErrors.password ? "password-error" : "password-toggle-desc"
                     }
                   />
                   <Button
@@ -233,9 +220,7 @@ export default function Login() {
                     size="sm"
                     className="btn-touch absolute right-0 top-0 h-12 w-12 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     aria-describedby="password-toggle-desc"
                   >
@@ -250,30 +235,25 @@ export default function Login() {
                   </div>
                 </div>
                 {fieldErrors.password && (
-                  <div
-                    id="password-error"
-                    className="text-sm text-destructive"
-                    role="alert"
-                  >
+                  <div id="password-error" className="text-sm text-destructive" role="alert">
                     {fieldErrors.password}
                   </div>
                 )}
               </div>
 
+              {/* Remember me */}
               <div className="flex items-center space-x-3 py-1">
                 <Checkbox
                   id="remember-me"
                   checked={rememberMe}
-                  onCheckedChange={(checked) =>
-                    setRememberMe(checked as boolean)
-                  }
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   disabled={isLoading}
                   className="h-5 w-5"
                   aria-describedby="remember-me-desc"
                 />
                 <label
                   htmlFor="remember-me"
-                  className="text-responsive-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="text-responsive-sm font-medium leading-none cursor-pointer"
                 >
                   Remember me
                 </label>
@@ -282,6 +262,7 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* Submit */}
               <Button
                 type="submit"
                 className="w-full btn-touch h-12 text-base font-medium animate-press"
@@ -291,14 +272,9 @@ export default function Login() {
               >
                 {isLoading ? (
                   <>
-                    <Loader2
-                      className="mr-2 h-5 w-5 animate-spin"
-                      aria-hidden="true"
-                    />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden="true" />
                     <span>Signing in...</span>
-                    <span className="sr-only">
-                      Please wait while we sign you in
-                    </span>
+                    <span className="sr-only">Please wait while we sign you in</span>
                   </>
                 ) : (
                   "Sign In"
@@ -315,8 +291,7 @@ export default function Login() {
               </span>
               <Link
                 to="/signup"
-                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm focus:outline-2 focus:outline-primary focus:outline-offset-2"
-                aria-label="Go to sign up page to create a new account"
+                className="text-responsive-sm text-primary hover:underline font-medium btn-touch inline-block py-1 px-1 animate-press-sm"
               >
                 Sign up
               </Link>
