@@ -51,8 +51,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // Hash password
     const passwordHash = await hash(password, 10);
-    const userId = uuidv4();
-    const puid = uuidv4();
+    const userId = randomUUID();
+    const puid = randomUUID();
     const now = new Date();
 
     // Create user
