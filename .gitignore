@@ -4,8 +4,6 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
 # ─── Dependencies ───────────────────────────────────────────────────
 node_modules
@@ -17,17 +15,22 @@ dist-ssr
 .svelte-kit
 .next
 .cache
+out
+build
+.turbo/
 
 # ─── Local Environment ──────────────────────────────────────────────
 .env
 .env.*
+.env.local
+.env.*.local
 .env.save
 .env.save.*
 
 .local
 .tmp
 
-# ─── Prisma ─────────────────────────────────────────────────────────
+# ─── Prisma (legacy — kept only to ignore old folders) ──────────────
 /prisma/migrations/
 /prisma/dev.db
 /generated/prisma
@@ -39,7 +42,7 @@ start
 node
 cloudflared.deb
 
-# ─── Data (do not commit local cache) ───────────────────────────────
+# ─── Data (local-only caches, not Postgres) ─────────────────────────
 data/
 database.json
 *.sqlite
@@ -55,6 +58,10 @@ database.json
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
 
 # ─── System Files ───────────────────────────────────────────────────
 .config/
+Thumbs.db
