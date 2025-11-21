@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { hash } from 'bcryptjs';
-import { v4 as uuidv4 } from 'crypto';
+import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { query } from '@/lib/db';
 import { createSession } from '@/lib/auth';
-import { ApiResponse, User } from '@/types';
+import { ApiResponse } from '@/types';
 
 const SignupSchema = z.object({
   username: z.string().min(3).max(50),
