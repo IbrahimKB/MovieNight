@@ -92,6 +92,17 @@ export interface Friendship {
   updatedAt: Date;
 }
 
+export interface Event {
+  id: string;
+  movieId: string;
+  hostUserId: string;
+  participants: string[];
+  date: Date;
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Notification {
   id: string;
   userId: string;
