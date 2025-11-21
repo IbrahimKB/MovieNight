@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,9 +19,9 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password, name }),
       });
 
@@ -29,18 +29,20 @@ export default function SignupPage() {
 
       if (!res.ok) {
         if (Array.isArray(data.error)) {
-          setError(data.error.map((e: any) => `${e.field}: ${e.message}`).join(', '));
+          setError(
+            data.error.map((e: any) => `${e.field}: ${e.message}`).join(", "),
+          );
         } else {
-          setError(data.error || 'Signup failed');
+          setError(data.error || "Signup failed");
         }
         return;
       }
 
       // Redirect to home on success
-      router.push('/');
+      router.push("/");
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error('Error:', err);
+      setError("An error occurred. Please try again.");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,10 @@ export default function SignupPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium mb-2"
+            >
               Username <span className="text-destructive">*</span>
             </label>
             <input
@@ -107,7 +112,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-2"
+            >
               Password <span className="text-destructive">*</span>
             </label>
             <input
@@ -127,12 +135,12 @@ export default function SignupPage() {
             disabled={loading}
             className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating account...' : 'Sign up'}
+            {loading ? "Creating account..." : "Sign up"}
           </button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link href="/login" className="text-primary hover:underline">
             Sign in
           </Link>

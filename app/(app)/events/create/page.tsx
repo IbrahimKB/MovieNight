@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState, FormEvent } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Movie {
   id: string;
@@ -18,14 +18,14 @@ interface Friend {
 export default function CreateEventPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const prefilledMovieId = searchParams.get('movieId');
-  const prefilledFromUserId = searchParams.get('fromUserId');
+  const prefilledMovieId = searchParams.get("movieId");
+  const prefilledFromUserId = searchParams.get("fromUserId");
 
-  const [movieId, setMovieId] = useState(prefilledMovieId || '');
-  const [date, setDate] = useState('');
-  const [notes, setNotes] = useState('');
+  const [movieId, setMovieId] = useState(prefilledMovieId || "");
+  const [date, setDate] = useState("");
+  const [notes, setNotes] = useState("");
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
-    prefilledFromUserId ? [prefilledFromUserId] : []
+    prefilledFromUserId ? [prefilledFromUserId] : [],
   );
 
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -38,8 +38,8 @@ export default function CreateEventPage() {
     const fetchData = async () => {
       try {
         const [moviesRes, friendsRes] = await Promise.all([
-          fetch('/api/movies?limit=100'),
-          fetch('/api/friends'),
+          fetch("/api/movies?limit=100"),
+          fetch("/api/friends"),
         ]);
 
         const moviesData = await moviesRes.json();
@@ -52,8 +52,8 @@ export default function CreateEventPage() {
           setFriends(friendsData.data?.friends || []);
         }
       } catch (err) {
-        setError('Failed to load data');
-        console.error('Error:', err);
+        setError("Failed to load data");
+        console.error("Error:", err);
       } finally {
         setLoading(false);
       }
@@ -68,9 +68,9 @@ export default function CreateEventPage() {
     setSubmitting(true);
 
     try {
-      const res = await fetch('/api/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           movieId,
           date,
@@ -82,15 +82,15 @@ export default function CreateEventPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Failed to create event');
+        setError(data.error || "Failed to create event");
         return;
       }
 
       // Redirect to calendar or event detail
       router.push(`/events/${data.data.id}`);
     } catch (err) {
-      setError('An error occurred');
-      console.error('Error:', err);
+      setError("An error occurred");
+      console.error("Error:", err);
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +98,9 @@ export default function CreateEventPage() {
 
   const toggleParticipant = (userId: string) => {
     setSelectedParticipants((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId],
     );
   };
 
@@ -116,7 +118,10 @@ export default function CreateEventPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-card border border-border rounded-lg p-6 space-y-6"
+      >
         {/* Movie Selection */}
         <div>
           <label htmlFor="movieId" className="block text-sm font-medium mb-2">
@@ -170,13 +175,20 @@ export default function CreateEventPage() {
 
         {/* Participants Selection */}
         <div>
-          <label className="block text-sm font-medium mb-3">Invite Friends</label>
+          <label className="block text-sm font-medium mb-3">
+            Invite Friends
+          </label>
           {friends.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No friends to invite</p>
+            <p className="text-sm text-muted-foreground">
+              No friends to invite
+            </p>
           ) : (
             <div className="space-y-2">
               {friends.map((friend) => (
-                <label key={friend.userId} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted rounded">
+                <label
+                  key={friend.userId}
+                  className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted rounded"
+                >
                   <input
                     type="checkbox"
                     checked={selectedParticipants.includes(friend.userId)}
@@ -197,7 +209,7 @@ export default function CreateEventPage() {
             disabled={submitting}
             className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {submitting ? 'Creating...' : 'Create Movie Night'}
+            {submitting ? "Creating..." : "Create Movie Night"}
           </button>
           <button
             type="button"

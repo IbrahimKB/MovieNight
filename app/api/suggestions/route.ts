@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser, getUserExternalId } from '@/lib/auth';
-import { ApiResponse, Suggestion } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser, getUserExternalId } from "@/lib/auth";
+import { ApiResponse, Suggestion } from "@/types";
 
 const CreateSuggestionSchema = z.object({
   movieId: z.string().uuid(),
@@ -16,21 +16,25 @@ const UserIdMappingSchema = z.object({
 });
 
 // Helper: map external user ID (puid) to internal user ID
-async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
   try {
     // Try to find by puid first
     const result = await query(
       `SELECT id FROM auth."User" WHERE puid = $1 OR id = $1 LIMIT 1`,
-      [externalId]
+      [externalId],
     );
     return result.rows.length > 0 ? result.rows[0].id : null;
   } catch (err) {
-    console.error('Error mapping user ID:', err);
+    console.error("Error mapping user ID:", err);
     return null;
   }
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -38,9 +42,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -52,11 +56,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,16 +69,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // Validate movie exists
     const movieResult = await query(
       `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId]
+      [movieId],
     );
 
     if (movieResult.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie not found',
+          error: "Movie not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -87,7 +91,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           success: false,
           error: `Invalid user ID: ${toUserId}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -98,7 +102,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     await query(
       `INSERT INTO movienight."Suggestion" (id, "movieId", "fromUserId", "toUserId", message, status, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [suggestionId, movieId, currentUser.id, toUserIdInternal, message || null, 'pending', now, now]
+      [
+        suggestionId,
+        movieId,
+        currentUser.id,
+        toUserIdInternal,
+        message || null,
+        "pending",
+        now,
+        now,
+      ],
     );
 
     return NextResponse.json(
@@ -110,26 +123,28 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           fromUserId: getUserExternalId(currentUser),
           toUserId: toUserId,
           message: message || null,
-          status: 'pending',
+          status: "pending",
           createdAt: now,
           updatedAt: now,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
-    console.error('Create suggestion error:', err);
+    console.error("Create suggestion error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -137,9 +152,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -155,7 +170,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        LEFT JOIN auth."User" tu ON s."toUserId" = tu.id
        WHERE s."fromUserId" = $1 OR s."toUserId" = $1
        ORDER BY s."createdAt" DESC`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     const suggestions = result.rows.map((row) => ({
@@ -178,13 +193,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       data: suggestions,
     });
   } catch (err) {
-    console.error('Get suggestions error:', err);
+    console.error("Get suggestions error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

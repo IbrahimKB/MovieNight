@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser, getUserExternalId } from '@/lib/auth';
-import { ApiResponse, Event } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser, getUserExternalId } from "@/lib/auth";
+import { ApiResponse, Event } from "@/types";
 
 const CreateEventSchema = z.object({
   movieId: z.string().uuid(),
@@ -13,37 +13,43 @@ const CreateEventSchema = z.object({
 });
 
 // Helper: map external user ID (puid) to internal user ID
-async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
   try {
     const result = await query(
       `SELECT id FROM auth."User" WHERE puid = $1 OR id = $1 LIMIT 1`,
-      [externalId]
+      [externalId],
     );
     return result.rows.length > 0 ? result.rows[0].id : null;
   } catch (err) {
-    console.error('Error mapping user ID:', err);
+    console.error("Error mapping user ID:", err);
     return null;
   }
 }
 
 // Helper: map internal user ID to external (puid)
-async function mapInternalUserIdToExternal(internalId: string): Promise<string> {
+async function mapInternalUserIdToExternal(
+  internalId: string,
+): Promise<string> {
   try {
     const result = await query(
       `SELECT puid, id FROM auth."User" WHERE id = $1`,
-      [internalId]
+      [internalId],
     );
     if (result.rows.length > 0) {
       return result.rows[0].puid || result.rows[0].id;
     }
     return internalId;
   } catch (err) {
-    console.error('Error mapping user ID:', err);
+    console.error("Error mapping user ID:", err);
     return internalId;
   }
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -51,9 +57,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -65,11 +71,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -78,16 +84,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // Validate movie exists
     const movieResult = await query(
       `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId]
+      [movieId],
     );
 
     if (movieResult.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie not found',
+          error: "Movie not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -110,9 +116,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       return NextResponse.json(
         {
           success: false,
-          error: `Invalid user IDs: ${invalidUserIds.join(', ')}`,
+          error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -133,7 +139,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         notes || null,
         now,
         now,
-      ]
+      ],
     );
 
     // Convert internal participant IDs back to external for response
@@ -156,21 +162,23 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           updatedAt: now,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
-    console.error('Create event error:', err);
+    console.error("Create event error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -178,9 +186,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -194,15 +202,15 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        LEFT JOIN auth."User" h ON e."hostUserId" = h.id
        WHERE e."hostUserId" = $1 OR e.participants::text LIKE $2
        ORDER BY e.date ASC`,
-      [currentUser.id, `%"${currentUser.id}"%`]
+      [currentUser.id, `%"${currentUser.id}"%`],
     );
 
     const events = await Promise.all(
       result.rows.map(async (row) => {
         const hostPuid = await mapInternalUserIdToExternal(row.hostUserId);
-        const participants = JSON.parse(row.participants || '[]');
+        const participants = JSON.parse(row.participants || "[]");
         const externalParticipants = await Promise.all(
-          participants.map((id: string) => mapInternalUserIdToExternal(id))
+          participants.map((id: string) => mapInternalUserIdToExternal(id)),
         );
 
         return {
@@ -218,7 +226,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
         };
-      })
+      }),
     );
 
     return NextResponse.json({
@@ -226,13 +234,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       data: events,
     });
   } catch (err) {
-    console.error('Get events error:', err);
+    console.error("Get events error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

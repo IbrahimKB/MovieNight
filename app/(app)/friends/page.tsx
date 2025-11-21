@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface Friend {
   id: string;
@@ -28,25 +28,27 @@ export default function FriendsPage() {
     incomingRequests: [],
     outgoingRequests: [],
   });
-  const [tab, setTab] = useState<'friends' | 'incoming' | 'outgoing'>('friends');
+  const [tab, setTab] = useState<"friends" | "incoming" | "outgoing">(
+    "friends",
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newFriendId, setNewFriendId] = useState('');
+  const [newFriendId, setNewFriendId] = useState("");
 
   const fetchFriends = async () => {
     try {
-      const res = await fetch('/api/friends');
+      const res = await fetch("/api/friends");
       const result = await res.json();
 
       if (!res.ok) {
-        setError(result.error || 'Failed to fetch friends');
+        setError(result.error || "Failed to fetch friends");
         return;
       }
 
       setData(result.data);
     } catch (err) {
-      setError('An error occurred');
-      console.error('Error:', err);
+      setError("An error occurred");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -61,29 +63,29 @@ export default function FriendsPage() {
     if (!newFriendId.trim()) return;
 
     try {
-      const res = await fetch('/api/friends/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/friends/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ toUserId: newFriendId }),
       });
 
       if (res.ok) {
-        setNewFriendId('');
+        setNewFriendId("");
         fetchFriends();
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
     }
   };
 
   const handleRespondToRequest = async (
     friendshipId: string,
-    action: 'accept' | 'reject'
+    action: "accept" | "reject",
   ) => {
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action }),
       });
 
@@ -91,7 +93,7 @@ export default function FriendsPage() {
         fetchFriends();
       }
     } catch (err) {
-      console.error('Error:', err);
+      console.error("Error:", err);
     }
   };
 
@@ -126,31 +128,31 @@ export default function FriendsPage() {
 
       <div className="flex gap-4 mb-8 border-b border-border">
         <button
-          onClick={() => setTab('friends')}
+          onClick={() => setTab("friends")}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === 'friends'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+            tab === "friends"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           Friends ({data.friends.length})
         </button>
         <button
-          onClick={() => setTab('incoming')}
+          onClick={() => setTab("incoming")}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === 'incoming'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+            tab === "incoming"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           Incoming ({data.incomingRequests.length})
         </button>
         <button
-          onClick={() => setTab('outgoing')}
+          onClick={() => setTab("outgoing")}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === 'outgoing'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+            tab === "outgoing"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           Outgoing ({data.outgoingRequests.length})
@@ -159,9 +161,11 @@ export default function FriendsPage() {
 
       {loading ? (
         <p className="text-muted-foreground text-center py-8">Loading...</p>
-      ) : tab === 'friends' ? (
+      ) : tab === "friends" ? (
         data.friends.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No friends yet</p>
+          <p className="text-muted-foreground text-center py-8">
+            No friends yet
+          </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.friends.map((friend) => (
@@ -171,7 +175,9 @@ export default function FriendsPage() {
               >
                 <div>
                   <p className="font-semibold">{friend.username}</p>
-                  <p className="text-xs text-muted-foreground">ID: {friend.userId}</p>
+                  <p className="text-xs text-muted-foreground">
+                    ID: {friend.userId}
+                  </p>
                 </div>
                 <button className="px-3 py-1 text-xs bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors">
                   Remove
@@ -180,9 +186,11 @@ export default function FriendsPage() {
             ))}
           </div>
         )
-      ) : tab === 'incoming' ? (
+      ) : tab === "incoming" ? (
         data.incomingRequests.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">No incoming requests</p>
+          <p className="text-muted-foreground text-center py-8">
+            No incoming requests
+          </p>
         ) : (
           <div className="space-y-4">
             {data.incomingRequests.map((request) => (
@@ -198,13 +206,13 @@ export default function FriendsPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleRespondToRequest(request.id, 'accept')}
+                    onClick={() => handleRespondToRequest(request.id, "accept")}
                     className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:opacity-90 transition-opacity"
                   >
                     Accept
                   </button>
                   <button
-                    onClick={() => handleRespondToRequest(request.id, 'reject')}
+                    onClick={() => handleRespondToRequest(request.id, "reject")}
                     className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:opacity-90 transition-opacity"
                   >
                     Reject
@@ -215,7 +223,9 @@ export default function FriendsPage() {
           </div>
         )
       ) : data.outgoingRequests.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">No outgoing requests</p>
+        <p className="text-muted-foreground text-center py-8">
+          No outgoing requests
+        </p>
       ) : (
         <div className="space-y-4">
           {data.outgoingRequests.map((request) => (

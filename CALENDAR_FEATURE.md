@@ -29,6 +29,7 @@ CREATE TABLE movienight."Event" (
 ```
 
 **Key Design Notes:**
+
 - `hostUserId` - Always a user's internal ID
 - `participants` - Array of internal user IDs (stored as JSON text)
 - `date` - The scheduled movie night datetime
@@ -47,6 +48,7 @@ Already has `watchedAt` timestamp which is used by the calendar to display solo 
 Create a new movie night event.
 
 **Request:**
+
 ```json
 {
   "movieId": "550e8400-e29b-41d4-a716-446655440000",
@@ -57,6 +59,7 @@ Create a new movie night event.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -74,6 +77,7 @@ Create a new movie night event.
 ```
 
 **Behavior:**
+
 - Automatically includes the current user as host
 - Validates all participant IDs (puid) exist in auth.User
 - Returns error with list of invalid user IDs if validation fails
@@ -84,6 +88,7 @@ Create a new movie night event.
 List all events for the current user (as host or participant).
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -110,6 +115,7 @@ List all events for the current user (as host or participant).
 Get detailed information about a single event.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -134,6 +140,7 @@ Get detailed information about a single event.
 ```
 
 **Permissions:**
+
 - Returns 403 if user is not the host or a participant
 - `isHost` field indicates if current user is the host
 
@@ -142,6 +149,7 @@ Get detailed information about a single event.
 Update an event (host only).
 
 **Request:**
+
 ```json
 {
   "date": "2025-01-26T19:00:00Z",
@@ -154,6 +162,7 @@ Update an event (host only).
 Same as GET event detail with updated fields.
 
 **Permissions:**
+
 - Returns 403 if current user is not the host
 - Only host can modify date, notes, and participants
 
@@ -162,6 +171,7 @@ Same as GET event detail with updated fields.
 Delete an event (host only).
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -170,6 +180,7 @@ Delete an event (host only).
 ```
 
 **Permissions:**
+
 - Returns 403 if current user is not the host
 
 ## Frontend Pages
@@ -177,6 +188,7 @@ Delete an event (host only).
 ### `/calendar`
 
 **Features:**
+
 - Month view calendar grid
 - Displays events and watch history on their respective dates
 - Color-coded: 🎬 Movie Night (blue) vs ✓ Watched (green)
@@ -186,11 +198,13 @@ Delete an event (host only).
 - Legend showing what each color means
 
 **Data Sources:**
+
 - Fetches from `/api/events` (scheduled movie nights)
 - Fetches from `/api/watch/history` (watched movies)
 - Combines both into unified calendar
 
 **Implementation:**
+
 - Generates a 6-week calendar grid (starts previous month, ends next month)
 - Groups entries by date
 - Shows day-of-month numbers with event list below
@@ -200,6 +214,7 @@ Delete an event (host only).
 ### `/events/create`
 
 **Features:**
+
 - Form to create a new movie night
 - Movie dropdown (fetches from `/api/movies`)
 - Date/time picker
@@ -208,10 +223,12 @@ Delete an event (host only).
 - Optional pre-fill from suggestion (via URL params)
 
 **URL Parameters:**
+
 - `movieId` - Pre-select a movie
 - `fromUserId` - Pre-select a friend as participant
 
 **Behavior:**
+
 - On success, redirects to event detail page
 - Validates all inputs with Zod before submission
 - Shows validation errors inline
@@ -220,6 +237,7 @@ Delete an event (host only).
 ### `/events/[id]`
 
 **Features:**
+
 - Display full event details with movie info
 - Show all participants
 - Host can edit or delete
@@ -228,10 +246,12 @@ Delete an event (host only).
 - Edit mode for hosts (form to modify date, notes, participants)
 
 **Host Permissions:**
+
 - Edit button (updates date, notes, participants)
 - Delete button (removes event entirely)
 
 **Non-Host Permissions:**
+
 - View-only mode (no edit/delete buttons)
 
 ## User ID Mapping Strategy
@@ -239,12 +259,14 @@ Delete an event (host only).
 The system uses two types of user IDs:
 
 ### Internal ID (`auth."User".id`)
+
 - UUID stored in database
 - Used internally for all database joins
 - Stored in `Event.hostUserId` and `Event.participants[]`
 - Never exposed to frontend (except in API responses)
 
 ### Public ID (`auth."User".puid`)
+
 - UUID generated during signup
 - Exposed to frontend and used in URLs
 - Used in API request bodies (e.g., participant arrays)
@@ -253,6 +275,7 @@ The system uses two types of user IDs:
 ### Mapping Flow
 
 **Creating an Event:**
+
 1. Client sends `participants: ["puid-1", "puid-2", ...]`
 2. Server maps each puid → internal id
 3. Server validates internal ids exist in auth.User
@@ -260,6 +283,7 @@ The system uses two types of user IDs:
 5. Server returns response with puids for frontend
 
 **Getting an Event:**
+
 1. Server fetches event with internal ids
 2. Server maps internal ids → puids
 3. Server returns response with puids
@@ -278,6 +302,7 @@ Users can convert a suggestion into a movie night event:
    - Original suggestion message in notes
 
 **Behavior:**
+
 - Only shows "Book Movie Night" for pending suggestions
 - Clicking button creates an event with the suggester as a participant
 
@@ -295,19 +320,20 @@ No additional action needed - watches appear automatically on the calendar.
 
 ## Permissions Summary
 
-| Action | Host | Participant | Non-Member |
-|--------|------|-------------|-----------|
-| View Event | ✓ | ✓ | ✗ (403) |
-| Create Event | ✓ (always host) | - | - |
-| Edit Event | ✓ | ✗ (403) | ✗ (403) |
-| Delete Event | ✓ | ✗ (403) | ✗ (403) |
-| Add Participants | ✓ | ✗ | ✗ |
+| Action           | Host            | Participant | Non-Member |
+| ---------------- | --------------- | ----------- | ---------- |
+| View Event       | ✓               | ✓           | ✗ (403)    |
+| Create Event     | ✓ (always host) | -           | -          |
+| Edit Event       | ✓               | ✗ (403)     | ✗ (403)    |
+| Delete Event     | ✓               | ✗ (403)     | ✗ (403)    |
+| Add Participants | ✓               | ✗           | ✗          |
 
 ## Error Handling
 
 ### Common Errors
 
 **Event Not Found (404)**
+
 ```json
 {
   "success": false,
@@ -316,6 +342,7 @@ No additional action needed - watches appear automatically on the calendar.
 ```
 
 **Unauthorized (403)**
+
 ```json
 {
   "success": false,
@@ -324,6 +351,7 @@ No additional action needed - watches appear automatically on the calendar.
 ```
 
 **Invalid Participants (400)**
+
 ```json
 {
   "success": false,
@@ -332,6 +360,7 @@ No additional action needed - watches appear automatically on the calendar.
 ```
 
 **Validation Error (400)**
+
 ```json
 {
   "success": false,

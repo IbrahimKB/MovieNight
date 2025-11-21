@@ -1,16 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { compare } from 'bcryptjs';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { createSession } from '@/lib/auth';
-import { ApiResponse } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { compare } from "bcryptjs";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { createSession } from "@/lib/auth";
+import { ApiResponse } from "@/types";
 
 const LoginSchema = z.object({
   emailOrUsername: z.string(),
   password: z.string(),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     const body = await req.json();
     const validation = LoginSchema.safeParse(body);
@@ -20,11 +22,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,16 +38,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
        FROM auth."User"
        WHERE email = $1 OR username = $2
        LIMIT 1`,
-      [emailOrUsername, emailOrUsername]
+      [emailOrUsername, emailOrUsername],
     );
 
     if (result.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid email/username or password',
+          error: "Invalid email/username or password",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -58,9 +60,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid email/username or password',
+          error: "Invalid email/username or password",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -80,13 +82,13 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error("Login error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,31 +1,33 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
-import { ApiResponse, Movie } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse, Movie } from "@/types";
 
 const SearchSchema = z.object({
   q: z.string().optional(),
-  limit: z.string().transform(Number).optional().default('50'),
-  offset: z.string().transform(Number).optional().default('0'),
+  limit: z.string().transform(Number).optional().default("50"),
+  offset: z.string().transform(Number).optional().default("0"),
 });
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     const searchParams = req.nextUrl.searchParams;
     const validation = SearchSchema.safeParse({
-      q: searchParams.get('q'),
-      limit: searchParams.get('limit'),
-      offset: searchParams.get('offset'),
+      q: searchParams.get("q"),
+      limit: searchParams.get("limit"),
+      offset: searchParams.get("offset"),
     });
 
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Invalid query parameters',
+          error: "Invalid query parameters",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -50,13 +52,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       data: result.rows as Movie[],
     });
   } catch (err) {
-    console.error('Get movies error:', err);
+    console.error("Get movies error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

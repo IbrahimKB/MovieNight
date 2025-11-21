@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { hash } from 'bcryptjs';
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { createSession } from '@/lib/auth';
-import { ApiResponse } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { hash } from "bcryptjs";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { createSession } from "@/lib/auth";
+import { ApiResponse } from "@/types";
 
 const SignupSchema = z.object({
   username: z.string().min(3).max(50),
@@ -13,7 +13,9 @@ const SignupSchema = z.object({
   name: z.string().optional(),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     const body = await req.json();
     const validation = SignupSchema.safeParse(body);
@@ -23,11 +25,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,16 +38,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // Check if username or email already exists
     const existing = await query(
       `SELECT id FROM auth."User" WHERE username = $1 OR email = $2 LIMIT 1`,
-      [username, email]
+      [username, email],
     );
 
     if (existing.rows.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Username or email already exists',
+          error: "Username or email already exists",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -59,7 +61,18 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     await query(
       `INSERT INTO auth."User" (id, username, email, "passwordHash", name, role, "joinedAt", "createdAt", "updatedAt", puid)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [userId, username, email, passwordHash, name || null, 'user', now, now, now, puid]
+      [
+        userId,
+        username,
+        email,
+        passwordHash,
+        name || null,
+        "user",
+        now,
+        now,
+        now,
+        puid,
+      ],
     );
 
     // Create session
@@ -74,20 +87,20 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           username,
           email,
           name: name || null,
-          role: 'user',
+          role: "user",
           joinedAt: now,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
-    console.error('Signup error:', err);
+    console.error("Signup error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

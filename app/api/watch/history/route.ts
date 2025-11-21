@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
-import { ApiResponse } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse } from "@/types";
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -11,9 +13,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -25,7 +27,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        LEFT JOIN movienight."Movie" m ON wm."movieId" = m.id
        WHERE wm."userId" = $1
        ORDER BY wm."watchedAt" DESC`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     const watchedMovies = result.rows.map((row) => ({
@@ -46,13 +48,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       data: watchedMovies,
     });
   } catch (err) {
-    console.error('Get watch history error:', err);
+    console.error("Get watch history error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

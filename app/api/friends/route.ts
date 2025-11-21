@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
-import { getCurrentUser, getUserExternalId } from '@/lib/auth';
-import { ApiResponse } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { query } from "@/lib/db";
+import { getCurrentUser, getUserExternalId } from "@/lib/auth";
+import { ApiResponse } from "@/types";
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -11,9 +13,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,7 +29,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        LEFT JOIN auth."User" u1 ON f."userId1" = u1.id
        LEFT JOIN auth."User" u2 ON f."userId2" = u2.id
        WHERE (f."userId1" = $1 OR f."userId2" = $1) AND f.status = 'accepted'`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     // Get pending incoming friend requests
@@ -36,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        FROM movienight."Friendship" f
        LEFT JOIN auth."User" u ON f."userId1" = u.id
        WHERE f."userId2" = $1 AND f.status = 'pending'`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     // Get pending outgoing friend requests
@@ -45,7 +47,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        FROM movienight."Friendship" f
        LEFT JOIN auth."User" u ON f."userId2" = u.id
        WHERE f."userId1" = $1 AND f.status = 'pending'`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     return NextResponse.json({
@@ -71,13 +73,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       },
     });
   } catch (err) {
-    console.error('Get friends error:', err);
+    console.error("Get friends error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

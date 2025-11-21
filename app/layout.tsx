@@ -1,21 +1,22 @@
-import type { Metadata } from 'next';
-import '../styles/globals.css';
+import type { Metadata } from "next";
+import "../styles/globals.css";
 
 export const metadata: Metadata = {
-  title: 'MovieNight - Discover & Share Movies with Friends',
-  description: 'Discover movies, suggest to friends, and build your perfect movie night with MovieNight.',
-  applicationName: 'MovieNight',
-  themeColor: '#dc2626',
+  title: "MovieNight - Discover & Share Movies with Friends",
+  description:
+    "Discover movies, suggest to friends, and build your perfect movie night with MovieNight.",
+  applicationName: "MovieNight",
+  themeColor: "#dc2626",
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
-    title: 'MovieNight',
+    statusBarStyle: "default",
+    title: "MovieNight",
   },
   icons: [
     {
-      rel: 'icon',
-      type: 'image/svg+xml',
-      url: '/movienight-favicon.svg',
+      rel: "icon",
+      type: "image/svg+xml",
+      url: "/movienight-favicon.svg",
     },
   ],
 };
@@ -34,9 +35,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/pwa-icon-192.svg" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body className="dark">
-        {children}
-      </body>
+      <body className="dark">{children}</body>
     </html>
   );
 }

@@ -1,8 +1,8 @@
-import { cookies } from 'next/headers';
-import { query } from './db';
-import { User, Session } from '@/types';
+import { cookies } from "next/headers";
+import { query } from "./db";
+import { User, Session } from "@/types";
 
-const SESSION_COOKIE_NAME = 'movienight_session';
+const SESSION_COOKIE_NAME = "movienight_session";
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 
 export async function getSessionFromCookie(): Promise<Session | null> {
@@ -18,7 +18,7 @@ export async function getSessionFromCookie(): Promise<Session | null> {
       `SELECT id, "sessionToken", "userId", expires, "createdAt"
        FROM auth."Session"
        WHERE "sessionToken" = $1 AND expires > NOW()`,
-      [sessionToken]
+      [sessionToken],
     );
 
     if (result.rows.length === 0) {
@@ -27,18 +27,20 @@ export async function getSessionFromCookie(): Promise<Session | null> {
 
     return result.rows[0] as Session;
   } catch (err) {
-    console.error('Error fetching session:', err);
+    console.error("Error fetching session:", err);
     return null;
   }
 }
 
-export async function getUserFromSession(session: Session): Promise<User | null> {
+export async function getUserFromSession(
+  session: Session,
+): Promise<User | null> {
   try {
     const result = await query(
       `SELECT id, username, email, "passwordHash", "createdAt", "updatedAt", name, role, "joinedAt", puid
        FROM auth."User"
        WHERE id = $1`,
-      [session.userId]
+      [session.userId],
     );
 
     if (result.rows.length === 0) {
@@ -47,7 +49,7 @@ export async function getUserFromSession(session: Session): Promise<User | null>
 
     return result.rows[0] as User;
   } catch (err) {
-    console.error('Error fetching user:', err);
+    console.error("Error fetching user:", err);
     return null;
   }
 }
@@ -69,27 +71,26 @@ export async function createSession(userId: string): Promise<string> {
   await query(
     `INSERT INTO auth."Session" (id, "sessionToken", "userId", expires, "createdAt")
      VALUES ($1, $2, $3, $4, NOW())`,
-    [crypto.randomUUID(), sessionToken, userId, expires]
+    [crypto.randomUUID(), sessionToken, userId, expires],
   );
 
   // Set the cookie
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
     maxAge: SESSION_DURATION / 1000, // in seconds
-    path: '/',
+    path: "/",
   });
 
   return sessionToken;
 }
 
 export async function deleteSession(sessionToken: string): Promise<void> {
-  await query(
-    `DELETE FROM auth."Session" WHERE "sessionToken" = $1`,
-    [sessionToken]
-  );
+  await query(`DELETE FROM auth."Session" WHERE "sessionToken" = $1`, [
+    sessionToken,
+  ]);
 
   // Clear the cookie
   const cookieStore = await cookies();
@@ -100,7 +101,7 @@ export async function requireAuth() {
   const user = await getCurrentUser();
 
   if (!user) {
-    throw new Error('UNAUTHORIZED');
+    throw new Error("UNAUTHORIZED");
   }
 
   return user;

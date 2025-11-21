@@ -20,21 +20,25 @@ A modern movie discovery and sharing platform built with Next.js App Router and 
 ## Setup
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Configure environment variables:**
+
    ```bash
    cp .env.example .env.local
    ```
 
    Update `.env.local` with your PostgreSQL connection string:
+
    ```
    DATABASE_URL=postgresql://user:password@localhost:5432/boksh_apps
    ```
 
 3. **Run the development server:**
+
    ```bash
    npm run dev
    ```
@@ -70,27 +74,32 @@ styles/
 ## API Routes
 
 ### Authentication
+
 - `POST /api/auth/signup` - Create a new account
 - `POST /api/auth/login` - Sign in with email/username and password
 - `POST /api/auth/logout` - Log out and clear session
 - `GET /api/auth/me` - Get current authenticated user
 
 ### Movies
+
 - `GET /api/movies` - List movies with optional search
 - `GET /api/movies/[id]` - Get movie details
 - `PATCH /api/movies/[id]` - Update movie (admin only)
 
 ### Suggestions
+
 - `POST /api/suggestions` - Create a movie suggestion
 - `GET /api/suggestions` - Get suggestions sent to/by current user
 
 ### Watchlist
+
 - `POST /api/watch/desire` - Add movie to watchlist
 - `GET /api/watch/desire` - Get watchlist
 - `POST /api/watch/mark-watched` - Mark movie as watched
 - `GET /api/watch/history` - Get watch history
 
 ### Friends
+
 - `POST /api/friends/request` - Send friend request
 - `GET /api/friends` - Get friends and pending requests
 - `PATCH /api/friends/[id]` - Accept/reject/remove friend request
@@ -101,10 +110,12 @@ styles/
 The application uses two main schemas:
 
 ### `auth` schema
+
 - **User** - User accounts with internal ID (id) and public ID (puid)
 - **Session** - Session tokens for authentication
 
 ### `movienight` schema
+
 - **Movie** - Movie information
 - **Release** - Specific releases (platform, date)
 - **Suggestion** - Movie suggestions between users
@@ -118,16 +129,19 @@ The application uses two main schemas:
 ## Key Features
 
 ### Session-Based Authentication
+
 - User login creates a session stored in the database
 - Session token stored in HttpOnly cookie
 - Automatic session validation on protected routes
 
 ### User ID Mapping
+
 - Internal IDs (UUID) stored as `auth.User.id`
 - Public IDs (UUID) stored as `auth.User.puid`
 - APIs use `puid` externally, `id` internally for joins
 
 ### Type-Safe API
+
 - All routes use Zod for request validation
 - Consistent JSON response format: `{ success, data?, error? }`
 - Full TypeScript support
@@ -135,21 +149,25 @@ The application uses two main schemas:
 ## Development
 
 ### Running the development server
+
 ```bash
 npm run dev
 ```
 
 ### Building for production
+
 ```bash
 npm run build
 ```
 
 ### Starting production server
+
 ```bash
 npm start
 ```
 
 ### Type checking
+
 ```bash
 npm run typecheck
 ```
@@ -167,14 +185,18 @@ The application can be deployed to any Node.js hosting platform. Ensure:
 All endpoints return a consistent JSON format:
 
 **Success:**
+
 ```json
 {
   "success": true,
-  "data": { /* response data */ }
+  "data": {
+    /* response data */
+  }
 }
 ```
 
 **Error:**
+
 ```json
 {
   "success": false,

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
-import { ApiResponse, Event } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse, Event } from "@/types";
 
 const UpdateEventSchema = z.object({
   date: z.string().datetime().optional(),
@@ -11,39 +11,43 @@ const UpdateEventSchema = z.object({
 });
 
 // Helper: map external user ID (puid) to internal user ID
-async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
   try {
     const result = await query(
       `SELECT id FROM auth."User" WHERE puid = $1 OR id = $1 LIMIT 1`,
-      [externalId]
+      [externalId],
     );
     return result.rows.length > 0 ? result.rows[0].id : null;
   } catch (err) {
-    console.error('Error mapping user ID:', err);
+    console.error("Error mapping user ID:", err);
     return null;
   }
 }
 
 // Helper: map internal user ID to external (puid)
-async function mapInternalUserIdToExternal(internalId: string): Promise<string> {
+async function mapInternalUserIdToExternal(
+  internalId: string,
+): Promise<string> {
   try {
     const result = await query(
       `SELECT puid, id FROM auth."User" WHERE id = $1`,
-      [internalId]
+      [internalId],
     );
     if (result.rows.length > 0) {
       return result.rows[0].puid || result.rows[0].id;
     }
     return internalId;
   } catch (err) {
-    console.error('Error mapping user ID:', err);
+    console.error("Error mapping user ID:", err);
     return internalId;
   }
 }
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
@@ -52,9 +56,9 @@ export async function GET(
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -68,23 +72,23 @@ export async function GET(
        LEFT JOIN movienight."Movie" m ON e."movieId" = m.id
        LEFT JOIN auth."User" h ON e."hostUserId" = h.id
        WHERE e.id = $1`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Event not found',
+          error: "Event not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     const event = result.rows[0];
-    const participants = JSON.parse(event.participants || '[]');
+    const participants = JSON.parse(event.participants || "[]");
     const externalParticipants = await Promise.all(
-      participants.map((pid: string) => mapInternalUserIdToExternal(pid))
+      participants.map((pid: string) => mapInternalUserIdToExternal(pid)),
     );
 
     // Check if user is host or participant
@@ -95,9 +99,9 @@ export async function GET(
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthorized',
+          error: "Unauthorized",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -124,20 +128,20 @@ export async function GET(
       },
     });
   } catch (err) {
-    console.error('Get event error:', err);
+    console.error("Get event error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
@@ -146,9 +150,9 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -157,16 +161,16 @@ export async function PATCH(
     // Check if event exists and user is host
     const eventResult = await query(
       `SELECT "hostUserId", participants FROM movienight."Event" WHERE id = $1`,
-      [id]
+      [id],
     );
 
     if (eventResult.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Event not found',
+          error: "Event not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -177,9 +181,9 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'Only the host can edit this event',
+          error: "Only the host can edit this event",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -191,11 +195,11 @@ export async function PATCH(
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -232,9 +236,9 @@ export async function PATCH(
         return NextResponse.json(
           {
             success: false,
-            error: `Invalid user IDs: ${invalidUserIds.join(', ')}`,
+            error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
           },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -246,16 +250,16 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'No fields to update',
+          error: "No fields to update",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     updates.push(`"updatedAt" = NOW()`);
 
     const sql = `UPDATE movienight."Event"
-                 SET ${updates.join(', ')}
+                 SET ${updates.join(", ")}
                  WHERE id = $1
                  RETURNING *`;
 
@@ -265,16 +269,16 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'Failed to update event',
+          error: "Failed to update event",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const updatedEvent = result.rows[0];
-    const participants = JSON.parse(updatedEvent.participants || '[]');
+    const participants = JSON.parse(updatedEvent.participants || "[]");
     const externalParticipants = await Promise.all(
-      participants.map((pid: string) => mapInternalUserIdToExternal(pid))
+      participants.map((pid: string) => mapInternalUserIdToExternal(pid)),
     );
 
     return NextResponse.json({
@@ -291,20 +295,20 @@ export async function PATCH(
       },
     });
   } catch (err) {
-    console.error('Update event error:', err);
+    console.error("Update event error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
@@ -313,9 +317,9 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -324,16 +328,16 @@ export async function DELETE(
     // Check if event exists and user is host
     const eventResult = await query(
       `SELECT "hostUserId" FROM movienight."Event" WHERE id = $1`,
-      [id]
+      [id],
     );
 
     if (eventResult.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Event not found',
+          error: "Event not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -344,9 +348,9 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          error: 'Only the host can delete this event',
+          error: "Only the host can delete this event",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -354,16 +358,16 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      data: { message: 'Event deleted' },
+      data: { message: "Event deleted" },
     });
   } catch (err) {
-    console.error('Delete event error:', err);
+    console.error("Delete event error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

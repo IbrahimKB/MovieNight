@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface CalendarEvent {
   id: string;
   movieTitle: string;
   date: string;
-  type: 'event' | 'watched';
+  type: "event" | "watched";
   eventId?: string;
 }
 
@@ -30,15 +30,15 @@ export default function CalendarPage() {
 
       // Fetch both events and watch history
       const [eventsRes, historyRes] = await Promise.all([
-        fetch('/api/events'),
-        fetch('/api/watch/history'),
+        fetch("/api/events"),
+        fetch("/api/watch/history"),
       ]);
 
       const eventsData = await eventsRes.json();
       const historyData = await historyRes.json();
 
       if (!eventsRes.ok || !historyRes.ok) {
-        setError('Failed to fetch calendar data');
+        setError("Failed to fetch calendar data");
         return;
       }
 
@@ -48,7 +48,7 @@ export default function CalendarPage() {
       // Add movie night events
       if (eventsData.data) {
         eventsData.data.forEach((event: any) => {
-          const dateKey = new Date(event.date).toISOString().split('T')[0];
+          const dateKey = new Date(event.date).toISOString().split("T")[0];
           if (!eventMap.has(dateKey)) {
             eventMap.set(dateKey, []);
           }
@@ -56,7 +56,7 @@ export default function CalendarPage() {
             id: event.id,
             movieTitle: event.movieTitle,
             date: event.date,
-            type: 'event',
+            type: "event",
             eventId: event.id,
           });
         });
@@ -65,7 +65,9 @@ export default function CalendarPage() {
       // Add watched movies
       if (historyData.data) {
         historyData.data.forEach((watched: any) => {
-          const dateKey = new Date(watched.watchedAt).toISOString().split('T')[0];
+          const dateKey = new Date(watched.watchedAt)
+            .toISOString()
+            .split("T")[0];
           if (!eventMap.has(dateKey)) {
             eventMap.set(dateKey, []);
           }
@@ -73,7 +75,7 @@ export default function CalendarPage() {
             id: watched.id,
             movieTitle: watched.title,
             date: watched.watchedAt,
-            type: 'watched',
+            type: "watched",
           });
         });
       }
@@ -94,7 +96,7 @@ export default function CalendarPage() {
       const daysInPrevMonth = prevMonth.getDate();
       for (let i = startingDayOfWeek - 1; i >= 0; i--) {
         const date = new Date(year, month - 1, daysInPrevMonth - i);
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = date.toISOString().split("T")[0];
         calendarDays.push({
           date,
           events: eventMap.get(dateKey) || [],
@@ -105,7 +107,7 @@ export default function CalendarPage() {
       // Add current month's days
       for (let i = 1; i <= daysInMonth; i++) {
         const date = new Date(year, month, i);
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = date.toISOString().split("T")[0];
         calendarDays.push({
           date,
           events: eventMap.get(dateKey) || [],
@@ -117,7 +119,7 @@ export default function CalendarPage() {
       const remainingDays = 42 - calendarDays.length; // 6 rows * 7 days
       for (let i = 1; i <= remainingDays; i++) {
         const date = new Date(year, month + 1, i);
-        const dateKey = date.toISOString().split('T')[0];
+        const dateKey = date.toISOString().split("T")[0];
         calendarDays.push({
           date,
           events: eventMap.get(dateKey) || [],
@@ -127,8 +129,8 @@ export default function CalendarPage() {
 
       setDays(calendarDays);
     } catch (err) {
-      setError('An error occurred');
-      console.error('Error:', err);
+      setError("An error occurred");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -138,15 +140,22 @@ export default function CalendarPage() {
     fetchCalendarData();
   }, [currentMonth]);
 
-  const monthName = currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const monthName = currentMonth.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1),
+    );
   };
 
   const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1),
+    );
   };
 
   return (
@@ -168,7 +177,9 @@ export default function CalendarPage() {
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-center py-8">Loading calendar...</p>
+        <p className="text-muted-foreground text-center py-8">
+          Loading calendar...
+        </p>
       ) : (
         <div className="bg-card border border-border rounded-lg overflow-hidden">
           {/* Month Navigation */}
@@ -206,17 +217,19 @@ export default function CalendarPage() {
               <div
                 key={idx}
                 className={`min-h-32 p-2 border-r border-b border-border last:border-r-0 ${
-                  day.isCurrentMonth ? 'bg-background' : 'bg-muted/50'
+                  day.isCurrentMonth ? "bg-background" : "bg-muted/50"
                 }`}
               >
-                <div className={`font-semibold mb-2 ${day.isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
+                <div
+                  className={`font-semibold mb-2 ${day.isCurrentMonth ? "text-foreground" : "text-muted-foreground"}`}
+                >
                   {day.date.getDate()}
                 </div>
 
                 <div className="space-y-1">
                   {day.events.map((event) => (
                     <div key={event.id} className="text-xs">
-                      {event.type === 'event' ? (
+                      {event.type === "event" ? (
                         <Link
                           href={`/events/${event.eventId}`}
                           className="block px-2 py-1 bg-primary/20 text-primary rounded hover:bg-primary/30 transition-colors truncate"

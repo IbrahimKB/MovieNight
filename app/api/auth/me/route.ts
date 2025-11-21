@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getCurrentUser, getUserExternalId } from '@/lib/auth';
-import { ApiResponse } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { getCurrentUser, getUserExternalId } from "@/lib/auth";
+import { ApiResponse } from "@/types";
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     const user = await getCurrentUser();
 
@@ -10,9 +12,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -28,13 +30,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       },
     });
   } catch (err) {
-    console.error('Get user error:', err);
+    console.error("Get user error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

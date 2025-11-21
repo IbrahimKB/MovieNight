@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
-import { ApiResponse, Movie } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse, Movie } from "@/types";
 
 const UpdateMovieSchema = z.object({
   title: z.string().optional(),
@@ -18,7 +18,7 @@ const UpdateMovieSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const { id } = params;
@@ -27,16 +27,16 @@ export async function GET(
       `SELECT id, title, year, genres, platform, poster, description, "imdbRating", "rtRating", "releaseDate", "createdAt", "updatedAt"
        FROM movienight."Movie"
        WHERE id = $1`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie not found',
+          error: "Movie not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -45,31 +45,31 @@ export async function GET(
       data: result.rows[0] as Movie,
     });
   } catch (err) {
-    console.error('Get movie error:', err);
+    console.error("Get movie error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
+    if (!user || user.role !== "admin") {
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthorized',
+          error: "Unauthorized",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -82,11 +82,11 @@ export async function PATCH(
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -136,16 +136,16 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'No fields to update',
+          error: "No fields to update",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     updates.push(`"updatedAt" = NOW()`);
 
     const sql = `UPDATE movienight."Movie"
-                 SET ${updates.join(', ')}
+                 SET ${updates.join(", ")}
                  WHERE id = $1
                  RETURNING *`;
 
@@ -155,9 +155,9 @@ export async function PATCH(
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie not found',
+          error: "Movie not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -166,13 +166,13 @@ export async function PATCH(
       data: result.rows[0] as Movie,
     });
   } catch (err) {
-    console.error('Update movie error:', err);
+    console.error("Update movie error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

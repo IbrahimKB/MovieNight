@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [emailOrUsername, setEmailOrUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,24 +17,24 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ emailOrUsername, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Login failed');
+        setError(data.error || "Login failed");
         return;
       }
 
       // Redirect to home on success
-      router.push('/');
+      router.push("/");
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error('Error:', err);
+      setError("An error occurred. Please try again.");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="emailOrUsername" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="emailOrUsername"
+              className="block text-sm font-medium mb-2"
+            >
               Email or Username <span className="text-destructive">*</span>
             </label>
             <input
@@ -71,7 +74,10 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-2"
+            >
               Password <span className="text-destructive">*</span>
             </label>
             <input
@@ -90,12 +96,12 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <Link href="/signup" className="text-primary hover:underline">
             Sign up
           </Link>

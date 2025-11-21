@@ -7,7 +7,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   name?: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   joinedAt: Date;
   puid?: string;
 }
@@ -56,7 +56,7 @@ export interface Suggestion {
   fromUserId: string;
   toUserId?: string;
   message?: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -87,7 +87,7 @@ export interface Friendship {
   userId1: string;
   userId2: string;
   requestedBy: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   createdAt: Date;
   updatedAt: Date;
 }

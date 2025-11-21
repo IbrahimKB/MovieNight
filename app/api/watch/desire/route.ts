@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
-import { z } from 'zod';
-import { query } from '@/lib/db';
-import { getCurrentUser } from '@/lib/auth';
-import { ApiResponse, WatchDesire } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { z } from "zod";
+import { query } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse, WatchDesire } from "@/types";
 
 const CreateWatchDesireSchema = z.object({
   movieId: z.string().uuid(),
@@ -11,7 +11,9 @@ const CreateWatchDesireSchema = z.object({
   rating: z.number().min(1).max(10).optional(),
 });
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -19,9 +21,9 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -33,11 +35,11 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         {
           success: false,
           error: validation.error.errors.map((e) => ({
-            field: e.path.join('.'),
+            field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,32 +48,32 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     // Validate movie exists
     const movieResult = await query(
       `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId]
+      [movieId],
     );
 
     if (movieResult.rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie not found',
+          error: "Movie not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Check if already in watch desire
     const existingResult = await query(
       `SELECT id FROM movienight."WatchDesire" WHERE "userId" = $1 AND "movieId" = $2`,
-      [currentUser.id, movieId]
+      [currentUser.id, movieId],
     );
 
     if (existingResult.rows.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Movie already in your watch list',
+          error: "Movie already in your watch list",
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -82,7 +84,15 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     await query(
       `INSERT INTO movienight."WatchDesire" (id, "userId", "movieId", "suggestionId", rating, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [desireId, currentUser.id, movieId, suggestionId || null, rating || null, now, now]
+      [
+        desireId,
+        currentUser.id,
+        movieId,
+        suggestionId || null,
+        rating || null,
+        now,
+        now,
+      ],
     );
 
     return NextResponse.json(
@@ -98,21 +108,23 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           updatedAt: now,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
-    console.error('Create watch desire error:', err);
+    console.error("Create watch desire error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function GET(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -120,9 +132,9 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       return NextResponse.json(
         {
           success: false,
-          error: 'Unauthenticated',
+          error: "Unauthenticated",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -134,7 +146,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
        LEFT JOIN movienight."Movie" m ON wd."movieId" = m.id
        WHERE wd."userId" = $1
        ORDER BY wd."createdAt" DESC`,
-      [currentUser.id]
+      [currentUser.id],
     );
 
     const desires = result.rows.map((row) => ({
@@ -152,13 +164,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       data: desires,
     });
   } catch (err) {
-    console.error('Get watch desires error:', err);
+    console.error("Get watch desires error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: 'Internal server error',
+        error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

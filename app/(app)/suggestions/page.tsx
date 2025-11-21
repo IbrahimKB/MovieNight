@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface Suggestion {
   id: string;
@@ -11,7 +11,7 @@ interface Suggestion {
   fromUserUsername: string;
   toUserUsername: string;
   message?: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   createdAt: string;
 }
 
@@ -23,18 +23,18 @@ export default function SuggestionsPage() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch('/api/suggestions');
+        const res = await fetch("/api/suggestions");
         const data = await res.json();
 
         if (!res.ok) {
-          setError(data.error || 'Failed to fetch suggestions');
+          setError(data.error || "Failed to fetch suggestions");
           return;
         }
 
         setSuggestions(data.data || []);
       } catch (err) {
-        setError('An error occurred');
-        console.error('Error:', err);
+        setError("An error occurred");
+        console.error("Error:", err);
       } finally {
         setLoading(false);
       }
@@ -45,12 +45,12 @@ export default function SuggestionsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'accepted':
-        return 'bg-green-500/20 text-green-400';
-      case 'rejected':
-        return 'bg-red-500/20 text-red-400';
+      case "accepted":
+        return "bg-green-500/20 text-green-400";
+      case "rejected":
+        return "bg-red-500/20 text-red-400";
       default:
-        return 'bg-yellow-500/20 text-yellow-400';
+        return "bg-yellow-500/20 text-yellow-400";
     }
   };
 
@@ -65,9 +65,13 @@ export default function SuggestionsPage() {
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-center py-8">Loading suggestions...</p>
+        <p className="text-muted-foreground text-center py-8">
+          Loading suggestions...
+        </p>
       ) : suggestions.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">No suggestions yet</p>
+        <p className="text-muted-foreground text-center py-8">
+          No suggestions yet
+        </p>
       ) : (
         <div className="space-y-4">
           {suggestions.map((suggestion) => (
@@ -88,14 +92,19 @@ export default function SuggestionsPage() {
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <h3 className="font-semibold text-lg">{suggestion.movieTitle}</h3>
+                    <h3 className="font-semibold text-lg">
+                      {suggestion.movieTitle}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      From <span className="font-medium">{suggestion.fromUserUsername}</span>
+                      From{" "}
+                      <span className="font-medium">
+                        {suggestion.fromUserUsername}
+                      </span>
                     </p>
                   </div>
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(
-                      suggestion.status
+                      suggestion.status,
                     )}`}
                   >
                     {suggestion.status}
@@ -112,7 +121,7 @@ export default function SuggestionsPage() {
                   {new Date(suggestion.createdAt).toLocaleDateString()}
                 </p>
 
-                {suggestion.status === 'pending' && (
+                {suggestion.status === "pending" && (
                   <a
                     href={`/events/create?movieId=${suggestion.movieId}&fromUserId=${suggestion.fromUserId}`}
                     className="text-xs px-3 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors inline-block"

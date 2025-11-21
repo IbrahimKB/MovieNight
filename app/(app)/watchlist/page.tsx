@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface WatchlistItem {
   id: string;
@@ -24,7 +24,7 @@ interface WatchedItem {
 export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [watched, setWatched] = useState<WatchedItem[]>([]);
-  const [tab, setTab] = useState<'want' | 'watched'>('want');
+  const [tab, setTab] = useState<"want" | "watched">("want");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,8 +32,8 @@ export default function WatchlistPage() {
     const fetchData = async () => {
       try {
         const [wantRes, watchedRes] = await Promise.all([
-          fetch('/api/watch/desire'),
-          fetch('/api/watch/history'),
+          fetch("/api/watch/desire"),
+          fetch("/api/watch/history"),
         ]);
 
         const wantData = await wantRes.json();
@@ -46,8 +46,8 @@ export default function WatchlistPage() {
           setWatched(watchedData.data || []);
         }
       } catch (err) {
-        setError('An error occurred');
-        console.error('Error:', err);
+        setError("An error occurred");
+        console.error("Error:", err);
       } finally {
         setLoading(false);
       }
@@ -68,21 +68,21 @@ export default function WatchlistPage() {
 
       <div className="flex gap-4 mb-8 border-b border-border">
         <button
-          onClick={() => setTab('want')}
+          onClick={() => setTab("want")}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === 'want'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+            tab === "want"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           Want to Watch ({watchlist.length})
         </button>
         <button
-          onClick={() => setTab('watched')}
+          onClick={() => setTab("watched")}
           className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === 'watched'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground hover:text-foreground'
+            tab === "watched"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
           }`}
         >
           Watched ({watched.length})
@@ -91,9 +91,11 @@ export default function WatchlistPage() {
 
       {loading ? (
         <p className="text-muted-foreground text-center py-8">Loading...</p>
-      ) : tab === 'want' ? (
+      ) : tab === "want" ? (
         watchlist.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">Your watchlist is empty</p>
+          <p className="text-muted-foreground text-center py-8">
+            Your watchlist is empty
+          </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {watchlist.map((item) => (
@@ -112,11 +114,14 @@ export default function WatchlistPage() {
                 )}
                 <div className="p-4">
                   <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">({item.year})</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    ({item.year})
+                  </p>
 
                   {item.rating && (
                     <p className="text-sm mb-4">
-                      <span className="font-medium">Your rating:</span> {item.rating}/10
+                      <span className="font-medium">Your rating:</span>{" "}
+                      {item.rating}/10
                     </p>
                   )}
 
@@ -129,7 +134,9 @@ export default function WatchlistPage() {
           </div>
         )
       ) : watched.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">You haven't watched any movies yet</p>
+        <p className="text-muted-foreground text-center py-8">
+          You haven't watched any movies yet
+        </p>
       ) : (
         <div className="space-y-4">
           {watched.map((item) => (
@@ -149,11 +156,14 @@ export default function WatchlistPage() {
 
               <div className="flex-1">
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground mb-2">({item.year})</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  ({item.year})
+                </p>
 
                 {item.originalScore && (
                   <p className="text-sm mb-2">
-                    <span className="font-medium">Score:</span> {item.originalScore}/10
+                    <span className="font-medium">Score:</span>{" "}
+                    {item.originalScore}/10
                   </p>
                 )}
 

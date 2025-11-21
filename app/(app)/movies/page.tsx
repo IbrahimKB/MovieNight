@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 interface Movie {
   id: string;
@@ -14,31 +14,31 @@ interface Movie {
 
 export default function MoviesPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMovies = async (query = '') => {
+  const fetchMovies = async (query = "") => {
     setLoading(true);
     setError(null);
 
     try {
       const params = new URLSearchParams();
-      if (query) params.append('q', query);
-      params.append('limit', '50');
+      if (query) params.append("q", query);
+      params.append("limit", "50");
 
       const res = await fetch(`/api/movies?${params}`);
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Failed to fetch movies');
+        setError(data.error || "Failed to fetch movies");
         return;
       }
 
       setMovies(data.data || []);
     } catch (err) {
-      setError('An error occurred');
-      console.error('Error:', err);
+      setError("An error occurred");
+      console.error("Error:", err);
     } finally {
       setLoading(false);
     }
@@ -80,9 +80,13 @@ export default function MoviesPage() {
       )}
 
       {loading ? (
-        <p className="text-muted-foreground text-center py-8">Loading movies...</p>
+        <p className="text-muted-foreground text-center py-8">
+          Loading movies...
+        </p>
       ) : movies.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">No movies found</p>
+        <p className="text-muted-foreground text-center py-8">
+          No movies found
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {movies.map((movie) => (
@@ -101,7 +105,9 @@ export default function MoviesPage() {
               )}
               <div className="p-4">
                 <h3 className="font-semibold text-lg mb-2">{movie.title}</h3>
-                <p className="text-sm text-muted-foreground mb-2">({movie.year})</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  ({movie.year})
+                </p>
 
                 {movie.genres.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
@@ -118,7 +124,8 @@ export default function MoviesPage() {
 
                 {movie.imdbRating && (
                   <p className="text-sm mb-3">
-                    <span className="font-medium">IMDb:</span> {movie.imdbRating}/10
+                    <span className="font-medium">IMDb:</span>{" "}
+                    {movie.imdbRating}/10
                   </p>
                 )}
 
