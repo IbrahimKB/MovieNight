@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 
 interface Suggestion {
   id: string;
+  movieId: string;
   movieTitle: string;
   moviePoster?: string;
+  fromUserId: string;
   fromUserUsername: string;
   toUserUsername: string;
   message?: string;
