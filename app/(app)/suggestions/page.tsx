@@ -108,9 +108,18 @@ export default function SuggestionsPage() {
                   </p>
                 )}
 
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground mb-3">
                   {new Date(suggestion.createdAt).toLocaleDateString()}
                 </p>
+
+                {suggestion.status === 'pending' && (
+                  <a
+                    href={`/events/create?movieId=${suggestion.movieId}&fromUserId=${suggestion.fromUserId}`}
+                    className="text-xs px-3 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20 transition-colors inline-block"
+                  >
+                    Book Movie Night
+                  </a>
+                )}
               </div>
             </div>
           ))}
