@@ -12,6 +12,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <a href="/movies" className="text-sm hover:text-primary transition-colors">
               Movies
             </a>
+            <a href="/calendar" className="text-sm hover:text-primary transition-colors">
+              Calendar
+            </a>
             <a href="/suggestions" className="text-sm hover:text-primary transition-colors">
               Suggestions
             </a>
