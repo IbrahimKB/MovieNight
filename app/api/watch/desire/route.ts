@@ -90,8 +90,8 @@ export async function POST(
         movieId,
         suggestionId || null,
         rating || null,
-        now,
-        now,
+        now.toISOString(),
+        now.toISOString(),
       ],
     );
 
@@ -104,8 +104,8 @@ export async function POST(
           movieId,
           suggestionId: suggestionId || null,
           rating: rating || null,
-          createdAt: now,
-          updatedAt: now,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
         },
       },
       { status: 201 },

@@ -1,94 +1,126 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { ApiResponse } from "@/types";
+import { ApiResponse } from "../../../../types";
 
+// -------------------------------------------------------
+// Validation schema
+// -------------------------------------------------------
 const UpdateFriendshipSchema = z.object({
   action: z.enum(["accept", "reject", "remove"]),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-): Promise<NextResponse<ApiResponse>> {
+// -------------------------------------------------------
+// Helpers: map external PUID <-> internal DB ID
+// -------------------------------------------------------
+async function mapExternalToInternal(externalId: string): Promise<string | null> {
+  const user = await prisma.authUser.findFirst({
+    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
+
+async function mapInternalToExternal(internalId: string): Promise<string> {
+  const user = await prisma.authUser.findUnique({
+    where: { id: internalId },
+    select: { id: true, puid: true },
+  });
+
+  return user?.puid || user?.id || internalId;
+}
+
+// -------------------------------------------------------
+// Helper: Extract dynamic id from the URL
+// -------------------------------------------------------
+function getFriendshipId(req: NextRequest): string | null {
+  const segments = req.nextUrl.pathname.split("/").filter(Boolean);
+  return segments.pop() || null;
+}
+
+// -------------------------------------------------------
+// PATCH /api/friends/[id]
+// -------------------------------------------------------
+export async function PATCH(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
+        { success: false, error: "Unauthenticated" },
         { status: 401 },
       );
     }
 
-    const { id } = params;
-    const body = await req.json();
-    const validation = UpdateFriendshipSchema.safeParse(body);
-
-    if (!validation.success) {
+    const friendshipId = getFriendshipId(req);
+    if (!friendshipId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: validation.error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
+        { success: false, error: "Friendship ID is required" },
         { status: 400 },
       );
     }
 
+    // Convert external → internal
+    const currentUserInternalId = await mapExternalToInternal(currentUser.id);
+    if (!currentUserInternalId) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
+
+    const body = await req.json();
+    const validation = UpdateFriendshipSchema.safeParse(body);
+
+if (!validation.success) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: validation.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join("; "),
+    },
+    { status: 400 },
+  );
+}
+
+
     const { action } = validation.data;
 
-    // Get friendship
-    const friendshipResult = await query(
-      `SELECT * FROM movienight."Friendship" WHERE id = $1`,
-      [id],
-    );
+    // Retrieve friendship
+    const friendship = await prisma.friendship.findUnique({
+      where: { id: friendshipId },
+    });
 
-    if (friendshipResult.rows.length === 0) {
+    if (!friendship) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Friendship not found",
-        },
+        { success: false, error: "Friendship not found" },
         { status: 404 },
       );
     }
 
-    const friendship = friendshipResult.rows[0];
+    // User must be part of the friendship
+    const isUserInvolved =
+      friendship.userId1 === currentUserInternalId ||
+      friendship.userId2 === currentUserInternalId;
 
-    // Verify current user is involved in this friendship
-    if (
-      friendship.userId1 !== currentUser.id &&
-      friendship.userId2 !== currentUser.id
-    ) {
+    if (!isUserInvolved) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-        },
+        { success: false, error: "Unauthorized" },
         { status: 403 },
       );
     }
 
+    // ---------------------------- ACCEPT ----------------------------
     if (action === "accept") {
-      // Only the recipient can accept
-      if (
-        (friendship.userId2 === currentUser.id &&
-          friendship.requestedBy === friendship.userId1) ||
-        (friendship.userId1 === currentUser.id &&
-          friendship.requestedBy === friendship.userId2)
-      ) {
-        await query(
-          `UPDATE movienight."Friendship" SET status = $1, "updatedAt" = NOW() WHERE id = $2`,
-          ["accepted", id],
-        );
-      } else {
+      const requester = friendship.requestedBy;
+      const otherUser =
+        requester === friendship.userId1
+          ? friendship.userId2
+          : friendship.userId1;
+
+      if (otherUser !== currentUserInternalId) {
         return NextResponse.json(
           {
             success: false,
@@ -97,19 +129,22 @@ export async function PATCH(
           { status: 403 },
         );
       }
-    } else if (action === "reject") {
-      // Only the recipient can reject
-      if (
-        (friendship.userId2 === currentUser.id &&
-          friendship.requestedBy === friendship.userId1) ||
-        (friendship.userId1 === currentUser.id &&
-          friendship.requestedBy === friendship.userId2)
-      ) {
-        await query(
-          `UPDATE movienight."Friendship" SET status = $1, "updatedAt" = NOW() WHERE id = $2`,
-          ["rejected", id],
-        );
-      } else {
+
+      await prisma.friendship.update({
+        where: { id: friendshipId },
+        data: { status: "accepted", updatedAt: new Date() },
+      });
+    }
+
+    // ---------------------------- REJECT ----------------------------
+    else if (action === "reject") {
+      const requester = friendship.requestedBy;
+      const otherUser =
+        requester === friendship.userId1
+          ? friendship.userId2
+          : friendship.userId1;
+
+      if (otherUser !== currentUserInternalId) {
         return NextResponse.json(
           {
             success: false,
@@ -118,19 +153,24 @@ export async function PATCH(
           { status: 403 },
         );
       }
-    } else if (action === "remove") {
-      // Both users can remove
+
+      await prisma.friendship.update({
+        where: { id: friendshipId },
+        data: { status: "rejected", updatedAt: new Date() },
+      });
+    }
+
+    // ---------------------------- REMOVE ----------------------------
+    else if (action === "remove") {
       if (friendship.status !== "accepted") {
         return NextResponse.json(
-          {
-            success: false,
-            error: "Can only remove accepted friendships",
-          },
+          { success: false, error: "Only accepted friendships can be removed" },
           { status: 400 },
         );
       }
 
-      await query(`DELETE FROM movienight."Friendship" WHERE id = $1`, [id]);
+      // Either user can remove
+      await prisma.friendship.delete({ where: { id: friendshipId } });
     }
 
     return NextResponse.json({
@@ -138,82 +178,76 @@ export async function PATCH(
       data: { message: `Friendship ${action}ed successfully` },
     });
   } catch (err) {
-    console.error("Update friendship error:", err);
+    console.error("PATCH friendship error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
+      { success: false, error: "Internal server error" },
       { status: 500 },
     );
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-): Promise<NextResponse<ApiResponse>> {
+// -------------------------------------------------------
+// DELETE /api/friends/[id]
+// -------------------------------------------------------
+export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
+        { success: false, error: "Unauthenticated" },
         { status: 401 },
       );
     }
 
-    const { id } = params;
-
-    // Get friendship
-    const friendshipResult = await query(
-      `SELECT * FROM movienight."Friendship" WHERE id = $1`,
-      [id],
-    );
-
-    if (friendshipResult.rows.length === 0) {
+    const friendshipId = getFriendshipId(req);
+    if (!friendshipId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Friendship not found",
-        },
+        { success: false, error: "Friendship ID is required" },
+        { status: 400 },
+      );
+    }
+
+    const currentUserInternalId = await mapExternalToInternal(currentUser.id);
+    if (!currentUserInternalId) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
+
+    const friendship = await prisma.friendship.findUnique({
+      where: { id: friendshipId },
+      select: { userId1: true, userId2: true },
+    });
+
+    if (!friendship) {
+      return NextResponse.json(
+        { success: false, error: "Friendship not found" },
         { status: 404 },
       );
     }
 
-    const friendship = friendshipResult.rows[0];
+    const isUserInvolved =
+      friendship.userId1 === currentUserInternalId ||
+      friendship.userId2 === currentUserInternalId;
 
-    // Verify current user is involved
-    if (
-      friendship.userId1 !== currentUser.id &&
-      friendship.userId2 !== currentUser.id
-    ) {
+    if (!isUserInvolved) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-        },
+        { success: false, error: "Unauthorized" },
         { status: 403 },
       );
     }
 
-    // Delete friendship
-    await query(`DELETE FROM movienight."Friendship" WHERE id = $1`, [id]);
+    await prisma.friendship.delete({ where: { id: friendshipId } });
 
     return NextResponse.json({
       success: true,
       data: { message: "Friendship removed" },
     });
   } catch (err) {
-    console.error("Delete friendship error:", err);
+    console.error("DELETE friendship error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
+      { success: false, error: "Internal server error" },
       { status: 500 },
     );
   }

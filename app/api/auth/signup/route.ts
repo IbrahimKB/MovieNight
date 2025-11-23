@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
-import { hash } from "bcryptjs";
-import { randomUUID } from "crypto";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
-import { ApiResponse } from "@/types";
 
+// Validation schema
 const SignupSchema = z.object({
   username: z.string().min(3).max(50),
   email: z.string().email(),
-  password: z.string().min(8),
-  name: z.string().optional(),
+  name: z.string().min(1),
+  password: z.string().min(6),
 });
 
-export async function POST(
-  req: NextRequest,
-): Promise<NextResponse<ApiResponse>> {
+// POST /api/auth/signup
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const validation = SignupSchema.safeParse(body);
@@ -29,69 +28,73 @@ export async function POST(
             message: e.message,
           })),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const { username, email, password, name } = validation.data;
+    const { username, email, name, password } = validation.data;
 
-    // Check if username or email already exists
-    const existing = await query(
-      `SELECT id FROM auth."User" WHERE username = $1 OR email = $2 LIMIT 1`,
-      [username, email],
-    );
+    const loweredEmail = email.toLowerCase();
+    const loweredUsername = username.toLowerCase();
 
-    if (existing.rows.length > 0) {
+    // Check duplicates via Prisma
+    const existing = await prisma.authUser.findFirst({
+      where: {
+        OR: [
+          { email: loweredEmail },
+          { username: loweredUsername },
+        ],
+      },
+    });
+
+    if (existing) {
       return NextResponse.json(
         {
           success: false,
-          error: "Username or email already exists",
+          error:
+            existing.email.toLowerCase() === loweredEmail
+              ? "An account with this email already exists"
+              : "This username is already taken",
         },
-        { status: 409 },
+        { status: 400 }
       );
     }
 
     // Hash password
-    const passwordHash = await hash(password, 10);
-    const userId = randomUUID();
-    const puid = randomUUID();
-    const now = new Date();
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Public ID
+    const puid = crypto.randomUUID();
 
     // Create user
-    await query(
-      `INSERT INTO auth."User" (id, username, email, "passwordHash", name, role, "joinedAt", "createdAt", "updatedAt", puid)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-      [
-        userId,
-        username,
-        email,
-        passwordHash,
-        name || null,
-        "user",
-        now,
-        now,
-        now,
+    const user = await prisma.authUser.create({
+      data: {
+        username: loweredUsername,
+        email: loweredEmail,
+        name,
+        passwordHash: hashedPassword,
         puid,
-      ],
-    );
+      },
+    });
 
     // Create session
-    await createSession(userId);
+    await createSession(user.id);
 
-    // Return user data (using puid as external id)
+    // Return user (using PUID externally)
     return NextResponse.json(
       {
         success: true,
         data: {
-          id: puid,
-          username,
-          email,
-          name: name || null,
-          role: "user",
-          joinedAt: now,
+          id: user.puid || user.id,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          joinedAt: user.joinedAt,
         },
+        message: "Account created successfully",
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (err) {
     console.error("Signup error:", err);
@@ -100,7 +103,7 @@ export async function POST(
         success: false,
         error: "Internal server error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

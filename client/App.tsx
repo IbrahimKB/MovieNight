@@ -6,10 +6,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { initializePWA } from "./lib/pwa";
-import { registerSW } from "virtual:pwa-register";
+// ❌ Removed: import { registerSW } from "virtual:pwa-register";
 import { initSentry } from "./lib/sentry";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+
 import Home from "./pages/Home";
 import Suggest from "./pages/Suggest";
 import MovieNight from "./pages/MovieNight";
@@ -17,11 +18,11 @@ import Watchlist from "./pages/Watchlist";
 import Squad from "./pages/Squad";
 import AdminDashboard from "./pages/AdminDashboard";
 import Settings from "./pages/Settings";
-
 import Releases from "./pages/Releases";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -33,24 +34,13 @@ const queryClient = new QueryClient();
 // Set dark mode by default
 document.documentElement.classList.add("dark");
 
-// Initialize Sentry for error monitoring
+// Initialize Sentry
 initSentry();
 
-// Initialize PWA features
+// Initialize PWA (custom Next.js-compatible logic)
 initializePWA();
 
-// Register service worker for PWA
-if ("serviceWorker" in navigator) {
-  registerSW({
-    onNeedRefresh() {
-      console.log("New app version available");
-      // You can show a toast or prompt here
-    },
-    onOfflineReady() {
-      console.log("App ready for offline use");
-    },
-  });
-}
+// ❌ Removed Vite-only service worker registration block
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -60,6 +50,7 @@ const App = () => (
         <Sonner />
         <PWAInstallPrompt />
         <PushNotificationPrompt />
+
         <BrowserRouter>
           <Routes>
             {/* Public routes */}
@@ -77,6 +68,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/suggest"
               element={
@@ -98,6 +90,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/movie-night"
               element={
@@ -108,6 +101,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/watchlist"
               element={
@@ -118,6 +112,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/friends"
               element={
@@ -128,6 +123,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/squad"
               element={
@@ -138,6 +134,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/settings"
               element={

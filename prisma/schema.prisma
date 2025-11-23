@@ -9,34 +9,153 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["movienight", "auth"]
 }
 
 //////////////////////////////////////////////////////////////
-// MOVIES
+// ENUMS
+//////////////////////////////////////////////////////////////
+
+enum Role {
+  user
+  admin
+}
+
+enum SuggestionStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum FriendshipStatus {
+  pending
+  accepted
+  rejected
+}
+
+//////////////////////////////////////////////////////////////
+// AUTH + USERS
+//////////////////////////////////////////////////////////////
+
+model AuthUser {
+  id           String   @id @default(uuid()) @db.Uuid
+  puid         String?  @unique
+  username     String   @unique
+  email        String   @unique
+  name         String?
+  passwordHash String   @map("password_hash")
+  role         Role     @default(user)
+  joinedAt     DateTime @default(now()) @map("joined_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  sessions                Session[]
+  watchHistory            WatchedMovie[]
+  watchDesires            WatchDesire[]
+  suggestionsFrom         Suggestion[]                 @relation("SuggestionsFromUser")
+  suggestionsTo           Suggestion[]                 @relation("SuggestionsToUser")
+  friendshipsAsUser1      Friendship[]                 @relation("FriendshipUser1")
+  friendshipsAsUser2      Friendship[]                 @relation("FriendshipUser2")
+  friendshipsRequested    Friendship[]                 @relation("FriendshipRequester")
+  eventsHosted            Event[]
+  notifications           Notification[]
+  pushSubscriptions       UserPushSubscription[]
+  notificationPreferences UserNotificationPreferences?
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid()) @db.Uuid
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user AuthUser @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+//////////////////////////////////////////////////////////////
+// MOVIES & RELEASES
 //////////////////////////////////////////////////////////////
 
 model Movie {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  imdbId      String?   @unique @map("imdb_id")
   title       String
   year        Int
-  genres      String[]
+  genres      String[]  @db.Text
   platform    String?
   poster      String?
   description String
-  imdbRating  Float?
-  rtRating    Int?
-  releaseDate DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  imdbRating  Float?    @map("imdb_rating")
+  rtRating    Float?    @map("rt_rating")
+  releaseDate DateTime? @map("release_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  // Relations
-  suggestions   Suggestion[]
-  watchDesires  WatchDesire[]
-  watchedMovies WatchedMovie[]
-  releases      Release[]
+  releases     Release[]
+  watchHistory WatchedMovie[]
+  watchDesires WatchDesire[]
+  suggestions  Suggestion[]
+  events       Event[]
 
-  @@schema("movienight")
+  @@map("movies")
+}
+
+model Release {
+  id          String   @id @default(uuid()) @db.Uuid
+  movieId     String   @map("movie_id")
+  title       String
+  platform    String
+  releaseDate DateTime @map("release_date")
+  genres      String[] @db.Text
+  description String?
+  poster      String?
+  year        Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  movie Movie @relation(fields: [movieId], references: [id])
+
+  @@map("releases")
+}
+
+//////////////////////////////////////////////////////////////
+// WATCH HISTORY & WATCH DESIRE
+//////////////////////////////////////////////////////////////
+
+model WatchedMovie {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @map("user_id")
+  movieId       String   @map("movie_id")
+  watchedAt     DateTime @default(now()) @map("watched_at")
+  originalScore Int?     @map("original_score")
+  reaction      Json?    @map("reaction")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user  AuthUser @relation(fields: [userId], references: [id])
+  movie Movie    @relation(fields: [movieId], references: [id])
+
+  @@map("watch_history")
+}
+
+model WatchDesire {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id")
+  movieId      String   @map("movie_id")
+  suggestionId String?  @map("suggestion_id")
+  rating       Float?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user       AuthUser    @relation(fields: [userId], references: [id])
+  movie      Movie       @relation(fields: [movieId], references: [id])
+  suggestion Suggestion? @relation(fields: [suggestionId], references: [id])
+
+  @@map("watch_desire")
 }
 
 //////////////////////////////////////////////////////////////
@@ -44,37 +163,22 @@ model Movie {
 //////////////////////////////////////////////////////////////
 
 model Suggestion {
-  id           String   @id @default(uuid()) @db.Uuid
-  movieId      String   @db.Uuid
-  suggestedBy  String   @db.Uuid
-  suggestedTo  String[]
-  desireRating Int
-  comment      String?
-  status       String   @default("pending")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id         String           @id @default(uuid()) @db.Uuid
+  movieId    String           @map("movie_id")
+  fromUserId String           @map("from_user_id")
+  toUserId   String?          @map("to_user_id")
+  message    String?
+  status     SuggestionStatus @default(pending)
+  createdAt  DateTime         @default(now()) @map("created_at")
+  updatedAt  DateTime         @updatedAt @map("updated_at")
 
-  movie Movie @relation(fields: [movieId], references: [id])
+  movie    Movie     @relation(fields: [movieId], references: [id])
+  fromUser AuthUser  @relation("SuggestionsFromUser", fields: [fromUserId], references: [id])
+  toUser   AuthUser? @relation("SuggestionsToUser", fields: [toUserId], references: [id])
 
-  @@schema("movienight")
-}
+  watchDesires WatchDesire[]
 
-//////////////////////////////////////////////////////////////
-// WATCH DESIRES
-//////////////////////////////////////////////////////////////
-
-model WatchDesire {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @db.Uuid
-  movieId      String   @db.Uuid
-  suggestionId String   @db.Uuid
-  rating       Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  movie Movie @relation(fields: [movieId], references: [id])
-
-  @@schema("movienight")
+  @@map("suggestions")
 }
 
 //////////////////////////////////////////////////////////////
@@ -82,122 +186,87 @@ model WatchDesire {
 //////////////////////////////////////////////////////////////
 
 model Friendship {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId1     String   @db.Uuid
-  userId2     String   @db.Uuid
-  requestedBy String   @db.Uuid
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String           @id @default(uuid()) @db.Uuid
+  userId1     String           @map("user_id_1")
+  userId2     String           @map("user_id_2")
+  requestedBy String           @map("requested_by")
+  status      FriendshipStatus @default(pending)
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  @@schema("movienight")
+  user1     AuthUser @relation("FriendshipUser1", fields: [userId1], references: [id])
+  user2     AuthUser @relation("FriendshipUser2", fields: [userId2], references: [id])
+  requester AuthUser @relation("FriendshipRequester", fields: [requestedBy], references: [id])
+
+  @@map("friendships")
 }
 
 //////////////////////////////////////////////////////////////
-// WATCH HISTORY
+// EVENTS
 //////////////////////////////////////////////////////////////
 
-model WatchedMovie {
-  id            String   @id @default(uuid()) @db.Uuid
-  userId        String   @db.Uuid
-  movieId       String   @db.Uuid
-  watchedDate   DateTime
-  watchedWith   String[]
-  originalScore Int?
-  actualRating  Int?
-  reaction      Json?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model Event {
+  id           String   @id @default(uuid()) @db.Uuid
+  movieId      String   @map("movie_id")
+  hostUserId   String   @map("host_user_id")
+  participants String[] @db.Text
+  date         DateTime
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
-  movie Movie @relation(fields: [movieId], references: [id])
+  movie    Movie    @relation(fields: [movieId], references: [id])
+  hostUser AuthUser @relation(fields: [hostUserId], references: [id])
 
-  @@schema("movienight")
+  @@map("events")
 }
 
 //////////////////////////////////////////////////////////////
-// NOTIFICATIONS
+// NOTIFICATIONS & PREFERENCES
 //////////////////////////////////////////////////////////////
 
 model Notification {
   id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @db.Uuid
+  userId    String   @map("user_id")
   type      String
   title     String
-  content   String
+  message   String
   read      Boolean  @default(false)
-  actionData Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  data      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@schema("movienight")
+  user AuthUser @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
 }
-
-//////////////////////////////////////////////////////////////
-// RELEASE CALENDAR
-//////////////////////////////////////////////////////////////
-
-model Release {
-  id          String   @id @default(uuid()) @db.Uuid
-  movieId     String   @db.Uuid
-  title       String
-  platform    String
-  releaseDate DateTime
-  genres      String[]
-  description String?
-  poster      String?
-  year        Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  movie Movie @relation(fields: [movieId], references: [id])
-
-  @@schema("movienight")
-}
-
-//////////////////////////////////////////////////////////////
-// PUSH SUBSCRIPTIONS
-//////////////////////////////////////////////////////////////
 
 model UserPushSubscription {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @db.Uuid
-  subscription Json
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id")
+  endpoint  String
+  auth      String
+  p256dh    String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@schema("movienight")
+  user AuthUser @relation(fields: [userId], references: [id])
+
+  @@map("user_push_subscriptions")
 }
-
-//////////////////////////////////////////////////////////////
-// NOTIFICATION PREFERENCES
-//////////////////////////////////////////////////////////////
 
 model UserNotificationPreferences {
-  userId     String   @id @db.Uuid
-  preferences Json
-  updatedAt  DateTime @updatedAt
+  id                 String   @id @default(uuid()) @db.Uuid
+  userId             String   @unique @map("user_id")
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  pushNotifications  Boolean  @default(true) @map("push_notifications")
+  friendRequests     Boolean  @default(true) @map("friend_requests")
+  suggestions        Boolean  @default(true) @map("suggestions")
+  movieReleases      Boolean  @default(true) @map("movie_releases")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
-  @@schema("movienight")
-}
+  user AuthUser @relation(fields: [userId], references: [id])
 
-//////////////////////////////////////////////////////////////
-// AUTH USERS (auth.users)
-//////////////////////////////////////////////////////////////
-
-model AuthUser {
-  id        String   @id @default(uuid()) @db.Uuid
-  puid      String   @unique     // public user ID (UUID string)
-  username  String   @unique
-  email     String   @unique
-  name      String
-  password  String
-  role      String   @default("user")
-  joinedAt  DateTime @default(now()) @map("joined_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
-
-  @@schema("auth")
-  @@map("users")
-
+  @@map("user_notification_preferences")
 }

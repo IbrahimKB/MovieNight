@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { ApiResponse, Movie } from "@/types";
+import { ApiResponse } from "@/types";
 
+// ---------------------------------------------
+// Zod schema for updates
+// ---------------------------------------------
 const UpdateMovieSchema = z.object({
   title: z.string().optional(),
   year: z.number().optional(),
@@ -16,163 +19,113 @@ const UpdateMovieSchema = z.object({
   releaseDate: z.string().datetime().optional(),
 });
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } },
-): Promise<NextResponse<ApiResponse>> {
+// ---------------------------------------------
+// Helper to extract ID from URL (Next.js 15 fix)
+// ---------------------------------------------
+function getMovieId(req: NextRequest): string | null {
+  const parts = req.nextUrl.pathname.split("/").filter(Boolean);
+  return parts.at(-1) ?? null;
+}
+
+// ---------------------------------------------
+// GET /api/movies/[id]
+// ---------------------------------------------
+export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const id = getMovieId(req);
 
-    const result = await query(
-      `SELECT id, title, year, genres, platform, poster, description, "imdbRating", "rtRating", "releaseDate", "createdAt", "updatedAt"
-       FROM movienight."Movie"
-       WHERE id = $1`,
-      [id],
-    );
-
-    if (result.rows.length === 0) {
+    if (!id) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Movie not found",
-        },
-        { status: 404 },
+        { success: false, error: "Movie ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const movie = await prisma.movie.findUnique({
+      where: { id },
+    });
+
+    if (!movie) {
+      return NextResponse.json(
+        { success: false, error: "Movie not found" },
+        { status: 404 }
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: result.rows[0] as Movie,
+      data: movie,
     });
   } catch (err) {
-    console.error("Get movie error:", err);
+    console.error("GET movie error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }
 
+// ---------------------------------------------
+// PATCH /api/movies/[id]
+// (Admin-only)
+// ---------------------------------------------
 export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } },
+  req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
+    // Auth required + must be admin
     const user = await getCurrentUser();
     if (!user || user.role !== "admin") {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized",
-        },
-        { status: 403 },
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
       );
     }
 
-    const { id } = params;
-    const body = await req.json();
-    const validation = UpdateMovieSchema.safeParse(body);
+    const id = getMovieId(req);
 
-    if (!validation.success) {
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Movie ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    const parsed = UpdateMovieSchema.safeParse(body);
+
+    if (!parsed.success) {
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors.map((e) => ({
+          error: parsed.error.errors.map((e) => ({
             field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const data = validation.data;
-    const updates: string[] = [];
-    const values: any[] = [id];
-    let paramIndex = 2;
+    const data = parsed.data;
 
-    if (data.title !== undefined) {
-      updates.push(`title = $${paramIndex++}`);
-      values.push(data.title);
-    }
-    if (data.year !== undefined) {
-      updates.push(`year = $${paramIndex++}`);
-      values.push(data.year);
-    }
-    if (data.genres !== undefined) {
-      updates.push(`genres = $${paramIndex++}`);
-      values.push(data.genres);
-    }
-    if (data.platform !== undefined) {
-      updates.push(`platform = $${paramIndex++}`);
-      values.push(data.platform);
-    }
-    if (data.poster !== undefined) {
-      updates.push(`poster = $${paramIndex++}`);
-      values.push(data.poster);
-    }
-    if (data.description !== undefined) {
-      updates.push(`description = $${paramIndex++}`);
-      values.push(data.description);
-    }
-    if (data.imdbRating !== undefined) {
-      updates.push(`"imdbRating" = $${paramIndex++}`);
-      values.push(data.imdbRating);
-    }
-    if (data.rtRating !== undefined) {
-      updates.push(`"rtRating" = $${paramIndex++}`);
-      values.push(data.rtRating);
-    }
-    if (data.releaseDate !== undefined) {
-      updates.push(`"releaseDate" = $${paramIndex++}`);
-      values.push(new Date(data.releaseDate));
-    }
-
-    if (updates.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "No fields to update",
-        },
-        { status: 400 },
-      );
-    }
-
-    updates.push(`"updatedAt" = NOW()`);
-
-    const sql = `UPDATE movienight."Movie"
-                 SET ${updates.join(", ")}
-                 WHERE id = $1
-                 RETURNING *`;
-
-    const result = await query(sql, values);
-
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Movie not found",
-        },
-        { status: 404 },
-      );
-    }
+    const updated = await prisma.movie.update({
+      where: { id },
+      data: {
+        ...data,
+        releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
+      },
+    });
 
     return NextResponse.json({
       success: true,
-      data: result.rows[0] as Movie,
+      data: updated,
     });
   } catch (err) {
-    console.error("Update movie error:", err);
+    console.error("PATCH movie error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

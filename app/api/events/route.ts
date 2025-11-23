@@ -3,8 +3,11 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { query } from "@/lib/db";
 import { getCurrentUser, getUserExternalId } from "@/lib/auth";
-import { ApiResponse, Event } from "@/types";
+import { ApiResponse } from "@/types";
 
+// ------------------------------------------------------
+// Zod schema
+// ------------------------------------------------------
 const CreateEventSchema = z.object({
   movieId: z.string().uuid(),
   date: z.string().datetime(),
@@ -12,14 +15,14 @@ const CreateEventSchema = z.object({
   participants: z.array(z.string()).optional(),
 });
 
-// Helper: map external user ID (puid) to internal user ID
-async function mapExternalUserIdToInternal(
-  externalId: string,
-): Promise<string | null> {
+// ------------------------------------------------------
+// Helpers
+// ------------------------------------------------------
+async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
   try {
     const result = await query(
       `SELECT id FROM auth."User" WHERE puid = $1 OR id = $1 LIMIT 1`,
-      [externalId],
+      [externalId]
     );
     return result.rows.length > 0 ? result.rows[0].id : null;
   } catch (err) {
@@ -28,38 +31,35 @@ async function mapExternalUserIdToInternal(
   }
 }
 
-// Helper: map internal user ID to external (puid)
-async function mapInternalUserIdToExternal(
-  internalId: string,
-): Promise<string> {
+async function mapInternalUserIdToExternal(internalId: string): Promise<string> {
   try {
     const result = await query(
-      `SELECT puid, id FROM auth."User" WHERE id = $1`,
-      [internalId],
+      `SELECT puid, id FROM auth."User" WHERE id = $1 LIMIT 1`,
+      [internalId]
     );
+
     if (result.rows.length > 0) {
       return result.rows[0].puid || result.rows[0].id;
     }
     return internalId;
   } catch (err) {
-    console.error("Error mapping user ID:", err);
+    console.error("Error mapping internal → external:", err);
     return internalId;
   }
 }
 
+// ------------------------------------------------------
+// POST /api/events (Create)
+// ------------------------------------------------------
 export async function POST(
-  req: NextRequest,
+  req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
-        { status: 401 },
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
       );
     }
 
@@ -70,45 +70,39 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
+          error: validation.error.errors
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join("; "),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const { movieId, date, notes, participants } = validation.data;
 
-    // Validate movie exists
+    // Ensure movie exists
     const movieResult = await query(
       `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId],
+      [movieId]
     );
 
     if (movieResult.rows.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Movie not found",
-        },
-        { status: 404 },
+        { success: false, error: "Movie not found" },
+        { status: 404 }
       );
     }
 
-    // Validate and map all participants to internal IDs
+    // Validate participants
     const internalParticipants: string[] = [currentUser.id];
     const invalidUserIds: string[] = [];
 
-    if (participants && participants.length > 0) {
-      for (const participantId of participants) {
-        const internalId = await mapExternalUserIdToInternal(participantId);
-        if (!internalId) {
-          invalidUserIds.push(participantId);
-        } else if (!internalParticipants.includes(internalId)) {
+    if (participants) {
+      for (const userId of participants) {
+        const internalId = await mapExternalUserIdToInternal(userId);
+        if (!internalId) invalidUserIds.push(userId);
+        else if (!internalParticipants.includes(internalId))
           internalParticipants.push(internalId);
-        }
       }
     }
 
@@ -118,7 +112,7 @@ export async function POST(
           success: false,
           error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -128,25 +122,25 @@ export async function POST(
     const eventDate = new Date(date);
 
     await query(
-      `INSERT INTO movienight."Event" (id, "movieId", "hostUserId", participants, date, notes, "createdAt", "updatedAt")
+      `INSERT INTO movienight."Event"
+       (id, "movieId", "hostUserId", participants, date, notes, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         eventId,
         movieId,
         currentUser.id,
         JSON.stringify(internalParticipants),
-        eventDate,
+        eventDate.toISOString(),        // ✅ FIXED
         notes || null,
-        now,
-        now,
-      ],
+        now.toISOString(),              // ✅ FIXED
+        now.toISOString(),              // ✅ FIXED
+      ]
     );
 
-    // Convert internal participant IDs back to external for response
-    const externalParticipants: string[] = [];
-    for (const id of internalParticipants) {
-      externalParticipants.push(await mapInternalUserIdToExternal(id));
-    }
+    // Map participants back to external IDs
+    const externalParticipants = await Promise.all(
+      internalParticipants.map((id) => mapInternalUserIdToExternal(id))
+    );
 
     return NextResponse.json(
       {
@@ -156,45 +150,41 @@ export async function POST(
           movieId,
           hostUserId: getUserExternalId(currentUser),
           participants: externalParticipants,
-          date: eventDate,
+          date: eventDate.toISOString(),
           notes: notes || null,
-          createdAt: now,
-          updatedAt: now,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
         },
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (err) {
     console.error("Create event error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }
 
+// ------------------------------------------------------
+// GET /api/events (List)
+// ------------------------------------------------------
 export async function GET(
-  req: NextRequest,
+  req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
-        { status: 401 },
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
       );
     }
 
-    // Get events where user is host or in participants
     const result = await query(
-      `SELECT e.id, e."movieId", e."hostUserId", e.participants, e.date, e.notes, e."createdAt", e."updatedAt",
+      `SELECT e.id, e."movieId", e."hostUserId", e.participants, e.date,
+              e.notes, e."createdAt", e."updatedAt",
               m.title as "movieTitle", m.poster as "moviePoster",
               h.username as "hostUsername", h.puid as "hostPuid"
        FROM movienight."Event" e
@@ -202,15 +192,15 @@ export async function GET(
        LEFT JOIN auth."User" h ON e."hostUserId" = h.id
        WHERE e."hostUserId" = $1 OR e.participants::text LIKE $2
        ORDER BY e.date ASC`,
-      [currentUser.id, `%"${currentUser.id}"%`],
+      [currentUser.id, `%"${currentUser.id}"%`]
     );
 
     const events = await Promise.all(
       result.rows.map(async (row) => {
-        const hostPuid = await mapInternalUserIdToExternal(row.hostUserId);
-        const participants = JSON.parse(row.participants || "[]");
-        const externalParticipants = await Promise.all(
-          participants.map((id: string) => mapInternalUserIdToExternal(id)),
+        const hostExternalId = await mapInternalUserIdToExternal(row.hostUserId);
+        const internal = JSON.parse(row.participants || "[]");
+        const external = await Promise.all(
+          internal.map((id: string) => mapInternalUserIdToExternal(id))
         );
 
         return {
@@ -218,29 +208,23 @@ export async function GET(
           movieId: row.movieId,
           movieTitle: row.movieTitle,
           moviePoster: row.moviePoster,
-          hostUserId: hostPuid,
+          hostUserId: hostExternalId,
           hostUsername: row.hostUsername,
-          participants: externalParticipants,
+          participants: external,
           date: row.date,
           notes: row.notes,
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
         };
-      }),
+      })
     );
 
-    return NextResponse.json({
-      success: true,
-      data: events,
-    });
+    return NextResponse.json({ success: true, data: events });
   } catch (err) {
     console.error("Get events error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

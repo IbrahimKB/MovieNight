@@ -1,25 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { query } from "@/lib/db";
-import { ApiResponse } from "@/types";
+import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE_NAME = "movienight_session";
 
-export async function POST(
-  req: NextRequest,
-): Promise<NextResponse<ApiResponse>> {
+export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
     if (sessionToken) {
-      // Delete session from database
-      await query(`DELETE FROM auth."Session" WHERE "sessionToken" = $1`, [
-        sessionToken,
-      ]);
+      // Delete session from Prisma (auth.Session table)
+      await prisma.session.deleteMany({
+        where: { sessionToken },
+      });
     }
 
-    // Clear the cookie
+    // Clear cookie
     cookieStore.delete(SESSION_COOKIE_NAME);
 
     return NextResponse.json({

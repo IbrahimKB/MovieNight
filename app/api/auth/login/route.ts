@@ -1,79 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
-import { ApiResponse } from "@/types";
 
+// -----------------------------
+// Validation schema
+// -----------------------------
 const LoginSchema = z.object({
   emailOrUsername: z.string(),
   password: z.string(),
 });
 
-export async function POST(
-  req: NextRequest,
-): Promise<NextResponse<ApiResponse>> {
+// -----------------------------
+// POST /api/auth/login
+// -----------------------------
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const validation = LoginSchema.safeParse(body);
+    const parsed = LoginSchema.safeParse(body);
 
-    if (!validation.success) {
+    if (!parsed.success) {
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors.map((e) => ({
+          error: parsed.error.errors.map((e) => ({
             field: e.path.join("."),
             message: e.message,
           })),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
-    const { emailOrUsername, password } = validation.data;
+    const { emailOrUsername, password } = parsed.data;
 
-    // Find user by email or username
-    const result = await query(
-      `SELECT id, username, email, "passwordHash", name, role, "joinedAt", puid
-       FROM auth."User"
-       WHERE email = $1 OR username = $2
-       LIMIT 1`,
-      [emailOrUsername, emailOrUsername],
-    );
+    // Find user by email or username (case-insensitive)
+    const user = await prisma.authUser.findFirst({
+      where: {
+        OR: [
+          { email: { equals: emailOrUsername.toLowerCase(), mode: "insensitive" } },
+          { username: { equals: emailOrUsername.toLowerCase(), mode: "insensitive" } },
+        ],
+      },
+    });
 
-    if (result.rows.length === 0) {
+    if (!user) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid email/username or password",
-        },
-        { status: 401 },
+        { success: false, error: "Invalid email/username or password" },
+        { status: 401 }
       );
     }
 
-    const user = result.rows[0];
-
-    // Verify password
-    const passwordMatch = await compare(password, user.passwordHash);
-
-    if (!passwordMatch) {
+    // Password check
+    const isValid = await compare(password, user.passwordHash);
+    if (!isValid) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid email/username or password",
-        },
-        { status: 401 },
+        { success: false, error: "Invalid email/username or password" },
+        { status: 401 }
       );
     }
 
     // Create session
     await createSession(user.id);
 
-    // Return user data (using puid as external id)
+    // Prepare safe return user
+    const externalId = user.puid || user.id;
+
     return NextResponse.json({
       success: true,
       data: {
-        id: user.puid || user.id,
+        id: externalId,
         username: user.username,
         email: user.email,
         name: user.name,
@@ -84,11 +81,8 @@ export async function POST(
   } catch (err) {
     console.error("Login error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

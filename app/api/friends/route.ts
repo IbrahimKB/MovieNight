@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { getCurrentUser, getUserExternalId } from "@/lib/auth";
-import { ApiResponse } from "@/types";
+import { ApiResponse } from "../../../types";
 
 export async function GET(
   req: NextRequest,

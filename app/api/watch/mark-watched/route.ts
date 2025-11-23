@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { query } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { ApiResponse, WatchedMovie } from "@/types";
+import { ApiResponse } from "@/types";
 
 const MarkWatchedSchema = z.object({
   movieId: z.string().uuid(),
@@ -13,18 +13,15 @@ const MarkWatchedSchema = z.object({
 });
 
 export async function POST(
-  req: NextRequest,
+  req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
-        { status: 401 },
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
       );
     }
 
@@ -35,12 +32,11 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
+          error: validation.error.errors
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .join("; "),
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -49,16 +45,13 @@ export async function POST(
     // Validate movie exists
     const movieResult = await query(
       `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId],
+      [movieId]
     );
 
     if (movieResult.rows.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Movie not found",
-        },
-        { status: 404 },
+        { success: false, error: "Movie not found" },
+        { status: 404 }
       );
     }
 
@@ -68,24 +61,25 @@ export async function POST(
     const watchedAt = watchedDate ? new Date(watchedDate) : now;
 
     await query(
-      `INSERT INTO movienight."WatchedMovie" (id, "userId", "movieId", "watchedAt", "originalScore", reaction, "createdAt", "updatedAt")
+      `INSERT INTO movienight."WatchedMovie"
+       (id, "userId", "movieId", "watchedAt", "originalScore", reaction, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
         watchedId,
         currentUser.id,
         movieId,
-        watchedAt,
+        watchedAt.toISOString(),
         originalScore || null,
         reaction ? JSON.stringify(reaction) : null,
-        now,
-        now,
-      ],
+        now.toISOString(),
+        now.toISOString(),
+      ]
     );
 
     // Remove from WatchDesire if present
     await query(
       `DELETE FROM movienight."WatchDesire" WHERE "userId" = $1 AND "movieId" = $2`,
-      [currentUser.id, movieId],
+      [currentUser.id, movieId]
     );
 
     return NextResponse.json(
@@ -95,23 +89,20 @@ export async function POST(
           id: watchedId,
           userId: currentUser.id,
           movieId,
-          watchedAt,
+          watchedAt: watchedAt.toISOString(),
           originalScore: originalScore || null,
           reaction: reaction || null,
-          createdAt: now,
-          updatedAt: now,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
         },
       },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (err) {
     console.error("Mark watched error:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      { status: 500 },
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

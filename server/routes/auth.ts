@@ -12,23 +12,13 @@ import {
   User,
   JWTPayload,
 } from "../models/types.js";
-import { sql } from "../db/sql.js";
+import { prisma } from "../../lib/prisma.js";
+import type { AuthUser } from "@prisma/client";
 
 // ---------------------------------------------------------------------------
-// Local DB type matching auth."User"
+// Local DB type matching Prisma AuthUser model
 // ---------------------------------------------------------------------------
-interface AuthUserRow {
-  id: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-  createdAt: Date;
-  updatedAt: Date;
-  name: string | null;
-  role: string | null;
-  joinedAt: Date | null;
-  puid: string | null;
-}
+type AuthUserRow = AuthUser;
 
 // ---------------------------------------------------------------------------
 // JWT config
@@ -58,7 +48,7 @@ const resetPasswordSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
-// Helper: map DB row → API User
+/** Helper: map DB row → API User */
 // ---------------------------------------------------------------------------
 function mapAuthUserToUserRow(authUser: AuthUserRow): User {
   const id = authUser.puid ?? authUser.id;
@@ -92,98 +82,58 @@ function createJwtForUser(user: User): string {
 }
 
 // ---------------------------------------------------------------------------
-// DB helpers
+// DB helpers (Prisma-based)
 // ---------------------------------------------------------------------------
-async function findUserByIdentifier(
-  identifier: string,
-): Promise<AuthUserRow | null> {
+
+async function findUserByIdentifier(identifier: string): Promise<AuthUserRow | null> {
   const lowered = identifier.trim().toLowerCase();
 
-  const result = await sql<AuthUserRow>(
-    `
-    SELECT
-      "id",
-      "username",
-      "email",
-      "passwordHash",
-      "createdAt",
-      "updatedAt",
-      "name",
-      "role",
-      "joinedAt",
-      "puid"
-    FROM auth."User"
-    WHERE lower("email") = $1
-       OR lower("username") = $1
-    LIMIT 1;
-    `,
-    [lowered],
-  );
-
-  return result.rows[0] ?? null;
+  return prisma.authUser.findFirst({
+    where: {
+      OR: [
+        { email: { equals: lowered, mode: "insensitive" } },
+        { username: { equals: lowered, mode: "insensitive" } },
+      ],
+    },
+  });
 }
 
-async function findUserByPublicId(
-  userId: string,
-): Promise<AuthUserRow | null> {
-  const result = await sql<AuthUserRow>(
-    `
-    SELECT
-      "id",
-      "username",
-      "email",
-      "passwordHash",
-      "createdAt",
-      "updatedAt",
-      "name",
-      "role",
-      "joinedAt",
-      "puid"
-    FROM auth."User"
-    WHERE "puid" = $1 OR "id" = $1
-    LIMIT 1;
-    `,
-    [userId],
-  );
-
-  return result.rows[0] ?? null;
+async function findUserByPublicId(userId: string): Promise<AuthUserRow | null> {
+  return prisma.authUser.findFirst({
+    where: {
+      OR: [{ id: userId }, { puid: userId }],
+    },
+  });
 }
 
 async function searchUsers(
   query: string,
   excludeUserId?: string,
 ): Promise<AuthUserRow[]> {
-  const searchTerm = `%${query.trim()}%`;
+  const trimmed = query.trim();
+  if (!trimmed) return [];
 
-  const result = await sql<AuthUserRow>(
-    `
-    SELECT
-      "id",
-      "username",
-      "email",
-      "passwordHash",
-      "createdAt",
-      "updatedAt",
-      "name",
-      "role",
-      "joinedAt",
-      "puid"
-    FROM auth."User"
-    WHERE
-      (
-        $1::text IS NULL OR 
-        ("puid" <> $1::text AND "id" <> $1::text)
-      )
-      AND (
-        "username" ILIKE $2::text
-        OR "name" ILIKE $2::text
-      )
-    ORDER BY "createdAt" ASC;
-    `,
-    [excludeUserId ?? null, searchTerm],
-  );
+  const excludeFilter = excludeUserId
+    ? {
+        NOT: [
+          { id: excludeUserId },
+          { puid: excludeUserId },
+        ],
+      }
+    : {};
 
-  return result.rows;
+  return prisma.authUser.findMany({
+    where: {
+      ...excludeFilter,
+      OR: [
+        { username: { contains: trimmed, mode: "insensitive" } },
+        { name: { contains: trimmed, mode: "insensitive" } },
+      ],
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -269,19 +219,15 @@ export const handleSignup: RequestHandler = async (req, res) => {
     const email = body.email.trim().toLowerCase();
     const name = body.name.trim();
 
-    const existing = await sql<
-      Pick<AuthUserRow, "id" | "email" | "username">
-    >(
-      `
-      SELECT "id", "email", "username"
-      FROM auth."User"
-      WHERE lower("email") = $1 OR lower("username") = $2
-      LIMIT 1;
-      `,
-      [email, username],
-    );
-
-    const existingUser = existing.rows[0];
+    // Check for existing user by email or username
+    const existingUser = await prisma.authUser.findFirst({
+      where: {
+        OR: [
+          { email: { equals: email, mode: "insensitive" } },
+          { username: { equals: username, mode: "insensitive" } },
+        ],
+      },
+    });
 
     if (existingUser) {
       if (existingUser.email.toLowerCase() === email) {
@@ -293,31 +239,19 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(body.password, 12);
 
-    const internalId = crypto.randomUUID();
+    // public UUID exposed to clients
     const puid = crypto.randomUUID();
 
-    const created = await sql<AuthUserRow>(
-      `
-      INSERT INTO auth."User"
-        ("id", "username", "email", "passwordHash", "name", "role", "createdAt", "updatedAt", "joinedAt", "puid")
-      VALUES
-        ($1, $2, $3, $4, $5, 'user', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $6)
-      RETURNING
-        "id",
-        "username",
-        "email",
-        "passwordHash",
-        "createdAt",
-        "updatedAt",
-        "name",
-        "role",
-        "joinedAt",
-        "puid";
-      `,
-      [internalId, username, email, hashedPassword, name, puid],
-    );
-
-    const createdUser = created.rows[0];
+    const createdUser = await prisma.authUser.create({
+      data: {
+        username,
+        email,
+        name,
+        passwordHash: hashedPassword,
+        puid,
+        // role defaults to 'user'
+      },
+    });
 
     const user = mapAuthUserToUserRow(createdUser);
     const token = createJwtForUser(user);
@@ -486,35 +420,23 @@ export const handleResetPassword: RequestHandler = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(body.newPassword, 12);
 
-    const result = await sql<AuthUserRow>(
-      `
-      UPDATE auth."User"
-      SET "passwordHash" = $1,
-          "updatedAt" = CURRENT_TIMESTAMP
-      WHERE "puid" = $2 OR "id" = $2
-      RETURNING
-        "id",
-        "username",
-        "email",
-        "passwordHash",
-        "createdAt",
-        "updatedAt",
-        "name",
-        "role",
-        "joinedAt",
-        "puid";
-      `,
-      [hashedPassword, body.userId],
-    );
+    const existing = await findUserByPublicId(body.userId);
 
-    if (result.rows.length === 0) {
+    if (!existing) {
       return res.status(404).json({
         success: false,
         error: "User not found",
       });
     }
 
-    const user = mapAuthUserToUserRow(result.rows[0]);
+    const updated = await prisma.authUser.update({
+      where: { id: existing.id },
+      data: {
+        passwordHash: hashedPassword,
+      },
+    });
+
+    const user = mapAuthUserToUserRow(updated);
 
     res.json({
       success: true,
@@ -550,25 +472,13 @@ export const handleResetPassword: RequestHandler = async (req, res) => {
 // ---------------------------------------------------------------------------
 export const handleGetAllUsers: RequestHandler = async (req, res) => {
   try {
-    const result = await sql<AuthUserRow>(
-      `
-      SELECT
-        "id",
-        "username",
-        "email",
-        "passwordHash",
-        "createdAt",
-        "updatedAt",
-        "name",
-        "role",
-        "joinedAt",
-        "puid"
-      FROM auth."User"
-      ORDER BY "createdAt" ASC;
-      `,
-    );
+    const users = await prisma.authUser.findMany({
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
 
-    const mapped = result.rows.map(mapAuthUserToUserRow);
+    const mapped = users.map(mapAuthUserToUserRow);
 
     res.json({
       success: true,
@@ -598,33 +508,20 @@ export const handleDeleteUser: RequestHandler = async (req, res) => {
       });
     }
 
-    const result = await sql<AuthUserRow>(
-      `
-      DELETE FROM auth."User"
-      WHERE "puid" = $1 OR "id" = $1
-      RETURNING
-        "id",
-        "username",
-        "email",
-        "passwordHash",
-        "createdAt",
-        "updatedAt",
-        "name",
-        "role",
-        "joinedAt",
-        "puid";
-      `,
-      [userId],
-    );
+    const existing = await findUserByPublicId(userId);
 
-    if (result.rows.length === 0) {
+    if (!existing) {
       return res.status(404).json({
         success: false,
         error: "User not found",
       });
     }
 
-    const user = mapAuthUserToUserRow(result.rows[0]);
+    const deleted = await prisma.authUser.delete({
+      where: { id: existing.id },
+    });
+
+    const user = mapAuthUserToUserRow(deleted);
 
     res.json({
       success: true,

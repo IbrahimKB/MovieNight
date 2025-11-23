@@ -109,8 +109,8 @@ export async function POST(
         toUserIdInternal,
         message || null,
         "pending",
-        now,
-        now,
+        now.toISOString(),
+        now.toISOString(),
       ],
     );
 
@@ -124,8 +124,8 @@ export async function POST(
           toUserId: toUserId,
           message: message || null,
           status: "pending",
-          createdAt: now,
-          updatedAt: now,
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
         },
       },
       { status: 201 },

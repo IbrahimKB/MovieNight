@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 import { z } from "zod";
 import { query } from "@/lib/db";
 import { getCurrentUser, getUserExternalId } from "@/lib/auth";
-import { ApiResponse } from "@/types";
+import { ApiResponse } from "../../../../types";
 
 const FriendRequestSchema = z.object({
   toUserId: z.string(),
@@ -44,18 +44,18 @@ export async function POST(
     const body = await req.json();
     const validation = FriendRequestSchema.safeParse(body);
 
-    if (!validation.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: validation.error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
-        { status: 400 },
-      );
-    }
+if (!validation.success) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: validation.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join("; "),
+    },
+    { status: 400 },
+  );
+}
+
 
     const { toUserId } = validation.data;
 
@@ -126,7 +126,7 @@ export async function POST(
     await query(
       `INSERT INTO movienight."Friendship" (id, "userId1", "userId2", "requestedBy", status, "createdAt", "updatedAt")
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [friendshipId, userId1, userId2, requestedBy, "pending", now, now],
+      [friendshipId, userId1, userId2, requestedBy, "pending", now.toISOString(), now.toISOString()],
     );
 
     return NextResponse.json(

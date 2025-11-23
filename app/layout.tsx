@@ -1,41 +1,34 @@
-import type { Metadata } from "next";
-import "../styles/globals.css";
+import "./globals.css";
+import { ReactNode } from "react";
 
-export const metadata: Metadata = {
-  title: "MovieNight - Discover & Share Movies with Friends",
-  description:
-    "Discover movies, suggest to friends, and build your perfect movie night with MovieNight.",
-  applicationName: "MovieNight",
-  themeColor: "#dc2626",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "MovieNight",
-  },
-  icons: [
-    {
-      rel: "icon",
-      type: "image/svg+xml",
-      url: "/movienight-favicon.svg",
-    },
-  ],
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AuthProvider } from "@/contexts/AuthContext";
+
+const queryClient = new QueryClient();
+
+export const metadata = {
+  title: "MovieNight",
+  description: "Friends. Movies. Vibes.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <link rel="apple-touch-icon" href="/icons/pwa-icon-192.svg" />
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body className="dark">{children}</body>
+    <html lang="en" className="dark">
+      <body>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              {children}
+            </TooltipProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </body>
     </html>
   );
 }
