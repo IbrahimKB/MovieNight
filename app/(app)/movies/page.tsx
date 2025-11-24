@@ -22,7 +22,10 @@ export default function MoviesPage() {
   const [loading, setLoading] = useState(true);
   const [allGenres, setAllGenres] = useState<string[]>([]);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -64,12 +67,14 @@ export default function MoviesPage() {
       results = results.filter(
         (movie) =>
           movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          movie.year.toString().includes(searchQuery)
+          movie.year.toString().includes(searchQuery),
       );
     }
 
     if (selectedGenre) {
-      results = results.filter((movie) => movie.genres?.includes(selectedGenre));
+      results = results.filter((movie) =>
+        movie.genres?.includes(selectedGenre),
+      );
     }
 
     setFilteredMovies(results);
@@ -113,7 +118,9 @@ export default function MoviesPage() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
-        <p className="text-muted-foreground">Explore thousands of films to add to your watchlist</p>
+        <p className="text-muted-foreground">
+          Explore thousands of films to add to your watchlist
+        </p>
       </div>
 
       {/* Search Bar */}
@@ -168,7 +175,8 @@ export default function MoviesPage() {
       ) : filteredMovies.length > 0 ? (
         <div>
           <p className="text-sm text-muted-foreground mb-4">
-            Found {filteredMovies.length} movie{filteredMovies.length !== 1 ? "s" : ""}
+            Found {filteredMovies.length} movie
+            {filteredMovies.length !== 1 ? "s" : ""}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {filteredMovies.map((movie) => (
@@ -179,7 +187,9 @@ export default function MoviesPage() {
       ) : (
         <div className="text-center py-12 bg-card border border-border rounded-xl">
           <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No movies found matching your criteria</p>
+          <p className="text-muted-foreground">
+            No movies found matching your criteria
+          </p>
           <button
             onClick={() => {
               setSearchQuery("");

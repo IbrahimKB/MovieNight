@@ -28,7 +28,7 @@ export default function SignupPage() {
         formData.username,
         formData.email,
         formData.password,
-        formData.name
+        formData.name,
       );
 
       if (!result.success) {
@@ -58,10 +58,14 @@ export default function SignupPage() {
 
         {/* Subtle film strip pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)',
-            backgroundSize: '100% 100%'
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)",
+              backgroundSize: "100% 100%",
+            }}
+          />
         </div>
       </div>
 
@@ -77,7 +81,9 @@ export default function SignupPage() {
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
             MovieNight
           </h1>
-          <p className="text-muted-foreground text-lg">Discover, watch, and connect</p>
+          <p className="text-muted-foreground text-lg">
+            Discover, watch, and connect
+          </p>
         </div>
 
         {/* Signup Card */}
@@ -85,8 +91,12 @@ export default function SignupPage() {
           <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
             {/* Card Header */}
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
-              <p className="text-muted-foreground">Join millions of movie enthusiasts</p>
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Create Account
+              </h2>
+              <p className="text-muted-foreground">
+                Join millions of movie enthusiasts
+              </p>
             </div>
 
             {/* Error Message */}
@@ -95,7 +105,8 @@ export default function SignupPage() {
                 <p className="font-semibold">{error}</p>
                 {error.includes("Database") && (
                   <p className="text-xs opacity-75">
-                    💡 Tip: Check that PostgreSQL is running. In Docker, make sure the database service is accessible.
+                    💡 Tip: Check that PostgreSQL is running. In Docker, make
+                    sure the database service is accessible.
                   </p>
                 )}
               </div>
@@ -111,7 +122,10 @@ export default function SignupPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <User size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <User
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="text"
                       placeholder="John Doe"
@@ -133,7 +147,10 @@ export default function SignupPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <User size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <User
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="text"
                       placeholder="johndoe"
@@ -157,7 +174,10 @@ export default function SignupPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <Mail size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <Mail
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="email"
                       placeholder="user@example.com"
@@ -180,7 +200,10 @@ export default function SignupPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <Lock size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <Lock
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="password"
                       placeholder="••••••••"

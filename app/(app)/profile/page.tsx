@@ -25,7 +25,10 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -48,16 +51,24 @@ export default function ProfilePage() {
         const historyData = await historyRes.json();
         const suggestionsData = await suggestionsRes.json();
 
-        const watchlistMovies = watchlistData.success ? watchlistData.data || [] : [];
+        const watchlistMovies = watchlistData.success
+          ? watchlistData.data || []
+          : [];
         const historyMovies = historyData.success ? historyData.data || [] : [];
-        const suggestions = suggestionsData.success ? suggestionsData.data || [] : [];
+        const suggestions = suggestionsData.success
+          ? suggestionsData.data || []
+          : [];
 
         setWatchlist(watchlistMovies.slice(0, 4));
         setWatchHistory(historyMovies.slice(0, 4));
-        setSentSuggestions(suggestions.filter((s: any) => s.fromUserId === user?.id).slice(0, 4));
+        setSentSuggestions(
+          suggestions.filter((s: any) => s.fromUserId === user?.id).slice(0, 4),
+        );
 
         setStats({
-          totalFriends: friendsData.success ? (friendsData.data?.friends?.length || 0) : 0,
+          totalFriends: friendsData.success
+            ? friendsData.data?.friends?.length || 0
+            : 0,
           moviesWatched: historyMovies.length,
           activeWatchlist: watchlistMovies.length,
         });

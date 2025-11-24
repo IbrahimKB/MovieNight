@@ -24,7 +24,10 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -41,7 +44,7 @@ export default function EventsPage() {
           // Sort by date
           const sorted = data.data.sort(
             (a: Event, b: Event) =>
-              new Date(a.date).getTime() - new Date(b.date).getTime()
+              new Date(a.date).getTime() - new Date(b.date).getTime(),
           );
           setEvents(sorted);
         }
@@ -76,7 +79,9 @@ export default function EventsPage() {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg truncate">{event.movie?.title}</h3>
+          <h3 className="font-semibold text-lg truncate">
+            {event.movie?.title}
+          </h3>
           <p className="text-sm text-muted-foreground">
             Hosted by {event.hostUser?.name || event.hostUser?.username}
           </p>

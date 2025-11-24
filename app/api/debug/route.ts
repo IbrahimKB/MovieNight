@@ -18,7 +18,10 @@ export async function GET() {
     const result = await Promise.race([
       prisma.$queryRaw`SELECT 1 as connected`,
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Database connection timeout")), 5000)
+        setTimeout(
+          () => reject(new Error("Database connection timeout")),
+          5000,
+        ),
       ),
     ]);
 
@@ -28,7 +31,8 @@ export async function GET() {
     diagnostics.database.status = "❌ FAILED";
     diagnostics.database.error = err.message;
     diagnostics.database.details = {
-      expectedHost: process.env.DATABASE_URL?.split("@")[1]?.split(":")[0] || "unknown",
+      expectedHost:
+        process.env.DATABASE_URL?.split("@")[1]?.split(":")[0] || "unknown",
       hint: "Check if PostgreSQL is running and accessible",
     };
   }
@@ -42,7 +46,9 @@ export async function GET() {
 
   if (diagnostics.database.status === "❌ FAILED") {
     issues.push("Cannot connect to PostgreSQL database");
-    issues.push("In Docker environments, use the service name (e.g., 'postgres') not 'localhost'");
+    issues.push(
+      "In Docker environments, use the service name (e.g., 'postgres') not 'localhost'",
+    );
   }
 
   diagnostics.issues = issues;

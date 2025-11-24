@@ -26,7 +26,10 @@ export default function CalendarPage() {
   const [dayEvents, setDayEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -55,8 +58,10 @@ export default function CalendarPage() {
   // Update day events when selected date changes
   useEffect(() => {
     if (selectedDate) {
-      const selected = events.filter((event) =>
-        new Date(event.date).toDateString() === new Date(selectedDate).toDateString()
+      const selected = events.filter(
+        (event) =>
+          new Date(event.date).toDateString() ===
+          new Date(selectedDate).toDateString(),
       );
       setDayEvents(selected);
     }
@@ -71,18 +76,27 @@ export default function CalendarPage() {
   };
 
   const getEventsForDate = (day: number) => {
-    const dateStr = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-      .toDateString();
-    return events.filter((event) => new Date(event.date).toDateString() === dateStr);
+    const dateStr = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day,
+    ).toDateString();
+    return events.filter(
+      (event) => new Date(event.date).toDateString() === dateStr,
+    );
   };
 
   const previousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1),
+    );
     setSelectedDate(null);
   };
 
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1),
+    );
     setSelectedDate(null);
   };
 
@@ -118,7 +132,9 @@ export default function CalendarPage() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Movie Calendar</h1>
-        <p className="text-muted-foreground">Plan and track your movie nights</p>
+        <p className="text-muted-foreground">
+          Plan and track your movie nights
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -145,7 +161,10 @@ export default function CalendarPage() {
             {/* Weekday Headers */}
             <div className="grid grid-cols-7 gap-2 mb-4">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                <div key={day} className="text-center text-sm font-semibold text-muted-foreground py-2">
+                <div
+                  key={day}
+                  className="text-center text-sm font-semibold text-muted-foreground py-2"
+                >
                   {day}
                 </div>
               ))}
@@ -158,8 +177,11 @@ export default function CalendarPage() {
                 const isSelected =
                   selectedDate &&
                   new Date(selectedDate).toDateString() ===
-                    new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day || 1)
-                      .toDateString();
+                    new Date(
+                      currentMonth.getFullYear(),
+                      currentMonth.getMonth(),
+                      day || 1,
+                    ).toDateString();
 
                 return (
                   <button
@@ -167,8 +189,11 @@ export default function CalendarPage() {
                     onClick={() => {
                       if (day) {
                         setSelectedDate(
-                          new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-                            .toISOString()
+                          new Date(
+                            currentMonth.getFullYear(),
+                            currentMonth.getMonth(),
+                            day,
+                          ).toISOString(),
                         );
                       }
                     }}
@@ -188,7 +213,9 @@ export default function CalendarPage() {
                           <div
                             key={i}
                             className={`w-1 h-1 rounded-full ${
-                              isSelected ? "bg-primary-foreground" : "bg-primary"
+                              isSelected
+                                ? "bg-primary-foreground"
+                                : "bg-primary"
                             }`}
                           />
                         ))}
@@ -225,14 +252,20 @@ export default function CalendarPage() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Hosted by {event.hostUser?.name || event.hostUser?.username}
                   </p>
-                  <p className="text-xs text-primary mt-2 font-medium">View Event</p>
+                  <p className="text-xs text-primary mt-2 font-medium">
+                    View Event
+                  </p>
                 </button>
               ))}
             </div>
           ) : selectedDate ? (
-            <p className="text-muted-foreground text-sm">No events scheduled for this date</p>
+            <p className="text-muted-foreground text-sm">
+              No events scheduled for this date
+            </p>
           ) : (
-            <p className="text-muted-foreground text-sm">Click on a date to view events</p>
+            <p className="text-muted-foreground text-sm">
+              Click on a date to view events
+            </p>
           )}
 
           <button

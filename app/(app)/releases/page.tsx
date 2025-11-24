@@ -19,7 +19,10 @@ export default function ReleasesPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -37,7 +40,7 @@ export default function ReleasesPage() {
           const sorted = data.data.sort(
             (a: Release, b: Release) =>
               new Date(a.releaseDate).getTime() -
-              new Date(b.releaseDate).getTime()
+              new Date(b.releaseDate).getTime(),
           );
           setReleases(sorted);
         }
@@ -134,10 +137,10 @@ export default function ReleasesPage() {
 
   // Separate upcoming and past
   const upcomingReleases = releases.filter(
-    (r) => new Date(r.releaseDate) > new Date()
+    (r) => new Date(r.releaseDate) > new Date(),
   );
   const pastReleases = releases.filter(
-    (r) => new Date(r.releaseDate) <= new Date()
+    (r) => new Date(r.releaseDate) <= new Date(),
   );
 
   return (

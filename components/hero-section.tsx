@@ -98,7 +98,9 @@ export default function HeroSection() {
           className="text-sm sm:text-base text-primary hover:text-primary/80 font-medium transition-colors duration-300 flex items-center gap-2 group"
         >
           Already have an account?
-          <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+          <span className="group-hover:translate-x-1 transition-transform duration-300">
+            →
+          </span>
         </button>
       </div>
 

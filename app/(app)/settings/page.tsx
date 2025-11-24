@@ -92,7 +92,9 @@ export default function SettingsPage() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Settings</h1>
-        <p className="text-muted-foreground">Manage your account and preferences</p>
+        <p className="text-muted-foreground">
+          Manage your account and preferences
+        </p>
       </div>
 
       {/* Profile Section */}
@@ -237,7 +239,9 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-6">
-        <h3 className="font-semibold text-lg text-destructive mb-2">Danger Zone</h3>
+        <h3 className="font-semibold text-lg text-destructive mb-2">
+          Danger Zone
+        </h3>
         <p className="text-sm text-muted-foreground mb-4">
           These actions are irreversible. Please be careful.
         </p>

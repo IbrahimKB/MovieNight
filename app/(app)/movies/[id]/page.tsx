@@ -39,7 +39,10 @@ export default function MovieDetailPage() {
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -60,7 +63,9 @@ export default function MovieDetailPage() {
         const watchlistRes = await fetch("/api/watch/desire", { headers });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
-          const isInList = watchlistData.data.some((item: any) => item.movieId === movieId);
+          const isInList = watchlistData.data.some(
+            (item: any) => item.movieId === movieId,
+          );
           setInWatchlist(isInList);
         }
 
@@ -68,7 +73,9 @@ export default function MovieDetailPage() {
         const historyRes = await fetch("/api/watch/history", { headers });
         const historyData = await historyRes.json();
         if (historyData.success && Array.isArray(historyData.data)) {
-          const isWatched = historyData.data.some((item: any) => item.movieId === movieId);
+          const isWatched = historyData.data.some(
+            (item: any) => item.movieId === movieId,
+          );
           setWatched(isWatched);
         }
 
@@ -216,7 +223,11 @@ export default function MovieDetailPage() {
         <div className="absolute bottom-0 left-0 md:left-8 md:bottom-8 -mb-20 md:mb-0">
           <div className="w-32 h-48 bg-card border border-border rounded-lg overflow-hidden shadow-2xl">
             {movie.poster ? (
-              <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
+              <img
+                src={movie.poster}
+                alt={movie.title}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Clapperboard className="h-8 w-8 text-muted-foreground" />
@@ -239,7 +250,9 @@ export default function MovieDetailPage() {
               </span>
             )}
             {movie.rtRating && (
-              <span className="flex items-center gap-1">🍅 {movie.rtRating.toFixed(0)}% RT</span>
+              <span className="flex items-center gap-1">
+                🍅 {movie.rtRating.toFixed(0)}% RT
+              </span>
             )}
           </div>
         </div>
@@ -259,7 +272,9 @@ export default function MovieDetailPage() {
         )}
 
         {/* Description */}
-        <p className="text-muted-foreground mb-8 leading-relaxed max-w-2xl">{movie.description}</p>
+        <p className="text-muted-foreground mb-8 leading-relaxed max-w-2xl">
+          {movie.description}
+        </p>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3 mb-12">
@@ -342,7 +357,9 @@ export default function MovieDetailPage() {
           {movie.genres && (
             <div>
               <p className="text-xs text-muted-foreground">Genres</p>
-              <p className="font-semibold text-sm">{movie.genres.slice(0, 2).join(", ")}</p>
+              <p className="font-semibold text-sm">
+                {movie.genres.slice(0, 2).join(", ")}
+              </p>
             </div>
           )}
         </div>
@@ -353,7 +370,9 @@ export default function MovieDetailPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Suggest to a Friend</h2>
-            <p className="text-muted-foreground mb-4">Choose a friend to suggest {movie.title}</p>
+            <p className="text-muted-foreground mb-4">
+              Choose a friend to suggest {movie.title}
+            </p>
 
             <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
               {friends.length > 0 ? (
@@ -367,7 +386,9 @@ export default function MovieDetailPage() {
                         : "bg-background border border-border hover:border-primary/50"
                     }`}
                   >
-                    <p className="font-medium">{friend.name || friend.username}</p>
+                    <p className="font-medium">
+                      {friend.name || friend.username}
+                    </p>
                     <p className="text-sm opacity-75">@{friend.username}</p>
                   </button>
                 ))

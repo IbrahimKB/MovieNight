@@ -26,7 +26,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [syncingMovies, setSyncingMovies] = useState(false);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -99,9 +102,7 @@ export default function AdminPage() {
 
       if (res.ok) {
         setUsers(
-          users.map((u) =>
-            u.id === userId ? { ...u, role: "admin" } : u
-          )
+          users.map((u) => (u.id === userId ? { ...u, role: "admin" } : u)),
         );
       }
     } catch (error) {
@@ -270,9 +271,7 @@ export default function AdminPage() {
         <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
         <div className="space-y-2">
           <div className="p-3 bg-background border border-border rounded-lg text-sm">
-            <p className="text-muted-foreground">
-              Last sync: Just now
-            </p>
+            <p className="text-muted-foreground">Last sync: Just now</p>
           </div>
           <div className="p-3 bg-background border border-border rounded-lg text-sm">
             <p className="text-muted-foreground">

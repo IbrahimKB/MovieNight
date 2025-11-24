@@ -34,7 +34,10 @@ export default function EventDetailPage() {
   const [isAttending, setIsAttending] = useState(false);
   const [guests, setGuests] = useState<any[]>([]);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -49,7 +52,9 @@ export default function EventDetailPage() {
 
         if (data.success && data.data) {
           setEvent(data.data);
-          setIsAttending(data.data.participants?.includes(data.data.hostUser?.id) ?? false);
+          setIsAttending(
+            data.data.participants?.includes(data.data.hostUser?.id) ?? false,
+          );
         }
       } catch (error) {
         console.error("Failed to fetch event:", error);
@@ -184,7 +189,9 @@ export default function EventDetailPage() {
               <Users className="h-5 w-5 text-primary" />
               <p className="text-sm text-muted-foreground">Attendees</p>
             </div>
-            <p className="text-lg font-semibold">{event.participants?.length || 0}</p>
+            <p className="text-lg font-semibold">
+              {event.participants?.length || 0}
+            </p>
             <p className="text-sm text-muted-foreground">people attending</p>
           </div>
 
@@ -215,7 +222,9 @@ export default function EventDetailPage() {
         {event.movie && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">About the Movie</h2>
-            <p className="text-foreground leading-relaxed">{event.movie.description}</p>
+            <p className="text-foreground leading-relaxed">
+              {event.movie.description}
+            </p>
 
             <div className="grid grid-cols-2 gap-4 bg-card border border-border rounded-xl p-6">
               <div>
@@ -260,7 +269,9 @@ export default function EventDetailPage() {
                   </div>
                   <p className="font-medium text-sm">{participant}</p>
                   {participant === event.hostUser?.username && (
-                    <span className="ml-auto text-xs text-primary font-medium">Host</span>
+                    <span className="ml-auto text-xs text-primary font-medium">
+                      Host
+                    </span>
                   )}
                 </div>
               ))}

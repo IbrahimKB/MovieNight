@@ -42,7 +42,10 @@ export default function HomePage() {
   const [upcomingReleases, setUpcomingReleases] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -59,7 +62,8 @@ export default function HomePage() {
           fetch("/api/watch/history", { headers }).then((r) => r.json()),
         ];
 
-        const [friendsData, suggestionsData, historyData] = await Promise.all(statsPromises);
+        const [friendsData, suggestionsData, historyData] =
+          await Promise.all(statsPromises);
 
         let friendsCount = 0;
         if (friendsData.success && friendsData.data?.friends) {
@@ -136,7 +140,13 @@ export default function HomePage() {
     </button>
   );
 
-  const MovieCard = ({ movie, size = "small" }: { movie: Movie; size?: string }) => (
+  const MovieCard = ({
+    movie,
+    size = "small",
+  }: {
+    movie: Movie;
+    size?: string;
+  }) => (
     <button
       onClick={() => router.push(`/movies/${movie.id}`)}
       className={`rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 ${
@@ -176,7 +186,9 @@ export default function HomePage() {
     <div className="space-y-12">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-8">
-        <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.name || user?.username}!</h1>
+        <h1 className="text-4xl font-bold mb-2">
+          Welcome back, {user?.name || user?.username}!
+        </h1>
         <p className="text-muted-foreground text-lg">
           Discover new movies, connect with friends, and plan your movie nights.
         </p>
@@ -221,7 +233,9 @@ export default function HomePage() {
         >
           <Clapperboard className="h-8 w-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
           <p className="font-semibold">Browse Movies</p>
-          <p className="text-sm text-muted-foreground mt-1">Explore thousands of films</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Explore thousands of films
+          </p>
         </button>
 
         <button
@@ -230,7 +244,9 @@ export default function HomePage() {
         >
           <Calendar className="h-8 w-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
           <p className="font-semibold">Movie Events</p>
-          <p className="text-sm text-muted-foreground mt-1">Check upcoming movie nights</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Check upcoming movie nights
+          </p>
         </button>
 
         <button
@@ -239,7 +255,9 @@ export default function HomePage() {
         >
           <Users className="h-8 w-8 text-primary mb-3 group-hover:scale-110 transition-transform" />
           <p className="font-semibold">Friends</p>
-          <p className="text-sm text-muted-foreground mt-1">Connect with movie buddies</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Connect with movie buddies
+          </p>
         </button>
       </div>
 
@@ -248,7 +266,10 @@ export default function HomePage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Recently Watched</h2>
-            <Link href="/watchlist" className="text-primary hover:text-primary/80 text-sm font-medium">
+            <Link
+              href="/watchlist"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
+            >
               View All
             </Link>
           </div>
@@ -265,7 +286,10 @@ export default function HomePage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Trending Now</h2>
-            <Link href="/movies" className="text-primary hover:text-primary/80 text-sm font-medium">
+            <Link
+              href="/movies"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
+            >
               Explore More
             </Link>
           </div>
@@ -282,7 +306,10 @@ export default function HomePage() {
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">Coming Soon</h2>
-            <Link href="/releases" className="text-primary hover:text-primary/80 text-sm font-medium">
+            <Link
+              href="/releases"
+              className="text-primary hover:text-primary/80 text-sm font-medium"
+            >
               View Calendar
             </Link>
           </div>

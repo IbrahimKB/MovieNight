@@ -80,7 +80,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white font-black text-lg">
               🎬
             </div>
-            <span className="hidden sm:inline text-xl font-bold text-primary">MovieNight</span>
+            <span className="hidden sm:inline text-xl font-bold text-primary">
+              MovieNight
+            </span>
           </button>
 
           {/* Desktop Nav */}

@@ -21,7 +21,10 @@ export default function WatchHistoryPage() {
   const [watchHistory, setWatchHistory] = useState<WatchedMovie[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -38,8 +41,7 @@ export default function WatchHistoryPage() {
           // Sort by date descending (most recent first)
           const sorted = data.data.sort(
             (a: WatchedMovie, b: WatchedMovie) =>
-              new Date(b.watchedAt).getTime() -
-              new Date(a.watchedAt).getTime()
+              new Date(b.watchedAt).getTime() - new Date(a.watchedAt).getTime(),
           );
           setWatchHistory(sorted);
         }
@@ -69,7 +71,7 @@ export default function WatchHistoryPage() {
       acc[date].push(movie);
       return acc;
     },
-    {} as Record<string, WatchedMovie[]>
+    {} as Record<string, WatchedMovie[]>,
   );
 
   const MovieItem = ({ movie }: { movie: WatchedMovie }) => (
@@ -109,8 +111,18 @@ export default function WatchHistoryPage() {
 
       {/* Arrow */}
       <div className="flex items-center">
-        <svg className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <svg
+          className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
         </svg>
       </div>
     </button>
@@ -130,7 +142,8 @@ export default function WatchHistoryPage() {
       <div>
         <h1 className="text-4xl font-bold mb-2">Watch History</h1>
         <p className="text-muted-foreground">
-          {watchHistory.length} movie{watchHistory.length !== 1 ? "s" : ""} watched
+          {watchHistory.length} movie{watchHistory.length !== 1 ? "s" : ""}{" "}
+          watched
         </p>
       </div>
 
@@ -153,7 +166,9 @@ export default function WatchHistoryPage() {
       ) : (
         <div className="text-center py-12 bg-card border border-border rounded-xl">
           <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground mb-4">You haven't watched any movies yet</p>
+          <p className="text-muted-foreground mb-4">
+            You haven't watched any movies yet
+          </p>
           <button
             onClick={() => router.push("/movies")}
             className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"

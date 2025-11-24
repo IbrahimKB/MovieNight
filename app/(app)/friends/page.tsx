@@ -39,7 +39,10 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -91,7 +94,7 @@ export default function FriendsPage() {
     try {
       const res = await fetch(
         `/api/auth/search-users?q=${encodeURIComponent(query)}`,
-        { headers }
+        { headers },
       );
       const data = await res.json();
 
@@ -114,14 +117,19 @@ export default function FriendsPage() {
       });
 
       if (res.ok) {
-        setSearchResults(searchResults.filter((user) => user.id !== targetUserId));
+        setSearchResults(
+          searchResults.filter((user) => user.id !== targetUserId),
+        );
       }
     } catch (error) {
       console.error("Failed to send friend request:", error);
     }
   };
 
-  const handleRespondToRequest = async (friendshipId: string, action: "accept" | "reject") => {
+  const handleRespondToRequest = async (
+    friendshipId: string,
+    action: "accept" | "reject",
+  ) => {
     try {
       const res = await fetch(`/api/friends/${friendshipId}`, {
         method: "PATCH",
@@ -136,7 +144,9 @@ export default function FriendsPage() {
             setFriends([...friends, request.fromUser as Friend]);
           }
         }
-        setIncomingRequests(incomingRequests.filter((r) => r.id !== friendshipId));
+        setIncomingRequests(
+          incomingRequests.filter((r) => r.id !== friendshipId),
+        );
       }
     } catch (error) {
       console.error("Failed to respond to request:", error);
@@ -207,7 +217,9 @@ export default function FriendsPage() {
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Friends</h1>
-        <p className="text-muted-foreground">Connect with friends and share movie moments</p>
+        <p className="text-muted-foreground">
+          Connect with friends and share movie moments
+        </p>
       </div>
 
       {/* Tabs */}
@@ -257,7 +269,9 @@ export default function FriendsPage() {
             ))
           ) : (
             <div className="text-center py-12 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground mb-4">You don't have any friends yet</p>
+              <p className="text-muted-foreground mb-4">
+                You don't have any friends yet
+              </p>
               <button
                 onClick={() => setActiveTab("search")}
                 className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
@@ -289,11 +303,14 @@ export default function FriendsPage() {
                       />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                        {request.fromUser.name?.[0] || request.fromUser.username[0].toUpperCase()}
+                        {request.fromUser.name?.[0] ||
+                          request.fromUser.username[0].toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold">{request.fromUser.name || request.fromUser.username}</p>
+                      <p className="font-semibold">
+                        {request.fromUser.name || request.fromUser.username}
+                      </p>
                       <p className="text-sm text-muted-foreground">
                         @{request.fromUser.username}
                       </p>
@@ -301,13 +318,17 @@ export default function FriendsPage() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleRespondToRequest(request.id, "accept")}
+                      onClick={() =>
+                        handleRespondToRequest(request.id, "accept")
+                      }
                       className="p-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                     >
                       <Check size={18} />
                     </button>
                     <button
-                      onClick={() => handleRespondToRequest(request.id, "reject")}
+                      onClick={() =>
+                        handleRespondToRequest(request.id, "reject")
+                      }
                       className="p-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                     >
                       <XIcon size={18} />
@@ -332,14 +353,21 @@ export default function FriendsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                      {request.toUser?.name?.[0] || request.toUser?.username[0].toUpperCase()}
+                      {request.toUser?.name?.[0] ||
+                        request.toUser?.username[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-semibold">{request.toUser?.name || request.toUser?.username}</p>
-                      <p className="text-sm text-muted-foreground">@{request.toUser?.username}</p>
+                      <p className="font-semibold">
+                        {request.toUser?.name || request.toUser?.username}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        @{request.toUser?.username}
+                      </p>
                     </div>
                   </div>
-                  <span className="text-sm text-muted-foreground">Pending...</span>
+                  <span className="text-sm text-muted-foreground">
+                    Pending...
+                  </span>
                 </div>
               ))}
             </div>
@@ -370,7 +398,9 @@ export default function FriendsPage() {
 
           {/* Results */}
           {searching ? (
-            <p className="text-muted-foreground text-center py-6">Searching...</p>
+            <p className="text-muted-foreground text-center py-6">
+              Searching...
+            </p>
           ) : searchResults.length > 0 ? (
             <div className="space-y-4">
               {searchResults.map((user) => (
@@ -391,8 +421,12 @@ export default function FriendsPage() {
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold">{user.name || user.username}</p>
-                      <p className="text-sm text-muted-foreground">@{user.username}</p>
+                      <p className="font-semibold">
+                        {user.name || user.username}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        @{user.username}
+                      </p>
                     </div>
                   </div>
                   <button
@@ -410,7 +444,9 @@ export default function FriendsPage() {
             </div>
           ) : (
             <div className="text-center py-12 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground">Search for friends to add them</p>
+              <p className="text-muted-foreground">
+                Search for friends to add them
+              </p>
             </div>
           )}
         </div>

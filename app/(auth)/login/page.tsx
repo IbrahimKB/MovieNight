@@ -51,10 +51,14 @@ export default function LoginPage() {
 
         {/* Subtle film strip pattern */}
         <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)',
-            backgroundSize: '100% 100%'
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)",
+              backgroundSize: "100% 100%",
+            }}
+          />
         </div>
       </div>
 
@@ -70,7 +74,9 @@ export default function LoginPage() {
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
             MovieNight
           </h1>
-          <p className="text-muted-foreground text-lg">Discover, watch, and connect</p>
+          <p className="text-muted-foreground text-lg">
+            Discover, watch, and connect
+          </p>
         </div>
 
         {/* Login Card */}
@@ -79,7 +85,9 @@ export default function LoginPage() {
             {/* Card Header */}
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Sign In</h2>
-              <p className="text-muted-foreground">Enter your credentials to continue</p>
+              <p className="text-muted-foreground">
+                Enter your credentials to continue
+              </p>
             </div>
 
             {/* Error Message */}
@@ -88,7 +96,8 @@ export default function LoginPage() {
                 <p className="font-semibold">{error}</p>
                 {error.includes("Database") && (
                   <p className="text-xs opacity-75">
-                    💡 Tip: Check that PostgreSQL is running. In Docker, make sure the database service is accessible.
+                    💡 Tip: Check that PostgreSQL is running. In Docker, make
+                    sure the database service is accessible.
                   </p>
                 )}
               </div>
@@ -104,7 +113,10 @@ export default function LoginPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <Mail size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <Mail
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="text"
                       placeholder="user@example.com or username"
@@ -130,7 +142,10 @@ export default function LoginPage() {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
                   <div className="relative flex items-center">
-                    <Lock size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <Lock
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
                     <input
                       type="password"
                       placeholder="••••••••"

@@ -34,11 +34,16 @@ type Tab = "received" | "sent";
 export default function SuggestionsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>("received");
-  const [receivedSuggestions, setReceivedSuggestions] = useState<Suggestion[]>([]);
+  const [receivedSuggestions, setReceivedSuggestions] = useState<Suggestion[]>(
+    [],
+  );
   const [sentSuggestions, setSentSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -53,8 +58,12 @@ export default function SuggestionsPage() {
 
         if (data.success && Array.isArray(data.data)) {
           // Separate by direction
-          const received = data.data.filter((s: Suggestion) => s.status === "pending");
-          const sent = data.data.filter((s: Suggestion) => s.status !== "pending");
+          const received = data.data.filter(
+            (s: Suggestion) => s.status === "pending",
+          );
+          const sent = data.data.filter(
+            (s: Suggestion) => s.status !== "pending",
+          );
 
           setReceivedSuggestions(received);
           setSentSuggestions(sent);
@@ -69,7 +78,10 @@ export default function SuggestionsPage() {
     fetchSuggestions();
   }, [token]);
 
-  const handleAcceptSuggestion = async (suggestionId: string, movieId: string) => {
+  const handleAcceptSuggestion = async (
+    suggestionId: string,
+    movieId: string,
+  ) => {
     try {
       // Add to watchlist
       await fetch("/api/watch/desire", {
@@ -80,7 +92,7 @@ export default function SuggestionsPage() {
 
       // Update status
       setReceivedSuggestions(
-        receivedSuggestions.filter((s) => s.id !== suggestionId)
+        receivedSuggestions.filter((s) => s.id !== suggestionId),
       );
     } catch (error) {
       console.error("Failed to accept suggestion:", error);
@@ -96,7 +108,7 @@ export default function SuggestionsPage() {
 
       if (res.ok) {
         setReceivedSuggestions(
-          receivedSuggestions.filter((s) => s.id !== suggestionId)
+          receivedSuggestions.filter((s) => s.id !== suggestionId),
         );
       }
     } catch (error) {
@@ -112,7 +124,9 @@ export default function SuggestionsPage() {
       });
 
       if (res.ok) {
-        setSentSuggestions(sentSuggestions.filter((s) => s.id !== suggestionId));
+        setSentSuggestions(
+          sentSuggestions.filter((s) => s.id !== suggestionId),
+        );
       }
     } catch (error) {
       console.error("Failed to delete suggestion:", error);
@@ -156,7 +170,9 @@ export default function SuggestionsPage() {
           className="cursor-pointer hover:text-primary transition-colors"
         >
           <h3 className="font-semibold text-lg">{suggestion.movie?.title}</h3>
-          <p className="text-sm text-muted-foreground">{suggestion.movie?.year}</p>
+          <p className="text-sm text-muted-foreground">
+            {suggestion.movie?.year}
+          </p>
         </div>
 
         <p className="text-sm text-muted-foreground mt-2">
@@ -276,7 +292,9 @@ export default function SuggestionsPage() {
             ))
           ) : (
             <div className="text-center py-12 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground">No suggestions received yet</p>
+              <p className="text-muted-foreground">
+                No suggestions received yet
+              </p>
             </div>
           )}
         </div>
@@ -296,7 +314,9 @@ export default function SuggestionsPage() {
             ))
           ) : (
             <div className="text-center py-12 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground">You haven't sent any suggestions yet</p>
+              <p className="text-muted-foreground">
+                You haven't sent any suggestions yet
+              </p>
             </div>
           )}
         </div>

@@ -21,7 +21,10 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
 
   const headers = {
     "Content-Type": "application/json",
@@ -53,7 +56,9 @@ export default function CreateEventPage() {
 
     setSubmitting(true);
     try {
-      const combinedDateTime = new Date(`${eventDate}T${eventTime}`).toISOString();
+      const combinedDateTime = new Date(
+        `${eventDate}T${eventTime}`,
+      ).toISOString();
 
       const res = await fetch("/api/events", {
         method: "POST",
