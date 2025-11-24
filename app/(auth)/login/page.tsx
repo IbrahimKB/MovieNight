@@ -84,8 +84,13 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-                {error}
+              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm space-y-2">
+                <p className="font-semibold">{error}</p>
+                {error.includes("Database") && (
+                  <p className="text-xs opacity-75">
+                    💡 Tip: Check that PostgreSQL is running. In Docker, make sure the database service is accessible.
+                  </p>
+                )}
               </div>
             )}
 
