@@ -72,8 +72,9 @@ model Session {
   expires      DateTime
   createdAt    DateTime @default(now()) @map("created_at")
 
-  user AuthUser @relation(fields: [userId], references: [id])
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("sessions")
 }
 
@@ -118,8 +119,10 @@ model Release {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  movie Movie @relation(fields: [movieId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
+  @@index([movieId])
+  @@index([releaseDate])
   @@map("releases")
 }
 
@@ -137,9 +140,12 @@ model WatchedMovie {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user  AuthUser @relation(fields: [userId], references: [id])
-  movie Movie    @relation(fields: [movieId], references: [id])
+  user  AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([movieId])
+  @@unique([userId, movieId])
   @@map("watch_history")
 }
 
@@ -152,10 +158,14 @@ model WatchDesire {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user       AuthUser    @relation(fields: [userId], references: [id])
-  movie      Movie       @relation(fields: [movieId], references: [id])
-  suggestion Suggestion? @relation(fields: [suggestionId], references: [id])
+  user       AuthUser    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie      Movie       @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  suggestion Suggestion? @relation(fields: [suggestionId], references: [id], onDelete: SetNull)
 
+  @@index([userId])
+  @@index([movieId])
+  @@index([suggestionId])
+  @@unique([userId, movieId])
   @@map("watch_desire")
 }
 
@@ -173,12 +183,17 @@ model Suggestion {
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")
 
-  movie    Movie     @relation(fields: [movieId], references: [id])
-  fromUser AuthUser  @relation("SuggestionsFromUser", fields: [fromUserId], references: [id])
-  toUser   AuthUser? @relation("SuggestionsToUser", fields: [toUserId], references: [id])
+  movie    Movie     @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  fromUser AuthUser  @relation("SuggestionsFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   AuthUser? @relation("SuggestionsToUser", fields: [toUserId], references: [id], onDelete: Cascade)
 
   watchDesires WatchDesire[]
 
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@index([movieId])
+  @@index([status])
+  @@index([fromUserId, toUserId])
   @@map("suggestions")
 }
 
@@ -195,10 +210,16 @@ model Friendship {
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  user1     AuthUser @relation("FriendshipUser1", fields: [userId1], references: [id])
-  user2     AuthUser @relation("FriendshipUser2", fields: [userId2], references: [id])
-  requester AuthUser @relation("FriendshipRequester", fields: [requestedBy], references: [id])
+  user1     AuthUser @relation("FriendshipUser1", fields: [userId1], references: [id], onDelete: Cascade)
+  user2     AuthUser @relation("FriendshipUser2", fields: [userId2], references: [id], onDelete: Cascade)
+  requester AuthUser @relation("FriendshipRequester", fields: [requestedBy], references: [id], onDelete: Cascade)
 
+  @@index([userId1])
+  @@index([userId2])
+  @@index([requestedBy])
+  @@index([status])
+  @@index([userId1, userId2])
+  @@unique([userId1, userId2])
   @@map("friendships")
 }
 
@@ -216,9 +237,12 @@ model Event {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  movie    Movie    @relation(fields: [movieId], references: [id])
-  hostUser AuthUser @relation(fields: [hostUserId], references: [id])
+  movie    Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  hostUser AuthUser @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
 
+  @@index([hostUserId])
+  @@index([movieId])
+  @@index([date])
   @@map("events")
 }
 
@@ -237,22 +261,26 @@ model Notification {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user AuthUser @relation(fields: [userId], references: [id])
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([read])
+  @@index([userId, read])
   @@map("notifications")
 }
 
 model UserPushSubscription {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid @map("user_id")
-  endpoint  String
+  endpoint  String   @unique
   auth      String
   p256dh    String
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user AuthUser @relation(fields: [userId], references: [id])
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("user_push_subscriptions")
 }
 
@@ -267,7 +295,8 @@ model UserNotificationPreferences {
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
-  user AuthUser @relation(fields: [userId], references: [id])
+  user AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("user_notification_preferences")
 }
