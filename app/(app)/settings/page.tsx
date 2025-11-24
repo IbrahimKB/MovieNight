@@ -1,244 +1,261 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { User, Mail, LogOut, Bell, Eye, Lock } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-interface SettingsState {
-  emailNotifications: boolean;
-  friendRequests: boolean;
-  suggestions: boolean;
-  movieNightInvites: boolean;
-}
-
-const settingsOptions = [
-  {
-    id: "emailNotifications",
-    title: "Email Notifications",
-    description: "Receive notifications about activity",
-    icon: Bell,
-  },
-  {
-    id: "friendRequests",
-    title: "Friend Requests",
-    description: "Allow others to send you friend requests",
-    icon: User,
-  },
-  {
-    id: "suggestions",
-    title: "Movie Suggestions",
-    description: "Receive movie recommendations from friends",
-    icon: Eye,
-  },
-  {
-    id: "movieNightInvites",
-    title: "Movie Night Invites",
-    description: "Get notified about movie night plans",
-    icon: Bell,
-  },
-];
+import { useAuth } from "@/contexts/AuthContext";
+import { LogOut, Bell, Lock, User } from "lucide-react";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, isLoading, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
-  const [settings, setSettings] = useState<SettingsState>({
-    emailNotifications: true,
+  const { user, logout } = useAuth();
+  const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+  });
+  const [notifications, setNotifications] = useState({
     friendRequests: true,
     suggestions: true,
-    movieNightInvites: true,
+    movieReleases: true,
+    pushNotifications: true,
   });
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const toggleSetting = (key: string) => {
-    setSettings({
-      ...settings,
-      [key]: !settings[key as keyof SettingsState],
-    });
-  };
-
-  const handleLogout = async () => {
-    await logout();
+  const handleLogout = () => {
+    logout();
     router.push("/login");
   };
 
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    try {
+      // In a real app, you'd call an API to update the profile
+      setEditMode(false);
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const SettingSection = ({
+    icon: Icon,
+    title,
+    description,
+    children,
+  }: {
+    icon: any;
+    title: string;
+    description: string;
+    children: React.ReactNode;
+  }) => (
+    <div className="bg-card border border-border rounded-xl p-6">
+      <div className="flex items-start gap-4 mb-4">
+        <Icon className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-lg">{title}</h3>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+
+  const NotificationToggle = ({
+    label,
+    value,
+    onChange,
+  }: {
+    label: string;
+    value: boolean;
+    onChange: (value: boolean) => void;
+  }) => (
+    <div className="flex items-center justify-between py-3">
+      <span className="text-sm">{label}</span>
+      <button
+        onClick={() => onChange(!value)}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          value ? "bg-primary" : "bg-muted"
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-background transition-transform ${
+            value ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </div>
+  );
+
   return (
-    <div className="p-4 md:p-8 lg:p-12">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Settings</h1>
-          <p className="text-base md:text-lg text-muted-foreground">
-            Manage your account and preferences
-          </p>
-        </div>
+    <div className="space-y-8 max-w-2xl">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold mb-2">Settings</h1>
+        <p className="text-muted-foreground">Manage your account and preferences</p>
+      </div>
 
-        {/* Profile Section */}
-        <div className="mb-8 md:mb-12">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Profile</h2>
-          <div className="bg-card border border-border rounded-xl p-6 md:p-8">
-            <div className="mb-6 pb-6 border-b border-border">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-primary/10 flex items-center justify-center text-3xl md:text-4xl">
-                  🎬
-                </div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold">
-                    {user.username}
-                  </h3>
-                  <p className="text-muted-foreground">@{user.username}</p>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Joined recently
-                  </p>
-                </div>
-              </div>
+      {/* Profile Section */}
+      <SettingSection
+        icon={User}
+        title="Profile Information"
+        description="Update your profile details"
+      >
+        {editMode ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+              />
             </div>
-
-            {/* Profile Fields */}
-            <div className="space-y-6">
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Username
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <User
-                      size={18}
-                      className="absolute left-3 top-3 text-muted-foreground"
-                    />
-                    <input
-                      type="text"
-                      value={user.username}
-                      disabled
-                      className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground disabled:opacity-50"
-                    />
-                  </div>
-                  <button className="px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium text-sm whitespace-nowrap">
-                    Edit
-                  </button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Display only currently
-                </p>
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Email
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Mail
-                      size={18}
-                      className="absolute left-3 top-3 text-muted-foreground"
-                    />
-                    <input
-                      type="email"
-                      value={user.email}
-                      disabled
-                      className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground disabled:opacity-50"
-                    />
-                  </div>
-                  <button className="px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium text-sm whitespace-nowrap">
-                    Edit
-                  </button>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Display only currently
-                </p>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Password
-                </label>
-                <button className="px-6 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium flex items-center gap-2">
-                  <Lock size={16} />
-                  Change Password
-                </button>
-              </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="w-full px-4 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+              />
             </div>
-          </div>
-        </div>
-
-        {/* Preferences Section */}
-        <div className="mb-8 md:mb-12">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Preferences</h2>
-          <div className="bg-card border border-border rounded-xl p-6 md:p-8 space-y-4 md:space-y-6">
-            {settingsOptions.map((option) => {
-              const Icon = option.icon;
-              const isChecked = settings[option.id as keyof SettingsState];
-              return (
-                <div
-                  key={option.id}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 py-3 border-b border-border last:border-b-0 last:py-0"
-                >
-                  <div className="flex items-start sm:items-center gap-3 flex-1">
-                    <Icon size={20} className="text-primary flex-shrink-0 mt-0.5 sm:mt-0" />
-                    <div>
-                      <h3 className="font-medium text-sm md:text-base">
-                        {option.title}
-                      </h3>
-                      <p className="text-xs md:text-sm text-muted-foreground">
-                        {option.description}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => toggleSetting(option.id)}
-                    className={`relative inline-flex h-8 w-14 flex-shrink-0 rounded-full transition-colors ${
-                      isChecked ? "bg-primary" : "bg-muted"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-7 w-7 rounded-full bg-white shadow-lg transform transition-transform ${
-                        isChecked ? "translate-x-7" : "translate-x-0.5"
-                      }`}
-                    />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Account Section */}
-        <div className="mb-8">
-          <h2 className="text-xl md:text-2xl font-bold mb-6">Account</h2>
-          <div className="bg-card border border-border rounded-xl p-6 md:p-8">
-            <div className="space-y-4">
+            <div className="flex gap-2">
               <button
-                onClick={handleLogout}
-                className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold flex items-center justify-center gap-2"
+                onClick={() => setEditMode(false)}
+                className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-background transition-colors font-medium"
               >
-                <LogOut size={18} />
-                Logout
+                Cancel
               </button>
-              <button className="w-full px-6 py-3 rounded-lg border border-destructive text-destructive hover:bg-destructive/10 transition-colors font-bold">
-                Delete Account
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors font-medium"
+              >
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
+        ) : (
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Name</p>
+              <p className="font-medium">{formData.name || "Not set"}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Email</p>
+              <p className="font-medium">{formData.email}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Username</p>
+              <p className="font-medium">@{user?.username}</p>
+            </div>
+            <button
+              onClick={() => setEditMode(true)}
+              className="mt-4 px-4 py-2 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-medium text-sm"
+            >
+              Edit Profile
+            </button>
+          </div>
+        )}
+      </SettingSection>
+
+      {/* Notifications Section */}
+      <SettingSection
+        icon={Bell}
+        title="Notifications"
+        description="Control how you receive notifications"
+      >
+        <div className="space-y-2">
+          <NotificationToggle
+            label="Friend Requests"
+            value={notifications.friendRequests}
+            onChange={(value) =>
+              setNotifications({ ...notifications, friendRequests: value })
+            }
+          />
+          <NotificationToggle
+            label="Movie Suggestions"
+            value={notifications.suggestions}
+            onChange={(value) =>
+              setNotifications({ ...notifications, suggestions: value })
+            }
+          />
+          <NotificationToggle
+            label="Movie Releases"
+            value={notifications.movieReleases}
+            onChange={(value) =>
+              setNotifications({ ...notifications, movieReleases: value })
+            }
+          />
+          <NotificationToggle
+            label="Push Notifications"
+            value={notifications.pushNotifications}
+            onChange={(value) =>
+              setNotifications({
+                ...notifications,
+                pushNotifications: value,
+              })
+            }
+          />
         </div>
+      </SettingSection>
+
+      {/* Privacy Section */}
+      <SettingSection
+        icon={Lock}
+        title="Privacy & Security"
+        description="Manage your privacy settings"
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 bg-background border border-border rounded-lg">
+            <div>
+              <p className="font-medium text-sm">Profile Visibility</p>
+              <p className="text-xs text-muted-foreground">Public</p>
+            </div>
+            <button className="px-3 py-1 rounded-lg border border-border text-sm hover:bg-border transition-colors">
+              Change
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-background border border-border rounded-lg">
+            <div>
+              <p className="font-medium text-sm">Show Watch History</p>
+              <p className="text-xs text-muted-foreground">Friends can see</p>
+            </div>
+            <button className="px-3 py-1 rounded-lg border border-border text-sm hover:bg-border transition-colors">
+              Change
+            </button>
+          </div>
+        </div>
+      </SettingSection>
+
+      {/* Danger Zone */}
+      <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-6">
+        <h3 className="font-semibold text-lg text-destructive mb-2">Danger Zone</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          These actions are irreversible. Please be careful.
+        </p>
+
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-destructive text-destructive-foreground font-medium hover:bg-destructive/90 transition-colors"
+        >
+          <LogOut size={20} />
+          Logout
+        </button>
+      </div>
+
+      {/* Account Info */}
+      <div className="bg-card border border-border rounded-xl p-6 text-sm">
+        <p className="text-muted-foreground">
+          Account ID: <span className="font-mono text-xs">{user?.id}</span>
+        </p>
       </div>
     </div>
   );
