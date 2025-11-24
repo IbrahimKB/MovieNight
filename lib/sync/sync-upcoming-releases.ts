@@ -32,18 +32,18 @@ export async function syncUpcomingReleases() {
     let totalImported = 0;
     let totalSkipped = 0;
 
-    // Calculate date range: today to 180 days from now
+    // Calculate date range: today to 30 days from now
     const today = new Date();
     const today_iso = today.toISOString().split("T")[0];
 
     const future = new Date();
-    future.setDate(future.getDate() + 180);
+    future.setDate(future.getDate() + 30);
     const future_iso = future.toISOString().split("T")[0];
 
     console.log(`[SYNC] Fetching releases from ${today_iso} to ${future_iso}`);
 
-    // Fetch upcoming releases from multiple pages
-    for (let page = 1; page <= 5; page++) {
+    // Fetch upcoming releases from multiple pages (30 days window)
+    for (let page = 1; page <= 3; page++) {
       try {
         console.log(`[SYNC] Fetching upcoming releases page ${page}...`);
 

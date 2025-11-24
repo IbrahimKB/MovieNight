@@ -32,10 +32,14 @@ export async function syncPopularMovies() {
     let totalImported = 0;
     let totalSkipped = 0;
 
-    // Fetch popular movies from multiple pages (500+ movies)
-    for (let page = 1; page <= 10; page++) {
+    // Fetch popular movies from multiple pages (entire TMDB database)
+    // TMDB has ~500+ pages of popular movies, but we'll fetch first 50 pages (~1000 movies)
+    // For full database, would need to use all pages or alternate endpoints
+    for (let page = 1; page <= 50; page++) {
       try {
-        console.log(`[SYNC] Fetching popular movies page ${page}...`);
+        if (page % 10 === 0) {
+          console.log(`[SYNC] Fetching popular movies page ${page}...`);
+        }
 
         const response = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
           params: {
