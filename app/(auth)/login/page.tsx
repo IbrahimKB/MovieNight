@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,123 +39,160 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-3 font-bold text-2xl text-primary hover:text-primary/90 transition-colors mb-8"
-        >
-          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xl">
-            🎬
-          </div>
-          <span>MovieNight</span>
-        </Link>
+    <div className="min-h-screen relative w-full overflow-hidden">
+      {/* Premium Background */}
+      <div className="absolute inset-0">
+        {/* Gradient backdrop */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0D0D0D] via-[#1a1a2e] to-[#0f0f1e]" />
 
-        {/* Login Card */}
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-          <h1 className="text-2xl font-bold mb-2">Sign In</h1>
-          <p className="text-muted-foreground mb-8">
-            Welcome back! Sign in to your account
-          </p>
+        {/* Glowing orbs */}
+        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -bottom-40 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-15" />
 
-          {error && (
-            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
-              {error}
-            </div>
-          )}
+        {/* Subtle film strip pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)',
+            backgroundSize: '100% 100%'
+          }} />
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-            {/* Email/Username Field */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Email or Username
-              </label>
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-3 top-3 text-muted-foreground"
-                />
-                <input
-                  type="text"
-                  placeholder="user@example.com or username"
-                  value={formData.emailOrUsername}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      emailOrUsername: e.target.value,
-                    })
-                  }
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-3 text-muted-foreground"
-                />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-              {!loading && <ArrowRight size={18} />}
-            </button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">
-                Don't have an account?
-              </span>
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        {/* Logo Section */}
+        <div className="mb-12 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/50">
+              <Clapperboard size={32} className="text-white" />
             </div>
           </div>
-
-          {/* Sign Up Link */}
-          <Link
-            href="/signup"
-            className="w-full py-2 px-4 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-bold text-center block"
-          >
-            Create Account
-          </Link>
+          <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
+            MovieNight
+          </h1>
+          <p className="text-muted-foreground text-lg">Discover, watch, and connect</p>
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-muted-foreground text-sm">
-            Not sure?{" "}
+        {/* Login Card */}
+        <div className="w-full max-w-md">
+          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+            {/* Card Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">Sign In</h2>
+              <p className="text-muted-foreground">Enter your credentials to continue</p>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-3">
+                  Email or Username
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <Mail size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <input
+                      type="text"
+                      placeholder="user@example.com or username"
+                      value={formData.emailOrUsername}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          emailOrUsername: e.target.value,
+                        })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-3">
+                  Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <Lock size={18} className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors" />
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-8 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-bold text-lg hover:from-primary hover:to-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60 group transform hover:scale-105 active:scale-95"
+              >
+                {loading ? (
+                  <>
+                    <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight
+                      size={20}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/20" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
+                  New to MovieNight?
+                </span>
+              </div>
+            </div>
+
+            {/* Signup Link */}
             <Link
-              href="/"
-              className="text-primary hover:text-primary/90 font-medium"
+              href="/signup"
+              className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
             >
-              Learn more about MovieNight
+              Create an Account
+            </Link>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-muted-foreground text-sm mt-8">
+            By signing in, you agree to our{" "}
+            <Link href="#" className="text-primary hover:text-primary/80">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="#" className="text-primary hover:text-primary/80">
+              Privacy Policy
             </Link>
           </p>
         </div>
