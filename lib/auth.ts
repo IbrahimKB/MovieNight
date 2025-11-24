@@ -15,12 +15,12 @@ export async function getSessionFromCookie(): Promise<Session | null> {
   if (!sessionToken) return null;
 
   try {
-    const result = await query(
-      `SELECT id, "sessionToken", "userId", expires, "createdAt"
-       FROM public.sessions
-       WHERE "sessionToken" = $1 AND expires > NOW()`,
-      [sessionToken]
-    );
+     const result = await query(
+       `SELECT id, "session_token", "user_id", expires, "created_at"
+        FROM public.sessions
+        WHERE "session_token" = $1 AND expires > NOW()`,
+       [sessionToken]
+     );
 
     if (result.rows.length === 0) return null;
     return result.rows[0] as Session;
@@ -68,11 +68,11 @@ export async function createSession(userId: string): Promise<string> {
   const expires = new Date(Date.now() + SESSION_DURATION);
 
   await query(
-    `INSERT INTO public.sessions
-       (id, "sessionToken", "userId", expires, "createdAt")
-     VALUES ($1, $2, $3, $4, NOW())`,
-    [crypto.randomUUID(), sessionToken, userId, expires.toISOString()]
-  );
+     `INSERT INTO public.sessions
+        (id, "session_token", "user_id", expires, "created_at")
+      VALUES ($1, $2, $3, $4, NOW())`,
+     [crypto.randomUUID(), sessionToken, userId, expires.toISOString()]
+   );
 
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
@@ -91,9 +91,9 @@ export async function createSession(userId: string): Promise<string> {
 // -----------------------------------------------------
 export async function deleteSession(sessionToken: string): Promise<void> {
   await query(
-    `DELETE FROM public.sessions WHERE "sessionToken" = $1`,
-    [sessionToken]
-  );
+     `DELETE FROM public.sessions WHERE "session_token" = $1`,
+     [sessionToken]
+   );
 
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);
