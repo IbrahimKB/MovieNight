@@ -4,30 +4,31 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, lastError, clearError } = useAuth();
-  const [emailOrUsername, setEmailOrUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    emailOrUsername: "",
+    password: "",
+  });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    clearError();
-    setError(null);
+    setError("");
     setLoading(true);
 
     try {
-      const result = await login(emailOrUsername, password);
+      const result = await login(formData.emailOrUsername, formData.password);
 
       if (!result.success) {
         setError(result.error?.message || "Login failed");
         return;
       }
 
-      // Redirect to home on success
       router.push("/");
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -38,71 +39,126 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-card border border-border rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-2 text-primary">MovieNight</h1>
-        <p className="text-sm text-muted-foreground mb-8">
-          Sign in to discover and plan movie nights with friends
-        </p>
-
-        {(error || lastError) && (
-          <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6 text-sm">
-            {error || lastError?.message}
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-8">
+      <div className="max-w-md w-full">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-3 font-bold text-2xl text-primary hover:text-primary/90 transition-colors mb-8"
+        >
+          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xl">
+            🎬
           </div>
-        )}
+          <span>MovieNight</span>
+        </Link>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="emailOrUsername"
-              className="block text-sm font-medium mb-2"
+        {/* Login Card */}
+        <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
+          <h1 className="text-2xl font-bold mb-2">Sign In</h1>
+          <p className="text-muted-foreground mb-8">
+            Welcome back! Sign in to your account
+          </p>
+
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+            {/* Email/Username Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Email or Username
+              </label>
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="text"
+                  placeholder="user@example.com or username"
+                  value={formData.emailOrUsername}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      emailOrUsername: e.target.value,
+                    })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
             >
-              Email or Username <span className="text-destructive">*</span>
-            </label>
-            <input
-              id="emailOrUsername"
-              type="text"
-              value={emailOrUsername}
-              onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder="Enter your email or username"
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              required
-            />
+              {loading ? "Signing in..." : "Sign In"}
+              {!loading && <ArrowRight size={18} />}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-card text-muted-foreground">
+                Don't have an account?
+              </span>
+            </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-2"
-            >
-              Password <span className="text-destructive">*</span>
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Sign Up Link */}
+          <Link
+            href="/signup"
+            className="w-full py-2 px-4 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-bold text-center block"
           >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Don't have an account?{" "}
-          <Link href="/signup" className="text-primary hover:underline">
-            Sign up
+            Create Account
           </Link>
-        </p>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-muted-foreground text-sm">
+            Not sure?{" "}
+            <Link
+              href="/"
+              className="text-primary hover:text-primary/90 font-medium"
+            >
+              Learn more about MovieNight
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

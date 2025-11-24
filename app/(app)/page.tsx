@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface User {
   id: string;
@@ -9,40 +11,15 @@ interface User {
   role: string;
 }
 
-export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function HomePage() {
+  const { user, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("movienight_token");
-        const res = await fetch("/api/auth/me", {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-            "Content-Type": "application/json",
-          },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.data);
-        } else {
-          // Redirect to login if not authenticated
-          window.location.href = "/(auth)/login";
-        }
-      } catch (err) {
-        setError("Failed to fetch user");
-        console.error("Error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
+    setMounted(true);
   }, []);
 
-  if (loading) {
+  if (!mounted || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <p className="text-muted-foreground">Loading...</p>
@@ -50,12 +27,8 @@ export default function Home() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-destructive">{error}</p>
-      </div>
-    );
+  if (!user) {
+    return null;
   }
 
   return (
@@ -78,46 +51,66 @@ export default function Home() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-         <a
-           href="/(app)/movies"
-           className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
-         >
-           <h3 className="text-lg font-semibold mb-2">Discover Movies</h3>
-           <p className="text-sm text-muted-foreground">
-             Browse and search movies
-           </p>
-         </a>
+        <Link
+          href="/movies"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">Discover Movies</h3>
+          <p className="text-sm text-muted-foreground">
+            Browse and search movies
+          </p>
+        </Link>
 
-         <a
-           href="/(app)/suggestions"
-           className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
-         >
-           <h3 className="text-lg font-semibold mb-2">Suggestions</h3>
-           <p className="text-sm text-muted-foreground">
-             Share movie ideas with friends
-           </p>
-         </a>
+        <Link
+          href="/suggestions"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">Suggestions</h3>
+          <p className="text-sm text-muted-foreground">
+            Share movie ideas with friends
+          </p>
+        </Link>
 
-         <a
-           href="/(app)/watchlist"
-           className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
-         >
-           <h3 className="text-lg font-semibold mb-2">My Watchlist</h3>
-           <p className="text-sm text-muted-foreground">
-             Track movies you want to watch
-           </p>
-         </a>
+        <Link
+          href="/watchlist"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">My Watchlist</h3>
+          <p className="text-sm text-muted-foreground">
+            Track movies you want to watch
+          </p>
+        </Link>
 
-         <a
-           href="/(app)/squad"
-           className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
-         >
-           <h3 className="text-lg font-semibold mb-2">Friends</h3>
-           <p className="text-sm text-muted-foreground">
-             Connect with other movie enthusiasts
-           </p>
-         </a>
-       </div>
+        <Link
+          href="/squad"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">Friends</h3>
+          <p className="text-sm text-muted-foreground">
+            Connect with other movie enthusiasts
+          </p>
+        </Link>
+
+        <Link
+          href="/events"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">Movie Nights</h3>
+          <p className="text-sm text-muted-foreground">
+            Plan movie nights with friends
+          </p>
+        </Link>
+
+        <Link
+          href="/releases"
+          className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
+        >
+          <h3 className="text-lg font-semibold mb-2">Upcoming Releases</h3>
+          <p className="text-sm text-muted-foreground">
+            Discover movies coming soon
+          </p>
+        </Link>
+      </div>
     </div>
   );
 }

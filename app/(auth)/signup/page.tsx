@@ -4,32 +4,38 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { Mail, Lock, User, ArrowRight } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, lastError, clearError } = useAuth();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const { signup } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    name: "",
+  });
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    clearError();
-    setError(null);
+    setError("");
     setLoading(true);
 
     try {
-      const result = await signup(username, email, password, name);
+      const result = await signup(
+        formData.username,
+        formData.email,
+        formData.password,
+        formData.name
+      );
 
       if (!result.success) {
         setError(result.error?.message || "Signup failed");
         return;
       }
 
-      // Redirect to home on success
       router.push("/");
     } catch (err) {
       setError("An error occurred. Please try again.");
@@ -40,102 +46,164 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-card border border-border rounded-lg p-8">
-        <h1 className="text-3xl font-bold mb-2 text-primary">MovieNight</h1>
-        <p className="text-sm text-muted-foreground mb-8">
-          Create an account to join the movie night community
-        </p>
-
-        {(error || lastError) && (
-          <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6 text-sm">
-            {error || lastError?.message}
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-8">
+      <div className="max-w-md w-full">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-3 font-bold text-2xl text-primary hover:text-primary/90 transition-colors mb-8"
+        >
+          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xl">
+            🎬
           </div>
-        )}
+          <span>MovieNight</span>
+        </Link>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium mb-2"
+        {/* Signup Card */}
+        <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
+          <h1 className="text-2xl font-bold mb-2">Create Account</h1>
+          <p className="text-muted-foreground mb-8">
+            Join MovieNight and start discovering movies with friends
+          </p>
+
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+            {/* Name Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Full Name (Optional)
+              </label>
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                />
+              </div>
+            </div>
+
+            {/* Username Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <User
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="text"
+                  placeholder="johndoe"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                  required
+                  minLength={3}
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="email"
+                  placeholder="user@example.com"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-3 text-muted-foreground"
+                />
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
             >
-              Username <span className="text-destructive">*</span>
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Choose a username"
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              required
-              minLength={3}
-            />
+              {loading ? "Creating account..." : "Create Account"}
+              {!loading && <ArrowRight size={18} />}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative mb-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-card text-muted-foreground">
+                Already have an account?
+              </span>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email <span className="text-destructive">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-2">
-              Name (optional)
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your full name"
-              className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium mb-2"
-            >
-              Password <span className="text-destructive">*</span>
-            </label>
-            <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a strong password"
-                className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                required
-                minLength={6}
-              />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Sign In Link */}
+          <Link
+            href="/login"
+            className="w-full py-2 px-4 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-bold text-center block"
           >
-            {loading ? "Creating account..." : "Sign up"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Already have an account?{" "}
-          <Link href="/login" className="text-primary hover:underline">
-            Sign in
+            Sign In
           </Link>
-        </p>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center mt-8">
+          <p className="text-muted-foreground text-sm">
+            By signing up, you agree to our Terms of Service and Privacy Policy
+          </p>
+        </div>
       </div>
     </div>
   );
