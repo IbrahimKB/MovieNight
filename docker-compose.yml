@@ -30,7 +30,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps?sslmode=disable"
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:3001:3000"
     networks:
       - movienight_net
 
