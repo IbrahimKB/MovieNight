@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getUserExternalId } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
@@ -12,38 +11,43 @@ const CreateEventSchema = z.object({
   movieId: z.string().uuid(),
   date: z.string().datetime(),
   notes: z.string().optional(),
-  participants: z.array(z.string()).optional(),
+  participants: z.array(z.string()).optional(), // external IDs (puid or id)
 });
 
 // ------------------------------------------------------
-// Helpers
+// Helpers: map external <-> internal user IDs
 // ------------------------------------------------------
-async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
   try {
-    const result = await query(
-      `SELECT id FROM auth."User" WHERE puid = $1 OR id = $1 LIMIT 1`,
-      [externalId]
-    );
-    return result.rows.length > 0 ? result.rows[0].id : null;
+    const user = await prisma.authUser.findFirst({
+      where: {
+        OR: [{ puid: externalId }, { id: externalId }],
+      },
+      select: { id: true },
+    });
+
+    return user?.id ?? null;
   } catch (err) {
-    console.error("Error mapping user ID:", err);
+    console.error("Error mapping external → internal user ID:", err);
     return null;
   }
 }
 
-async function mapInternalUserIdToExternal(internalId: string): Promise<string> {
+async function mapInternalUserIdToExternal(
+  internalId: string,
+): Promise<string> {
   try {
-    const result = await query(
-      `SELECT puid, id FROM auth."User" WHERE id = $1 LIMIT 1`,
-      [internalId]
-    );
+    const user = await prisma.authUser.findUnique({
+      where: { id: internalId },
+      select: { id: true, puid: true },
+    });
 
-    if (result.rows.length > 0) {
-      return result.rows[0].puid || result.rows[0].id;
-    }
-    return internalId;
+    if (!user) return internalId;
+    return user.puid || user.id;
   } catch (err) {
-    console.error("Error mapping internal → external:", err);
+    console.error("Error mapping internal → external user ID:", err);
     return internalId;
   }
 }
@@ -52,14 +56,14 @@ async function mapInternalUserIdToExternal(internalId: string): Promise<string> 
 // POST /api/events (Create)
 // ------------------------------------------------------
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -74,35 +78,46 @@ export async function POST(
             .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join("; "),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { movieId, date, notes, participants } = validation.data;
 
-    // Ensure movie exists
-    const movieResult = await query(
-      `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId]
-    );
-
-    if (movieResult.rows.length === 0) {
+    // Map current user to internal ID
+    const hostUserId = await mapExternalUserIdToInternal(currentUser.id);
+    if (!hostUserId) {
       return NextResponse.json(
-        { success: false, error: "Movie not found" },
-        { status: 404 }
+        { success: false, error: "User not found" },
+        { status: 401 },
       );
     }
 
-    // Validate participants
-    const internalParticipants: string[] = [currentUser.id];
+    // Ensure movie exists
+    const movie = await prisma.movie.findUnique({
+      where: { id: movieId },
+      select: { id: true },
+    });
+
+    if (!movie) {
+      return NextResponse.json(
+        { success: false, error: "Movie not found" },
+        { status: 404 },
+      );
+    }
+
+    // Validate participants (external -> internal)
+    const internalParticipants: string[] = [hostUserId];
     const invalidUserIds: string[] = [];
 
     if (participants) {
-      for (const userId of participants) {
-        const internalId = await mapExternalUserIdToInternal(userId);
-        if (!internalId) invalidUserIds.push(userId);
-        else if (!internalParticipants.includes(internalId))
+      for (const external of participants) {
+        const internalId = await mapExternalUserIdToInternal(external);
+        if (!internalId) {
+          invalidUserIds.push(external);
+        } else if (!internalParticipants.includes(internalId)) {
           internalParticipants.push(internalId);
+        }
       }
     }
 
@@ -112,57 +127,47 @@ export async function POST(
           success: false,
           error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Create event
-    const eventId = randomUUID();
-    const now = new Date();
-    const eventDate = new Date(date);
-
-    await query(
-      `INSERT INTO movienight."Event"
-       (id, "movieId", "hostUserId", participants, date, notes, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        eventId,
+    // Create event via Prisma
+    const event = await prisma.event.create({
+      data: {
         movieId,
-        currentUser.id,
-        JSON.stringify(internalParticipants),
-        eventDate.toISOString(),        // ✅ FIXED
-        notes || null,
-        now.toISOString(),              // ✅ FIXED
-        now.toISOString(),              // ✅ FIXED
-      ]
-    );
+        hostUserId,
+        participants: internalParticipants,
+        date: new Date(date),
+        notes: notes ?? null,
+      },
+    });
 
     // Map participants back to external IDs
     const externalParticipants = await Promise.all(
-      internalParticipants.map((id) => mapInternalUserIdToExternal(id))
+      internalParticipants.map((id) => mapInternalUserIdToExternal(id)),
     );
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          id: eventId,
-          movieId,
+          id: event.id,
+          movieId: event.movieId,
           hostUserId: getUserExternalId(currentUser),
           participants: externalParticipants,
-          date: eventDate.toISOString(),
-          notes: notes || null,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
+          date: event.date,
+          notes: event.notes,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     console.error("Create event error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -171,60 +176,74 @@ export async function POST(
 // GET /api/events (List)
 // ------------------------------------------------------
 export async function GET(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const result = await query(
-      `SELECT e.id, e."movieId", e."hostUserId", e.participants, e.date,
-              e.notes, e."createdAt", e."updatedAt",
-              m.title as "movieTitle", m.poster as "moviePoster",
-              h.username as "hostUsername", h.puid as "hostPuid"
-       FROM movienight."Event" e
-       LEFT JOIN movienight."Movie" m ON e."movieId" = m.id
-       LEFT JOIN auth."User" h ON e."hostUserId" = h.id
-       WHERE e."hostUserId" = $1 OR e.participants::text LIKE $2
-       ORDER BY e.date ASC`,
-      [currentUser.id, `%"${currentUser.id}"%`]
+    const currentUserInternalId = await mapExternalUserIdToInternal(
+      currentUser.id,
     );
 
-    const events = await Promise.all(
-      result.rows.map(async (row) => {
-        const hostExternalId = await mapInternalUserIdToExternal(row.hostUserId);
-        const internal = JSON.parse(row.participants || "[]");
-        const external = await Promise.all(
-          internal.map((id: string) => mapInternalUserIdToExternal(id))
+    if (!currentUserInternalId) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
+
+    const events = await prisma.event.findMany({
+      where: {
+        OR: [
+          { hostUserId: currentUserInternalId },
+          { participants: { has: currentUserInternalId } },
+        ],
+      },
+      include: {
+        movie: true,
+        hostUser: true,
+      },
+      orderBy: { date: "asc" },
+    });
+
+    const mapped = await Promise.all(
+      events.map(async (event) => {
+        const participantsInternal: string[] = event.participants ?? [];
+        const externalParticipants = await Promise.all(
+          participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
         );
 
+        const hostExternalId =
+          event.hostUser?.puid || event.hostUser?.id || event.hostUserId;
+
         return {
-          id: row.id,
-          movieId: row.movieId,
-          movieTitle: row.movieTitle,
-          moviePoster: row.moviePoster,
+          id: event.id,
+          movieId: event.movieId,
+          movieTitle: event.movie?.title ?? null,
+          moviePoster: event.movie?.poster ?? null,
           hostUserId: hostExternalId,
-          hostUsername: row.hostUsername,
-          participants: external,
-          date: row.date,
-          notes: row.notes,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
+          hostUsername: event.hostUser?.username ?? null,
+          participants: externalParticipants,
+          date: event.date,
+          notes: event.notes,
+          createdAt: event.createdAt,
+          updatedAt: event.updatedAt,
         };
-      })
+      }),
     );
 
-    return NextResponse.json({ success: true, data: events });
+    return NextResponse.json({ success: true, data: mapped });
   } catch (err) {
     console.error("Get events error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

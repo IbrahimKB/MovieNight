@@ -37,7 +37,6 @@ data
 load-ids.txt
 
 tmp
-types
 .git
 .gitignore
 dist

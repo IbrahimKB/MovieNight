@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
+  const user = await prisma.authUser.findFirst({
+    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
 
 export async function GET(
   req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
@@ -19,33 +28,38 @@ export async function GET(
       );
     }
 
-    // Get watched movies for current user
-    const result = await query(
-      `SELECT wm.id, wm."movieId", wm."watchedAt", wm."originalScore", wm.reaction, wm."createdAt",
-              m.title, m.poster, m.year, m.genres, m.description
-       FROM movienight."WatchedMovie" wm
-       LEFT JOIN movienight."Movie" m ON wm."movieId" = m.id
-       WHERE wm."userId" = $1
-       ORDER BY wm."watchedAt" DESC`,
-      [currentUser.id],
-    );
+    const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
+    if (!userIdInternal) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
 
-    const watchedMovies = result.rows.map((row) => ({
-      id: row.id,
-      movieId: row.movieId,
-      title: row.title,
-      poster: row.poster,
-      year: row.year,
-      genres: row.genres,
-      description: row.description,
-      watchedAt: row.watchedAt,
-      originalScore: row.originalScore,
-      reaction: row.reaction ? JSON.parse(row.reaction) : null,
+    const history = await prisma.watchedMovie.findMany({
+      where: { userId: userIdInternal },
+      include: {
+        movie: true,
+      },
+      orderBy: { watchedAt: "desc" },
+    });
+
+    const mapped = history.map((wm) => ({
+      id: wm.id,
+      movieId: wm.movieId,
+      title: wm.movie?.title ?? null,
+      poster: wm.movie?.poster ?? null,
+      year: wm.movie?.year ?? null,
+      genres: wm.movie?.genres ?? [],
+      description: wm.movie?.description ?? null,
+      watchedAt: wm.watchedAt,
+      originalScore: wm.originalScore,
+      reaction: wm.reaction ?? null,
     }));
 
     return NextResponse.json({
       success: true,
-      data: watchedMovies,
+      data: mapped,
     });
   } catch (err) {
     console.error("Get watch history error:", err);

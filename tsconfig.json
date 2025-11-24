@@ -19,14 +19,16 @@
     "resolveJsonModule": true,
     "incremental": true,
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["./app/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/types": ["./types/index.ts"],
-      "@/types/*": ["./types/*"],
-      "@/components/*": ["./client/components/*"],
-      "@/components/ui/*": ["./client/components/ui/*"]
-    },
+   "paths": {
+  "@/app/*": ["./app/*"],
+  "@/contexts/*": ["./app/contexts/*"],
+  "@/lib/*": ["./lib/*"],
+  "@/types": ["./types/index.ts"],
+  "@/types/*": ["./types/*"],
+  "@/components/*": ["./components/*"],
+  "@/components/ui/*": ["./components/ui/*"],
+  "@/hooks/*": ["./hooks/*"]
+},
     "allowJs": true,
     "plugins": [
       {

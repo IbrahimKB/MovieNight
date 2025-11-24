@@ -1,7 +1,9 @@
+"use server";
+
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
@@ -9,18 +11,37 @@ const MarkWatchedSchema = z.object({
   movieId: z.string().uuid(),
   watchedDate: z.string().datetime().optional(),
   originalScore: z.number().min(1).max(10).optional(),
-  reaction: z.record(z.any()).optional(),
+  reaction: z.record(z.any()).optional(), // generic JSON
 });
 
-export async function POST(
-  req: NextRequest
-): Promise<NextResponse<ApiResponse>> {
+// -----------------------------------------------------
+// Map PUID <-> Internal UUID
+// -----------------------------------------------------
+async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+  const user = await prisma.authUser.findFirst({
+    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
+
+// -----------------------------------------------------
+// POST /api/watch/mark-watched
+// -----------------------------------------------------
+export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
+        { status: 401 }
+      );
+    }
+
+    const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
+    if (!userIdInternal) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
         { status: 401 }
       );
     }
@@ -43,57 +64,57 @@ export async function POST(
     const { movieId, watchedDate, originalScore, reaction } = validation.data;
 
     // Validate movie exists
-    const movieResult = await query(
-      `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId]
-    );
+    const movie = await prisma.movie.findUnique({
+      where: { id: movieId },
+      select: { id: true },
+    });
 
-    if (movieResult.rows.length === 0) {
+    if (!movie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
         { status: 404 }
       );
     }
 
-    // Create watched movie record
-    const watchedId = randomUUID();
     const now = new Date();
     const watchedAt = watchedDate ? new Date(watchedDate) : now;
 
-    await query(
-      `INSERT INTO movienight."WatchedMovie"
-       (id, "userId", "movieId", "watchedAt", "originalScore", reaction, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        watchedId,
-        currentUser.id,
+    // -----------------------------------------------------
+    // Create watched movie record
+    // reaction: undefined → valid
+    // -----------------------------------------------------
+    const watched = await prisma.watchedMovie.create({
+      data: {
+        userId: userIdInternal,
         movieId,
-        watchedAt.toISOString(),
-        originalScore || null,
-        reaction ? JSON.stringify(reaction) : null,
-        now.toISOString(),
-        now.toISOString(),
-      ]
-    );
+        watchedAt,
+        originalScore: originalScore ?? null,
+        reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
+      },
+    });
 
+    // -----------------------------------------------------
     // Remove from WatchDesire if present
-    await query(
-      `DELETE FROM movienight."WatchDesire" WHERE "userId" = $1 AND "movieId" = $2`,
-      [currentUser.id, movieId]
-    );
+    // -----------------------------------------------------
+    await prisma.watchDesire.deleteMany({
+      where: {
+        userId: userIdInternal,
+        movieId,
+      },
+    });
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          id: watchedId,
-          userId: currentUser.id,
+          id: watched.id,
+          userId: currentUser.id, // external (puid/id)
           movieId,
-          watchedAt: watchedAt.toISOString(),
-          originalScore: originalScore || null,
-          reaction: reaction || null,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
+          watchedAt: watched.watchedAt,
+          originalScore: watched.originalScore ?? null,
+          reaction: watched.reaction ?? null,
+          createdAt: watched.createdAt,
+          updatedAt: watched.updatedAt,
         },
       },
       { status: 201 }

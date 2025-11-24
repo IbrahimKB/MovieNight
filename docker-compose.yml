@@ -17,7 +17,10 @@ services:
       - "5432:5432"
 
   movienight:
-    build: .
+    build:
+      context: .
+      args:
+        DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps?sslmode=disable"
     image: movienight:prod
     container_name: movienight
     restart: unless-stopped
@@ -25,13 +28,11 @@ services:
       - postgres
     environment:
       NODE_ENV: production
-      DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps"
-    volumes:
-      - ./data:/app/data
-    networks:
-      - movienight_net
+      DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps?sslmode=disable"
     ports:
       - "127.0.0.1:3000:3000"
+    networks:
+      - movienight_net
 
   proxy:
     image: nginx:alpine

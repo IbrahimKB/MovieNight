@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import { z } from "zod";
-import { query } from "@/lib/db";
+import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { ApiResponse, WatchDesire } from "@/types";
+import { ApiResponse } from "@/types";
 
 const CreateWatchDesireSchema = z.object({
   movieId: z.string().uuid(),
@@ -11,11 +10,20 @@ const CreateWatchDesireSchema = z.object({
   rating: z.number().min(1).max(10).optional(),
 });
 
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
+  const user = await prisma.authUser.findFirst({
+    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
+
 export async function POST(
   req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
@@ -45,13 +53,22 @@ export async function POST(
 
     const { movieId, suggestionId, rating } = validation.data;
 
-    // Validate movie exists
-    const movieResult = await query(
-      `SELECT id FROM movienight."Movie" WHERE id = $1`,
-      [movieId],
-    );
+    // Map current user external -> internal
+    const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
+    if (!userIdInternal) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
 
-    if (movieResult.rows.length === 0) {
+    // Validate movie exists
+    const movie = await prisma.movie.findUnique({
+      where: { id: movieId },
+      select: { id: true },
+    });
+
+    if (!movie) {
       return NextResponse.json(
         {
           success: false,
@@ -62,12 +79,15 @@ export async function POST(
     }
 
     // Check if already in watch desire
-    const existingResult = await query(
-      `SELECT id FROM movienight."WatchDesire" WHERE "userId" = $1 AND "movieId" = $2`,
-      [currentUser.id, movieId],
-    );
+    const existing = await prisma.watchDesire.findFirst({
+      where: {
+        userId: userIdInternal,
+        movieId,
+      },
+      select: { id: true },
+    });
 
-    if (existingResult.rows.length > 0) {
+    if (existing) {
       return NextResponse.json(
         {
           success: false,
@@ -78,34 +98,26 @@ export async function POST(
     }
 
     // Create watch desire
-    const desireId = randomUUID();
-    const now = new Date();
-
-    await query(
-      `INSERT INTO movienight."WatchDesire" (id, "userId", "movieId", "suggestionId", rating, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        desireId,
-        currentUser.id,
+    const desire = await prisma.watchDesire.create({
+      data: {
+        userId: userIdInternal,
         movieId,
-        suggestionId || null,
-        rating || null,
-        now.toISOString(),
-        now.toISOString(),
-      ],
-    );
+        suggestionId: suggestionId ?? null,
+        rating: rating ?? null,
+      },
+    });
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          id: desireId,
-          userId: currentUser.id,
+          id: desire.id,
+          userId: currentUser.id, // external ID as before
           movieId,
-          suggestionId: suggestionId || null,
-          rating: rating || null,
-          createdAt: now.toISOString(),
-          updatedAt: now.toISOString(),
+          suggestionId: desire.suggestionId,
+          rating: desire.rating,
+          createdAt: desire.createdAt,
+          updatedAt: desire.updatedAt,
         },
       },
       { status: 201 },
@@ -126,7 +138,6 @@ export async function GET(
   req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
@@ -138,30 +149,35 @@ export async function GET(
       );
     }
 
-    // Get watch desires for current user
-    const result = await query(
-      `SELECT wd.id, wd."userId", wd."movieId", wd."suggestionId", wd.rating, wd."createdAt", wd."updatedAt",
-              m.title, m.poster, m.year
-       FROM movienight."WatchDesire" wd
-       LEFT JOIN movienight."Movie" m ON wd."movieId" = m.id
-       WHERE wd."userId" = $1
-       ORDER BY wd."createdAt" DESC`,
-      [currentUser.id],
-    );
+    const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
+    if (!userIdInternal) {
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { status: 401 },
+      );
+    }
 
-    const desires = result.rows.map((row) => ({
-      id: row.id,
-      movieId: row.movieId,
-      title: row.title,
-      poster: row.poster,
-      year: row.year,
-      rating: row.rating,
-      createdAt: row.createdAt,
+    const desires = await prisma.watchDesire.findMany({
+      where: { userId: userIdInternal },
+      include: {
+        movie: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const mapped = desires.map((d) => ({
+      id: d.id,
+      movieId: d.movieId,
+      title: d.movie?.title ?? null,
+      poster: d.movie?.poster ?? null,
+      year: d.movie?.year ?? null,
+      rating: d.rating,
+      createdAt: d.createdAt,
     }));
 
     return NextResponse.json({
       success: true,
-      data: desires,
+      data: mapped,
     });
   } catch (err) {
     console.error("Get watch desires error:", err);

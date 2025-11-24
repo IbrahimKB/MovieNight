@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface Movie {
@@ -15,9 +15,10 @@ interface Friend {
   username: string;
 }
 
-export default function CreateEventPage() {
+function CreateEventPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const prefilledMovieId = searchParams.get("movieId");
   const prefilledFromUserId = searchParams.get("fromUserId");
 
@@ -86,7 +87,6 @@ export default function CreateEventPage() {
         return;
       }
 
-      // Redirect to calendar or event detail
       router.push(`/events/${data.data.id}`);
     } catch (err) {
       setError("An error occurred");
@@ -173,7 +173,7 @@ export default function CreateEventPage() {
           />
         </div>
 
-        {/* Participants Selection */}
+        {/* Participants */}
         <div>
           <label className="block text-sm font-medium mb-3">
             Invite Friends
@@ -211,6 +211,7 @@ export default function CreateEventPage() {
           >
             {submitting ? "Creating..." : "Create Movie Night"}
           </button>
+
           <button
             type="button"
             onClick={() => router.back()}
@@ -221,5 +222,13 @@ export default function CreateEventPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CreateEventPage() {
+  return (
+    <Suspense fallback={<p>Loading…</p>}>
+      <CreateEventPageInner />
+    </Suspense>
   );
 }

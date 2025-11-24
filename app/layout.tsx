@@ -1,19 +1,15 @@
+"use client";
+
 import "./globals.css";
 import { ReactNode } from "react";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { ToastProvider, ToastViewport } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/app/contexts/AuthContext";
 
 const queryClient = new QueryClient();
-
-export const metadata = {
-  title: "MovieNight",
-  description: "Friends. Movies. Vibes.",
-};
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -22,9 +18,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              {children}
+              <ToastProvider>
+                <ToastViewport />
+                {children}
+              </ToastProvider>
             </TooltipProvider>
           </AuthProvider>
         </QueryClientProvider>
