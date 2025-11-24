@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, FormEvent, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 interface Movie {
   id: string;
@@ -11,245 +11,203 @@ interface Movie {
   poster?: string;
 }
 
-interface Friend {
-  userId: string;
-  username: string;
-}
-
-function CreateEventPageInner() {
+export default function CreateEventPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const prefilledMovieId = searchParams.get("movieId");
-  const prefilledFromUserId = searchParams.get("fromUserId");
-
-  const [movieId, setMovieId] = useState(prefilledMovieId || "");
-  const [date, setDate] = useState("");
-  const [notes, setNotes] = useState("");
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
-    prefilledFromUserId ? [prefilledFromUserId] : [],
-  );
-
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [friends, setFriends] = useState<Friend[]>([]);
+  const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("19:00");
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchMovies = async () => {
       try {
-        const [moviesRes, friendsRes] = await Promise.all([
-          fetch("/api/movies?limit=100"),
-          fetch("/api/friends"),
-        ]);
+        const res = await fetch("/api/movies", { headers });
+        const data = await res.json();
 
-        const moviesData = await moviesRes.json();
-        const friendsData = await friendsRes.json();
-
-        if (moviesRes.ok) {
-          setMovies(moviesData.data || []);
+        if (data.success && Array.isArray(data.data)) {
+          setMovies(data.data.slice(0, 20)); // Show top 20 movies
         }
-        if (friendsRes.ok) {
-          setFriends(friendsData.data?.friends || []);
-        }
-      } catch (err) {
-        setError("Failed to load data");
-        console.error("Error:", err);
+      } catch (error) {
+        console.error("Failed to fetch movies:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchMovies();
+  }, [token]);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSubmitting(true);
+    if (!selectedMovie || !eventDate) return;
 
+    setSubmitting(true);
     try {
-      const token = localStorage.getItem("movienight_token");
+      const combinedDateTime = new Date(`${eventDate}T${eventTime}`).toISOString();
+
       const res = await fetch("/api/events", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
+        headers,
         body: JSON.stringify({
-          movieId,
-          date,
-          notes: notes || undefined,
-          participants: selectedParticipants,
+          movieId: selectedMovie,
+          date: combinedDateTime,
+          notes,
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        const errorMsg = data.error || "Failed to create event";
-        setError(errorMsg);
-        toast({
-          title: "Error",
-          description: errorMsg,
-          variant: "error",
-        });
-        return;
+      if (res.ok) {
+        const data = await res.json();
+        router.push(`/events/${data.data?.id || ""}`);
       }
-
-      toast({
-        title: "Success",
-        description: "Movie night created successfully",
-      });
-      router.push(`/(app)/events/${data.data.id}`);
-    } catch (err) {
-      const errorMsg = "An error occurred while creating the event";
-      setError(errorMsg);
-      toast({
-        title: "Error",
-        description: errorMsg,
-        variant: "error",
-      });
-      console.error("Error:", err);
+    } catch (error) {
+      console.error("Failed to create event:", error);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const toggleParticipant = (userId: string) => {
-    setSelectedParticipants((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId],
-    );
-  };
-
   if (loading) {
-    return <p className="text-muted-foreground">Loading...</p>;
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
   }
 
+  const selectedMovieData = movies.find((m) => m.id === selectedMovie);
+
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-4xl font-bold mb-8">Create Movie Night</h1>
-
-      {error && (
-        <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      <form
-        onSubmit={handleSubmit}
-        className="bg-card border border-border rounded-lg p-6 space-y-6"
+    <div className="space-y-8 max-w-2xl">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
       >
+        <ArrowLeft size={20} />
+        Back
+      </button>
+
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold mb-2">Create Movie Event</h1>
+        <p className="text-muted-foreground">
+          Plan a movie night with your friends
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Movie Selection */}
-        <div>
-          <label htmlFor="movieId" className="block text-sm font-medium mb-2">
-            Movie <span className="text-destructive">*</span>
-          </label>
-          <select
-            id="movieId"
-            value={movieId}
-            onChange={(e) => setMovieId(e.target.value)}
-            required
-            className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          >
-            <option value="">Select a movie...</option>
+        <div className="space-y-4">
+          <label className="block text-sm font-medium">Select a Movie</label>
+          <div className="bg-card border border-border rounded-xl p-4 max-h-64 overflow-y-auto space-y-2">
             {movies.map((movie) => (
-              <option key={movie.id} value={movie.id}>
-                {movie.title} ({movie.year})
-              </option>
+              <button
+                key={movie.id}
+                type="button"
+                onClick={() => setSelectedMovie(movie.id)}
+                className={`w-full text-left p-3 rounded-lg transition-all flex gap-3 ${
+                  selectedMovie === movie.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background hover:border-primary/50 border border-border"
+                }`}
+              >
+                {movie.poster && (
+                  <img
+                    src={movie.poster}
+                    alt={movie.title}
+                    className="w-10 h-14 rounded object-cover flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{movie.title}</p>
+                  <p className="text-xs opacity-75">{movie.year}</p>
+                </div>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
+
+        {/* Selected Movie Preview */}
+        {selectedMovieData && (
+          <div className="bg-card border border-primary/50 rounded-xl p-4 flex gap-4">
+            {selectedMovieData.poster && (
+              <img
+                src={selectedMovieData.poster}
+                alt={selectedMovieData.title}
+                className="w-16 h-24 rounded object-cover flex-shrink-0"
+              />
+            )}
+            <div className="flex-1">
+              <p className="font-semibold">{selectedMovieData.title}</p>
+              <p className="text-sm text-muted-foreground">
+                {selectedMovieData.year}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Date Selection */}
-        <div>
-          <label htmlFor="date" className="block text-sm font-medium mb-2">
-            Date & Time <span className="text-destructive">*</span>
-          </label>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Event Date</label>
           <input
-            id="date"
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
             required
-            className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          />
+        </div>
+
+        {/* Time Selection */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Event Time</label>
+          <input
+            type="time"
+            value={eventTime}
+            onChange={(e) => setEventTime(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
           />
         </div>
 
         {/* Notes */}
-        <div>
-          <label htmlFor="notes" className="block text-sm font-medium mb-2">
-            Notes
-          </label>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Notes (Optional)</label>
           <textarea
-            id="notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add any notes about the movie night..."
-            className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-            rows={4}
+            placeholder="Add details about the event, location, snacks, etc."
+            className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all resize-none h-24"
           />
         </div>
 
-        {/* Participants */}
-        <div>
-          <label className="block text-sm font-medium mb-3">
-            Invite Friends
-          </label>
-          {friends.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No friends to invite
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {friends.map((friend) => (
-                <label
-                  key={friend.userId}
-                  className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted rounded"
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedParticipants.includes(friend.userId)}
-                    onChange={() => toggleParticipant(friend.userId)}
-                    className="rounded border border-input"
-                  />
-                  <span className="text-sm">{friend.username}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Submit */}
-        <div className="flex gap-3 pt-4">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
-            {submitting ? "Creating..." : "Create Movie Night"}
-          </button>
-
+        {/* Submit Buttons */}
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
+            className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-card transition-colors font-medium"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!selectedMovie || !eventDate || submitting}
+            className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+          >
+            {submitting ? "Creating..." : "Create Event"}
           </button>
         </div>
       </form>
     </div>
-  );
-}
-
-export default function CreateEventPage() {
-  return (
-    <Suspense fallback={<p>Loading…</p>}>
-      <CreateEventPageInner />
-    </Suspense>
   );
 }
