@@ -56,7 +56,7 @@ export default function HomePage() {
   // Check authentication
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/(auth)/login");
+      router.push("/login");
     }
   }, [authLoading, user, router]);
 
@@ -149,31 +149,31 @@ export default function HomePage() {
           </button>
           <div className="flex gap-4 items-center">
             <button
-              onClick={() => router.push("/(app)/movies")}
+              onClick={() => router.push("/movies")}
               className="text-sm hover:text-primary transition-colors"
             >
               Movies
             </button>
             <button
-              onClick={() => router.push("/(app)/calendar")}
+              onClick={() => router.push("/calendar")}
               className="text-sm hover:text-primary transition-colors"
             >
               Calendar
             </button>
             <button
-              onClick={() => router.push("/(app)/suggestions")}
+              onClick={() => router.push("/suggestions")}
               className="text-sm hover:text-primary transition-colors"
             >
               Suggestions
             </button>
             <button
-              onClick={() => router.push("/(app)/watchlist")}
+              onClick={() => router.push("/watchlist")}
               className="text-sm hover:text-primary transition-colors"
             >
               Watchlist
             </button>
             <button
-              onClick={() => router.push("/squad")}
+              onClick={() => router.push("/friends")}
               className="text-sm hover:text-primary transition-colors"
             >
               Friends
@@ -279,7 +279,7 @@ export default function HomePage() {
                    variant="ghost"
                    size="sm"
                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                   onClick={() => router.push("/(app)/movies")}
+                   onClick={() => router.push("/movies")}
                  >
                    View All
                  </Button>
@@ -311,7 +311,7 @@ export default function HomePage() {
                   <div
                     key={movie.id}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
-                    onClick={() => router.push("/(app)/movies")}
+                    onClick={() => router.push("/movies")}
                   >
                     <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
                       <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
@@ -436,7 +436,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
-                onClick={() => router.push("/(app)/movies")}
+                onClick={() => router.push("/movies")}
               >
                 <Film className="h-4 w-4 mr-2" />
                 Discover Movies
@@ -445,7 +445,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
-                onClick={() => router.push("/suggest")}
+                onClick={() => router.push("/suggestions")}
               >
                 <Users className="h-4 w-4 mr-2" />
                 Suggest to Friends
@@ -454,7 +454,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
-                onClick={() => router.push("/movie-night")}
+                onClick={() => router.push("/events")}
               >
                 <Calendar className="h-4 w-4 mr-2" />
                 Plan Movie Night
