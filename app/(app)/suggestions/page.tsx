@@ -23,7 +23,13 @@ export default function SuggestionsPage() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch("/api/suggestions");
+        const token = localStorage.getItem("movienight_token");
+        const res = await fetch("/api/suggestions", {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+            "Content-Type": "application/json",
+          },
+        });
         const data = await res.json();
 
         if (!res.ok) {

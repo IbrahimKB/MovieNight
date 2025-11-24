@@ -31,9 +31,15 @@ export default function WatchlistPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        };
+
         const [wantRes, watchedRes] = await Promise.all([
-          fetch("/api/watch/desire"),
-          fetch("/api/watch/history"),
+          fetch("/api/watch/desire", { headers }),
+          fetch("/api/watch/history", { headers }),
         ]);
 
         const wantData = await wantRes.json();

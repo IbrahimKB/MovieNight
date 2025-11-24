@@ -1,13 +1,37 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Home } from "lucide-react";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
+      router.push("/(auth)/login");
+    }
+  }, [user, isLoading, mounted, router]);
+
+  if (!mounted || isLoading) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">

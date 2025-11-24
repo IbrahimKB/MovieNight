@@ -29,9 +29,15 @@ export default function CalendarPage() {
       setError(null);
 
       // Fetch both events and watch history
+      const token = localStorage.getItem("movienight_token");
+      const headers = {
+        Authorization: token ? `Bearer ${token}` : "",
+        "Content-Type": "application/json",
+      };
+
       const [eventsRes, historyRes] = await Promise.all([
-        fetch("/api/events"),
-        fetch("/api/watch/history"),
+        fetch("/api/events", { headers }),
+        fetch("/api/watch/history", { headers }),
       ]);
 
       const eventsData = await eventsRes.json();

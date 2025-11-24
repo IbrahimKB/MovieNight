@@ -23,11 +23,17 @@ export default function MoviesPage() {
     setError(null);
 
     try {
+      const token = localStorage.getItem("movienight_token");
       const params = new URLSearchParams();
       if (query) params.append("q", query);
       params.append("limit", "50");
 
-      const res = await fetch(`/api/movies?${params}`);
+      const res = await fetch(`/api/movies?${params}`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+      });
       const data = await res.json();
 
       if (!res.ok) {

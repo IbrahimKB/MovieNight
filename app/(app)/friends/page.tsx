@@ -4,16 +4,28 @@ import { useEffect, useState } from "react";
 
 interface Friend {
   id: string;
-  userId: string;
+  name: string;
   username: string;
+  avatar?: string;
+  friendshipId?: string;
+  friendsSince?: string;
 }
 
 interface FriendRequest {
   id: string;
-  fromUserId: string;
-  toUserId?: string;
-  username: string;
-  createdAt: string;
+  fromUser: {
+    id: string;
+    name: string;
+    username: string;
+    avatar?: string;
+  };
+  toUser?: {
+    id: string;
+    name: string;
+    username: string;
+    avatar?: string;
+  };
+  sentAt: string;
 }
 
 interface FriendsData {
@@ -37,7 +49,13 @@ export default function FriendsPage() {
 
   const fetchFriends = async () => {
     try {
-      const res = await fetch("/api/friends");
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/friends", {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+      });
       const result = await res.json();
 
       if (!res.ok) {
@@ -63,9 +81,13 @@ export default function FriendsPage() {
     if (!newFriendId.trim()) return;
 
     try {
+      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/friends/request", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ toUserId: newFriendId }),
       });
 
@@ -83,9 +105,13 @@ export default function FriendsPage() {
     action: "accept" | "reject",
   ) => {
     try {
+      const token = localStorage.getItem("movienight_token");
       const res = await fetch(`/api/friends/${friendshipId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ action }),
       });
 
@@ -173,11 +199,20 @@ export default function FriendsPage() {
                 key={friend.id}
                 className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
               >
-                <div>
-                  <p className="font-semibold">{friend.username}</p>
-                  <p className="text-xs text-muted-foreground">
-                    ID: {friend.userId}
-                  </p>
+                <div className="flex items-center gap-3">
+                  {friend.avatar && (
+                    <img
+                      src={friend.avatar}
+                      alt={friend.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="font-semibold">{friend.name || friend.username}</p>
+                    <p className="text-xs text-muted-foreground">
+                      @{friend.username}
+                    </p>
+                  </div>
                 </div>
                 <button className="px-3 py-1 text-xs bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors">
                   Remove
@@ -198,11 +233,20 @@ export default function FriendsPage() {
                 key={request.id}
                 className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
               >
-                <div>
-                  <p className="font-semibold">{request.username}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Sent {new Date(request.createdAt).toLocaleDateString()}
-                  </p>
+                <div className="flex items-center gap-3">
+                  {request.fromUser.avatar && (
+                    <img
+                      src={request.fromUser.avatar}
+                      alt={request.fromUser.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="font-semibold">{request.fromUser.name || request.fromUser.username}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Sent {new Date(request.sentAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -233,11 +277,20 @@ export default function FriendsPage() {
               key={request.id}
               className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
             >
-              <div>
-                <p className="font-semibold">{request.username}</p>
-                <p className="text-xs text-muted-foreground">
-                  Sent {new Date(request.createdAt).toLocaleDateString()}
-                </p>
+              <div className="flex items-center gap-3">
+                {request.toUser?.avatar && (
+                  <img
+                    src={request.toUser.avatar}
+                    alt={request.toUser.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                )}
+                <div>
+                  <p className="font-semibold">{request.toUser?.name || request.toUser?.username}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Sent {new Date(request.sentAt).toLocaleDateString()}
+                  </p>
+                </div>
               </div>
               <span className="px-3 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded">
                 Pending
