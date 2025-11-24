@@ -78,19 +78,22 @@ export async function POST(req: NextRequest) {
     });
 
     // Create session
-    await createSession(user.id);
+    const session = await createSession(user.id);
 
     // Return user (using PUID externally)
     return NextResponse.json(
       {
         success: true,
         data: {
-          id: user.puid || user.id,
-          username: user.username,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          joinedAt: user.joinedAt,
+          user: {
+            id: user.puid || user.id,
+            username: user.username,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            joinedAt: user.joinedAt,
+          },
+          token: session.sessionToken,
         },
         message: "Account created successfully",
       },

@@ -3,9 +3,11 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { signup, lastError, clearError } = useAuth();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,26 +17,15 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    clearError();
     setError(null);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, name }),
-      });
+      const result = await signup(username, email, password, name);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (Array.isArray(data.error)) {
-          setError(
-            data.error.map((e: any) => `${e.field}: ${e.message}`).join(", "),
-          );
-        } else {
-          setError(data.error || "Signup failed");
-        }
+      if (!result.success) {
+        setError(result.error?.message || "Signup failed");
         return;
       }
 
@@ -56,9 +47,9 @@ export default function SignupPage() {
           Create an account to join the movie night community
         </p>
 
-        {error && (
+        {(error || lastError) && (
           <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
+            {error || lastError?.message}
           </div>
         )}
 

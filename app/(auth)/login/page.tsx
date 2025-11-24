@@ -3,9 +3,11 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, lastError, clearError } = useAuth();
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -13,20 +15,15 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    clearError();
     setError(null);
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emailOrUsername, password }),
-      });
+      const result = await login(emailOrUsername, password);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Login failed");
+      if (!result.success) {
+        setError(result.error?.message || "Login failed");
         return;
       }
 
@@ -48,9 +45,9 @@ export default function LoginPage() {
           Sign in to discover and plan movie nights with friends
         </p>
 
-        {error && (
+        {(error || lastError) && (
           <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6 text-sm">
-            {error}
+            {error || lastError?.message}
           </div>
         )}
 

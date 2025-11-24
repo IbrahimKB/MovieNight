@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create session
-    await createSession(user.id);
+    const session = await createSession(user.id);
 
     // Prepare safe return user
     const externalId = user.puid || user.id;
@@ -70,12 +70,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        id: externalId,
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        joinedAt: user.joinedAt,
+        user: {
+          id: externalId,
+          username: user.username,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          joinedAt: user.joinedAt,
+        },
+        token: session.sessionToken,
       },
     });
   } catch (err) {

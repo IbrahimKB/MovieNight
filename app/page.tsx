@@ -15,7 +15,8 @@ import {
   Star,
   Eye,
   Target,
-  MessageSquare
+  MessageSquare,
+  Home
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -44,13 +45,20 @@ const defaultStats: DashboardStats = {
 };
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading, logout } = useAuth();
   const router = useRouter();
 
   const [stats, setStats] = useState<DashboardStats>(defaultStats);
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/(auth)/login");
+    }
+  }, [authLoading, user, router]);
 
   // Load dashboard data
   useEffect(() => {
@@ -62,7 +70,7 @@ export default function HomePage() {
       setIsLoading(true);
 
       const [dashboardStats, trending, upcoming] = await Promise.all([
-        getDashboardStats(user!.id),
+        getDashboardStats(),
         getTrendingMovies(),
         getUpcomingReleases()
       ]);
@@ -110,8 +118,78 @@ export default function HomePage() {
     </Card>
   );
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show nothing while redirecting to login
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Navigation Header */}
+      <nav className="border-b border-border bg-card sticky top-0 z-50">
+        <div className="container max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <button
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <Home className="h-6 w-6 text-primary" />
+            <span className="text-2xl font-bold text-primary">MovieNight</span>
+          </button>
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={() => router.push("/(app)/movies")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Movies
+            </button>
+            <button
+              onClick={() => router.push("/(app)/calendar")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Calendar
+            </button>
+            <button
+              onClick={() => router.push("/(app)/suggestions")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Suggestions
+            </button>
+            <button
+              onClick={() => router.push("/(app)/watchlist")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Watchlist
+            </button>
+            <button
+              onClick={() => router.push("/squad")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Friends
+            </button>
+            <button
+              onClick={logout}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="container max-w-7xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
       {/* Welcome Header */}
       <div className="space-y-1 sm:space-y-2">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
@@ -198,13 +276,13 @@ export default function HomePage() {
                   <span className="sm:hidden">Trending</span>
                 </CardTitle>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  onClick={() => router.push("/movies")}
-                >
-                  View All
-                </Button>
+                   variant="ghost"
+                   size="sm"
+                   className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
+                   onClick={() => router.push("/(app)/movies")}
+                 >
+                   View All
+                 </Button>
               </div>
             </CardHeader>
 
@@ -233,7 +311,7 @@ export default function HomePage() {
                   <div
                     key={movie.id}
                     className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
-                    onClick={() => router.push("/movie-search")}
+                    onClick={() => router.push("/(app)/movies")}
                   >
                     <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
                       <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
@@ -358,7 +436,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 className="w-full justify-start text-sm h-9 touch-manipulation active:scale-95"
-                onClick={() => router.push("/movie-search")}
+                onClick={() => router.push("/(app)/movies")}
               >
                 <Film className="h-4 w-4 mr-2" />
                 Discover Movies
@@ -385,6 +463,7 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
+      </main>
     </div>
   );
 }

@@ -99,28 +99,24 @@ export async function searchUsers(query: string): Promise<Friend[]> {
   return handleApiResponse<Friend[]>(response);
 }
 
-export async function getUserFriends(userId: string): Promise<Friend[]> {
-  const response = await fetch(`/api/friends/${userId}`, {
+export async function getUserFriends(): Promise<Friend[]> {
+  const response = await fetch(`/api/friends`, {
     headers: getAuthHeaders(),
   });
 
   return handleApiResponse<Friend[]>(response);
 }
 
-export async function getIncomingRequests(
-  userId: string,
-): Promise<FriendRequest[]> {
-  const response = await fetch(`/api/friends/${userId}/incoming`, {
+export async function getIncomingRequests(): Promise<FriendRequest[]> {
+  const response = await fetch(`/api/friends/incoming`, {
     headers: getAuthHeaders(),
   });
 
   return handleApiResponse<FriendRequest[]>(response);
 }
 
-export async function getOutgoingRequests(
-  userId: string,
-): Promise<FriendRequest[]> {
-  const response = await fetch(`/api/friends/${userId}/outgoing`, {
+export async function getOutgoingRequests(): Promise<FriendRequest[]> {
+  const response = await fetch(`/api/friends/outgoing`, {
     headers: getAuthHeaders(),
   });
 
@@ -128,10 +124,9 @@ export async function getOutgoingRequests(
 }
 
 export async function sendFriendRequest(
-  userId: string,
   targetUserId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/friends/${userId}/request`, {
+  const response = await fetch(`/api/friends/request`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ targetUserId }),
@@ -141,24 +136,22 @@ export async function sendFriendRequest(
 }
 
 export async function respondToFriendRequest(
-  userId: string,
   friendshipId: string,
   action: "accept" | "reject",
 ): Promise<void> {
-  const response = await fetch(`/api/friends/${userId}/respond`, {
-    method: "POST",
+  const response = await fetch(`/api/friends/${friendshipId}`, {
+    method: "PATCH",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ friendshipId, action }),
+    body: JSON.stringify({ action }),
   });
 
   await handleApiResponse(response);
 }
 
 export async function removeFriend(
-  userId: string,
   friendshipId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/friends/${userId}/${friendshipId}`, {
+  const response = await fetch(`/api/friends/${friendshipId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
@@ -167,20 +160,16 @@ export async function removeFriend(
 }
 
 // Notification management
-export async function getNotifications(
-  userId: string,
-): Promise<Notification[]> {
-  const response = await fetch(`/api/notifications/${userId}`, {
+export async function getNotifications(): Promise<Notification[]> {
+  const response = await fetch(`/api/notifications`, {
     headers: getAuthHeaders(),
   });
 
   return handleApiResponse<Notification[]>(response);
 }
 
-export async function getUnreadNotificationCount(
-  userId: string,
-): Promise<number> {
-  const response = await fetch(`/api/notifications/${userId}/unread-count`, {
+export async function getUnreadNotificationCount(): Promise<number> {
+  const response = await fetch(`/api/notifications/unread-count`, {
     headers: getAuthHeaders(),
   });
 
@@ -189,10 +178,9 @@ export async function getUnreadNotificationCount(
 }
 
 export async function markNotificationAsRead(
-  userId: string,
   notificationId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/notifications/${userId}/mark-read`, {
+  const response = await fetch(`/api/notifications/mark-read`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({ notificationId }),
@@ -202,16 +190,12 @@ export async function markNotificationAsRead(
 }
 
 export async function deleteNotification(
-  userId: string,
   notificationId: string,
 ): Promise<void> {
-  const response = await fetch(
-    `/api/notifications/${userId}/${notificationId}`,
-    {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    },
-  );
+  const response = await fetch(`/api/notifications/${notificationId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
 
   await handleApiResponse(response);
 }
@@ -264,15 +248,18 @@ export function hasExistingRequest(
 }
 
 // Dashboard and statistics
-export async function getDashboardStats(
-  userId: string,
-): Promise<DashboardStats> {
+export async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    // Get friends count - API expects user ID from auth token, not parameter
-    const friendsResponse = await fetch(`/api/friends/${userId}`, {
+    // Get friends count
+    const friendsResponse = await fetch(`/api/friends`, {
       headers: getAuthHeaders(),
     });
-    const friends = await handleApiResponse<Friend[]>(friendsResponse);
+    const friendsData = await handleApiResponse<{
+      friends: Friend[];
+      incomingRequests: any[];
+      outgoingRequests: any[];
+    }>(friendsResponse);
+    const friends = friendsData.friends || [];
 
     // Get active suggestions count
     const suggestionsResponse = await fetch("/api/suggestions", {
@@ -284,7 +271,7 @@ export async function getDashboardStats(
     let suggestionAccuracy = 0;
     try {
       const accuracyResponse = await fetch(
-        `/api/analytics/suggestion-accuracy/${userId}`,
+        `/api/analytics/suggestion-accuracy`,
         {
           headers: getAuthHeaders(),
         },
