@@ -1,181 +1,196 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Plus, Film } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search, Clapperboard, X } from "lucide-react";
 
 interface Movie {
   id: string;
   title: string;
   year: number;
-  genres: string[];
   poster?: string;
-  description: string;
+  genres?: string[];
   imdbRating?: number;
 }
 
 export default function MoviesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [adding, setAdding] = useState<string | null>(null);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [allGenres, setAllGenres] = useState<string[]>([]);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
+  const token = typeof window !== "undefined" ? localStorage.getItem("movienight_token") : null;
 
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("movienight_token");
-      const response = await fetch(
-        `/api/movies?q=${encodeURIComponent(searchQuery)}&limit=12`,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
-      );
-      const data = await response.json();
-      setMovies(data.data || []);
-    } catch (err) {
-      console.error("Error searching movies:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToWatchlist = async (movieId: string) => {
-    setAdding(movieId);
-    try {
-      const token = localStorage.getItem("movienight_token");
-      await fetch("/api/watch/desire", {
-        method: "POST",
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
+  useEffect(() => {
+    const fetchMovies = async () => {
+      try {
+        const headers = {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ movieId }),
-      });
-    } catch (err) {
-      console.error("Error adding to watchlist:", err);
-    } finally {
-      setAdding(null);
+          ...(token && { Authorization: `Bearer ${token}` }),
+        };
+
+        const res = await fetch("/api/movies", { headers });
+        const data = await res.json();
+
+        if (data.success && Array.isArray(data.data)) {
+          setMovies(data.data);
+          setFilteredMovies(data.data);
+
+          // Extract unique genres
+          const genres = new Set<string>();
+          data.data.forEach((movie: Movie) => {
+            movie.genres?.forEach((g) => genres.add(g));
+          });
+          setAllGenres(Array.from(genres).sort());
+        }
+      } catch (error) {
+        console.error("Failed to fetch movies:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovies();
+  }, [token]);
+
+  // Filter movies based on search and genre
+  useEffect(() => {
+    let results = movies;
+
+    if (searchQuery) {
+      results = results.filter(
+        (movie) =>
+          movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          movie.year.toString().includes(searchQuery)
+      );
     }
-  };
 
-  return (
-    <div className="p-4 md:p-8 lg:p-12">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">
-            Discover Movies
-          </h1>
-          <p className="text-base md:text-lg text-muted-foreground">
-            Search for movies and add them to your watchlist
-          </p>
-        </div>
+    if (selectedGenre) {
+      results = results.filter((movie) => movie.genres?.includes(selectedGenre));
+    }
 
-        {/* Search Form */}
-        <form onSubmit={handleSearch} className="mb-8 md:mb-12">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="flex-1 relative">
-              <Search
-                size={20}
-                className="absolute left-4 top-3 text-muted-foreground"
-              />
-              <input
-                type="text"
-                placeholder="Search movies, actors, genres..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-lg bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold disabled:opacity-50 sm:whitespace-nowrap"
-            >
-              {loading ? "Searching..." : "Search"}
-            </button>
-          </div>
-        </form>
+    setFilteredMovies(results);
+  }, [searchQuery, selectedGenre, movies]);
 
-        {/* Movies Grid */}
-        {movies.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {movies.map((movie) => (
-              <div
-                key={movie.id}
-                className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
-              >
-                {/* Poster */}
-                <div className="w-full h-64 bg-secondary flex items-center justify-center overflow-hidden relative group">
-                  {movie.poster ? (
-                    <img
-                      src={movie.poster}
-                      alt={movie.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Film size={60} className="text-muted-foreground" />
-                  )}
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button
-                      onClick={() => handleAddToWatchlist(movie.id)}
-                      disabled={adding === movie.id}
-                      className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Plus size={18} />
-                      {adding === movie.id ? "Adding..." : "Add to Watchlist"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2 line-clamp-1">
-                    {movie.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {movie.description}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      {movie.year}
-                      {movie.imdbRating && ` • ${movie.imdbRating}/10`}
-                    </div>
-                    {movie.genres.length > 0 && (
-                      <div className="flex gap-1 flex-wrap justify-end">
-                        {movie.genres.slice(0, 2).map((genre) => (
-                          <span
-                            key={genre}
-                            className="px-2 py-1 text-xs rounded bg-primary/10 text-primary"
-                          >
-                            {genre}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+  const MovieCard = ({ movie }: { movie: Movie }) => (
+    <button
+      onClick={() => router.push(`/movies/${movie.id}`)}
+      className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20"
+    >
+      <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
+        {movie.poster ? (
+          <img
+            src={movie.poster}
+            alt={movie.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
         ) : (
-          <div className="text-center py-20">
-            <Film size={48} className="text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">
-              {searchQuery ? "No movies found" : "Search for movies"}
-            </h2>
-            <p className="text-muted-foreground">
-              {searchQuery
-                ? "Try searching for a different movie"
-                : "Enter a movie title to get started"}
-            </p>
+          <div className="text-center p-4">
+            <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+            <p className="text-xs text-muted-foreground">{movie.title}</p>
+          </div>
+        )}
+
+        {/* Rating badge */}
+        {movie.imdbRating && (
+          <div className="absolute top-2 right-2 bg-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-primary-foreground">
+            {movie.imdbRating.toFixed(1)}
           </div>
         )}
       </div>
+      <div className="mt-3 px-1">
+        <p className="font-semibold text-sm truncate">{movie.title}</p>
+        <p className="text-xs text-muted-foreground">{movie.year}</p>
+      </div>
+    </button>
+  );
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
+        <p className="text-muted-foreground">Explore thousands of films to add to your watchlist</p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search
+          size={20}
+          className="absolute left-4 top-3.5 text-muted-foreground"
+        />
+        <input
+          type="text"
+          placeholder="Search by title or year..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+        />
+      </div>
+
+      {/* Genre Filter Chips */}
+      {allGenres.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setSelectedGenre(null)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              selectedGenre === null
+                ? "bg-primary text-primary-foreground"
+                : "bg-card border border-border text-foreground hover:border-primary/50"
+            }`}
+          >
+            All Genres
+          </button>
+          {allGenres.map((genre) => (
+            <button
+              key={genre}
+              onClick={() => setSelectedGenre(genre)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                selectedGenre === genre
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-card border border-border text-foreground hover:border-primary/50"
+              }`}
+            >
+              {genre}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Results */}
+      {loading ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading movies...</p>
+        </div>
+      ) : filteredMovies.length > 0 ? (
+        <div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Found {filteredMovies.length} movie{filteredMovies.length !== 1 ? "s" : ""}
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {filteredMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-card border border-border rounded-xl">
+          <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">No movies found matching your criteria</p>
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSelectedGenre(null);
+            }}
+            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+          >
+            Clear Filters
+          </button>
+        </div>
+      )}
     </div>
   );
 }
