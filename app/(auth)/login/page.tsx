@@ -1,164 +1,166 @@
-"use client";
+'use client';
 
-import { useState, FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Film, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    emailOrUsername: "",
-    password: "",
-  });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setError('');
+    setIsLoading(true);
+
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const result = await login(formData.emailOrUsername, formData.password);
-
-      if (!result.success) {
-        setError(result.error?.message || "Login failed");
-        return;
+      const success = await login(email, password);
+      if (success) {
+        router.push('/');
+      } else {
+        setError('Invalid email/username or password');
       }
-
-      router.push("/");
     } catch (err) {
-      setError("An error occurred. Please try again.");
-      console.error("Error:", err);
+      setError('An error occurred during login');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="flex items-center justify-center gap-3 font-bold text-2xl text-primary hover:text-primary/90 transition-colors mb-8"
-        >
-          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xl">
-            🎬
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* Logo/Brand */}
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Film className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold">MovieNight</h1>
           </div>
-          <span>MovieNight</span>
-        </Link>
-
-        {/* Login Card */}
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-          <h1 className="text-2xl font-bold mb-2">Sign In</h1>
-          <p className="text-muted-foreground mb-8">
-            Welcome back! Sign in to your account
+          <p className="text-muted-foreground">
+            Sign in to discover and plan movie nights with friends
           </p>
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
-              {error}
-            </div>
-          )}
+        {/* Login Form */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-            {/* Email/Username Field */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Email or Username
-              </label>
-              <div className="relative">
-                <Mail
-                  size={18}
-                  className="absolute left-3 top-3 text-muted-foreground"
-                />
-                <input
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">
+                  Email or Username
+                </label>
+                <Input
+                  id="email"
                   type="text"
-                  placeholder="user@example.com or username"
-                  value={formData.emailOrUsername}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      emailOrUsername: e.target.value,
-                    })
-                  }
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                  required
+                  placeholder="Enter your email or username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  autoComplete="username"
                 />
               </div>
-            </div>
 
-            {/* Password Field */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock
-                  size={18}
-                  className="absolute left-3 top-3 text-muted-foreground"
-                />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
-                  required
-                />
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading}
+                    autoComplete="current-password"
+                    className="pr-10"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-              {!loading && <ArrowRight size={18} />}
-            </button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+                size="lg"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
 
-          {/* Divider */}
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-card text-muted-foreground">
-                Don't have an account?
+            <div className="mt-6 text-center text-sm">
+              <span className="text-muted-foreground">
+                Don't have an account?{' '}
               </span>
+              <Link
+                href="/signup"
+                className="text-primary hover:underline font-medium"
+              >
+                Sign up
+              </Link>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Sign Up Link */}
-          <Link
-            href="/signup"
-            className="w-full py-2 px-4 rounded-lg border border-primary text-primary hover:bg-primary/10 transition-colors font-bold text-center block"
-          >
-            Create Account
-          </Link>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-muted-foreground text-sm">
-            Not sure?{" "}
-            <Link
-              href="/"
-              className="text-primary hover:text-primary/90 font-medium"
-            >
-              Learn more about MovieNight
-            </Link>
-          </p>
-        </div>
+        {/* Demo Credentials */}
+        <Card className="border-dashed border-primary/30">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-2">
+              <h3 className="font-medium text-sm">Demo Credentials</h3>
+              <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
+                <div>📧 ibrahim@example.com / 🔑 password123</div>
+                <div>📧 omar@example.com / 🔑 password123</div>
+                <div>📧 sara@example.com / 🔑 password123</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

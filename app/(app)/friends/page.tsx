@@ -1,352 +1,437 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  UserPlus,
+  Users,
+  Search,
+  Check,
+  X,
+  Clock,
+  Film,
+  Loader2,
+  UserCheck,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 interface Friend {
   id: string;
   name: string;
   username: string;
   avatar?: string;
-  friendshipId?: string;
-  friendsSince?: string;
 }
 
 interface FriendRequest {
   id: string;
-  fromUser: {
-    id: string;
-    name: string;
-    username: string;
-    avatar?: string;
-  };
-  toUser?: {
-    id: string;
-    name: string;
-    username: string;
-    avatar?: string;
-  };
+  fromUser: Friend;
+  toUser: Friend;
   sentAt: string;
 }
 
-interface FriendsData {
-  friends: Friend[];
-  incomingRequests: FriendRequest[];
-  outgoingRequests: FriendRequest[];
-}
+// Mock data
+const mockFriends: Friend[] = [
+  { id: '1', name: 'Ibrahim', username: 'ibrahim' },
+  { id: '2', name: 'Omar', username: 'omar' },
+  { id: '3', name: 'Sara', username: 'sara' },
+  { id: '4', name: 'Alex', username: 'alex' },
+  { id: '5', name: 'Maya', username: 'maya' },
+];
+
+const mockAllUsers: Friend[] = [
+  ...mockFriends,
+  { id: '6', name: 'Jordan', username: 'jordan' },
+  { id: '7', name: 'Casey', username: 'casey' },
+  { id: '8', name: 'Morgan', username: 'morgan' },
+];
+
+const mockIncomingRequests: FriendRequest[] = [
+  {
+    id: 'req-1',
+    fromUser: mockAllUsers[5],
+    toUser: mockAllUsers[0],
+    sentAt: '2024-01-14T10:30:00Z',
+  },
+];
+
+const mockOutgoingRequests: FriendRequest[] = [
+  {
+    id: 'req-2',
+    fromUser: mockAllUsers[0],
+    toUser: mockAllUsers[6],
+    sentAt: '2024-01-13T15:45:00Z',
+  },
+];
 
 export default function FriendsPage() {
-  const [data, setData] = useState<FriendsData>({
-    friends: [],
-    incomingRequests: [],
-    outgoingRequests: [],
-  });
-  const [tab, setTab] = useState<"friends" | "incoming" | "outgoing">(
-    "friends",
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Friend[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
+  const [sentRequests, setSentRequests] = useState<Set<string>>(
+    new Set(mockOutgoingRequests.map((r) => r.toUser.id))
   );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [newFriendId, setNewFriendId] = useState("");
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [incomingRequests, setIncomingRequests] =
+    useState<FriendRequest[]>(mockIncomingRequests);
+  const [currentFriends, setCurrentFriends] = useState<Set<string>>(
+    new Set(mockFriends.map((f) => f.id))
+  );
 
-  const fetchFriends = async () => {
-    try {
-      const token = localStorage.getItem("movienight_token");
-      const res = await fetch("/api/friends", {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-          "Content-Type": "application/json",
-        },
-      });
-      const result = await res.json();
-
-      if (!res.ok) {
-        setError(result.error || "Failed to fetch friends");
-        return;
-      }
-
-      setData(result.data);
-    } catch (err) {
-      setError("An error occurred");
-      console.error("Error:", err);
-    } finally {
-      setLoading(false);
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
     }
+
+    setIsSearching(true);
+    setTimeout(() => {
+      const results = mockAllUsers.filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(results);
+      setIsSearching(false);
+
+      if (results.length === 0) {
+        setMessage({ type: 'error', text: 'User not found' });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    }, 500);
   };
 
-  useEffect(() => {
-    fetchFriends();
-  }, []);
-
-  const handleAddFriend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFriendId.trim()) return;
-
-    setActionLoading("send");
-    try {
-      const token = localStorage.getItem("movienight_token");
-      const res = await fetch("/api/friends/request", {
-        method: "POST",
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ toUserId: newFriendId }),
+  const handleSendRequest = (targetUserId: string, username: string) => {
+    if (currentFriends.has(targetUserId)) {
+      setMessage({
+        type: 'info',
+        text: `You're already friends with @${username}`,
       });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
 
-      const data = await res.json();
+    if (sentRequests.has(targetUserId)) {
+      setMessage({
+        type: 'info',
+        text: `Request already sent to @${username}`,
+      });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
 
-      if (res.ok) {
-        setNewFriendId("");
-        toast({
-          title: "Success",
-          description: "Friend request sent successfully",
-        });
-        fetchFriends();
-      } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to send friend request",
-          variant: "error",
-        });
-      }
-    } catch (err) {
-      console.error("Error:", err);
+    setSentRequests((prev) => new Set([...prev, targetUserId]));
+    setMessage({ type: 'success', text: `Request sent to @${username}` });
+    setTimeout(() => setMessage(null), 3000);
+    toast({
+      title: 'Request sent! ✨',
+      description: `${username} will see your friend request.`,
+    });
+  };
+
+  const handleAcceptRequest = (requestId: string, username: string) => {
+    const request = incomingRequests.find((r) => r.id === requestId);
+    if (request) {
+      setCurrentFriends((prev) => new Set([...prev, request.fromUser.id]));
+      setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
+      setMessage({
+        type: 'success',
+        text: `You're now friends with @${username}!`,
+      });
       toast({
-        title: "Error",
-        description: "An error occurred while sending the request",
-        variant: "error",
+        title: 'Friend added! 🎉',
+        description: `${username} is now in your squad.`,
       });
-    } finally {
-      setActionLoading(null);
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
-  const handleRespondToRequest = async (
-    friendshipId: string,
-    action: "accept" | "reject",
-  ) => {
-    setActionLoading(friendshipId);
-    try {
-      const token = localStorage.getItem("movienight_token");
-      const res = await fetch(`/api/friends/${friendshipId}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: token ? `Bearer ${token}` : "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        toast({
-          title: "Success",
-          description:
-            action === "accept"
-              ? "Friend request accepted"
-              : "Friend request rejected",
-        });
-        fetchFriends();
-      } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to respond to friend request",
-          variant: "error",
-        });
-      }
-    } catch (err) {
-      console.error("Error:", err);
-      toast({
-        title: "Error",
-        description: "An error occurred while responding to the request",
-        variant: "error",
-      });
-    } finally {
-      setActionLoading(null);
-    }
+  const handleRejectRequest = (requestId: string, username: string) => {
+    setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
+    setMessage({ type: 'info', text: `Declined request from @${username}` });
+    setTimeout(() => setMessage(null), 3000);
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getStatusForUser = (targetUserId: string) => {
+    if (currentFriends.has(targetUserId)) return 'friends';
+    if (sentRequests.has(targetUserId)) return 'sent';
+    return 'none';
+  };
+
+  const userFriendsArray = Array.from(currentFriends)
+    .map((id) => mockFriends.find((f) => f.id === id))
+    .filter(Boolean) as Friend[];
 
   return (
-    <div>
-      <h1 className="text-4xl font-bold mb-8">Friends</h1>
-
-      {error && (
-        <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6">
-          {error}
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Squad</h1>
         </div>
-      )}
-
-      <div className="bg-card border border-border rounded-lg p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-4">Add Friend</h2>
-        <form onSubmit={handleAddFriend} className="flex gap-2">
-          <input
-            type="text"
-            value={newFriendId}
-            onChange={(e) => setNewFriendId(e.target.value)}
-            placeholder="Enter user ID or username..."
-            className="flex-1 px-4 py-2 rounded-lg border border-input bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-          />
-          <button
-            type="submit"
-            disabled={actionLoading === "send"}
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {actionLoading === "send" ? "Sending..." : "Send Request"}
-          </button>
-        </form>
-      </div>
-
-      <div className="flex gap-4 mb-8 border-b border-border">
-        <button
-          onClick={() => setTab("friends")}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === "friends"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Friends ({data.friends.length})
-        </button>
-        <button
-          onClick={() => setTab("incoming")}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === "incoming"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Incoming ({data.incomingRequests.length})
-        </button>
-        <button
-          onClick={() => setTab("outgoing")}
-          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
-            tab === "outgoing"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          Outgoing ({data.outgoingRequests.length})
-        </button>
-      </div>
-
-      {loading ? (
-        <p className="text-muted-foreground text-center py-8">Loading...</p>
-      ) : tab === "friends" ? (
-        data.friends.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            No friends yet
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.friends.map((friend) => (
-              <div
-                key={friend.id}
-                className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  {friend.avatar && (
-                    <img
-                      src={friend.avatar}
-                      alt={friend.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  )}
-                  <div>
-                    <p className="font-semibold">{friend.name || friend.username}</p>
-                    <p className="text-xs text-muted-foreground">
-                      @{friend.username}
-                    </p>
-                  </div>
-                </div>
-                <button className="px-3 py-1 text-xs bg-destructive/10 text-destructive rounded hover:bg-destructive/20 transition-colors">
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        )
-      ) : tab === "incoming" ? (
-        data.incomingRequests.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            No incoming requests
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {data.incomingRequests.map((request) => (
-              <div
-                key={request.id}
-                className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  {request.fromUser.avatar && (
-                    <img
-                      src={request.fromUser.avatar}
-                      alt={request.fromUser.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  )}
-                  <div>
-                    <p className="font-semibold">{request.fromUser.name || request.fromUser.username}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Sent {new Date(request.sentAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                   <button
-                     onClick={() => handleRespondToRequest(request.id, "accept")}
-                     disabled={actionLoading === request.id}
-                     className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
-                     {actionLoading === request.id ? "..." : "Accept"}
-                   </button>
-                   <button
-                     onClick={() => handleRespondToRequest(request.id, "reject")}
-                     disabled={actionLoading === request.id}
-                     className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-                   >
-                     {actionLoading === request.id ? "..." : "Reject"}
-                   </button>
-                 </div>
-              </div>
-            ))}
-          </div>
-        )
-      ) : data.outgoingRequests.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">
-          No outgoing requests
+        <p className="text-muted-foreground text-lg">
+          Manage your movie-watching circle and connect with friends.
         </p>
-      ) : (
-        <div className="space-y-4">
-          {data.outgoingRequests.map((request) => (
-            <div
-              key={request.id}
-              className="bg-card border border-border rounded-lg p-4 flex items-center justify-between"
+      </div>
+
+      {/* Message Alert */}
+      {message && (
+        <Alert
+          variant={message.type === 'error' ? 'destructive' : 'default'}
+          className={cn(
+            message.type === 'success' &&
+              'border-green-500 bg-green-50 dark:bg-green-950',
+            message.type === 'info' &&
+              'border-blue-500 bg-blue-50 dark:bg-blue-950'
+          )}
+        >
+          <AlertDescription>{message.text}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Search & Add Friend */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Find Friends
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by username or name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="pl-10"
+              />
+            </div>
+            <Button
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
             >
-              <div className="flex items-center gap-3">
-                {request.toUser?.avatar && (
-                  <img
-                    src={request.toUser.avatar}
-                    alt={request.toUser.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                )}
-                <div>
-                  <p className="font-semibold">{request.toUser?.name || request.toUser?.username}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Sent {new Date(request.sentAt).toLocaleDateString()}
-                  </p>
+              {isSearching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                'Search'
+              )}
+            </Button>
+          </div>
+
+          {/* Search Results */}
+          {searchResults.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Search Results
+              </h4>
+              <div className="space-y-2">
+                {searchResults.map((foundUser) => {
+                  const status = getStatusForUser(foundUser.id);
+                  return (
+                    <div
+                      key={foundUser.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Users className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{foundUser.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            @{foundUser.username}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {status === 'friends' && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          >
+                            <UserCheck className="h-3 w-3 mr-1" />
+                            Friends
+                          </Badge>
+                        )}
+                        {status === 'sent' && (
+                          <Badge variant="outline">
+                            <Clock className="h-3 w-3 mr-1" />
+                            Pending
+                          </Badge>
+                        )}
+                        {status === 'none' && (
+                          <Button
+                            size="sm"
+                            onClick={() =>
+                              handleSendRequest(foundUser.id, foundUser.username)
+                            }
+                          >
+                            <UserPlus className="h-4 w-4 mr-1" />
+                            Send Request
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Pending Friend Requests */}
+      {(incomingRequests.length > 0 || sentRequests.size > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              Pending Requests
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Incoming Requests */}
+            {incomingRequests.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-lg font-semibold">📥 Incoming Requests</h3>
+                <div className="space-y-2">
+                  {incomingRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="flex items-center justify-between p-4 border rounded-lg bg-accent/20"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                          <Users className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{request.fromUser.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            @{request.fromUser.username} •{' '}
+                            {formatDate(request.sentAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleAcceptRequest(
+                              request.id,
+                              request.fromUser.username
+                            )
+                          }
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleRejectRequest(
+                              request.id,
+                              request.fromUser.username
+                            )
+                          }
+                          className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Reject
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <span className="px-3 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded">
-                Pending
-              </span>
-            </div>
-          ))}
-        </div>
+            )}
+          </CardContent>
+        </Card>
       )}
+
+      {/* Your Squad */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            🎬 Your Squad
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {userFriendsArray.length} friend
+            {userFriendsArray.length !== 1 ? 's' : ''} in your movie circle
+          </p>
+        </CardHeader>
+        <CardContent>
+          {userFriendsArray.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No friends yet</h3>
+              <p className="text-muted-foreground">
+                Search for friends above to start building your movie-watching
+                squad!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userFriendsArray.map((friend) => (
+                <Card
+                  key={friend.id}
+                  className="border-l-4 border-l-primary/50 hover:border-l-primary transition-colors"
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Friend Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                          <span className="text-lg font-bold">
+                            {friend.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{friend.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            @{friend.username}
+                          </p>
+                        </div>
+                        <div className="text-2xl">🎭</div>
+                      </div>
+
+                      {/* No Activity Message */}
+                      <div className="bg-accent/20 p-3 rounded-lg text-center">
+                        <div className="text-2xl mb-1">🍿</div>
+                        <p className="text-xs text-muted-foreground">
+                          Watching together soon!
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

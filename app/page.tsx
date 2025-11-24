@@ -56,7 +56,7 @@ export default function HomePage() {
   // Check authentication
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/(auth)/login");
+      router.push("/(landing)");
     }
   }, [authLoading, user, router]);
 
