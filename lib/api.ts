@@ -286,10 +286,32 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       console.log("Could not load suggestion accuracy:", error);
     }
 
+    // Get movies watched this week
+    let moviesWatchedThisWeek = 0;
+    try {
+      const historyResponse = await fetch("/api/watch/history", {
+        headers: getAuthHeaders(),
+      });
+      if (historyResponse.ok) {
+        const historyData = await handleApiResponse<any[]>(historyResponse);
+        
+        // Calculate movies watched in the last 7 days
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        moviesWatchedThisWeek = historyData.filter((movie) => {
+          const watchedDate = new Date(movie.watchedAt);
+          return watchedDate >= oneWeekAgo;
+        }).length;
+      }
+    } catch (error) {
+      console.log("Could not load watch history:", error);
+    }
+
     return {
       totalFriends: friends.length,
       activeSuggestions: suggestionsData.length,
-      moviesWatchedThisWeek: 0, // TODO: Implement watched movies tracking
+      moviesWatchedThisWeek,
       suggestionAccuracy,
     };
   } catch (error) {
@@ -316,14 +338,40 @@ export async function getTrendingMovies(): Promise<TrendingMovie[]> {
       return [];
     }
 
-    return movies.slice(0, 5).map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      year: movie.year,
-      rating: movie.imdbRating || movie.rating || 0,
-      watchCount: 0, // TODO: Implement real watch count tracking
-      genres: movie.genres || [],
-    }));
+    // Get watch history to calculate watch counts
+    let watchHistory: any[] = [];
+    try {
+      const historyResponse = await fetch("/api/watch/history", {
+        headers: getAuthHeaders(),
+      });
+      if (historyResponse.ok) {
+        watchHistory = await handleApiResponse<any[]>(historyResponse);
+      }
+    } catch (error) {
+      console.log("Could not load watch history for trending:", error);
+    }
+
+    // Count watches per movie
+    const watchCountMap = new Map<string, number>();
+    watchHistory.forEach((watched) => {
+      watchCountMap.set(
+        watched.movieId,
+        (watchCountMap.get(watched.movieId) || 0) + 1,
+      );
+    });
+
+    // Sort by watch count and return top 5
+    return movies
+      .map((movie) => ({
+        id: movie.id,
+        title: movie.title,
+        year: movie.year,
+        rating: movie.imdbRating || movie.rating || 0,
+        watchCount: watchCountMap.get(movie.id) || 0,
+        genres: movie.genres || [],
+      }))
+      .sort((a, b) => b.watchCount - a.watchCount)
+      .slice(0, 5);
   } catch (error) {
     console.error("Failed to load trending movies:", error);
     return [];

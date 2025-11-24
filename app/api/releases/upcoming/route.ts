@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyAuth } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 
 // GET /api/releases/upcoming
 // Returns upcoming movie releases
 export async function GET(req: NextRequest) {
   try {
     // Verify authentication
-    const auth = await verifyAuth(req);
-    if (!auth.success) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }

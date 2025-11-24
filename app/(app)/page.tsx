@@ -109,7 +109,7 @@ export default function Home() {
          </a>
 
          <a
-           href="/squad"
+           href="/(app)/squad"
            className="block p-6 bg-card border border-border rounded-lg hover:border-primary transition-colors"
          >
            <h3 className="text-lg font-semibold mb-2">Friends</h3>

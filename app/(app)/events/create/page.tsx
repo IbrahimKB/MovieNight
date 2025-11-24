@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
@@ -69,9 +70,13 @@ function CreateEventPageInner() {
     setSubmitting(true);
 
     try {
+      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify({
           movieId,
           date,
@@ -83,13 +88,29 @@ function CreateEventPageInner() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Failed to create event");
+        const errorMsg = data.error || "Failed to create event";
+        setError(errorMsg);
+        toast({
+          title: "Error",
+          description: errorMsg,
+          variant: "error",
+        });
         return;
       }
 
-      router.push(`/events/${data.data.id}`);
+      toast({
+        title: "Success",
+        description: "Movie night created successfully",
+      });
+      router.push(`/(app)/events/${data.data.id}`);
     } catch (err) {
-      setError("An error occurred");
+      const errorMsg = "An error occurred while creating the event";
+      setError(errorMsg);
+      toast({
+        title: "Error",
+        description: errorMsg,
+        variant: "error",
+      });
       console.error("Error:", err);
     } finally {
       setSubmitting(false);

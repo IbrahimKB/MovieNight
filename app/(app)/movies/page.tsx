@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
@@ -17,6 +18,7 @@ export default function MoviesPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addingToWatchlist, setAddingToWatchlist] = useState<string | null>(null);
 
   const fetchMovies = async (query = "") => {
     setLoading(true);
@@ -57,6 +59,45 @@ export default function MoviesPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchMovies(search);
+  };
+
+  const handleAddToWatchlist = async (movieId: string) => {
+    setAddingToWatchlist(movieId);
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/watch/desire", {
+        method: "POST",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ movieId }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast({
+          title: "Success",
+          description: "Added to watchlist",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to add to watchlist",
+          variant: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      toast({
+        title: "Error",
+        description: "An error occurred while adding to watchlist",
+        variant: "error",
+      });
+    } finally {
+      setAddingToWatchlist(null);
+    }
   };
 
   return (
@@ -139,8 +180,12 @@ export default function MoviesPage() {
                   {movie.description}
                 </p>
 
-                <button className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
-                  Add to Watchlist
+                <button
+                  onClick={() => handleAddToWatchlist(movie.id)}
+                  disabled={addingToWatchlist === movie.id}
+                  className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {addingToWatchlist === movie.id ? "Adding..." : "Add to Watchlist"}
                 </button>
               </div>
             </div>

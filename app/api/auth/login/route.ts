@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
           role: user.role,
           joinedAt: user.joinedAt,
         },
-        token: session.sessionToken,
+        token: session,
       },
     });
   } catch (err) {

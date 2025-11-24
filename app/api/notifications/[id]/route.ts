@@ -5,7 +5,7 @@ import { ApiResponse } from "@/types";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -19,7 +19,8 @@ export async function DELETE(
       );
     }
 
-    const notificationId = params.id;
+    const { id } = await params;
+    const notificationId = id;
 
     // Verify notification belongs to current user
     const notification = await prisma.notification.findFirst({

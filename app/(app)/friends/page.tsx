@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
 interface Friend {
   id: string;
@@ -46,6 +47,7 @@ export default function FriendsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newFriendId, setNewFriendId] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchFriends = async () => {
     try {
@@ -80,6 +82,7 @@ export default function FriendsPage() {
     e.preventDefault();
     if (!newFriendId.trim()) return;
 
+    setActionLoading("send");
     try {
       const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/friends/request", {
@@ -91,12 +94,31 @@ export default function FriendsPage() {
         body: JSON.stringify({ toUserId: newFriendId }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
         setNewFriendId("");
+        toast({
+          title: "Success",
+          description: "Friend request sent successfully",
+        });
         fetchFriends();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to send friend request",
+          variant: "error",
+        });
       }
     } catch (err) {
       console.error("Error:", err);
+      toast({
+        title: "Error",
+        description: "An error occurred while sending the request",
+        variant: "error",
+      });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -104,6 +126,7 @@ export default function FriendsPage() {
     friendshipId: string,
     action: "accept" | "reject",
   ) => {
+    setActionLoading(friendshipId);
     try {
       const token = localStorage.getItem("movienight_token");
       const res = await fetch(`/api/friends/${friendshipId}`, {
@@ -115,11 +138,33 @@ export default function FriendsPage() {
         body: JSON.stringify({ action }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
+        toast({
+          title: "Success",
+          description:
+            action === "accept"
+              ? "Friend request accepted"
+              : "Friend request rejected",
+        });
         fetchFriends();
+      } else {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to respond to friend request",
+          variant: "error",
+        });
       }
     } catch (err) {
       console.error("Error:", err);
+      toast({
+        title: "Error",
+        description: "An error occurred while responding to the request",
+        variant: "error",
+      });
+    } finally {
+      setActionLoading(null);
     }
   };
 
@@ -145,9 +190,10 @@ export default function FriendsPage() {
           />
           <button
             type="submit"
-            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
+            disabled={actionLoading === "send"}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Send Request
+            {actionLoading === "send" ? "Sending..." : "Send Request"}
           </button>
         </form>
       </div>
@@ -249,19 +295,21 @@ export default function FriendsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => handleRespondToRequest(request.id, "accept")}
-                    className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:opacity-90 transition-opacity"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => handleRespondToRequest(request.id, "reject")}
-                    className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:opacity-90 transition-opacity"
-                  >
-                    Reject
-                  </button>
-                </div>
+                   <button
+                     onClick={() => handleRespondToRequest(request.id, "accept")}
+                     disabled={actionLoading === request.id}
+                     className="px-3 py-1 text-xs bg-green-600 text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                   >
+                     {actionLoading === request.id ? "..." : "Accept"}
+                   </button>
+                   <button
+                     onClick={() => handleRespondToRequest(request.id, "reject")}
+                     disabled={actionLoading === request.id}
+                     className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                   >
+                     {actionLoading === request.id ? "..." : "Reject"}
+                   </button>
+                 </div>
               </div>
             ))}
           </div>

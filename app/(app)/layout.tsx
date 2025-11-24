@@ -33,6 +33,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     return null; // Will redirect via useEffect
   }
 
+  const handleLogout = async () => {
+    await logout();
+    router.push("/(auth)/login");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <nav className="border-b border-border bg-card sticky top-0 z-50">
@@ -70,13 +75,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               Watchlist
             </button>
             <button
-              onClick={() => router.push("/squad")}
+              onClick={() => router.push("/(app)/squad")}
               className="text-sm hover:text-primary transition-colors"
             >
               Friends
             </button>
             <button
-              onClick={logout}
+              onClick={() => router.push("/(app)/settings")}
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Settings
+            </button>
+            <button
+              onClick={handleLogout}
               className="text-sm hover:text-primary transition-colors"
             >
               Logout
