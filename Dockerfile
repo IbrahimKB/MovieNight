@@ -19,6 +19,7 @@ RUN npx prisma generate
 # 5. Build Next.js (requires DATABASE_URL → passed via ARG)
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
+ENV PRISMA_SKIP_ENGINE_CHECK=true
 RUN npm run build
 
 
