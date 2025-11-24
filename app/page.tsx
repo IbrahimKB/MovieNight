@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import HeroSection from "@/components/hero-section";
 
 import {
   Calendar,
@@ -130,9 +131,9 @@ export default function HomePage() {
     );
   }
 
-  // Show nothing while redirecting to login
+  // Show hero section for unauthenticated users
   if (!user) {
-    return null;
+    return <HeroSection />;
   }
 
   return (
