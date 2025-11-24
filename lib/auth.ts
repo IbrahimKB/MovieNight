@@ -36,7 +36,7 @@ export async function getSessionFromCookie(): Promise<Session | null> {
 export async function getUserFromSession(session: Session): Promise<User | null> {
   try {
     const result = await query(
-      `SELECT id, username, email, "passwordHash", "createdAt",
+      `SELECT id, username, email, "password_hash", "createdAt",
               "updatedAt", name, role, "joinedAt", puid
        FROM public.users
        WHERE id = $1`,
