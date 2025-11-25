@@ -68,17 +68,17 @@ export default function SignupPage() {
     }
 
     try {
-      const success = await signup(
+      const result = await signup(
         formData.username,
         formData.email,
         formData.password,
         formData.name,
       );
 
-      if (success) {
+      if (result.success) {
         router.push('/');
       } else {
-        setError('Username or email already exists');
+        setError(result.error?.message || 'Username or email already exists');
       }
     } catch (err) {
       setError('An error occurred during signup');
