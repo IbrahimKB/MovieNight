@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
@@ -19,18 +19,11 @@ const sizeMap = {
  * MovieNight Brand Logo
  * Concept: Film reel meets connection node - representing cinema + social
  * Uses primary brand colors and scales responsively
+ *
+ * Note: This component is for client-side only (used in app layout navbar).
+ * For SSR pages (auth pages), use the Clapperboard icon instead.
  */
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Prevent hydration mismatch by not rendering until client is ready
-  if (!mounted) {
-    return <div className={cn(sizeMap[size], className)} />;
-  }
   return (
     <svg
       viewBox="0 0 512 512"
