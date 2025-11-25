@@ -173,19 +173,24 @@ export default function MoviesPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <Search
           size={20}
-          className="absolute left-4 top-3.5 text-muted-foreground"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
         />
         <input
           type="text"
           placeholder="Search by title or year..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
         />
-      </div>
+      </motion.div>
 
       {/* Genre Filter Chips */}
       {allGenres.length > 0 && (
