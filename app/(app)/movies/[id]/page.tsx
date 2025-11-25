@@ -50,7 +50,9 @@ export default function MovieDetailPage() {
   const [isMarkingWatched, setIsMarkingWatched] = useState(false);
   const [isSuggestingMovie, setIsSuggestingMovie] = useState(false);
   const [friendsWhoWatched, setFriendsWhoWatched] = useState<any[]>([]);
-  const [friendsRatings, setFriendsRatings] = useState<Record<string, number>>({});
+  const [friendsRatings, setFriendsRatings] = useState<Record<string, number>>(
+    {},
+  );
 
   const token =
     typeof window !== "undefined"
@@ -102,23 +104,31 @@ export default function MovieDetailPage() {
         // Fetch friends who watched this movie (from activity/stats)
         const friendsActivityRes = await fetch("/api/friends", { headers });
         const friendsActivityData = await friendsActivityRes.json();
-        if (friendsActivityData.success && Array.isArray(friendsActivityData.data?.friends)) {
+        if (
+          friendsActivityData.success &&
+          Array.isArray(friendsActivityData.data?.friends)
+        ) {
           // Filter friends who have watched this movie by checking their watch history
           const friendsWithActivity = await Promise.all(
             friendsActivityData.data.friends.map(async (friend: any) => {
               // Try to fetch friend's watch history to see if they watched this movie
               try {
-                const friendHistoryRes = await fetch(`/api/watch/history?userId=${friend.id}`, { headers });
+                const friendHistoryRes = await fetch(
+                  `/api/watch/history?userId=${friend.id}`,
+                  { headers },
+                );
                 const friendHistoryData = await friendHistoryRes.json();
                 if (Array.isArray(friendHistoryData.data)) {
-                  const watched = friendHistoryData.data.some((item: any) => item.movieId === movieId);
+                  const watched = friendHistoryData.data.some(
+                    (item: any) => item.movieId === movieId,
+                  );
                   return watched ? friend : null;
                 }
               } catch (e) {
                 // Silently fail for individual friend data
               }
               return null;
-            })
+            }),
           );
 
           setFriendsWhoWatched(friendsWithActivity.filter((f) => f !== null));
@@ -475,7 +485,9 @@ export default function MovieDetailPage() {
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-bold text-primary">
-                      {friend.name?.charAt(0) || friend.username?.charAt(0) || "U"}
+                      {friend.name?.charAt(0) ||
+                        friend.username?.charAt(0) ||
+                        "U"}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">

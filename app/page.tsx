@@ -7,7 +7,10 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MovieGridSkeleton, ListItemSkeleton } from "@/components/ui/skeleton-loader";
+import {
+  MovieGridSkeleton,
+  ListItemSkeleton,
+} from "@/components/ui/skeleton-loader";
 import HeroSection from "@/components/hero-section";
 
 import {
@@ -231,7 +234,9 @@ export default function HomePage() {
             >
               <RefreshCw className="h-5 w-5 text-primary" />
             </motion.div>
-            <span className="ml-2 text-sm text-muted-foreground">Refreshing...</span>
+            <span className="ml-2 text-sm text-muted-foreground">
+              Refreshing...
+            </span>
           </motion.div>
         )}
 
@@ -244,7 +249,10 @@ export default function HomePage() {
         >
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-32 bg-card rounded-lg border border-primary/10 animate-pulse" />
+              <div
+                key={i}
+                className="h-32 bg-card rounded-lg border border-primary/10 animate-pulse"
+              />
             ))
           ) : (
             <>
@@ -487,17 +495,19 @@ export default function HomePage() {
                               {release.title}
                             </p>
                             <div className="flex items-center gap-2 overflow-hidden">
-                              <Badge variant="outline" className="text-xs shrink-0">
+                              <Badge
+                                variant="outline"
+                                className="text-xs shrink-0"
+                              >
                                 {release.platform}
                               </Badge>
                               <span className="text-xs text-muted-foreground truncate">
-                                {new Date(release.releaseDate).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                  },
-                                )}
+                                {new Date(
+                                  release.releaseDate,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
                               </span>
                             </div>
                           </div>

@@ -19,7 +19,7 @@ export function MoviePosterSkeleton({
     <div
       className={cn(
         "relative overflow-hidden rounded-lg bg-muted aspect-[2/3]",
-        className
+        className,
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
@@ -31,12 +31,14 @@ export function MoviePosterSkeleton({
  * Movie Card Skeleton Loader
  * Full card with poster, title, and rating skeleton
  */
-export function MovieCardSkeleton({ className }: Omit<MoviePosterSkeletonProps, "count">) {
+export function MovieCardSkeleton({
+  className,
+}: Omit<MoviePosterSkeletonProps, "count">) {
   return (
     <div
       className={cn(
         "space-y-3 p-3 rounded-lg border border-primary/10 bg-card",
-        className
+        className,
       )}
     >
       {/* Poster skeleton */}
@@ -53,7 +55,10 @@ export function MovieCardSkeleton({ className }: Omit<MoviePosterSkeletonProps, 
         <div className="h-3 bg-muted rounded w-1/4 animate-pulse" />
         <div className="flex gap-1">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-3 w-3 bg-muted rounded-full animate-pulse" />
+            <div
+              key={i}
+              className="h-3 w-3 bg-muted rounded-full animate-pulse"
+            />
           ))}
         </div>
       </div>
@@ -79,12 +84,14 @@ export function MovieGridSkeleton({ count = 4 }: MoviePosterSkeletonProps) {
  * List Item Skeleton Loader
  * For movie lists with title and metadata
  */
-export function ListItemSkeleton({ className }: Omit<MoviePosterSkeletonProps, "count">) {
+export function ListItemSkeleton({
+  className,
+}: Omit<MoviePosterSkeletonProps, "count">) {
   return (
     <div
       className={cn(
         "flex items-center gap-3 p-3 rounded-lg border border-primary/10",
-        className
+        className,
       )}
     >
       {/* Poster thumbnail */}
@@ -123,9 +130,7 @@ export function FeedSkeleton({ count = 3 }: MoviePosterSkeletonProps) {
 export function CardSectionSkeleton({ title = true }: { title?: boolean }) {
   return (
     <div className="space-y-4 rounded-lg border border-primary/10 bg-card p-6">
-      {title && (
-        <div className="h-6 bg-muted rounded w-1/3 animate-pulse" />
-      )}
+      {title && <div className="h-6 bg-muted rounded w-1/3 animate-pulse" />}
       <div className="space-y-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <ListItemSkeleton key={i} />
