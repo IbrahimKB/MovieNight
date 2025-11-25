@@ -40,7 +40,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-4">
+          <div className="mx-auto mb-4 w-10 h-10">
             <BrandLogo size="lg" className="text-primary animate-pulse" />
           </div>
           <p className="text-muted-foreground">Loading MovieNight...</p>
