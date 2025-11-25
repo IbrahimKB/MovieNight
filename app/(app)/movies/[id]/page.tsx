@@ -452,8 +452,51 @@ export default function MovieDetailPage() {
           </motion.button>
         </motion.div>
 
+        {/* Social Context Section */}
+        {friendsWhoWatched.length > 0 && (
+          <motion.div
+            className="space-y-4 bg-card border border-primary/20 rounded-xl p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <span className="text-primary">👥</span> Friends Who Watched
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {friendsWhoWatched.map((friend) => (
+                <motion.div
+                  key={friend.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors border border-primary/10 hover:border-primary/30"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-sm font-bold text-primary">
+                      {friend.name?.charAt(0) || friend.username?.charAt(0) || "U"}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate">
+                      {friend.name || friend.username}
+                    </p>
+                    <p className="text-xs text-muted-foreground">✓ Watched</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* Additional Info */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card border border-border rounded-xl p-6">
+        <motion.div
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card border border-primary/20 rounded-xl p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4 }}
+        >
           <div>
             <p className="text-xs text-muted-foreground">Year</p>
             <p className="font-semibold">{movie.year}</p>
@@ -480,7 +523,7 @@ export default function MovieDetailPage() {
               </p>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* Suggest Modal - Using BottomSheet on mobile */}
