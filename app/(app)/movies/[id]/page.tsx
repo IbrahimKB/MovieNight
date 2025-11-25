@@ -106,6 +106,10 @@ export default function MovieDetailPage() {
   }, [movieId, token]);
 
   const handleAddToWatchlist = async () => {
+    const previousState = inWatchlist;
+    setIsAddingToWatchlist(true);
+    setInWatchlist(!inWatchlist);
+
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -119,14 +123,29 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
-        setInWatchlist(!inWatchlist);
+        if (!previousState) {
+          triggerConfetti({
+            particleCount: 80,
+            spread: 90,
+            origin: { y: 0.5 },
+          });
+        }
+      } else {
+        setInWatchlist(previousState);
       }
     } catch (error) {
       console.error("Failed to add to watchlist:", error);
+      setInWatchlist(previousState);
+    } finally {
+      setIsAddingToWatchlist(false);
     }
   };
 
   const handleMarkWatched = async () => {
+    const previousState = watched;
+    setIsMarkingWatched(true);
+    setWatched(!watched);
+
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -140,15 +159,24 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
-        setWatched(!watched);
+        if (!previousState) {
+          triggerCheckmark();
+        }
+      } else {
+        setWatched(previousState);
       }
     } catch (error) {
       console.error("Failed to mark watched:", error);
+      setWatched(previousState);
+    } finally {
+      setIsMarkingWatched(false);
     }
   };
 
   const handleSuggestToFriend = async () => {
     if (!selectedFriend) return;
+
+    setIsSuggestingMovie(true);
 
     try {
       const headers = {
@@ -167,11 +195,14 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
+        triggerPaperAirplane();
         setShowSuggestModal(false);
         setSelectedFriend(null);
       }
     } catch (error) {
       console.error("Failed to suggest movie:", error);
+    } finally {
+      setIsSuggestingMovie(false);
     }
   };
 
