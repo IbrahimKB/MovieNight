@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { tmdbClient } from "@/lib/tmdb";
 
 // ---------------------------------------------
 // Zod schema for updates
@@ -27,6 +28,30 @@ function getMovieId(req: NextRequest): string | null {
   return parts.at(-1) ?? null;
 }
 
+// Helper function to convert TMDB movie details to local format
+function mapTMDBMovieDetailsToLocal(tmdbMovie: any) {
+  return {
+    id: undefined,
+    tmdbId: tmdbMovie.id,
+    title: tmdbMovie.title,
+    year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+    genres: tmdbMovie.genres?.map((g: any) => g.name) || [],
+    platform: null,
+    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
+    description: tmdbMovie.overview || '',
+    imdbRating: tmdbMovie.vote_average || null,
+    rtRating: null,
+    releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+    runtime: tmdbMovie.runtime,
+    productionCompanies: tmdbMovie.production_companies?.map((c: any) => c.name) || [],
+  };
+}
+
+// Check if ID is a TMDB ID or local UUID
+function isTMDBId(id: string): boolean {
+  return /^\d+$/.test(id);
+}
+
 // ---------------------------------------------
 // GET /api/movies/[id]
 // ---------------------------------------------
@@ -41,6 +66,19 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       );
     }
 
+    // If ID looks like TMDB ID (all digits) and TMDB API is available
+    if (isTMDBId(id) && process.env.TMDB_API_KEY) {
+      const tmdbMovie = await tmdbClient.getMovieDetails(parseInt(id));
+      if (tmdbMovie) {
+        return NextResponse.json({
+          success: true,
+          data: mapTMDBMovieDetailsToLocal(tmdbMovie),
+          source: 'tmdb',
+        });
+      }
+    }
+
+    // Fallback to local database
     const movie = await prisma.movie.findUnique({
       where: { id },
     });
@@ -55,6 +93,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       data: movie,
+      source: 'local',
     });
   } catch (err) {
     console.error("GET movie error:", err);

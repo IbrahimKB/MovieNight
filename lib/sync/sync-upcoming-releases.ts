@@ -77,7 +77,7 @@ export async function syncUpcomingReleases() {
 
             // Upsert: update if exists, create if new
             await prisma.movie.upsert({
-              where: { imdbId: movie.id.toString() },
+              where: { tmdbId: movie.id },
               update: {
                 title: movie.title,
                 year: releaseYear,
@@ -91,7 +91,7 @@ export async function syncUpcomingReleases() {
                 updatedAt: new Date(),
               },
               create: {
-                imdbId: movie.id.toString(),
+                tmdbId: movie.id,
                 title: movie.title,
                 year: releaseYear,
                 description: movie.overview,

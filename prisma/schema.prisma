@@ -84,6 +84,7 @@ model Session {
 
 model Movie {
   id          String    @id @default(uuid()) @db.Uuid
+  tmdbId      Int?      @unique @map("tmdb_id")
   imdbId      String?   @unique @map("imdb_id")
   title       String
   year        Int
@@ -108,6 +109,7 @@ model Movie {
 
 model Release {
   id          String   @id @default(uuid()) @db.Uuid
+  tmdbId      Int?     @unique @map("tmdb_id")
   movieId     String   @db.Uuid @map("movie_id")
   title       String
   platform    String
