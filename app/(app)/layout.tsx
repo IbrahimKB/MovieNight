@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import {
   Home,
   Clapperboard,
