@@ -47,6 +47,9 @@ COPY --chown=nodejs:nodejs package.json package-lock.json ./
 # Switch to user BEFORE installing deps to avoid root ownership issues
 USER nodejs
 
+# Create node_modules manually to ensure ownership
+RUN mkdir -p /app/node_modules
+
 # Install prod deps (files will be owned by nodejs)
 RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
