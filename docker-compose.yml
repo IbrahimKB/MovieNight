@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: SuperSecurePassword123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SuperSecurePassword123}
       POSTGRES_DB: boksh_apps
     volumes:
       - /srv/storage/postgres:/var/lib/postgresql/data
@@ -20,7 +20,7 @@ services:
     build:
       context: .
       args:
-        DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps?sslmode=disable"
+        DATABASE_URL: ${DATABASE_URL}
     image: movienight:prod
     container_name: movienight
     restart: unless-stopped
@@ -28,7 +28,7 @@ services:
       - postgres
     environment:
       NODE_ENV: production
-      DATABASE_URL: "postgresql://postgres:SuperSecurePassword123@postgres:5432/boksh_apps?sslmode=disable"
+      DATABASE_URL: ${DATABASE_URL}
       TMDB_API_KEY: ${TMDB_API_KEY}
 
     # ✅ FIX: Force stable DNS inside Docker container

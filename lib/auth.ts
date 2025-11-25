@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { query } from "./db";
+import { prisma } from "./prisma";
 import { User, Session } from "@/types";
 
 const SESSION_COOKIE_NAME = "movienight_session";
@@ -15,15 +15,12 @@ export async function getSessionFromCookie(): Promise<Session | null> {
   if (!sessionToken) return null;
 
   try {
-     const result = await query(
-       `SELECT id, "session_token", "user_id", expires, "created_at"
-        FROM public.sessions
-        WHERE "session_token" = $1 AND expires > NOW()`,
-       [sessionToken]
-     );
+    const session = await prisma.session.findUnique({
+      where: { sessionToken },
+    });
 
-    if (result.rows.length === 0) return null;
-    return result.rows[0] as Session;
+    if (!session || session.expires < new Date()) return null;
+    return session as unknown as Session;
   } catch (err) {
     console.error("Error fetching session:", err);
     return null;
@@ -35,16 +32,13 @@ export async function getSessionFromCookie(): Promise<Session | null> {
 // -----------------------------------------------------
 export async function getUserFromSession(session: Session): Promise<User | null> {
   try {
-    const result = await query(
-      `SELECT id, username, email, "password_hash", "createdAt",
-              "updatedAt", name, role, "joinedAt", puid
-       FROM public.users
-       WHERE id = $1`,
-      [session.userId]
-    );
+    const user = await prisma.authUser.findUnique({
+      where: { id: session.userId },
+    });
 
-    if (result.rows.length === 0) return null;
-    return result.rows[0] as User;
+    if (!user) return null;
+    
+    return user as unknown as User;
   } catch (err) {
     console.error("Error fetching user:", err);
     return null;
@@ -67,12 +61,13 @@ export async function createSession(userId: string): Promise<string> {
   const sessionToken = crypto.randomUUID();
   const expires = new Date(Date.now() + SESSION_DURATION);
 
-  await query(
-     `INSERT INTO public.sessions
-        (id, "session_token", "user_id", expires, "created_at")
-      VALUES ($1, $2, $3, $4, NOW())`,
-     [crypto.randomUUID(), sessionToken, userId, expires.toISOString()]
-   );
+  await prisma.session.create({
+    data: {
+      sessionToken,
+      userId,
+      expires,
+    },
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE_NAME, sessionToken, {
@@ -90,10 +85,9 @@ export async function createSession(userId: string): Promise<string> {
 // Delete session
 // -----------------------------------------------------
 export async function deleteSession(sessionToken: string): Promise<void> {
-  await query(
-     `DELETE FROM public.sessions WHERE "session_token" = $1`,
-     [sessionToken]
-   );
+  await prisma.session.delete({
+    where: { sessionToken },
+  });
 
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE_NAME);

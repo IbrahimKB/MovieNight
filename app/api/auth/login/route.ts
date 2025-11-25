@@ -88,7 +88,6 @@ export async function POST(req: NextRequest) {
           role: user.role,
           joinedAt: user.joinedAt,
         },
-        token: session,
       },
     });
   } catch (err: any) {

@@ -33,7 +33,6 @@ interface AuthError {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   login: (
     email: string,
     password: string
@@ -73,7 +72,6 @@ interface ApiResponse<T = any> {
 // -----------------------------------------------------
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastError, setLastError] = useState<AuthError | null>(null);
 
@@ -82,10 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // -----------------------------------------------------
   useEffect(() => {
     const storedUser = localStorage.getItem("movienight_user");
-    const storedToken = localStorage.getItem("movienight_token");
     const loginTime = localStorage.getItem("movienight_login_time");
 
-    if (storedUser && storedToken) {
+    if (storedUser) {
       try {
         const loginTimestamp = loginTime ? parseInt(loginTime) : 0;
         const now = Date.now();
@@ -94,15 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (sessionDuration < maxSessionAge) {
           setUser(JSON.parse(storedUser));
-          setToken(storedToken);
         } else {
           localStorage.removeItem("movienight_user");
-          localStorage.removeItem("movienight_token");
           localStorage.removeItem("movienight_login_time");
         }
       } catch {
         localStorage.removeItem("movienight_user");
-        localStorage.removeItem("movienight_token");
         localStorage.removeItem("movienight_login_time");
       }
     }
@@ -152,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const result: ApiResponse<{ user: User; token: string }> =
+      const result: ApiResponse<{ user: User }> =
         await response.json();
 
       if (!response.ok) {
@@ -184,10 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         setUser(cleanUser);
-        setToken(result.data.token);
 
         localStorage.setItem("movienight_user", JSON.stringify(cleanUser));
-        localStorage.setItem("movienight_token", result.data.token);
         localStorage.setItem("movienight_login_time", Date.now().toString());
 
         setIsLoading(false);
@@ -280,7 +272,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ username, email, password, name }),
       });
 
-      const result: ApiResponse<{ user: User; token: string }> =
+      const result: ApiResponse<{ user: User }> =
         await response.json();
 
       if (!response.ok) {
@@ -311,10 +303,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         };
 
         setUser(cleanUser);
-        setToken(result.data.token);
 
         localStorage.setItem("movienight_user", JSON.stringify(cleanUser));
-        localStorage.setItem("movienight_token", result.data.token);
         localStorage.setItem("movienight_login_time", Date.now().toString());
 
         setIsLoading(false);
@@ -346,10 +336,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // -----------------------------------------------------
   const logout = () => {
     setUser(null);
-    setToken(null);
     localStorage.removeItem("movienight_user");
-    localStorage.removeItem("movienight_token");
     localStorage.removeItem("movienight_login_time");
+    
+    // Optional: Call logout API to delete session from DB
+    fetch(`${API_BASE}/auth/logout`, { method: "POST" }).catch(console.error);
   };
 
   const isAdmin = user?.role === "admin";
@@ -358,7 +349,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         login,
         signup,
         logout,

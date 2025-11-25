@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 // ---------------------------------------------------------------------------
 // Validation schema
@@ -219,7 +220,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const data = validation.data;
-    const updateData: any = {};
+    const updateData: Prisma.EventUpdateInput = {};
 
     if (data.date !== undefined) updateData.date = new Date(data.date);
     if (data.notes !== undefined) updateData.notes = data.notes || null;
