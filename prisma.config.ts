@@ -1,3 +1,10 @@
-// Prisma 7 configuration
-// Database URL is passed via environment variable and PrismaClient constructor
-export default {};
+import { defineConfig } from '@prisma/config';
+
+export default defineConfig({
+  datasources: {
+    db: {
+      provider: 'postgresql',
+      url: process.env.DATABASE_URL!,
+    },
+  },
+});

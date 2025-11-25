@@ -13,14 +13,17 @@ RUN npm install --legacy-peer-deps && npm cache clean --force
 # 3. Copy full project
 COPY . .
 
-# 4. Generate Prisma client
-RUN npx prisma generate
 
 # 5. Build Next.js (requires DATABASE_URL → passed via ARG)
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
+
+RUN npx prisma generate
+
 ENV PRISMA_SKIP_ENGINE_CHECK=true
 RUN npm run build
+
+
 
 # 6. Cleanup builder artifacts
 RUN npm cache clean --force && rm -rf /app/.next/cache
