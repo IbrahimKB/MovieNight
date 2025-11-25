@@ -189,31 +189,43 @@ export default function MoviesPage() {
 
       {/* Genre Filter Chips */}
       {allGenres.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <button
+        <motion.div
+          className="flex flex-wrap gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.button
             onClick={() => setSelectedGenre(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
               selectedGenre === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-card border border-border text-foreground hover:border-primary/50"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
             }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             All Genres
-          </button>
-          {allGenres.map((genre) => (
-            <button
+          </motion.button>
+          {allGenres.map((genre, idx) => (
+            <motion.button
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
                 selectedGenre === genre
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border border-border text-foreground hover:border-primary/50"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                  : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
               }`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {genre}
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Results */}
