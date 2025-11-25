@@ -1,7 +1,27 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { Search, Plus, UserX, Check, X as XIcon } from "lucide-react";
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  UserPlus,
+  Users,
+  Search,
+  Check,
+  X,
+  Clock,
+  Film,
+  Loader2,
+  UserCheck,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 interface Friend {
   id: string;
@@ -114,7 +134,104 @@ export default function FriendsPage() {
         method: "POST",
         headers,
         body: JSON.stringify({ targetUserId }),
+  fromUser: Friend;
+  toUser: Friend;
+  sentAt: string;
+}
+
+// Mock data
+const mockFriends: Friend[] = [
+  { id: '1', name: 'Ibrahim', username: 'ibrahim' },
+  { id: '2', name: 'Omar', username: 'omar' },
+  { id: '3', name: 'Sara', username: 'sara' },
+  { id: '4', name: 'Alex', username: 'alex' },
+  { id: '5', name: 'Maya', username: 'maya' },
+];
+
+const mockAllUsers: Friend[] = [
+  ...mockFriends,
+  { id: '6', name: 'Jordan', username: 'jordan' },
+  { id: '7', name: 'Casey', username: 'casey' },
+  { id: '8', name: 'Morgan', username: 'morgan' },
+];
+
+const mockIncomingRequests: FriendRequest[] = [
+  {
+    id: 'req-1',
+    fromUser: mockAllUsers[5],
+    toUser: mockAllUsers[0],
+    sentAt: '2024-01-14T10:30:00Z',
+  },
+];
+
+const mockOutgoingRequests: FriendRequest[] = [
+  {
+    id: 'req-2',
+    fromUser: mockAllUsers[0],
+    toUser: mockAllUsers[6],
+    sentAt: '2024-01-13T15:45:00Z',
+  },
+];
+
+export default function FriendsPage() {
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Friend[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
+  const [sentRequests, setSentRequests] = useState<Set<string>>(
+    new Set(mockOutgoingRequests.map((r) => r.toUser.id))
+  );
+  const [incomingRequests, setIncomingRequests] =
+    useState<FriendRequest[]>(mockIncomingRequests);
+  const [currentFriends, setCurrentFriends] = useState<Set<string>>(
+    new Set(mockFriends.map((f) => f.id))
+  );
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    setTimeout(() => {
+      const results = mockAllUsers.filter(
+        (user) =>
+          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(results);
+      setIsSearching(false);
+
+      if (results.length === 0) {
+        setMessage({ type: 'error', text: 'User not found' });
+        setTimeout(() => setMessage(null), 3000);
+      }
+    }, 500);
+  };
+
+  const handleSendRequest = (targetUserId: string, username: string) => {
+    if (currentFriends.has(targetUserId)) {
+      setMessage({
+        type: 'info',
+        text: `You're already friends with @${username}`,
       });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
+
+    if (sentRequests.has(targetUserId)) {
+      setMessage({
+        type: 'info',
+        text: `Request already sent to @${username}`,
+      });
+      setTimeout(() => setMessage(null), 3000);
+      return;
+    }
 
       if (res.ok) {
         setSearchResults(
@@ -208,6 +325,66 @@ export default function FriendsPage() {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">Loading friends...</p>
+    setSentRequests((prev) => new Set([...prev, targetUserId]));
+    setMessage({ type: 'success', text: `Request sent to @${username}` });
+    setTimeout(() => setMessage(null), 3000);
+    toast({
+      title: 'Request sent! ✨',
+      description: `${username} will see your friend request.`,
+    });
+  };
+
+  const handleAcceptRequest = (requestId: string, username: string) => {
+    const request = incomingRequests.find((r) => r.id === requestId);
+    if (request) {
+      setCurrentFriends((prev) => new Set([...prev, request.fromUser.id]));
+      setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
+      setMessage({
+        type: 'success',
+        text: `You're now friends with @${username}!`,
+      });
+      toast({
+        title: 'Friend added! 🎉',
+        description: `${username} is now in your squad.`,
+      });
+      setTimeout(() => setMessage(null), 3000);
+    }
+  };
+
+  const handleRejectRequest = (requestId: string, username: string) => {
+    setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
+    setMessage({ type: 'info', text: `Declined request from @${username}` });
+    setTimeout(() => setMessage(null), 3000);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getStatusForUser = (targetUserId: string) => {
+    if (currentFriends.has(targetUserId)) return 'friends';
+    if (sentRequests.has(targetUserId)) return 'sent';
+    return 'none';
+  };
+
+  const userFriendsArray = Array.from(currentFriends)
+    .map((id) => mockFriends.find((f) => f.id === id))
+    .filter(Boolean) as Friend[];
+
+  return (
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-6 w-6 text-primary" />
+          <h1 className="text-3xl font-bold">Squad</h1>
+        </div>
+        <p className="text-muted-foreground text-lg">
+          Manage your movie-watching circle and connect with friends.
+        </p>
       </div>
     );
   }
@@ -451,6 +628,69 @@ export default function FriendsPage() {
           )}
         </div>
       )}
+
+      {/* Your Squad */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            🎬 Your Squad
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {userFriendsArray.length} friend
+            {userFriendsArray.length !== 1 ? 's' : ''} in your movie circle
+          </p>
+        </CardHeader>
+        <CardContent>
+          {userFriendsArray.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No friends yet</h3>
+              <p className="text-muted-foreground">
+                Search for friends above to start building your movie-watching
+                squad!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userFriendsArray.map((friend) => (
+                <Card
+                  key={friend.id}
+                  className="border-l-4 border-l-primary/50 hover:border-l-primary transition-colors"
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Friend Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+                          <span className="text-lg font-bold">
+                            {friend.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{friend.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            @{friend.username}
+                          </p>
+                        </div>
+                        <div className="text-2xl">🎭</div>
+                      </div>
+
+                      {/* No Activity Message */}
+                      <div className="bg-accent/20 p-3 rounded-lg text-center">
+                        <div className="text-2xl mb-1">🍿</div>
+                        <p className="text-xs text-muted-foreground">
+                          Watching together soon!
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

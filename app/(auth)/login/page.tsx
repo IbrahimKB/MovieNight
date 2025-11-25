@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
@@ -7,34 +7,36 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Lock, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { login } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    emailOrUsername: "",
-    password: "",
-  });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setError('');
+    setIsLoading(true);
+
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const result = await login(formData.emailOrUsername, formData.password);
-
-      if (!result.success) {
-        setError(result.error?.message || "Login failed");
-        return;
+      const success = await login(email, password);
+      if (success) {
+        router.push('/');
+      } else {
+        setError('Invalid email/username or password');
       }
-
-      router.push("/");
     } catch (err) {
-      setError("An error occurred. Please try again.");
-      console.error("Error:", err);
+      setError('An error occurred during login');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 

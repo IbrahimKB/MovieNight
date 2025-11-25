@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
@@ -7,43 +7,96 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Lock, User, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function SignupPage() {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    name: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { signup } = useAuth();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    name: "",
-  });
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const validateForm = () => {
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.name ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      return 'Please fill in all fields';
+    }
+
+    if (formData.username.length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      return 'Please enter a valid email address';
+    }
+
+    if (formData.password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return 'Passwords do not match';
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setError('');
+    setIsLoading(true);
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const result = await signup(
+      const success = await signup(
         formData.username,
         formData.email,
         formData.password,
         formData.name,
       );
 
-      if (!result.success) {
-        setError(result.error?.message || "Signup failed");
-        return;
+      if (success) {
+        router.push('/');
+      } else {
+        setError('Username or email already exists');
       }
-
-      router.push("/");
     } catch (err) {
-      setError("An error occurred. Please try again.");
-      console.error("Error:", err);
+      setError('An error occurred during signup');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
+
+  const getPasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+    if (password.match(/\d/)) strength++;
+    if (password.match(/[^a-zA-Z\d]/)) strength++;
+    return strength;
+  };
+
+  const passwordStrength = getPasswordStrength(formData.password);
 
   return (
     <div className="min-h-screen relative w-full overflow-hidden">
@@ -252,7 +305,6 @@ export default function SignupPage() {
                   Already have an account?
                 </span>
               </div>
-            </div>
 
             {/* Login Link */}
             <Link
