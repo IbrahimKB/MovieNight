@@ -420,80 +420,94 @@ export default function HomePage() {
             />
 
             {/* Upcoming Releases */}
-            <Card className="lg:block">
-              <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="hidden sm:inline">Coming Soon</span>
-                    <span className="sm:hidden">Releases</span>
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/releases")}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  >
-                    <span className="hidden sm:inline">View Calendar</span>
-                    <span className="sm:hidden">View All</span>
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-2 sm:space-y-3">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
-                      >
-                        <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-muted rounded animate-pulse" />
-                          <div className="h-2 bg-muted rounded animate-pulse w-1/2" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : recentReleases.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No upcoming releases
-                  </p>
-                ) : (
-                  recentReleases.slice(0, 2).map((release) => (
-                    <div
-                      key={release.id}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Card className="lg:block">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline">Coming Soon</span>
+                      <span className="sm:hidden">Releases</span>
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => router.push("/releases")}
+                      className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                     >
-                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <p className="font-medium text-xs sm:text-sm leading-none truncate">
-                          {release.title}
-                        </p>
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            {release.platform}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {new Date(release.releaseDate).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </span>
-                        </div>
-                      </div>
+                      <span className="hidden sm:inline">View Calendar</span>
+                      <span className="sm:hidden">View All</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-2 sm:space-y-3">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2].map((i) => (
+                        <ListItemSkeleton key={i} />
+                      ))}
                     </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
+                  ) : recentReleases.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No upcoming releases
+                    </p>
+                  ) : (
+                    <motion.div
+                      className="space-y-2"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        visible: {
+                          transition: {
+                            staggerChildren: 0.1,
+                          },
+                        },
+                      }}
+                    >
+                      {recentReleases.slice(0, 2).map((release) => (
+                        <motion.div
+                          key={release.id}
+                          variants={{
+                            hidden: { opacity: 0, x: -20 },
+                            visible: { opacity: 1, x: 0 },
+                          }}
+                          className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                          onClick={() => router.push("/releases")}
+                        >
+                          <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <p className="font-medium text-xs sm:text-sm leading-none truncate">
+                              {release.title}
+                            </p>
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <Badge variant="outline" className="text-xs shrink-0">
+                                {release.platform}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground truncate">
+                                {new Date(release.releaseDate).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Suggestion Leaderboard */}
             <SuggestionLeaderboard />
