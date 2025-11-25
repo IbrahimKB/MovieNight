@@ -160,6 +160,16 @@
 }
 
 @layer components {
+  /* Cinematic card component with neon glow */
+  .card-cinematic {
+    @apply rounded-xl border border-primary/20 bg-card text-card-foreground shadow-sm;
+    @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300;
+  }
+
+  .card-cinematic.glow {
+    @apply animate-glow-pulse;
+  }
+
   /* Mobile-optimized card component */
   .mobile-card {
     @apply rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow;
@@ -167,6 +177,24 @@
 
   .mobile-card.interactive {
     @apply active:scale-[0.98] transition-transform;
+  }
+
+  /* Cinematic button with micro-interactions */
+  .btn-cinematic {
+    @apply relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium;
+    @apply rounded-lg px-4 py-2 transition-all duration-200;
+    @apply hover:scale-105 active:scale-95;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .btn-cinematic-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    @apply hover:shadow-lg hover:shadow-primary/50;
+  }
+
+  .btn-cinematic-ghost {
+    @apply bg-transparent hover:bg-accent/50;
+    @apply border border-primary/30 hover:border-primary/60;
   }
 
   /* Touch-friendly buttons */
