@@ -30,19 +30,22 @@ function getMovieId(req: NextRequest): string | null {
 
 // Helper function to convert TMDB movie details to local format
 function mapTMDBMovieDetailsToLocal(tmdbMovie: any) {
+  const releaseDate = tmdbMovie.release_date || tmdbMovie.first_air_date;
+  const runtime = tmdbMovie.runtime || (tmdbMovie.episode_run_time?.length > 0 ? tmdbMovie.episode_run_time[0] : 0);
+  
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title,
-    year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+    year: new Date(releaseDate || '2024-01-01').getFullYear(),
     genres: tmdbMovie.genres?.map((g: any) => g.name) || [],
     platform: null,
     poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
     description: tmdbMovie.overview || '',
     imdbRating: tmdbMovie.vote_average || null,
     rtRating: null,
-    releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
-    runtime: tmdbMovie.runtime,
+    releaseDate: releaseDate ? new Date(releaseDate) : null,
+    runtime: runtime,
     productionCompanies: tmdbMovie.production_companies?.map((c: any) => c.name) || [],
   };
 }

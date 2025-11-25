@@ -48,7 +48,7 @@ export async function syncTrendingMovies(
             poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
             description: tmdbMovie.overview || 'No description available',
             imdbRating: tmdbMovie.vote_average || null,
-            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '') : null,
           },
         });
 
@@ -121,7 +121,7 @@ export async function syncUpcomingMovies(
             poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
             description: tmdbMovie.overview || 'No description available',
             imdbRating: tmdbMovie.vote_average || null,
-            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '') : null,
           },
         });
 
@@ -281,7 +281,7 @@ export async function syncTMDBMovie(tmdbMovie: TMDBMovie): Promise<any> {
             poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
             description: tmdbMovie.overview || 'No description available',
             imdbRating: tmdbMovie.vote_average || null,
-            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '') : null,
           },
         });
 

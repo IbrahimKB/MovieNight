@@ -20,7 +20,8 @@ export interface TMDBMovie {
 }
 
 export interface TMDBMovieDetails extends TMDBMovie {
-  runtime: number;
+  runtime?: number;
+  episode_run_time?: number[];
   genres: Array<{ id: number; name: string }>;
   production_companies: Array<{ id: number; name: string }>;
 }
@@ -95,8 +96,14 @@ class TMDBClient {
       const response = await this.getAxiosInstance().get(`/movie/${movieId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching movie details:', error);
-      return null;
+      // If movie not found, try TV show
+      try {
+        const tvResponse = await this.getAxiosInstance().get(`/tv/${movieId}`);
+        return { ...tvResponse.data, media_type: 'tv' };
+      } catch (tvError) {
+        console.error('Error fetching movie/tv details:', error);
+        return null;
+      }
     }
   }
 

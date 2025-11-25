@@ -11,18 +11,19 @@ const PageSchema = z.object({
 
 // Helper function to convert TMDB movie to local format
 function mapTMDBMovieToLocal(tmdbMovie: any) {
+  const releaseDate = tmdbMovie.release_date || tmdbMovie.first_air_date;
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title,
-    year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+    year: new Date(releaseDate || '2024-01-01').getFullYear(),
     genres: tmdbMovie.genre_ids || [],
     platform: null,
     poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
     description: tmdbMovie.overview || '',
     imdbRating: tmdbMovie.vote_average || null,
     rtRating: null,
-    releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+    releaseDate: releaseDate ? new Date(releaseDate) : null,
   };
 }
 
