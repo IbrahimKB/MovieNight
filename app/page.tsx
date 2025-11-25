@@ -233,6 +233,7 @@ export default function HomePage() {
                 : "Find friends to get started"
             }
             color="text-blue-500"
+            index={0}
           />
 
           <StatCard
@@ -245,6 +246,7 @@ export default function HomePage() {
                 : "No pending suggestions"
             }
             color="text-green-500"
+            index={1}
           />
 
           <StatCard
@@ -257,6 +259,7 @@ export default function HomePage() {
                 : "Start watching"
             }
             color="text-purple-500"
+            index={2}
           />
 
           <StatCard
@@ -275,6 +278,7 @@ export default function HomePage() {
                 : "Make suggestions to track"
             }
             color="text-orange-500"
+            index={3}
           />
         </div>
 
