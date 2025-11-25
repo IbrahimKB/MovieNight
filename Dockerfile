@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # 2. Install ALL dependencies
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps && npm cache clean --force
 
 # 3. Copy full project
 COPY . .
@@ -22,6 +22,9 @@ ENV DATABASE_URL=${DATABASE_URL}
 ENV PRISMA_SKIP_ENGINE_CHECK=true
 RUN npm run build
 
+# 6. Cleanup builder artifacts
+RUN npm cache clean --force && rm -rf /app/.next/cache
+
 
 # ---------------------------------------------
 # Stage 2: Runner (production runtime)
@@ -33,7 +36,7 @@ ENV NODE_ENV=production
 
 # Install ONLY production deps
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --legacy-peer-deps
+RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 # Copy Next.js build
 COPY --from=builder /app/.next ./.next
@@ -46,6 +49,10 @@ COPY --from=builder /app/prisma ./prisma
 
 # Copy environment file if it exists
 COPY .env* ./
+
+# Create non-root user for security
+RUN useradd -m -u 1001 nodejs && chown -R nodejs:nodejs /app
+USER nodejs
 
 EXPOSE 3000
 
