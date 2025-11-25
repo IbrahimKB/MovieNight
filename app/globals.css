@@ -439,12 +439,33 @@
   }
 
   /* Interactive element minimum sizes (WCAG 2.5.5) */
-  button:not(.btn-sm),
-  [role="button"]:not(.btn-sm),
+  button,
+  [role="button"],
   input[type="checkbox"],
-  input[type="radio"] {
+  input[type="radio"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"],
+  a[role="button"] {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Search inputs and text inputs should be at least 44px in height on mobile */
+  input[type="text"],
+  input[type="search"],
+  textarea,
+  select {
+    min-height: 44px;
+  }
+
+  @media (min-width: 768px) {
+    input[type="text"],
+    input[type="search"],
+    textarea,
+    select {
+      min-height: auto;
+    }
   }
 
   /* Error state indicators */
