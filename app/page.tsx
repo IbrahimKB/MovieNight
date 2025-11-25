@@ -93,31 +93,39 @@ export default function HomePage() {
     icon: Icon,
     trend,
     color = "text-primary",
+    index = 0,
   }: {
     title: string;
     value: string | number;
     icon: any;
     trend?: string;
     color?: string;
+    index?: number;
   }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1 min-w-0 flex-1">
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-              {title}
-            </p>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value}</p>
-            {trend && (
-              <p className="text-xs text-muted-foreground truncate hidden sm:block">
-                {trend}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+    >
+      <Card className="hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                {title}
               </p>
-            )}
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value}</p>
+              {trend && (
+                <p className="text-xs text-muted-foreground truncate hidden sm:block">
+                  {trend}
+                </p>
+              )}
+            </div>
+            <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)} />
           </div>
-          <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)} />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   // Show loading while checking auth
