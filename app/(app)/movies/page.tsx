@@ -218,8 +218,10 @@ export default function MoviesPage() {
 
       {/* Results */}
       {loading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading movies...</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <MovieCardSkeleton key={i} />
+          ))}
         </div>
       ) : filteredMovies.length > 0 ? (
         <div>
@@ -227,14 +229,58 @@ export default function MoviesPage() {
             Found {filteredMovies.length} movie
             {filteredMovies.length !== 1 ? "s" : ""}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {filteredMovies.map((movie, index) => (
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.05,
+                },
+              },
+            }}
+          >
+            {displayedMovies.map((movie, index) => (
               <MovieCard key={movie.id} movie={movie} index={index} />
             ))}
-          </div>
+          </motion.div>
+
+          {/* Infinite scroll trigger */}
+          {hasMore && (
+            <div ref={observerTarget} className="mt-8 flex justify-center py-8">
+              {isLoadingMore && (
+                <motion.div
+                  className="flex items-center gap-2"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                </motion.div>
+              )}
+            </div>
+          )}
+
+          {!hasMore && displayedMovies.length > 0 && (
+            <motion.div
+              className="text-center py-8 text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <p>No more movies to load</p>
+            </motion.div>
+          )}
         </div>
       ) : (
-        <div className="text-center py-12 bg-card border border-border rounded-xl">
+        <motion.div
+          className="text-center py-12 bg-card border border-primary/20 rounded-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
             No movies found matching your criteria
@@ -244,11 +290,11 @@ export default function MoviesPage() {
               setSearchQuery("");
               setSelectedGenre(null);
             }}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
           >
             Clear Filters
           </button>
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );
