@@ -49,15 +49,16 @@ COPY --from=builder /app/prisma ./prisma
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
+# Install prisma CLI explicitly for migrations
+# Standalone output includes the Client but not the CLI
+# We match the version in package.json
+# We do this BEFORE switching to user nextjs to ensure we have permissions
+RUN npm install prisma@5.21.1
+
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Install prisma CLI explicitly for migrations
-# Standalone output includes the Client but not the CLI
-# We match the version in package.json
-RUN npm install prisma@5.21.1
 
 USER nextjs
 
