@@ -76,11 +76,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white font-black text-lg">
-              🎬
-            </div>
+            <BrandLogo size="md" className="text-primary" />
             <span className="hidden sm:inline text-xl font-bold text-primary">
               MovieNight
             </span>
