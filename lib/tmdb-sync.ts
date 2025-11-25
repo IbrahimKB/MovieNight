@@ -42,18 +42,18 @@ export async function syncTrendingMovies(
         await prisma.movie.create({
           data: {
             tmdbId: tmdbMovie.id,
-            title: tmdbMovie.title,
-            year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+            title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+            year: new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '2024-01-01').getFullYear(),
             genres: tmdbMovie.genre_ids?.map(String) || [],
             poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
             description: tmdbMovie.overview || 'No description available',
             imdbRating: tmdbMovie.vote_average || null,
-            releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
           },
         });
 
         synced++;
-        console.log(`[TMDB Sync] ✓ Synced: ${tmdbMovie.title}`);
+        console.log(`[TMDB Sync] ✓ Synced: ${tmdbMovie.title || tmdbMovie.name}`);
       } catch (error) {
         failed++;
         console.error(`[TMDB Sync] ✗ Failed to sync ${tmdbMovie.title}:`, error);
@@ -115,23 +115,23 @@ export async function syncUpcomingMovies(
         const createdMovie = await prisma.movie.create({
           data: {
             tmdbId: tmdbMovie.id,
-            title: tmdbMovie.title,
-            year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+            title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+            year: new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '2024-01-01').getFullYear(),
             genres: tmdbMovie.genre_ids?.map(String) || [],
             poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
             description: tmdbMovie.overview || 'No description available',
             imdbRating: tmdbMovie.vote_average || null,
-            releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
           },
         });
 
         // Create release entry if it doesn't exist
-        const releaseDate = new Date(tmdbMovie.release_date || Date.now());
+        const releaseDate = new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || Date.now());
         await prisma.release.create({
           data: {
             tmdbId: tmdbMovie.id,
             movieId: createdMovie.id,
-            title: tmdbMovie.title,
+            title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
             platform: 'Theater',
             releaseDate,
             year: releaseDate.getFullYear(),
@@ -142,10 +142,10 @@ export async function syncUpcomingMovies(
         });
 
         synced++;
-        console.log(`[TMDB Sync] ✓ Synced: ${tmdbMovie.title} (${releaseDate.toLocaleDateString()})`);
+        console.log(`[TMDB Sync] ✓ Synced: ${tmdbMovie.title || tmdbMovie.name} (${releaseDate.toLocaleDateString()})`);
       } catch (error) {
         failed++;
-        console.error(`[TMDB Sync] ✗ Failed to sync ${tmdbMovie.title}:`, error);
+        console.error(`[TMDB Sync] ✗ Failed to sync ${tmdbMovie.title || tmdbMovie.name}:`, error);
       }
     }
 
@@ -272,18 +272,18 @@ export async function syncTMDBMovie(tmdbMovie: TMDBMovie): Promise<any> {
       return existing;
     }
 
-    const movie = await prisma.movie.create({
-      data: {
-        tmdbId: tmdbMovie.id,
-        title: tmdbMovie.title,
-        year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
-        genres: tmdbMovie.genre_ids?.map(String) || [],
-        poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-        description: tmdbMovie.overview || 'No description available',
-        imdbRating: tmdbMovie.vote_average || null,
-        releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
-      },
-    });
+        const movie = await prisma.movie.create({
+          data: {
+            tmdbId: tmdbMovie.id,
+            title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+            year: new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '2024-01-01').getFullYear(),
+            genres: tmdbMovie.genre_ids?.map(String) || [],
+            poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
+            description: tmdbMovie.overview || 'No description available',
+            imdbRating: tmdbMovie.vote_average || null,
+            releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date) : null,
+          },
+        });
 
     return movie;
   } catch (error) {

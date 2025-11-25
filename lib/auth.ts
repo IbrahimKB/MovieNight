@@ -3,7 +3,7 @@ import { prisma } from "./prisma";
 import { User, Session } from "@/types";
 
 const SESSION_COOKIE_NAME = "movienight_session";
-const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
+const SESSION_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // -----------------------------------------------------
 // Fetch session using the cookie

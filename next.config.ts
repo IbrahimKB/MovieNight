@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
   },
   // Compression and optimization
   compress: true,
+  output: "standalone",
   poweredByHeader: false,
   // Disable ESLint during production builds to prevent circular reference issues
   eslint: {

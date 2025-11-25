@@ -6,11 +6,14 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p';
 
 export interface TMDBMovie {
   id: number;
-  title: string;
+  title?: string; // Movies have title
+  name?: string;  // TV shows have name
+  media_type?: 'movie' | 'tv';
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
-  release_date: string;
+  release_date?: string; // Movies
+  first_air_date?: string; // TV Shows
   vote_average: number;
   vote_count: number;
   genre_ids: number[];
@@ -58,13 +61,23 @@ class TMDBClient {
         return null;
       }
 
-      const response = await this.getAxiosInstance().get('/search/movie', {
+      // Search for both movies and TV shows separately and combine them if needed
+      // For now, let's focus on movies as per the method name, but we can extend this.
+      const response = await this.getAxiosInstance().get('/search/multi', {
         params: {
           query,
           page,
           include_adult: false,
         },
       });
+      
+      // Filter to keep only movies and tv shows
+      if (response.data && response.data.results) {
+        response.data.results = response.data.results.filter(
+          (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+        );
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Error searching movies:', error);

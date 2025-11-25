@@ -1,73 +1,67 @@
-# ---------------------------------------------
-# Stage 1: Builder (installs deps, builds Next)
-# ---------------------------------------------
-FROM node:20-bullseye AS builder
+FROM node:20-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# 1. Copy package manifests
-COPY package.json package-lock.json ./
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
+RUN npm ci --legacy-peer-deps
 
-# 2. Install ALL dependencies
-RUN npm install --legacy-peer-deps && npm cache clean --force
 
-# 3. Copy full project
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-
-# 5. Build Next.js (requires DATABASE_URL → passed via ARG)
+# Generate Prisma Client
+# We need the env var if schema validation requires it, but usually generate works without DB connection
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
+RUN npx prisma generate
 
-# Use relative path in builder stage as we haven't switched users yet
-RUN ./node_modules/.bin/prisma generate
+# Disable telemetry during build
+ENV NEXT_TELEMETRY_DISABLED=1
 
-ENV PRISMA_SKIP_ENGINE_CHECK=true
+# Build the application
 RUN npm run build
 
-
-
-# 6. Cleanup builder artifacts
-RUN npm cache clean --force && rm -rf /app/.next/cache
-
-
-# ---------------------------------------------
-# Stage 2: Runner (production runtime)
-# ---------------------------------------------
-FROM node:20-bullseye AS runner
+# Production image, copy all the files and run next
+FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# Create non-root user EARLY to avoid chown -R later
-RUN useradd -m -u 1001 nodejs
+# Create a non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Ensure /app is owned by nodejs (it was created by WORKDIR as root)
-# This is fast because /app is empty
-RUN chown nodejs:nodejs /app
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
 
-# Install ONLY production deps
-# Copy with ownership so nodejs user can write to it during install if needed
-COPY --chown=nodejs:nodejs package.json package-lock.json ./
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Switch to user BEFORE installing deps to avoid root ownership issues
-USER nodejs
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Install prod deps (files will be owned by nodejs)
-RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
+# Install prisma CLI explicitly for migrations
+# Standalone output includes the Client but not the CLI
+# We match the version in package.json
+RUN npm install prisma@5.21.1
 
-# Copy Next.js build with ownership
-COPY --chown=nodejs:nodejs --from=builder /app/.next ./.next
-COPY --chown=nodejs:nodejs --from=builder /app/public ./public
-
-# Copy Prisma client + schema with ownership
-COPY --chown=nodejs:nodejs --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --chown=nodejs:nodejs --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --chown=nodejs:nodejs --from=builder /app/prisma ./prisma
-
-# Copy environment file if it exists
-COPY --chown=nodejs:nodejs .env* ./
+USER nextjs
 
 EXPOSE 3000
 
-# Run migrations and start app
-CMD ["sh", "-c", "/app/node_modules/.bin/prisma migrate deploy && npm start"]
+# Run migrations and start the server
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
