@@ -206,7 +206,12 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
         {/* Welcome Header */}
-        <div className="space-y-1 sm:space-y-2">
+        <motion.div
+          className="space-y-1 sm:space-y-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
             Welcome back, {user?.name?.split(" ")[0] || "Movie Lover"}! 🎬
           </h1>
@@ -214,7 +219,7 @@ export default function HomePage() {
             Discover what your friends are watching and find your next great
             movie
           </p>
-        </div>
+        </motion.div>
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
