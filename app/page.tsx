@@ -146,7 +146,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Navigation Header */}
       <nav className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -484,6 +489,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 }
