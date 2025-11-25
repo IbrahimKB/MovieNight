@@ -191,13 +191,13 @@ export async function syncMovieDetails(
       movie = await prisma.movie.create({
         data: {
           tmdbId: tmdbMovie.id,
-          title: tmdbMovie.title,
-          year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+          title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+          year: new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '2024-01-01').getFullYear(),
           genres: tmdbMovie.genres?.map((g) => g.name) || [],
           poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
           description: tmdbMovie.overview || 'No description available',
           imdbRating: tmdbMovie.vote_average || null,
-          releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+          releaseDate: tmdbMovie.release_date || tmdbMovie.first_air_date ? new Date(tmdbMovie.release_date || tmdbMovie.first_air_date || '') : null,
         },
       });
     } else {

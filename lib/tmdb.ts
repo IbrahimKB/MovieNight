@@ -95,15 +95,21 @@ class TMDBClient {
 
       const response = await this.getAxiosInstance().get(`/movie/${movieId}`);
       return response.data;
-    } catch (error) {
-      // If movie not found, try TV show
-      try {
-        const tvResponse = await this.getAxiosInstance().get(`/tv/${movieId}`);
-        return { ...tvResponse.data, media_type: 'tv' };
-      } catch (tvError) {
-        console.error('Error fetching movie/tv details:', error);
-        return null;
+    } catch (error: any) {
+      // If movie not found (404), try TV show
+      if (error.response && error.response.status === 404) {
+        try {
+          const tvResponse = await this.getAxiosInstance().get(`/tv/${movieId}`);
+          return { ...tvResponse.data, media_type: 'tv' };
+        } catch (tvError) {
+          // If fails here, it's really not found or another error
+          console.error('Error fetching movie/tv details:', tvError);
+          return null;
+        }
       }
+      
+      console.error('Error fetching movie details:', error);
+      return null;
     }
   }
 
