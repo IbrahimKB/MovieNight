@@ -2,6 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
+/* View Transitions API - Smooth page transitions */
+@supports (view-transition-name: auto) {
+  ::view-transition-group(root) {
+    animation-duration: 0.4s;
+  }
+
+  ::view-transition-old(root) {
+    animation: fade-out 0.4s ease-in-out;
+  }
+
+  ::view-transition-new(root) {
+    animation: fade-in 0.4s ease-in-out;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-out-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
 @layer base {
   /* Mobile-first optimizations */
   html {
