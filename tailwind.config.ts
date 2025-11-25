@@ -43,6 +43,16 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        cinema: {
+          red: "hsl(var(--cinema-red))",
+          blue: "hsl(var(--cinema-blue))",
+          dark: "hsl(var(--cinema-dark))",
+        },
+        neon: {
+          blue: "hsl(var(--neon-blue))",
+          red: "hsl(var(--neon-red))",
+          purple: "hsl(var(--neon-purple))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
