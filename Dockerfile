@@ -53,7 +53,14 @@ RUN chown nextjs:nodejs .next
 # Standalone output includes the Client but not the CLI
 # We match the version in package.json
 # We do this BEFORE switching to user nextjs to ensure we have permissions
+# Also install openssl explicitly to fix prisma detection issues
+RUN apk add --no-cache openssl
 RUN npm install prisma@5.21.1
+
+# Ensure node_modules is owned by the correct user so prisma can write to it at runtime if needed
+# (though ideally we only run the CLI which writes to tmp or reads)
+# But the error specifically says it can't write to node_modules/@prisma/engines
+RUN chown -R nextjs:nodejs /app/node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
