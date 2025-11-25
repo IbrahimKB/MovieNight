@@ -127,7 +127,7 @@ export default function SignupPage() {
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
         {/* Logo Section */}
         <div className="mb-12 text-center">
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-6 h-12">
             <BrandLogo size="xl" className="text-primary drop-shadow-2xl" />
           </div>
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
