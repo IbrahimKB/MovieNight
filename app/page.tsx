@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MovieGridSkeleton, ListItemSkeleton } from "@/components/ui/skeleton-loader";
 import HeroSection from "@/components/hero-section";
 
 import {
@@ -19,6 +20,7 @@ import {
   Target,
   MessageSquare,
   Home,
+  RefreshCw,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
