@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
@@ -8,15 +8,15 @@ import { Mail, Lock, User, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    name: '',
-    password: '',
-    confirmPassword: '',
+    username: "",
+    email: "",
+    name: "",
+    password: "",
+    confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { signup } = useAuth();
@@ -33,23 +33,23 @@ export default function SignupPage() {
       !formData.password ||
       !formData.confirmPassword
     ) {
-      return 'Please fill in all fields';
+      return "Please fill in all fields";
     }
 
     if (formData.username.length < 3) {
-      return 'Username must be at least 3 characters';
+      return "Username must be at least 3 characters";
     }
 
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      return 'Please enter a valid email address';
+      return "Please enter a valid email address";
     }
 
     if (formData.password.length < 6) {
-      return 'Password must be at least 6 characters';
+      return "Password must be at least 6 characters";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      return 'Passwords do not match';
+      return "Passwords do not match";
     }
 
     return null;
@@ -57,7 +57,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     const validationError = validateForm();
@@ -76,12 +76,12 @@ export default function SignupPage() {
       );
 
       if (result.success) {
-        router.push('/');
+        router.push("/");
       } else {
-        setError(result.error?.message || 'Username or email already exists');
+        setError(result.error?.message || "Username or email already exists");
       }
     } catch (err) {
-      setError('An error occurred during signup');
+      setError("An error occurred during signup");
     } finally {
       setIsLoading(false);
     }
@@ -289,7 +289,10 @@ export default function SignupPage() {
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) =>
-                        setFormData({ ...formData, confirmPassword: e.target.value })
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        })
                       }
                       className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
                       required
@@ -323,25 +326,25 @@ export default function SignupPage() {
             </form>
 
             {/* Divider */}
-             <div className="relative my-8">
-               <div className="absolute inset-0 flex items-center">
-                 <div className="w-full border-t border-primary/20" />
-               </div>
-               <div className="relative flex justify-center">
-                 <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
-                   Already have an account?
-                 </span>
-               </div>
-             </div>
-
-             {/* Login Link */}
-             <Link
-               href="/login"
-               className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
-             >
-               Sign In
-             </Link>
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/20" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
+                  Already have an account?
+                </span>
+              </div>
             </div>
+
+            {/* Login Link */}
+            <Link
+              href="/login"
+              className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
+            >
+              Sign In
+            </Link>
+          </div>
 
           {/* Footer */}
           <p className="text-center text-muted-foreground text-sm mt-8">

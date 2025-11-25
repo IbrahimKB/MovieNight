@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   UserPlus,
   Users,
@@ -16,10 +17,10 @@ import {
   Film,
   Loader2,
   UserCheck,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface Friend {
   id: string;
@@ -37,14 +38,14 @@ interface FriendRequest {
 
 export default function FriendsPage() {
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [message, setMessage] = useState<{
-    type: 'success' | 'error' | 'info';
+    type: "success" | "error" | "info";
     text: string;
   } | null>(null);
-  
+
   // Real State
   const [sentRequests, setSentRequests] = useState<Set<string>>(new Set());
   const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
@@ -99,23 +100,28 @@ export default function FriendsPage() {
     setIsSearching(true);
     try {
       const token = localStorage.getItem("movienight_token");
-      const res = await fetch(`/api/auth/search-users?q=${encodeURIComponent(searchQuery)}`, {
-        headers: { Authorization: token ? `Bearer ${token}` : "" }
-      });
+      const res = await fetch(
+        `/api/auth/search-users?q=${encodeURIComponent(searchQuery)}`,
+        {
+          headers: { Authorization: token ? `Bearer ${token}` : "" },
+        },
+      );
       const data = await res.json();
-      
+
       if (data.success) {
         // Filter out self
-        const results = data.data.filter((u: Friend) => u.username !== user?.username);
+        const results = data.data.filter(
+          (u: Friend) => u.username !== user?.username,
+        );
         setSearchResults(results);
-        
+
         if (results.length === 0) {
-          setMessage({ type: 'info', text: 'No users found' });
+          setMessage({ type: "info", text: "No users found" });
           setTimeout(() => setMessage(null), 3000);
         }
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Search failed' });
+      setMessage({ type: "error", text: "Search failed" });
     } finally {
       setIsSearching(false);
     }
@@ -137,16 +143,19 @@ export default function FriendsPage() {
 
       if (data.success) {
         setSentRequests((prev) => new Set([...prev, targetUserId]));
-        setMessage({ type: 'success', text: `Request sent to @${username}` });
+        setMessage({ type: "success", text: `Request sent to @${username}` });
         toast({
-          title: 'Request sent! ✨',
+          title: "Request sent! ✨",
           description: `${username} will see your friend request.`,
         });
       } else {
-        setMessage({ type: 'error', text: data.error || 'Failed to send request' });
+        setMessage({
+          type: "error",
+          text: data.error || "Failed to send request",
+        });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Network error' });
+      setMessage({ type: "error", text: "Network error" });
     }
     setTimeout(() => setMessage(null), 3000);
   };
@@ -155,9 +164,9 @@ export default function FriendsPage() {
     try {
       const token = localStorage.getItem("movienight_token");
       // Note: API expects friend request ID (which is friendship ID), not user ID
-      // But we need to ensure we pass the correct ID. 
+      // But we need to ensure we pass the correct ID.
       // The incomingRequests array has items with 'id' being the friendship ID.
-      
+
       const res = await fetch(`/api/friends/${requestId}`, {
         method: "PATCH",
         headers: {
@@ -169,32 +178,32 @@ export default function FriendsPage() {
 
       if (res.ok) {
         // Optimistic update
-        const request = incomingRequests.find(r => r.id === requestId);
+        const request = incomingRequests.find((r) => r.id === requestId);
         if (request) {
-           const newFriend = {
-             id: request.fromUser.id, // This needs to match the structure of Friend
-             name: request.fromUser.name, 
-             username: request.fromUser.username,
-             // userId property for consistency with fetched friends
-             userId: request.fromUser.id 
-           };
-           
-           setFriendsList(prev => [...prev, newFriend as unknown as Friend]);
-           setCurrentFriends(prev => new Set([...prev, request.fromUser.id]));
-           setIncomingRequests(prev => prev.filter(r => r.id !== requestId));
+          const newFriend = {
+            id: request.fromUser.id, // This needs to match the structure of Friend
+            name: request.fromUser.name,
+            username: request.fromUser.username,
+            // userId property for consistency with fetched friends
+            userId: request.fromUser.id,
+          };
+
+          setFriendsList((prev) => [...prev, newFriend as unknown as Friend]);
+          setCurrentFriends((prev) => new Set([...prev, request.fromUser.id]));
+          setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
         }
 
         setMessage({
-          type: 'success',
+          type: "success",
           text: `You're now friends with @${username}!`,
         });
         toast({
-          title: 'Friend added! 🎉',
+          title: "Friend added! 🎉",
           description: `${username} is now in your squad.`,
         });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to accept request' });
+      setMessage({ type: "error", text: "Failed to accept request" });
     }
     setTimeout(() => setMessage(null), 3000);
   };
@@ -213,25 +222,28 @@ export default function FriendsPage() {
 
       if (res.ok) {
         setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
-        setMessage({ type: 'info', text: `Declined request from @${username}` });
+        setMessage({
+          type: "info",
+          text: `Declined request from @${username}`,
+        });
       }
     } catch (error) {
-       console.error(error);
+      console.error(error);
     }
     setTimeout(() => setMessage(null), 3000);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusForUser = (targetUserId: string) => {
-    if (currentFriends.has(targetUserId)) return 'friends';
-    if (sentRequests.has(targetUserId)) return 'sent';
-    return 'none';
+    if (currentFriends.has(targetUserId)) return "friends";
+    if (sentRequests.has(targetUserId)) return "sent";
+    return "none";
   };
 
   const userFriendsArray = friendsList;
@@ -252,12 +264,12 @@ export default function FriendsPage() {
       {/* Message Alert */}
       {message && (
         <Alert
-          variant={message.type === 'error' ? 'destructive' : 'default'}
+          variant={message.type === "error" ? "destructive" : "default"}
           className={cn(
-            message.type === 'success' &&
-              'border-green-500 bg-green-50 dark:bg-green-950',
-            message.type === 'info' &&
-              'border-blue-500 bg-blue-50 dark:bg-blue-950'
+            message.type === "success" &&
+              "border-green-500 bg-green-50 dark:bg-green-950",
+            message.type === "info" &&
+              "border-blue-500 bg-blue-50 dark:bg-blue-950",
           )}
         >
           <AlertDescription>{message.text}</AlertDescription>
@@ -280,7 +292,7 @@ export default function FriendsPage() {
                 placeholder="Search by username or name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="pl-10"
               />
             </div>
@@ -291,7 +303,7 @@ export default function FriendsPage() {
               {isSearching ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                'Search'
+                "Search"
               )}
             </Button>
           </div>
@@ -322,7 +334,7 @@ export default function FriendsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {status === 'friends' && (
+                        {status === "friends" && (
                           <Badge
                             variant="secondary"
                             className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
@@ -331,17 +343,20 @@ export default function FriendsPage() {
                             Friends
                           </Badge>
                         )}
-                        {status === 'sent' && (
+                        {status === "sent" && (
                           <Badge variant="outline">
                             <Clock className="h-3 w-3 mr-1" />
                             Pending
                           </Badge>
                         )}
-                        {status === 'none' && (
+                        {status === "none" && (
                           <Button
                             size="sm"
                             onClick={() =>
-                              handleSendRequest(foundUser.id, foundUser.username)
+                              handleSendRequest(
+                                foundUser.id,
+                                foundUser.username,
+                              )
                             }
                           >
                             <UserPlus className="h-4 w-4 mr-1" />
@@ -385,7 +400,7 @@ export default function FriendsPage() {
                         <div>
                           <p className="font-medium">{request.fromUser.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            @{request.fromUser.username} •{' '}
+                            @{request.fromUser.username} •{" "}
                             {formatDate(request.sentAt)}
                           </p>
                         </div>
@@ -396,7 +411,7 @@ export default function FriendsPage() {
                           onClick={() =>
                             handleAcceptRequest(
                               request.id,
-                              request.fromUser.username
+                              request.fromUser.username,
                             )
                           }
                           className="bg-green-600 hover:bg-green-700"
@@ -410,7 +425,7 @@ export default function FriendsPage() {
                           onClick={() =>
                             handleRejectRequest(
                               request.id,
-                              request.fromUser.username
+                              request.fromUser.username,
                             )
                           }
                           className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
@@ -437,7 +452,7 @@ export default function FriendsPage() {
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             {userFriendsArray.length} friend
-            {userFriendsArray.length !== 1 ? 's' : ''} in your movie circle
+            {userFriendsArray.length !== 1 ? "s" : ""} in your movie circle
           </p>
         </CardHeader>
         <CardContent>

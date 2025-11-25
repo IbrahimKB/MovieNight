@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { BrandLogo } from "@/components/ui/brand-logo";
 import {
   Home,
   Clapperboard,
@@ -39,8 +40,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xl mx-auto mb-4">
-            🎬
+          <div className="mx-auto mb-4 w-10 h-10">
+            <BrandLogo size="lg" className="text-primary animate-pulse" />
           </div>
           <p className="text-muted-foreground">Loading MovieNight...</p>
         </div>
@@ -75,10 +76,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <div className="px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-white font-black text-lg">
-              🎬
+            <div className="w-9 h-9">
+              <BrandLogo size="md" className="text-primary" />
             </div>
             <span className="hidden sm:inline text-xl font-bold text-primary">
               MovieNight

@@ -1,24 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Bookmark,
   Edit3,
@@ -32,10 +33,10 @@ import {
   Target,
   Sparkles,
   Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Friend {
   id: string;
@@ -80,26 +81,26 @@ export default function WatchlistPage() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
-  
+
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [markAsWatchedItem, setMarkAsWatchedItem] = useState<string | null>(
-    null
+    null,
   );
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
-  const [historyFilter, setHistoryFilter] = useState('All');
-  const [selectedFriend, setSelectedFriend] = useState('All Friends');
+  const [historyFilter, setHistoryFilter] = useState("All");
+  const [selectedFriend, setSelectedFriend] = useState("All Friends");
 
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
-      
+
       try {
         const token = localStorage.getItem("movienight_token");
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
 
         const [watchlistRes, friendsRes] = await Promise.all([
           fetch("/api/watchlist", { headers }),
-          fetch("/api/friends", { headers })
+          fetch("/api/friends", { headers }),
         ]);
 
         const watchlistData = await watchlistRes.json();
@@ -111,18 +112,20 @@ export default function WatchlistPage() {
         }
 
         if (friendsData.success) {
-          setFriends(friendsData.data.friends.map((f: any) => ({
-             id: f.userId,
-             name: f.name,
-             avatar: f.avatar
-          })) || []);
+          setFriends(
+            friendsData.data.friends.map((f: any) => ({
+              id: f.userId,
+              name: f.name,
+              avatar: f.avatar,
+            })) || [],
+          );
         }
       } catch (error) {
         console.error("Failed to fetch watchlist data:", error);
         toast({
           title: "Error",
           description: "Failed to load watchlist. Please try again.",
-          variant: "error"
+          variant: "error",
         });
       } finally {
         setIsLoading(false);
@@ -134,20 +137,20 @@ export default function WatchlistPage() {
 
   const getPlatformColor = (platform: string) => {
     switch (platform) {
-      case 'Netflix':
-        return 'bg-red-600';
-      case 'Disney+':
-        return 'bg-blue-600';
-      case 'Hulu':
-        return 'bg-green-600';
-      case 'Amazon Prime':
-        return 'bg-orange-600';
-      case 'HBO Max':
-        return 'bg-purple-600';
-      case 'Paramount+':
-        return 'bg-blue-500';
+      case "Netflix":
+        return "bg-red-600";
+      case "Disney+":
+        return "bg-blue-600";
+      case "Hulu":
+        return "bg-green-600";
+      case "Amazon Prime":
+        return "bg-orange-600";
+      case "HBO Max":
+        return "bg-purple-600";
+      case "Paramount+":
+        return "bg-blue-500";
       default:
-        return 'bg-gray-600';
+        return "bg-gray-600";
     }
   };
 
@@ -155,10 +158,10 @@ export default function WatchlistPage() {
     // Optimistic update
     setWatchlist((prev) =>
       prev.map((item) =>
-        item.id === itemId ? { ...item, userDesireScore: newScore[0] } : item
-      )
+        item.id === itemId ? { ...item, userDesireScore: newScore[0] } : item,
+      ),
     );
-    
+
     // TODO: Debounce and save to API
   };
 
@@ -172,7 +175,7 @@ export default function WatchlistPage() {
           return { ...item, selectedFriends: updatedFriends };
         }
         return item;
-      })
+      }),
     );
   };
 
@@ -195,50 +198,50 @@ export default function WatchlistPage() {
       const res = await fetch("/api/watchlist", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "" 
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
-            action: 'markWatched',
-            movieId: item.id,
-            watchedWith
-        })
+          action: "markWatched",
+          movieId: item.id,
+          watchedWith,
+        }),
       });
 
       if (res.ok) {
-          setWatchlist((prev) =>
-            prev.map((w) =>
-              w.id === markAsWatchedItem ? { ...w, isWatched: true } : w
-            )
-          );
-          
-          // Add to history locally
-          const newItem: HistoryItem = {
-              id: item.id,
-              title: item.title,
-              year: item.year,
-              genres: item.genres,
-              platform: item.platform,
-              poster: item.poster,
-              watchedDate: new Date().toISOString(),
-              watchedWith: watchedWith,
-              originalScore: 0 // Default until rated?
-          };
-          setHistory(prev => [newItem, ...prev]);
+        setWatchlist((prev) =>
+          prev.map((w) =>
+            w.id === markAsWatchedItem ? { ...w, isWatched: true } : w,
+          ),
+        );
 
-          toast({
-            title: 'Movie marked as watched! ✅',
-            description: `${item.title} has been added to your watch history.`,
-          });
+        // Add to history locally
+        const newItem: HistoryItem = {
+          id: item.id,
+          title: item.title,
+          year: item.year,
+          genres: item.genres,
+          platform: item.platform,
+          poster: item.poster,
+          watchedDate: new Date().toISOString(),
+          watchedWith: watchedWith,
+          originalScore: 0, // Default until rated?
+        };
+        setHistory((prev) => [newItem, ...prev]);
+
+        toast({
+          title: "Movie marked as watched! ✅",
+          description: `${item.title} has been added to your watch history.`,
+        });
       } else {
-          throw new Error("Failed to update");
+        throw new Error("Failed to update");
       }
     } catch (error) {
-        toast({
-            title: "Error",
-            description: "Failed to mark as watched.",
-            variant: "error"
-        });
+      toast({
+        title: "Error",
+        description: "Failed to mark as watched.",
+        variant: "error",
+      });
     }
 
     setMarkAsWatchedItem(null);
@@ -246,42 +249,46 @@ export default function WatchlistPage() {
   };
 
   const getFriendName = (friendId: string) => {
-    return friends.find((f) => f.id === friendId)?.name || 'Unknown';
+    return friends.find((f) => f.id === friendId)?.name || "Unknown";
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Unknown';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    if (!dateString) return "Unknown";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   const getFilteredHistory = () => {
     let filtered = history;
 
-    if (historyFilter !== 'All') {
+    if (historyFilter !== "All") {
       filtered = filtered.filter((item) => item.genres.includes(historyFilter));
     }
 
-    if (selectedFriend !== 'All Friends') {
+    if (selectedFriend !== "All Friends") {
       const friendId = friends.find((f) => f.name === selectedFriend)?.id;
       if (friendId) {
         filtered = filtered.filter((item) =>
-          item.watchedWith.includes(friendId)
+          item.watchedWith.includes(friendId),
         );
       }
     }
 
     return filtered.sort(
       (a, b) =>
-        new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
+        new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime(),
     );
   };
 
   if (isLoading) {
-      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -341,8 +348,8 @@ export default function WatchlistPage() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className={cn(
-                                    'w-2 h-2 rounded-full',
-                                    getPlatformColor(item.platform)
+                                    "w-2 h-2 rounded-full",
+                                    getPlatformColor(item.platform),
                                   )}
                                 />
                                 <span className="text-sm text-muted-foreground">
@@ -364,7 +371,7 @@ export default function WatchlistPage() {
                             size="sm"
                             onClick={() =>
                               setEditingItem(
-                                editingItem === item.id ? null : item.id
+                                editingItem === item.id ? null : item.id,
                               )
                             }
                           >
@@ -398,16 +405,16 @@ export default function WatchlistPage() {
                               Your WatchDesire ({item.userDesireScore}/10)
                             </label>
                             <Slider
-                               value={[item.userDesireScore]}
-                               onValueChange={(value: number[]) =>
-                                 handleDesireScoreChange(item.id, value)
-                               }
-                               max={10}
-                               min={1}
-                               step={1}
-                               className="w-full"
-                               disabled={editingItem !== item.id}
-                             />
+                              value={[item.userDesireScore]}
+                              onValueChange={(value: number[]) =>
+                                handleDesireScoreChange(item.id, value)
+                              }
+                              max={10}
+                              min={1}
+                              step={1}
+                              className="w-full"
+                              disabled={editingItem !== item.id}
+                            />
                           </div>
 
                           {/* Who to watch with */}
@@ -420,10 +427,10 @@ export default function WatchlistPage() {
                                 <div
                                   key={friend.id}
                                   className={cn(
-                                    'flex items-center space-x-2 p-2 rounded border transition-colors',
+                                    "flex items-center space-x-2 p-2 rounded border transition-colors",
                                     editingItem === item.id
-                                      ? 'cursor-pointer hover:bg-accent'
-                                      : 'opacity-75'
+                                      ? "cursor-pointer hover:bg-accent"
+                                      : "opacity-75",
                                   )}
                                   onClick={() =>
                                     editingItem === item.id &&
@@ -433,7 +440,7 @@ export default function WatchlistPage() {
                                   <Checkbox
                                     id={`${item.id}-${friend.id}`}
                                     checked={item.selectedFriends.includes(
-                                      friend.id
+                                      friend.id,
                                     )}
                                     disabled={editingItem !== item.id}
                                   />
@@ -446,7 +453,9 @@ export default function WatchlistPage() {
                                 </div>
                               ))}
                               {friends.length === 0 && (
-                                <p className="text-xs text-muted-foreground col-span-full">Add friends to plan viewing!</p>
+                                <p className="text-xs text-muted-foreground col-span-full">
+                                  Add friends to plan viewing!
+                                </p>
                               )}
                             </div>
                           </div>
@@ -535,10 +544,10 @@ export default function WatchlistPage() {
                   <div className="flex flex-col items-center">
                     <div
                       className={cn(
-                        'w-3 h-3 rounded-full border-2',
+                        "w-3 h-3 rounded-full border-2",
                         index === 0
-                          ? 'bg-primary border-primary'
-                          : 'bg-background border-border'
+                          ? "bg-primary border-primary"
+                          : "bg-background border-border",
                       )}
                     />
                     {index < getFilteredHistory().length - 1 && (
@@ -564,8 +573,8 @@ export default function WatchlistPage() {
                               <div className="flex items-center gap-2">
                                 <div
                                   className={cn(
-                                    'w-2 h-2 rounded-full',
-                                    getPlatformColor(item.platform)
+                                    "w-2 h-2 rounded-full",
+                                    getPlatformColor(item.platform),
                                   )}
                                 />
                                 {item.platform}
@@ -602,20 +611,24 @@ export default function WatchlistPage() {
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm text-muted-foreground">
-                            Watched with:{' '}
+                            Watched with:{" "}
                           </span>
                           <div className="flex gap-1">
-                            {item.watchedWith.length > 0 ? item.watchedWith.map((friendId, idx) => (
-                              <Badge
-                                key={friendId}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {getFriendName(friendId)}
-                                {idx < item.watchedWith.length - 1 && ','}
-                              </Badge>
-                            )) : (
-                                <span className="text-xs text-muted-foreground">Just me</span>
+                            {item.watchedWith.length > 0 ? (
+                              item.watchedWith.map((friendId, idx) => (
+                                <Badge
+                                  key={friendId}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {getFriendName(friendId)}
+                                  {idx < item.watchedWith.length - 1 && ","}
+                                </Badge>
+                              ))
+                            ) : (
+                              <span className="text-xs text-muted-foreground">
+                                Just me
+                              </span>
                             )}
                           </div>
                         </div>
@@ -625,8 +638,8 @@ export default function WatchlistPage() {
                           item.actualRating !== item.originalScore && (
                             <div className="text-xs text-muted-foreground bg-accent/30 p-2 rounded">
                               {item.actualRating > item.originalScore
-                                ? '🎉 Better than expected!'
-                                : '😐 Didn\'t quite meet expectations'}
+                                ? "🎉 Better than expected!"
+                                : "😐 Didn't quite meet expectations"}
                             </div>
                           )}
                       </div>
@@ -662,7 +675,7 @@ export default function WatchlistPage() {
                       setWatchedWith((prev) =>
                         prev.includes(friend.id)
                           ? prev.filter((id) => id !== friend.id)
-                          : [...prev, friend.id]
+                          : [...prev, friend.id],
                       )
                     }
                   >
@@ -671,7 +684,9 @@ export default function WatchlistPage() {
                   </div>
                 ))}
                 {friends.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No friends found.</p>
+                  <p className="text-sm text-muted-foreground">
+                    No friends found.
+                  </p>
                 )}
               </div>
             </div>

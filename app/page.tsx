@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -92,31 +93,43 @@ export default function HomePage() {
     icon: Icon,
     trend,
     color = "text-primary",
+    index = 0,
   }: {
     title: string;
     value: string | number;
     icon: any;
     trend?: string;
     color?: string;
+    index?: number;
   }) => (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1 min-w-0 flex-1">
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">
-              {title}
-            </p>
-            <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value}</p>
-            {trend && (
-              <p className="text-xs text-muted-foreground truncate hidden sm:block">
-                {trend}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+    >
+      <Card className="hover:shadow-lg hover:shadow-primary/10 transition-all duration-300">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                {title}
               </p>
-            )}
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold">
+                {value}
+              </p>
+              {trend && (
+                <p className="text-xs text-muted-foreground truncate hidden sm:block">
+                  {trend}
+                </p>
+              )}
+            </div>
+            <Icon
+              className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)}
+            />
           </div>
-          <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)} />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   // Show loading while checking auth
@@ -137,7 +150,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Navigation Header */}
       <nav className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -192,7 +210,12 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
         {/* Welcome Header */}
-        <div className="space-y-1 sm:space-y-2">
+        <motion.div
+          className="space-y-1 sm:space-y-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
             Welcome back, {user?.name?.split(" ")[0] || "Movie Lover"}! 🎬
           </h1>
@@ -200,7 +223,7 @@ export default function HomePage() {
             Discover what your friends are watching and find your next great
             movie
           </p>
-        </div>
+        </motion.div>
 
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -214,6 +237,7 @@ export default function HomePage() {
                 : "Find friends to get started"
             }
             color="text-blue-500"
+            index={0}
           />
 
           <StatCard
@@ -226,6 +250,7 @@ export default function HomePage() {
                 : "No pending suggestions"
             }
             color="text-green-500"
+            index={1}
           />
 
           <StatCard
@@ -238,6 +263,7 @@ export default function HomePage() {
                 : "Start watching"
             }
             color="text-purple-500"
+            index={2}
           />
 
           <StatCard
@@ -256,6 +282,7 @@ export default function HomePage() {
                 : "Make suggestions to track"
             }
             color="text-orange-500"
+            index={3}
           />
         </div>
 
@@ -475,6 +502,6 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 }

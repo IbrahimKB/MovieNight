@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Bookmark,
@@ -12,6 +13,8 @@ import {
   Share2,
   Clapperboard,
 } from "lucide-react";
+import { useConfetti } from "@/hooks/use-confetti";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 interface Movie {
   id: string;
@@ -30,6 +33,11 @@ export default function MovieDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const movieId = params?.id as string;
+  const {
+    trigger: triggerConfetti,
+    triggerCheckmark,
+    triggerPaperAirplane,
+  } = useConfetti();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +46,9 @@ export default function MovieDetailPage() {
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const [isMarkingWatched, setIsMarkingWatched] = useState(false);
+  const [isSuggestingMovie, setIsSuggestingMovie] = useState(false);
 
   const token =
     typeof window !== "undefined"
@@ -98,6 +109,10 @@ export default function MovieDetailPage() {
   }, [movieId, token]);
 
   const handleAddToWatchlist = async () => {
+    const previousState = inWatchlist;
+    setIsAddingToWatchlist(true);
+    setInWatchlist(!inWatchlist);
+
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -111,14 +126,29 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
-        setInWatchlist(!inWatchlist);
+        if (!previousState) {
+          triggerConfetti({
+            particleCount: 80,
+            spread: 90,
+            origin: { y: 0.5 },
+          });
+        }
+      } else {
+        setInWatchlist(previousState);
       }
     } catch (error) {
       console.error("Failed to add to watchlist:", error);
+      setInWatchlist(previousState);
+    } finally {
+      setIsAddingToWatchlist(false);
     }
   };
 
   const handleMarkWatched = async () => {
+    const previousState = watched;
+    setIsMarkingWatched(true);
+    setWatched(!watched);
+
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -132,15 +162,24 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
-        setWatched(!watched);
+        if (!previousState) {
+          triggerCheckmark();
+        }
+      } else {
+        setWatched(previousState);
       }
     } catch (error) {
       console.error("Failed to mark watched:", error);
+      setWatched(previousState);
+    } finally {
+      setIsMarkingWatched(false);
     }
   };
 
   const handleSuggestToFriend = async () => {
     if (!selectedFriend) return;
+
+    setIsSuggestingMovie(true);
 
     try {
       const headers = {
@@ -159,11 +198,14 @@ export default function MovieDetailPage() {
       });
 
       if (res.ok) {
+        triggerPaperAirplane();
         setShowSuggestModal(false);
         setSelectedFriend(null);
       }
     } catch (error) {
       console.error("Failed to suggest movie:", error);
+    } finally {
+      setIsSuggestingMovie(false);
     }
   };
 
@@ -189,16 +231,38 @@ export default function MovieDetailPage() {
     );
   }
 
+  if (!movie) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Movie not found</p>
+        <motion.button
+          onClick={() => router.back()}
+          className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+          whileTap={{ scale: 0.95 }}
+        >
+          Go Back
+        </motion.button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Back Button */}
-      <button
+      <motion.button
         onClick={() => router.back()}
         className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+        whileHover={{ x: -4 }}
+        whileTap={{ scale: 0.95 }}
       >
         <ArrowLeft size={20} />
         Back
-      </button>
+      </motion.button>
 
       {/* Hero Section */}
       <div className="relative -mx-4 md:-mx-0">
@@ -277,62 +341,89 @@ export default function MovieDetailPage() {
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 mb-12">
-          <button
+        <motion.div
+          className="flex flex-wrap gap-3 mb-12"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        >
+          <motion.button
             onClick={handleAddToWatchlist}
+            disabled={isAddingToWatchlist}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
               inWatchlist
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-card border border-border text-foreground hover:border-primary/50"
             }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {inWatchlist ? (
-              <>
-                <BookmarkCheck size={20} />
-                In Watchlist
-              </>
-            ) : (
-              <>
-                <Bookmark size={20} />
-                Add to Watchlist
-              </>
-            )}
-          </button>
+            <motion.span
+              initial={false}
+              animate={inWatchlist ? { scale: 1 } : { scale: 1 }}
+            >
+              {inWatchlist ? (
+                <>
+                  <BookmarkCheck size={20} />
+                  In Watchlist
+                </>
+              ) : (
+                <>
+                  <Bookmark size={20} />
+                  Add to Watchlist
+                </>
+              )}
+            </motion.span>
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={handleMarkWatched}
+            disabled={isMarkingWatched}
             className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
               watched
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-card border border-border text-foreground hover:border-primary/50"
             }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            {watched ? (
-              <>
-                <Check size={20} />
-                Watched
-              </>
-            ) : (
-              <>
-                <Check size={20} />
-                Mark as Watched
-              </>
-            )}
-          </button>
+            <motion.span
+              initial={false}
+              animate={watched ? { scale: 1 } : { scale: 1 }}
+            >
+              {watched ? (
+                <>
+                  <Check size={20} />
+                  Watched
+                </>
+              ) : (
+                <>
+                  <Check size={20} />
+                  Mark as Watched
+                </>
+              )}
+            </motion.span>
+          </motion.button>
 
-          <button
+          <motion.button
             onClick={() => setShowSuggestModal(true)}
             className="flex items-center gap-2 px-6 py-3 rounded-lg bg-card border border-border text-foreground hover:border-primary/50 font-medium transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <Heart size={20} />
             Suggest to Friend
-          </button>
+          </motion.button>
 
-          <button className="flex items-center gap-2 px-6 py-3 rounded-lg bg-card border border-border text-foreground hover:border-primary/50 font-medium transition-all">
+          <motion.button
+            className="flex items-center gap-2 px-6 py-3 rounded-lg bg-card border border-border text-foreground hover:border-primary/50 font-medium transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Share2 size={20} />
             Share
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {/* Additional Info */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card border border-border rounded-xl p-6">
@@ -365,58 +456,131 @@ export default function MovieDetailPage() {
         </div>
       </div>
 
-      {/* Suggest Modal */}
-      {showSuggestModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4">Suggest to a Friend</h2>
-            <p className="text-muted-foreground mb-4">
-              Choose a friend to suggest {movie.title}
+      {/* Suggest Modal - Using BottomSheet on mobile */}
+      <AnimatePresence>
+        {showSuggestModal && (
+          <motion.div
+            className="hidden md:flex fixed inset-0 bg-black/50 backdrop-blur-sm z-50 items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowSuggestModal(false)}
+          >
+            <motion.div
+              className="bg-card border border-border rounded-xl p-6 max-w-md w-full"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-2xl font-bold mb-4">Suggest to a Friend</h2>
+              <p className="text-muted-foreground mb-4">
+                Choose a friend to suggest {movie.title}
+              </p>
+
+              <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
+                {friends.length > 0 ? (
+                  friends.map((friend) => (
+                    <motion.button
+                      key={friend.id}
+                      onClick={() => setSelectedFriend(friend.id)}
+                      className={`w-full p-3 rounded-lg text-left transition-all ${
+                        selectedFriend === friend.id
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background border border-border hover:border-primary/50"
+                      }`}
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <p className="font-medium">
+                        {friend.name || friend.username}
+                      </p>
+                      <p className="text-sm opacity-75">@{friend.username}</p>
+                    </motion.button>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm text-center py-4">
+                    No friends yet. Add friends to suggest movies!
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <motion.button
+                  onClick={() => setShowSuggestModal(false)}
+                  className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-card transition-colors font-medium"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={handleSuggestToFriend}
+                  disabled={!selectedFriend || isSuggestingMovie}
+                  className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isSuggestingMovie ? "Suggesting..." : "Suggest"}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Sheet */}
+      <BottomSheet
+        isOpen={showSuggestModal}
+        onClose={() => setShowSuggestModal(false)}
+        title="Suggest to a Friend"
+        className="md:hidden max-h-[70vh]"
+      >
+        <p className="text-muted-foreground mb-4">
+          Choose a friend to suggest {movie.title}
+        </p>
+
+        <div className="space-y-2 mb-6">
+          {friends.length > 0 ? (
+            friends.map((friend) => (
+              <motion.button
+                key={friend.id}
+                onClick={() => setSelectedFriend(friend.id)}
+                className={`w-full p-3 rounded-lg text-left transition-all ${
+                  selectedFriend === friend.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background border border-border hover:border-primary/50"
+                }`}
+                whileHover={{ x: 4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <p className="font-medium">{friend.name || friend.username}</p>
+                <p className="text-sm opacity-75">@{friend.username}</p>
+              </motion.button>
+            ))
+          ) : (
+            <p className="text-muted-foreground text-sm text-center py-4">
+              No friends yet. Add friends to suggest movies!
             </p>
-
-            <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
-              {friends.length > 0 ? (
-                friends.map((friend) => (
-                  <button
-                    key={friend.id}
-                    onClick={() => setSelectedFriend(friend.id)}
-                    className={`w-full p-3 rounded-lg text-left transition-all ${
-                      selectedFriend === friend.id
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background border border-border hover:border-primary/50"
-                    }`}
-                  >
-                    <p className="font-medium">
-                      {friend.name || friend.username}
-                    </p>
-                    <p className="text-sm opacity-75">@{friend.username}</p>
-                  </button>
-                ))
-              ) : (
-                <p className="text-muted-foreground text-sm text-center py-4">
-                  No friends yet. Add friends to suggest movies!
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowSuggestModal(false)}
-                className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-card transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSuggestToFriend}
-                disabled={!selectedFriend}
-                className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-              >
-                Suggest
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+
+        <div className="flex gap-2">
+          <motion.button
+            onClick={() => setShowSuggestModal(false)}
+            className="flex-1 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-card transition-colors font-medium"
+            whileTap={{ scale: 0.95 }}
+          >
+            Cancel
+          </motion.button>
+          <motion.button
+            onClick={handleSuggestToFriend}
+            disabled={!selectedFriend || isSuggestingMovie}
+            className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            whileTap={{ scale: 0.95 }}
+          >
+            {isSuggestingMovie ? "Suggesting..." : "Suggest"}
+          </motion.button>
+        </div>
+      </BottomSheet>
+    </motion.div>
   );
 }

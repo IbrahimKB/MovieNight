@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Search, Clapperboard, X } from "lucide-react";
 
 interface Movie {
@@ -80,17 +81,24 @@ export default function MoviesPage() {
     setFilteredMovies(results);
   }, [searchQuery, selectedGenre, movies]);
 
-  const MovieCard = ({ movie }: { movie: Movie }) => (
-    <button
+  const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => (
+    <motion.button
       onClick={() => router.push(`/movies/${movie.id}`)}
-      className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20"
+      className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
         {movie.poster ? (
-          <img
+          <motion.img
             src={movie.poster}
             alt={movie.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-cover"
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.3 }}
           />
         ) : (
           <div className="text-center p-4">
@@ -101,20 +109,30 @@ export default function MoviesPage() {
 
         {/* Rating badge */}
         {movie.imdbRating && (
-          <div className="absolute top-2 right-2 bg-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-primary-foreground">
+          <motion.div
+            className="absolute top-2 right-2 bg-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-primary-foreground"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: (index % 12) * 0.05 + 0.2 }}
+          >
             {movie.imdbRating.toFixed(1)}
-          </div>
+          </motion.div>
         )}
       </div>
       <div className="mt-3 px-1">
         <p className="font-semibold text-sm truncate">{movie.title}</p>
         <p className="text-xs text-muted-foreground">{movie.year}</p>
       </div>
-    </button>
+    </motion.button>
   );
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
@@ -179,8 +197,8 @@ export default function MoviesPage() {
             {filteredMovies.length !== 1 ? "s" : ""}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {filteredMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+            {filteredMovies.map((movie, index) => (
+              <MovieCard key={movie.id} movie={movie} index={index} />
             ))}
           </div>
         </div>
@@ -201,6 +219,6 @@ export default function MoviesPage() {
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
