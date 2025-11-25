@@ -129,7 +129,7 @@ export default function SignupPage() {
         <div className="mb-12 text-center">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/50">
-              <Clapperboard size={32} className="text-white" />
+              <BrandLogo size="lg" className="text-white" />
             </div>
           </div>
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
