@@ -49,6 +49,8 @@ export default function MovieDetailPage() {
   const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
   const [isMarkingWatched, setIsMarkingWatched] = useState(false);
   const [isSuggestingMovie, setIsSuggestingMovie] = useState(false);
+  const [friendsWhoWatched, setFriendsWhoWatched] = useState<any[]>([]);
+  const [friendsRatings, setFriendsRatings] = useState<Record<string, number>>({});
 
   const token =
     typeof window !== "undefined"
