@@ -89,7 +89,28 @@ export default function MoviesPage() {
     }
 
     setFilteredMovies(results);
+    setCurrentPage(1);
+    setDisplayedMovies(results.slice(0, MOVIES_PER_PAGE));
+    setHasMore(results.length > MOVIES_PER_PAGE);
   }, [searchQuery, selectedGenre, movies]);
+
+  // Load more movies
+  const handleLoadMore = async () => {
+    const nextPage = currentPage + 1;
+    const startIdx = nextPage * MOVIES_PER_PAGE - MOVIES_PER_PAGE;
+    const endIdx = startIdx + MOVIES_PER_PAGE;
+    const newMovies = filteredMovies.slice(0, endIdx);
+
+    setDisplayedMovies(newMovies);
+    setCurrentPage(nextPage);
+    setHasMore(endIdx < filteredMovies.length);
+  };
+
+  const { observerTarget, isLoading: isLoadingMore } = useInfiniteScroll({
+    onLoadMore: handleLoadMore,
+    hasMore,
+    threshold: 300,
+  });
 
   const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => (
     <motion.button
