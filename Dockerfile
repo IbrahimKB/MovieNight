@@ -44,6 +44,10 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
+# Copy environment file
+COPY .env .env
+
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Run migrations and start app
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
