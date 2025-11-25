@@ -317,76 +317,90 @@ export default function HomePage() {
           {/* Right Column */}
           <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
             {/* Trending */}
-            <Card>
-              <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="hidden sm:inline">
-                      Trending in Network
-                    </span>
-                    <span className="sm:hidden">Trending</span>
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                    onClick={() => router.push("/movies")}
-                  >
-                    View All
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-2 sm:space-y-3">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
-                      >
-                        <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-muted rounded animate-pulse" />
-                          <div className="h-2 bg-muted rounded animate-pulse w-2/3" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : trendingMovies.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No trending movies yet
-                  </p>
-                ) : (
-                  trendingMovies.slice(0, 3).map((movie) => (
-                    <div
-                      key={movie.id}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline">
+                        Trending in Network
+                      </span>
+                      <span className="sm:hidden">Trending</span>
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                       onClick={() => router.push("/movies")}
                     >
-                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
-                            {movie.title}
-                          </p>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs">{movie.rating}</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {movie.watchCount} friends
-                        </p>
-                      </div>
+                      View All
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-2 sm:space-y-3">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <ListItemSkeleton key={i} />
+                      ))}
                     </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
+                  ) : trendingMovies.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No trending movies yet
+                    </p>
+                  ) : (
+                    <motion.div
+                      className="space-y-2"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        visible: {
+                          transition: {
+                            staggerChildren: 0.1,
+                          },
+                        },
+                      }}
+                    >
+                      {trendingMovies.slice(0, 3).map((movie, idx) => (
+                        <motion.div
+                          key={movie.id}
+                          variants={{
+                            hidden: { opacity: 0, x: -20 },
+                            visible: { opacity: 1, x: 0 },
+                          }}
+                          className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                          onClick={() => router.push("/movies")}
+                        >
+                          <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
+                                {movie.title}
+                              </p>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                <span className="text-xs">{movie.rating}</span>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {movie.watchCount} friends
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Suggestion Accuracy */}
             {user && (
