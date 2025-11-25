@@ -33,8 +33,11 @@ export default function MovieDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const movieId = params?.id as string;
-  const { trigger: triggerConfetti, triggerCheckmark, triggerPaperAirplane } =
-    useConfetti();
+  const {
+    trigger: triggerConfetti,
+    triggerCheckmark,
+    triggerPaperAirplane,
+  } = useConfetti();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -549,9 +552,7 @@ export default function MovieDetailPage() {
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <p className="font-medium">
-                  {friend.name || friend.username}
-                </p>
+                <p className="font-medium">{friend.name || friend.username}</p>
                 <p className="text-sm opacity-75">@{friend.username}</p>
               </motion.button>
             ))

@@ -41,7 +41,7 @@ export function BottomSheet({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={cn(
               "fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl",
-              className
+              className,
             )}
           >
             {/* Handle indicator */}

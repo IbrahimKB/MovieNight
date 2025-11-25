@@ -114,14 +114,18 @@ export default function HomePage() {
               <p className="text-xs sm:text-sm text-muted-foreground truncate">
                 {title}
               </p>
-              <p className="text-lg sm:text-xl lg:text-2xl font-bold">{value}</p>
+              <p className="text-lg sm:text-xl lg:text-2xl font-bold">
+                {value}
+              </p>
               {trend && (
                 <p className="text-xs text-muted-foreground truncate hidden sm:block">
                   {trend}
                 </p>
               )}
             </div>
-            <Icon className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)} />
+            <Icon
+              className={cn("h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0", color)}
+            />
           </div>
         </CardContent>
       </Card>

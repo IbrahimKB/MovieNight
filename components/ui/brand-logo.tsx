@@ -37,11 +37,20 @@ export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
       <defs>
         <linearGradient id="reel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: "#1e40af", stopOpacity: 1 }} />
+          <stop
+            offset="100%"
+            style={{ stopColor: "#1e40af", stopOpacity: 1 }}
+          />
         </linearGradient>
         <radialGradient id="glow">
-          <stop offset="0%" style={{ stopColor: "#60a5fa", stopOpacity: 0.3 }} />
-          <stop offset="100%" style={{ stopColor: "#3b82f6", stopOpacity: 0 }} />
+          <stop
+            offset="0%"
+            style={{ stopColor: "#60a5fa", stopOpacity: 0.3 }}
+          />
+          <stop
+            offset="100%"
+            style={{ stopColor: "#3b82f6", stopOpacity: 0 }}
+          />
         </radialGradient>
       </defs>
 
@@ -104,7 +113,12 @@ export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
       </g>
 
       {/* Connecting lines between nodes (subtle) */}
-      <g stroke="currentColor" strokeWidth="3" opacity="0.25" strokeLinecap="round">
+      <g
+        stroke="currentColor"
+        strokeWidth="3"
+        opacity="0.25"
+        strokeLinecap="round"
+      >
         <line x1="350" y1="170" x2="350" y2="342" />
         <line x1="350" y1="342" x2="162" y2="342" />
         <line x1="162" y1="342" x2="162" y2="170" />

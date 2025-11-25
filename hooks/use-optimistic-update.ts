@@ -33,7 +33,7 @@ export const useOptimisticUpdate = <T>({
         setIsPending(false);
       }
     },
-    [onMutate, onSuccess, onError]
+    [onMutate, onSuccess, onError],
   );
 
   return {

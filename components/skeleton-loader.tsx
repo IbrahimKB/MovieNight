@@ -34,7 +34,7 @@ export const Skeleton = ({
     !circle && "rounded-lg",
     aspect && aspectRatios[aspect],
     !aspect && [width, height],
-    className
+    className,
   );
 
   return (

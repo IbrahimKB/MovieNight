@@ -73,7 +73,7 @@ export const MovieCard = ({
       className={cn(
         "group cursor-pointer text-left rounded-lg overflow-hidden",
         "transition-all duration-300 hover:shadow-xl hover:shadow-primary/30",
-        className
+        className,
       )}
     >
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
@@ -86,7 +86,7 @@ export const MovieCard = ({
               className={cn(
                 "w-full h-full object-cover",
                 "transition-transform duration-300 ease-out",
-                isHovered && "scale-110"
+                isHovered && "scale-110",
               )}
               loading="lazy"
             />
@@ -96,7 +96,7 @@ export const MovieCard = ({
             className={cn(
               "w-full h-full bg-gradient-to-br",
               generateGradient(movie.id),
-              "flex flex-col items-center justify-center p-4"
+              "flex flex-col items-center justify-center p-4",
             )}
           >
             <Clapperboard className="h-12 w-12 text-white/80 mb-2" />
@@ -125,7 +125,7 @@ export const MovieCard = ({
             className={cn(
               "absolute inset-0 bg-black/60 backdrop-blur-sm",
               "flex flex-col items-center justify-center gap-3",
-              "pointer-events-none group-hover:pointer-events-auto"
+              "pointer-events-none group-hover:pointer-events-auto",
             )}
           >
             {onAddToWatchlist && (
@@ -139,7 +139,7 @@ export const MovieCard = ({
                   inWatchlist
                     ? "bg-primary text-primary-foreground"
                     : "bg-white/20 hover:bg-primary text-white",
-                  "disabled:opacity-50 pointer-events-auto"
+                  "disabled:opacity-50 pointer-events-auto",
                 )}
               >
                 <Bookmark

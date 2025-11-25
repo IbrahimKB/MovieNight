@@ -22,7 +22,7 @@ export const useViewTransition = () => {
         router.push(path);
       });
     },
-    [router]
+    [router],
   );
 
   return { navigateWithTransition };

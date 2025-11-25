@@ -90,7 +90,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://movienight.app",
     title: "MovieNight",
-    description: "Discover movies with friends. Watch together, decide together.",
+    description:
+      "Discover movies with friends. Watch together, decide together.",
     siteName: "MovieNight",
     images: [
       {
@@ -104,7 +105,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MovieNight",
-    description: "Discover movies with friends. Watch together, decide together.",
+    description:
+      "Discover movies with friends. Watch together, decide together.",
     images: ["/icons/icon-512x512.png"],
   },
 };

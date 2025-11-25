@@ -5,12 +5,14 @@ This guide covers how to generate and deploy the remaining PWA assets for the Mo
 ## Status
 
 ✅ **Completed:**
+
 - Professional SVG logo component (`components/ui/brand-logo.tsx`)
 - Updated metadata in `app/layout.tsx`
 - Updated `public/manifest.json` with icon references
 - Logo integrated in auth pages and app layout
 
 ⏳ **TODO:**
+
 - Generate raster icon files (PNG at multiple sizes)
 - Generate favicon
 
@@ -18,19 +20,20 @@ This guide covers how to generate and deploy the remaining PWA assets for the Mo
 
 All files should be placed in `public/icons/`:
 
-| Filename | Size | Format | Purpose |
-|----------|------|--------|---------|
-| `icon.svg` | Scalable | SVG | Modern browsers, scalable |
-| `favicon.ico` | 32x32 | ICO | Browser tab (legacy) |
-| `icon-192x192.png` | 192x192 | PNG | Android/PWA install |
-| `icon-512x512.png` | 512x512 | PNG | PWA splash screen |
-| `maskable-icon-192.png` | 192x192 | PNG | Android adaptive icon |
-| `maskable-icon-512.png` | 512x512 | PNG | Android adaptive icon |
-| `apple-touch-icon.png` | 180x180 | PNG | iOS home screen |
+| Filename                | Size     | Format | Purpose                   |
+| ----------------------- | -------- | ------ | ------------------------- |
+| `icon.svg`              | Scalable | SVG    | Modern browsers, scalable |
+| `favicon.ico`           | 32x32    | ICO    | Browser tab (legacy)      |
+| `icon-192x192.png`      | 192x192  | PNG    | Android/PWA install       |
+| `icon-512x512.png`      | 512x512  | PNG    | PWA splash screen         |
+| `maskable-icon-192.png` | 192x192  | PNG    | Android adaptive icon     |
+| `maskable-icon-512.png` | 512x512  | PNG    | Android adaptive icon     |
+| `apple-touch-icon.png`  | 180x180  | PNG    | iOS home screen           |
 
 ## Option 1: Use Figma (Recommended)
 
 ### Step 1: Create the Design
+
 1. Go to [Figma](https://figma.com) and create a new file
 2. Create a 512x512 artboard
 3. Copy the SVG code from `components/ui/brand-logo.tsx` and paste it into Figma
@@ -39,6 +42,7 @@ All files should be placed in `public/icons/`:
 5. Export as SVG: Right-click → Export → Select SVG format
 
 ### Step 2: Generate PNG Versions
+
 1. For each size (192, 512):
    - Select the artboard
    - Right-click → Export
@@ -51,6 +55,7 @@ All files should be placed in `public/icons/`:
    - Export as `apple-touch-icon.png`
 
 ### Step 3: Generate Maskable Icons
+
 Maskable icons are required for Android adaptive icons. The safe zone is the center 66% of the icon.
 
 1. Create a 512x512 artboard with a solid background (match your theme)
@@ -102,7 +107,7 @@ os.makedirs("public/icons", exist_ok=True)
 def create_logo_image(size):
     img = Image.new("RGBA", (size, size), (10, 10, 10, 0))
     draw = ImageDraw.Draw(img)
-    
+
     # Draw circle outline (film reel)
     margin = int(size * 0.1)
     draw.ellipse(
@@ -110,7 +115,7 @@ def create_logo_image(size):
         outline=(59, 130, 246, 255),
         width=int(size * 0.06)
     )
-    
+
     # Draw play button (triangle)
     center = size // 2
     triangle_size = int(size * 0.2)
@@ -120,7 +125,7 @@ def create_logo_image(size):
         (center + triangle_size, center),
     ]
     draw.polygon(points, fill=(59, 130, 246, 255))
-    
+
     return img
 
 # Generate all sizes
@@ -143,6 +148,7 @@ print("✅ Icon generation complete!")
 ```
 
 Run it:
+
 ```bash
 python scripts/generate-icons.py
 ```
@@ -165,6 +171,7 @@ If you're comfortable with Photoshop, GIMP, or similar:
 The favicon is the 32x32 icon in browser tabs.
 
 ### Option A: Convert PNG to ICO
+
 ```bash
 # Using ImageMagick
 convert public/icons/icon-192x192.png -define icon:auto-resize=32 public/icons/favicon.ico
@@ -174,6 +181,7 @@ convert public/icons/icon-192x192.png -define icon:auto-resize=32 public/icons/f
 ```
 
 ### Option B: Direct generation from SVG
+
 Some tools like [Favicon Generator](https://favicon-generator.org/) can create ICO files directly.
 
 ## Verification Checklist
@@ -190,6 +198,7 @@ After generating all assets:
   - [ ] maskable-icon-512.png
 
 - [ ] Run Lighthouse audit to verify PWA score:
+
   ```bash
   npm run build
   npm run start
@@ -197,6 +206,7 @@ After generating all assets:
   ```
 
 - [ ] Check manifest.json references correct paths:
+
   ```bash
   curl http://localhost:3000/manifest.json
   ```
@@ -218,17 +228,20 @@ When exporting the logo SVG from `components/ui/brand-logo.tsx`:
 ## Troubleshooting
 
 ### Icons not showing on PWA install
+
 - [ ] Verify `manifest.json` has correct icon paths
 - [ ] Ensure icons are in `public/icons/`
 - [ ] Check that `app/layout.tsx` references correct manifest path
 - [ ] Clear browser cache and rebuild
 
 ### Android shows default icon instead of custom
+
 - [ ] Ensure maskable icons are present and properly formatted
 - [ ] Check that safe zone (center 66%) contains the logo
 - [ ] Verify icon colors have enough contrast (white logo on dark bg)
 
 ### iOS shows generic icon on home screen
+
 - [ ] Verify `apple-touch-icon.png` is exactly 180x180
 - [ ] Check file is in `public/icons/`
 - [ ] Clear browser cache on iOS device
@@ -248,4 +261,3 @@ When exporting the logo SVG from `components/ui/brand-logo.tsx`:
 - [Web.dev: Installable PWA](https://web.dev/install-criteria/)
 - [Favicon Best Practices](https://evilmartians.com/chronicles/how-to-favicon-in-2021-six-files-that-matter)
 - [Android Adaptive Icons](https://developer.android.com/guide/topics/ui/look-and-feel/icon_design_adaptive)
-

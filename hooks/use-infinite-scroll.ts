@@ -34,7 +34,7 @@ export const useInfiniteScroll = ({
       },
       {
         rootMargin: `${threshold}px`,
-      }
+      },
     );
 
     if (observerTarget.current) {
