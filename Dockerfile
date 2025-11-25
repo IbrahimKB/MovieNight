@@ -44,8 +44,8 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
-# Copy environment file
-COPY .env .env
+# Copy environment file if it exists
+COPY .env* ./
 
 EXPOSE 3000
 

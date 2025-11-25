@@ -20,8 +20,6 @@ build
 .turbo/
 
 # ─── Local Environment ──────────────────────────────────────────────
-.env
-.env.*
 .env.local
 .env.*.local
 .env.save
