@@ -16,123 +16,68 @@ const sizeMap = {
 };
 
 /**
- * MovieNight Brand Logo
- * Concept: Film reel meets connection node - representing cinema + social
- * Uses primary brand colors and scales responsively
- *
- * Note: This component is for client-side only (used in app layout navbar).
- * For SSR pages (auth pages), use the Clapperboard icon instead.
+ * MovieNight Brand Logo - Modern Minimalist Cinema Design
+ * Concept: Sleek film frame with play button - representing cinema + action
+ * Clean geometric design with primary brand colors
  */
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
   return (
     <svg
-      viewBox="0 0 512 512"
+      viewBox="0 0 64 64"
       className={cn(sizeMap[size], className)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       role="img"
       aria-label="MovieNight"
     >
-      {/* Define gradients for depth */}
       <defs>
-        <linearGradient id="reel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#1e40af", stopOpacity: 1 }}
-          />
+        <linearGradient id="gradient-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: "currentColor", stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: "currentColor", stopOpacity: 0.7 }} />
         </linearGradient>
-        <radialGradient id="glow">
-          <stop
-            offset="0%"
-            style={{ stopColor: "#60a5fa", stopOpacity: 0.3 }}
-          />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#3b82f6", stopOpacity: 0 }}
-          />
-        </radialGradient>
       </defs>
 
-      {/* Background circle */}
-      <circle cx="256" cy="256" r="256" fill="currentColor" opacity="0.05" />
-
-      {/* Outer film reel circles */}
-      <circle
-        cx="256"
-        cy="256"
-        r="200"
-        fill="url(#reel-gradient)"
-        opacity="0.1"
-      />
-
-      {/* Main reel ring */}
-      <circle
-        cx="256"
-        cy="256"
-        r="180"
-        fill="none"
-        stroke="url(#reel-gradient)"
-        strokeWidth="24"
-      />
-
-      {/* Reel film perforations (top, right, bottom, left) */}
-      <g fill="currentColor" opacity="0.7">
-        {/* Top hole */}
-        <rect x="240" y="95" width="32" height="32" rx="4" />
-        {/* Right hole */}
-        <rect x="385" y="240" width="32" height="32" rx="4" />
-        {/* Bottom hole */}
-        <rect x="240" y="385" width="32" height="32" rx="4" />
-        {/* Left hole */}
-        <rect x="95" y="240" width="32" height="32" rx="4" />
-      </g>
-
-      {/* Central play button (representing cinema) */}
-      <g transform="translate(256, 256)">
-        <circle cx="0" cy="0" r="70" fill="currentColor" opacity="0.1" />
-
-        {/* Play triangle */}
-        <path
-          d="M -20 -35 L -20 35 L 40 0 Z"
-          fill="currentColor"
-          opacity="0.9"
-        />
-      </g>
-
-      {/* Connection nodes (representing social) - subtle highlights */}
-      <g fill="currentColor" opacity="0.5">
-        {/* Top-right */}
-        <circle cx="350" cy="170" r="12" />
-        {/* Bottom-right */}
-        <circle cx="350" cy="342" r="12" />
-        {/* Bottom-left */}
-        <circle cx="162" cy="342" r="12" />
-        {/* Top-left */}
-        <circle cx="162" cy="170" r="12" />
-      </g>
-
-      {/* Connecting lines between nodes (subtle) */}
-      <g
+      {/* Outer frame - minimalist cinema screen */}
+      <rect
+        x="6"
+        y="8"
+        width="52"
+        height="48"
+        rx="3"
         stroke="currentColor"
-        strokeWidth="3"
-        opacity="0.25"
-        strokeLinecap="round"
-      >
-        <line x1="350" y1="170" x2="350" y2="342" />
-        <line x1="350" y1="342" x2="162" y2="342" />
-        <line x1="162" y1="342" x2="162" y2="170" />
-        <line x1="162" y1="170" x2="350" y2="170" />
+        strokeWidth="1.5"
+        opacity="0.8"
+      />
+
+      {/* Inner film strips - top and bottom */}
+      <g stroke="currentColor" strokeWidth="1" opacity="0.6">
+        <line x1="8" y1="14" x2="56" y2="14" strokeDasharray="3,2" />
+        <line x1="8" y1="50" x2="56" y2="50" strokeDasharray="3,2" />
       </g>
 
-      {/* Optional glow effect for premium feel */}
-      <circle
-        cx="256"
-        cy="256"
-        r="180"
-        fill="url(#glow)"
-        pointerEvents="none"
-      />
+      {/* Center play button - modern geometric triangle */}
+      <g fill="currentColor">
+        <polygon points="28,24 28,40 42,32" opacity="0.9" />
+      </g>
+
+      {/* Accent corner brackets - cinema frame detail */}
+      <g stroke="currentColor" strokeWidth="1.5" opacity="0.5">
+        {/* Top-left */}
+        <line x1="8" y1="10" x2="14" y2="10" />
+        <line x1="8" y1="10" x2="8" y2="16" />
+        {/* Top-right */}
+        <line x1="56" y1="10" x2="50" y2="10" />
+        <line x1="56" y1="10" x2="56" y2="16" />
+        {/* Bottom-left */}
+        <line x1="8" y1="54" x2="14" y2="54" />
+        <line x1="8" y1="54" x2="8" y2="48" />
+        {/* Bottom-right */}
+        <line x1="56" y1="54" x2="50" y2="54" />
+        <line x1="56" y1="54" x2="56" y2="48" />
+      </g>
+
+      {/* Subtle glow circle behind play button */}
+      <circle cx="32" cy="32" r="10" fill="currentColor" opacity="0.08" />
     </svg>
   );
 }
