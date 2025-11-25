@@ -15,6 +15,32 @@ export async function GET(
   req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
+    // Security check: Require CRON_SECRET or Admin Auth
+    const authHeader = req.headers.get("authorization");
+    const cronSecret = process.env.CRON_SECRET;
+    const isCronAuthorized = cronSecret && authHeader === `Bearer ${cronSecret}`;
+    
+    // Also allow admin users to manually trigger via UI
+    let isAdmin = false;
+    if (!isCronAuthorized) {
+      // Only check session if not using secret
+      try {
+        // Dynamic import to avoid circular deps if any
+        const { getCurrentUser } = await import("@/lib/auth");
+        const user = await getCurrentUser();
+        isAdmin = user?.role === "admin";
+      } catch (e) {
+        // Ignore auth error, just fail
+      }
+    }
+
+    if (!isCronAuthorized && !isAdmin) {
+       return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const action = req.nextUrl.searchParams.get("action") || "status";
 
     // Initialize cron jobs if not already done

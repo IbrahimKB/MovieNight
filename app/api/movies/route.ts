@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { ApiResponse } from "@/types";
 import { tmdbClient } from "@/lib/tmdb";
+import { getCurrentUser } from "@/lib/auth";
 
 // ---------------------------------------------
 // Validation schema
@@ -37,6 +38,14 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
 // ---------------------------------------------
 export async function GET(req: NextRequest) {
   try {
+    const user = await getCurrentUser();
+    if (!user) {
+       return NextResponse.json(
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
+      );
+    }
+
     const searchParams = req.nextUrl.searchParams;
 
     const parsed = SearchSchema.safeParse({

@@ -42,7 +42,10 @@ function getFriendshipId(req: NextRequest): string | null {
 // -------------------------------------------------------
 // PATCH /api/friends/[id]
 // -------------------------------------------------------
-export async function PATCH(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
     const currentUser = await getCurrentUser();
@@ -53,7 +56,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse<ApiResponse>
       );
     }
 
-    const friendshipId = getFriendshipId(req);
+    const { id: friendshipId } = await params;
     if (!friendshipId) {
       return NextResponse.json(
         { success: false, error: "Friendship ID is required" },
@@ -189,7 +192,10 @@ if (!validation.success) {
 // -------------------------------------------------------
 // DELETE /api/friends/[id]
 // -------------------------------------------------------
-export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -199,7 +205,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
       );
     }
 
-    const friendshipId = getFriendshipId(req);
+    const { id: friendshipId } = await params;
     if (!friendshipId) {
       return NextResponse.json(
         { success: false, error: "Friendship ID is required" },

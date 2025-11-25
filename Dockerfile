@@ -18,7 +18,7 @@ COPY . .
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
-RUN npx prisma generate
+RUN ./node_modules/.bin/prisma generate
 
 ENV PRISMA_SKIP_ENGINE_CHECK=true
 RUN npm run build
@@ -37,27 +37,32 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Create non-root user EARLY to avoid chown -R later
+RUN useradd -m -u 1001 nodejs
+
 # Install ONLY production deps
-COPY package.json package-lock.json ./
+# Copy with ownership so nodejs user can write to it during install if needed
+COPY --chown=nodejs:nodejs package.json package-lock.json ./
+
+# Switch to user BEFORE installing deps to avoid root ownership issues
+USER nodejs
+
+# Install prod deps (files will be owned by nodejs)
 RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
-# Copy Next.js build
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# Copy Next.js build with ownership
+COPY --chown=nodejs:nodejs --from=builder /app/.next ./.next
+COPY --chown=nodejs:nodejs --from=builder /app/public ./public
 
-# Copy Prisma client + schema
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+# Copy Prisma client + schema with ownership
+COPY --chown=nodejs:nodejs --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --chown=nodejs:nodejs --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --chown=nodejs:nodejs --from=builder /app/prisma ./prisma
 
 # Copy environment file if it exists
-COPY .env* ./
-
-# Create non-root user for security
-RUN useradd -m -u 1001 nodejs && chown -R nodejs:nodejs /app
-USER nodejs
+COPY --chown=nodejs:nodejs .env* ./
 
 EXPOSE 3000
 
 # Run migrations and start app
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && npm start"]
