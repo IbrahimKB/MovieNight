@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Clapperboard, X } from "lucide-react";
+import { Search, Clapperboard } from "lucide-react";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 
 interface Movie {
   id: string;
@@ -14,6 +16,8 @@ interface Movie {
   imdbRating?: number;
 }
 
+const MOVIES_PER_PAGE = 20;
+
 export default function MoviesPage() {
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -22,6 +26,9 @@ export default function MoviesPage() {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [allGenres, setAllGenres] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [displayedMovies, setDisplayedMovies] = useState<Movie[]>([]);
 
   const token =
     typeof window !== "undefined"
@@ -42,6 +49,9 @@ export default function MoviesPage() {
         if (data.success && Array.isArray(data.data)) {
           setMovies(data.data);
           setFilteredMovies(data.data);
+          setCurrentPage(1);
+          setDisplayedMovies(data.data.slice(0, MOVIES_PER_PAGE));
+          setHasMore(data.data.length > MOVIES_PER_PAGE);
 
           // Extract unique genres
           const genres = new Set<string>();
