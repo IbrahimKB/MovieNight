@@ -226,7 +226,7 @@ export default function SuggestPage() {
         toast({
             title: "Error",
             description: "Failed to send suggestion. Try again.",
-            variant: "destructive"
+            variant: "error"
         });
       }
     } catch (error) {
@@ -267,7 +267,7 @@ export default function SuggestPage() {
         toast({
             title: "Error",
             description: "Failed to accept suggestion.",
-            variant: "destructive"
+            variant: "error"
         });
     }
   };

@@ -145,7 +145,7 @@ export default function MovieNightPage() {
           toast({
             title: "Error",
             description: "Failed to find movies.",
-            variant: "destructive"
+            variant: "error"
           });
       }
 
@@ -154,7 +154,7 @@ export default function MovieNightPage() {
       toast({
         title: "Error",
         description: "Failed to find movies.",
-        variant: "destructive"
+        variant: "error"
       });
     } finally {
       setIsFinding(false);

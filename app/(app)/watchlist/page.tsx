@@ -122,7 +122,7 @@ export default function WatchlistPage() {
         toast({
           title: "Error",
           description: "Failed to load watchlist. Please try again.",
-          variant: "destructive"
+          variant: "error"
         });
       } finally {
         setIsLoading(false);
@@ -237,7 +237,7 @@ export default function WatchlistPage() {
         toast({
             title: "Error",
             description: "Failed to mark as watched.",
-            variant: "destructive"
+            variant: "error"
         });
     }
 
