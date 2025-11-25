@@ -33,6 +33,8 @@ export default function MovieDetailPage() {
   const router = useRouter();
   const { user } = useAuth();
   const movieId = params?.id as string;
+  const { trigger: triggerConfetti, triggerCheckmark, triggerPaperAirplane } =
+    useConfetti();
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,9 @@ export default function MovieDetailPage() {
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const [isMarkingWatched, setIsMarkingWatched] = useState(false);
+  const [isSuggestingMovie, setIsSuggestingMovie] = useState(false);
 
   const token =
     typeof window !== "undefined"
