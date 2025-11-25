@@ -78,7 +78,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             onClick={() => router.push("/")}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <BrandLogo size="md" className="text-primary" />
+            <div className="w-9 h-9">
+              <BrandLogo size="md" className="text-primary" />
+            </div>
             <span className="hidden sm:inline text-xl font-bold text-primary">
               MovieNight
             </span>
