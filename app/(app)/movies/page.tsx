@@ -127,7 +127,12 @@ export default function MoviesPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
@@ -192,8 +197,8 @@ export default function MoviesPage() {
             {filteredMovies.length !== 1 ? "s" : ""}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {filteredMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
+            {filteredMovies.map((movie, index) => (
+              <MovieCard key={movie.id} movie={movie} index={index} />
             ))}
           </div>
         </div>
@@ -214,6 +219,6 @@ export default function MoviesPage() {
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
