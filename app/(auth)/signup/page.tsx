@@ -258,11 +258,38 @@ export default function SignupPage() {
                       className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
                     />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirm Password Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Confirm Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <Lock
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({ ...formData, confirmPassword: e.target.value })
                       }
                       className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
                       required

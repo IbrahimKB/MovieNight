@@ -7,8 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Mail, Lock, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,14 +22,14 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    if (!email || !password) {
+    if (!formData.emailOrUsername || !formData.password) {
       setError('Please fill in all fields');
       setIsLoading(false);
       return;
     }
 
     try {
-      const success = await login(email, password);
+      const success = await login(formData.emailOrUsername, formData.password);
       if (success) {
         router.push('/');
       } else {
