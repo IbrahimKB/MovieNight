@@ -113,13 +113,25 @@ export async function POST(req: NextRequest) {
        });
     }
 
+    // Map friendIds (external) to internal UUIDs
+    const internalFriendIds: string[] = [];
+    for (const externalId of friendIds) {
+      const friend = await prisma.authUser.findFirst({
+        where: { OR: [{ puid: externalId }, { id: externalId }] },
+        select: { id: true }
+      });
+      if (friend) {
+        internalFriendIds.push(friend.id);
+      }
+    }
+
     const createdSuggestions = await Promise.all(
-      friendIds.map(friendId => 
+      internalFriendIds.map(id => 
         prisma.suggestion.create({
           data: {
             movieId,
             fromUserId: user.id,
-            toUserId: friendId,
+            toUserId: id,
             message: comment,
             status: 'pending'
           }
