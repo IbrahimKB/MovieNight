@@ -18,6 +18,7 @@ COPY . .
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
+# Use relative path in builder stage as we haven't switched users yet
 RUN ./node_modules/.bin/prisma generate
 
 ENV PRISMA_SKIP_ENGINE_CHECK=true
@@ -69,4 +70,4 @@ COPY --chown=nodejs:nodejs .env* ./
 EXPOSE 3000
 
 # Run migrations and start app
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "/app/node_modules/.bin/prisma migrate deploy && npm start"]
