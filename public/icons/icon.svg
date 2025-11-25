@@ -1,0 +1,58 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#0a0a0a"/>
+  
+  <!-- Film Reel + Chat Bubble Design -->
+  <defs>
+    <linearGradient id="filmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glowGradient">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Main Film Reel Circle -->
+  <circle cx="256" cy="220" r="140" fill="url(#filmGradient)" opacity="0.1"/>
+  <circle cx="256" cy="220" r="130" fill="none" stroke="url(#filmGradient)" stroke-width="20"/>
+  
+  <!-- Reel Film Perforations -->
+  <rect x="235" y="80" width="24" height="24" rx="3" fill="white" opacity="0.8"/>
+  <rect x="235" y="360" width="24" height="24" rx="3" fill="white" opacity="0.8"/>
+  <rect x="96" y="215" width="24" height="24" rx="3" fill="white" opacity="0.8"/>
+  <rect x="392" y="215" width="24" height="24" rx="3" fill="white" opacity="0.8"/>
+  
+  <!-- Play Button (Center Cinema Icon) -->
+  <circle cx="256" cy="220" r="50" fill="white" opacity="0.1"/>
+  <path d="M240 200 L240 240 L280 220 Z" fill="white" opacity="0.9"/>
+  
+  <!-- Chat Bubble (Social Element) -->
+  <g transform="translate(290, 320)">
+    <!-- Bubble -->
+    <rect x="0" y="0" width="130" height="90" rx="12" fill="#dc2626" opacity="0.85"/>
+    <!-- Pointer -->
+    <polygon points="25,90 40,110 45,90" fill="#dc2626" opacity="0.85"/>
+    <!-- Text lines inside bubble -->
+    <rect x="10" y="15" width="50" height="4" rx="2" fill="white" opacity="0.7"/>
+    <rect x="10" y="27" width="70" height="4" rx="2" fill="white" opacity="0.7"/>
+    <rect x="10" y="39" width="55" height="4" rx="2" fill="white" opacity="0.7"/>
+    <rect x="10" y="55" width="40" height="4" rx="2" fill="white" opacity="0.6"/>
+  </g>
+  
+  <!-- Connection Nodes (Social Network) -->
+  <circle cx="150" cy="100" r="8" fill="white" opacity="0.5"/>
+  <circle cx="362" cy="100" r="8" fill="white" opacity="0.5"/>
+  <circle cx="362" cy="340" r="8" fill="white" opacity="0.5"/>
+  <circle cx="150" cy="340" r="8" fill="white" opacity="0.5"/>
+  
+  <!-- Connecting Lines -->
+  <line x1="150" y1="100" x2="362" y2="100" stroke="white" stroke-width="2" opacity="0.3"/>
+  <line x1="362" y1="100" x2="362" y2="340" stroke="white" stroke-width="2" opacity="0.3"/>
+  <line x1="362" y1="340" x2="150" y2="340" stroke="white" stroke-width="2" opacity="0.3"/>
+  <line x1="150" y1="340" x2="150" y2="100" stroke="white" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Glow Effect -->
+  <circle cx="256" cy="220" r="130" fill="url(#glowGradient)" pointer-events="none"/>
+</svg>
