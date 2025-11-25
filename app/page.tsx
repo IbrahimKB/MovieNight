@@ -116,10 +116,19 @@ export default function HomePage() {
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <motion.div
+          className="text-center space-y-4"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="text-muted-foreground">Loading MovieNight...</p>
+        </motion.div>
       </div>
     );
   }
@@ -131,6 +140,10 @@ export default function HomePage() {
 
   return (
     <motion.div
+      ref={contentRef}
+      onTouchStart={handlePullToRefresh}
+      onTouchMove={handlePullToRefresh}
+      onTouchEnd={handlePullToRefresh}
       className="min-h-screen bg-background text-foreground"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
