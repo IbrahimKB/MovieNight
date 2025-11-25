@@ -4,7 +4,8 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, User, ArrowRight, Clapperboard } from "lucide-react";
+import { Mail, Lock, User, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
