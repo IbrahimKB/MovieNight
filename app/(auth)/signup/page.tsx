@@ -1,14 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Film, Eye, EyeOff, Check } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { Mail, Lock, User, ArrowRight, Clapperboard } from "lucide-react";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -76,7 +72,7 @@ export default function SignupPage() {
         formData.username,
         formData.email,
         formData.password,
-        formData.name
+        formData.name,
       );
 
       if (success) {
@@ -103,211 +99,234 @@ export default function SignupPage() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Logo/Brand */}
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Film className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">MovieNight</h1>
+    <div className="min-h-screen relative w-full overflow-hidden">
+      {/* Premium Background */}
+      <div className="absolute inset-0">
+        {/* Gradient backdrop */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0D0D0D] via-[#1a1a2e] to-[#0f0f1e]" />
+
+        {/* Glowing orbs */}
+        <div className="absolute top-20 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl opacity-20" />
+        <div className="absolute -bottom-40 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-15" />
+
+        {/* Subtle film strip pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(59,130,246,0.1) 2px, rgba(59,130,246,0.1) 4px)",
+              backgroundSize: "100% 100%",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
+        {/* Logo Section */}
+        <div className="mb-12 text-center">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/50">
+              <Clapperboard size={32} className="text-white" />
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Join the community and start planning movie nights with friends
+          <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
+            MovieNight
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Discover, watch, and connect
           </p>
         </div>
 
-        {/* Signup Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">
-              Create Account
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+        {/* Signup Card */}
+        <div className="w-full max-w-md">
+          <div className="bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+            {/* Card Header */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                Create Account
+              </h2>
+              <p className="text-muted-foreground">
+                Join millions of movie enthusiasts
+              </p>
+            </div>
 
-              <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-medium">
-                  Full Name
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  disabled={isLoading}
-                  autoComplete="name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="username" className="text-sm font-medium">
-                  Username
-                </label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Choose a username"
-                  value={formData.username}
-                  onChange={(e) =>
-                    handleInputChange('username', e.target.value)
-                  }
-                  disabled={isLoading}
-                  autoComplete="username"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  disabled={isLoading}
-                  autoComplete="email"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Password
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Create a password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      handleInputChange('password', e.target.value)
-                    }
-                    disabled={isLoading}
-                    autoComplete="new-password"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {formData.password && (
-                  <div className="space-y-1">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 flex-1 rounded ${
-                            passwordStrength >= level
-                              ? level <= 2
-                                ? 'bg-red-500'
-                                : level === 3
-                                  ? 'bg-yellow-500'
-                                  : 'bg-green-500'
-                              : 'bg-muted'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {passwordStrength === 0 && 'Password too weak'}
-                      {passwordStrength === 1 && 'Weak password'}
-                      {passwordStrength === 2 && 'Fair password'}
-                      {passwordStrength === 3 && 'Good password'}
-                      {passwordStrength === 4 && 'Strong password'}
-                    </p>
-                  </div>
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm space-y-2">
+                <p className="font-semibold">{error}</p>
+                {error.includes("Database") && (
+                  <p className="text-xs opacity-75">
+                    💡 Tip: Check that PostgreSQL is running. In Docker, make
+                    sure the database service is accessible.
+                  </p>
                 )}
               </div>
+            )}
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="confirmPassword"
-                  className="text-sm font-medium"
-                >
-                  Confirm Password
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Full Name
                 </label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm your password"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      handleInputChange('confirmPassword', e.target.value)
-                    }
-                    disabled={isLoading}
-                    autoComplete="new-password"
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                  {formData.confirmPassword &&
-                    formData.password === formData.confirmPassword && (
-                      <Check className="absolute right-10 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
-                    )}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <User
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                    />
+                  </div>
                 </div>
               </div>
 
-              <Button
+              {/* Username Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Username
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <User
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
+                    <input
+                      type="text"
+                      placeholder="johndoe"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                      minLength={3}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Email
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <Mail
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
+                    <input
+                      type="email"
+                      placeholder="user@example.com"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Input */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Password
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur" />
+                  <div className="relative flex items-center">
+                    <Lock
+                      size={18}
+                      className="absolute left-4 text-primary/60 group-focus-within:text-primary transition-colors"
+                    />
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      className="w-full pl-12 pr-4 py-3 rounded-xl bg-[#0a0a14] border border-primary/30 text-white placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
                 type="submit"
-                className="w-full"
-                disabled={isLoading}
-                size="lg"
+                disabled={loading}
+                className="w-full mt-8 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-bold text-lg hover:from-primary hover:to-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60 group transform hover:scale-105 active:scale-95"
               >
-                {isLoading ? (
+                {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     Creating account...
                   </>
                 ) : (
-                  'Create Account'
+                  <>
+                    Create Account
+                    <ArrowRight
+                      size={20}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
                 )}
-              </Button>
+              </button>
             </form>
 
-            <div className="mt-6 text-center text-sm">
-              <span className="text-muted-foreground">
-                Already have an account?{' '}
-              </span>
-              <Link
-                href="/login"
-                className="text-primary hover:underline font-medium"
-              >
-                Sign in
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-primary/20" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
+                  Already have an account?
+                </span>
+              </div>
+
+            {/* Login Link */}
+            <Link
+              href="/login"
+              className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
+            >
+              Sign In
+            </Link>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-muted-foreground text-sm mt-8">
+            By signing up, you agree to our{" "}
+            <Link href="#" className="text-primary hover:text-primary/80">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="#" className="text-primary hover:text-primary/80">
+              Privacy Policy
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,229 +1,326 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Heart, CheckCircle, XCircle, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Trash2, Check, Bookmark } from "lucide-react";
 
 interface Suggestion {
   id: string;
   movieId: string;
-  movieTitle: string;
-  moviePoster?: string;
   fromUserId: string;
-  fromUserUsername: string;
+  toUserId: string;
   message?: string;
-  status: "pending" | "accepted" | "rejected";
-  createdAt: string;
+  status: string;
+  movie?: {
+    id: string;
+    title: string;
+    year: number;
+    poster?: string;
+  };
+  fromUser?: {
+    id: string;
+    name: string;
+    username: string;
+  };
+  toUser?: {
+    id: string;
+    name: string;
+    username: string;
+  };
 }
 
+type Tab = "received" | "sent";
+
 export default function SuggestionsPage() {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<Tab>("received");
+  const [receivedSuggestions, setReceivedSuggestions] = useState<Suggestion[]>(
+    [],
+  );
+  const [sentSuggestions, setSentSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
 
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const res = await fetch("/api/suggestions", {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-            "Content-Type": "application/json",
-          },
-        });
+        const res = await fetch("/api/suggestions", { headers });
         const data = await res.json();
 
-        if (!res.ok) {
-          setError(data.error || "Failed to fetch suggestions");
-          return;
-        }
+        if (data.success && Array.isArray(data.data)) {
+          // Separate by direction
+          const received = data.data.filter(
+            (s: Suggestion) => s.status === "pending",
+          );
+          const sent = data.data.filter(
+            (s: Suggestion) => s.status !== "pending",
+          );
 
-        setSuggestions(data.data || []);
-      } catch (err) {
-        setError("An error occurred");
-        console.error("Error:", err);
+          setReceivedSuggestions(received);
+          setSentSuggestions(sent);
+        }
+      } catch (error) {
+        console.error("Failed to fetch suggestions:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchSuggestions();
-  }, []);
+  }, [token]);
 
-  const pendingSuggestions = suggestions.filter((s) => s.status === "pending");
-  const acceptedSuggestions = suggestions.filter((s) => s.status === "accepted");
+  const handleAcceptSuggestion = async (
+    suggestionId: string,
+    movieId: string,
+  ) => {
+    try {
+      // Add to watchlist
+      await fetch("/api/watch/desire", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ movieId, suggestionId }),
+      });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/30";
-      case "accepted":
-        return "bg-green-500/10 text-green-400 border-green-500/30";
-      case "rejected":
-        return "bg-red-500/10 text-red-400 border-red-500/30";
-      default:
-        return "bg-muted";
+      // Update status
+      setReceivedSuggestions(
+        receivedSuggestions.filter((s) => s.id !== suggestionId),
+      );
+    } catch (error) {
+      console.error("Failed to accept suggestion:", error);
+    }
+  };
+
+  const handleRejectSuggestion = async (suggestionId: string) => {
+    try {
+      const res = await fetch(`/api/suggestions/${suggestionId}`, {
+        method: "DELETE",
+        headers,
+      });
+
+      if (res.ok) {
+        setReceivedSuggestions(
+          receivedSuggestions.filter((s) => s.id !== suggestionId),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to reject suggestion:", error);
+    }
+  };
+
+  const handleDeleteSentSuggestion = async (suggestionId: string) => {
+    try {
+      const res = await fetch(`/api/suggestions/${suggestionId}`, {
+        method: "DELETE",
+        headers,
+      });
+
+      if (res.ok) {
+        setSentSuggestions(
+          sentSuggestions.filter((s) => s.id !== suggestionId),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to delete suggestion:", error);
     }
   };
 
   const SuggestionCard = ({
     suggestion,
-    isPending,
+    onAccept,
+    onReject,
+    onDelete,
+    isReceived,
   }: {
     suggestion: Suggestion;
-    isPending: boolean;
+    onAccept?: () => void;
+    onReject?: () => void;
+    onDelete?: () => void;
+    isReceived?: boolean;
   }) => (
-    <div className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
-      {/* Poster */}
-      <div className="relative h-48 md:h-56 bg-secondary overflow-hidden group">
-        {suggestion.moviePoster ? (
+    <div className="bg-card border border-border rounded-lg p-4 flex gap-4">
+      <div
+        onClick={() => router.push(`/movies/${suggestion.movieId}`)}
+        className="w-24 h-36 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      >
+        {suggestion.movie?.poster ? (
           <img
-            src={suggestion.moviePoster}
-            alt={suggestion.movieTitle}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            src={suggestion.movie.poster}
+            alt={suggestion.movie.title}
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Heart size={60} className="text-muted-foreground" />
+          <div className="w-full h-full bg-background flex items-center justify-center">
+            📽️
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
-        <span
-          className={`absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-semibold border ${getStatusColor(
-            suggestion.status
-          )}`}
-        >
-          {suggestion.status === "pending" ? "Pending" : "Watched"}
-        </span>
       </div>
 
-      {/* Content */}
-      <div className="p-4 md:p-6">
-        <h3 className="font-bold text-lg md:text-xl mb-2 line-clamp-2">
-          {suggestion.movieTitle}
-        </h3>
-
-        <div className="mb-4">
-          <p className="text-xs md:text-sm text-muted-foreground mb-2">
-            Suggested by{" "}
-            <span className="text-foreground">@{suggestion.fromUserUsername}</span>
-          </p>
-          {suggestion.message && (
-            <p className="text-sm text-foreground italic">
-              "{suggestion.message}"
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground mt-2">
-            {new Date(suggestion.createdAt).toLocaleDateString()}
+      <div className="flex-1">
+        <div
+          onClick={() => router.push(`/movies/${suggestion.movieId}`)}
+          className="cursor-pointer hover:text-primary transition-colors"
+        >
+          <h3 className="font-semibold text-lg">{suggestion.movie?.title}</h3>
+          <p className="text-sm text-muted-foreground">
+            {suggestion.movie?.year}
           </p>
         </div>
 
-        {isPending ? (
-          <div className="space-y-2">
-            <button className="w-full px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold flex items-center justify-center gap-2 text-sm">
-              <Calendar size={16} />
-              Book Movie Night
+        <p className="text-sm text-muted-foreground mt-2">
+          {isReceived ? (
+            <>
+              Suggested by{" "}
+              <span className="font-medium text-foreground">
+                {suggestion.fromUser?.name || suggestion.fromUser?.username}
+              </span>
+            </>
+          ) : (
+            <>
+              Suggested to{" "}
+              <span className="font-medium text-foreground">
+                {suggestion.toUser?.name || suggestion.toUser?.username}
+              </span>
+            </>
+          )}
+        </p>
+
+        {suggestion.message && (
+          <p className="text-sm text-muted-foreground mt-2 italic">
+            "{suggestion.message}"
+          </p>
+        )}
+
+        {isReceived && (
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={onAccept}
+              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Bookmark size={14} />
+              Add to Watchlist
             </button>
-            <div className="flex gap-2">
-              <button className="flex-1 px-3 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium flex items-center justify-center gap-2 text-sm">
-                <XCircle size={16} />
-                <span className="hidden sm:inline">Skip</span>
-              </button>
-              <button className="flex-1 px-3 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium flex items-center justify-center gap-2 text-sm">
-                <Heart size={16} />
-                <span className="hidden sm:inline">Save</span>
-              </button>
-            </div>
+            <button
+              onClick={onReject}
+              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20 transition-colors"
+            >
+              <Trash2 size={14} />
+              Reject
+            </button>
           </div>
-        ) : (
-          <div className="px-4 py-2 rounded-lg bg-green-500/10 text-green-400 border border-green-500/30 text-center text-sm font-medium">
-            <CheckCircle className="inline mr-2" size={16} />
-            Watched
+        )}
+
+        {!isReceived && onDelete && (
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={onDelete}
+              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20 transition-colors"
+            >
+              <Trash2 size={14} />
+              Delete
+            </button>
           </div>
         )}
       </div>
     </div>
   );
 
-  return (
-    <div className="p-4 md:p-8 lg:p-12">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Suggestions</h1>
-          <p className="text-base md:text-lg text-muted-foreground">
-            Discover movies your friends think you'll love
-          </p>
-        </div>
-
-        {error && (
-          <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <p className="text-muted-foreground text-center py-8">
-            Loading suggestions...
-          </p>
-        ) : (
-          <>
-            {/* Pending Suggestions */}
-            {pendingSuggestions.length > 0 && (
-              <div className="mb-12">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-1 h-6 bg-primary rounded-full" />
-                  <h2 className="text-xl md:text-2xl font-bold">
-                    Pending Suggestions ({pendingSuggestions.length})
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {pendingSuggestions.map((suggestion) => (
-                    <SuggestionCard
-                      key={suggestion.id}
-                      suggestion={suggestion}
-                      isPending={true}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Watched from Suggestions */}
-            {acceptedSuggestions.length > 0 && (
-              <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="w-1 h-6 bg-green-500 rounded-full" />
-                  <h2 className="text-xl md:text-2xl font-bold">
-                    Watched ({acceptedSuggestions.length})
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {acceptedSuggestions.map((suggestion) => (
-                    <SuggestionCard
-                      key={suggestion.id}
-                      suggestion={suggestion}
-                      isPending={false}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {suggestions.length === 0 && (
-              <div className="text-center py-20">
-                <Heart size={48} className="text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">
-                  No suggestions yet
-                </h2>
-                <p className="text-muted-foreground">
-                  Add friends to get personalized movie recommendations!
-                </p>
-              </div>
-            )}
-          </>
-        )}
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading suggestions...</p>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold mb-2">Suggestions</h1>
+        <p className="text-muted-foreground">
+          Discover movies recommended by friends
+        </p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-4 border-b border-border">
+        <button
+          onClick={() => setActiveTab("received")}
+          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            activeTab === "received"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Received ({receivedSuggestions.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("sent")}
+          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            activeTab === "sent"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Sent ({sentSuggestions.length})
+        </button>
+      </div>
+
+      {/* Received Suggestions */}
+      {activeTab === "received" && (
+        <div className="space-y-4">
+          {receivedSuggestions.length > 0 ? (
+            receivedSuggestions.map((suggestion) => (
+              <SuggestionCard
+                key={suggestion.id}
+                suggestion={suggestion}
+                isReceived
+                onAccept={() =>
+                  handleAcceptSuggestion(suggestion.id, suggestion.movieId)
+                }
+                onReject={() => handleRejectSuggestion(suggestion.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12 bg-card border border-border rounded-lg">
+              <p className="text-muted-foreground">
+                No suggestions received yet
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sent Suggestions */}
+      {activeTab === "sent" && (
+        <div className="space-y-4">
+          {sentSuggestions.length > 0 ? (
+            sentSuggestions.map((suggestion) => (
+              <SuggestionCard
+                key={suggestion.id}
+                suggestion={suggestion}
+                isReceived={false}
+                onDelete={() => handleDeleteSentSuggestion(suggestion.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12 bg-card border border-border rounded-lg">
+              <p className="text-muted-foreground">
+                You haven't sent any suggestions yet
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

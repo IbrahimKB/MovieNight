@@ -1,375 +1,283 @@
 "use client";
 
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Link from "next/link";
+import { ArrowLeft, Calendar, Users, Clapperboard } from "lucide-react";
 
 interface EventDetail {
   id: string;
   movieId: string;
-  movieTitle: string;
-  moviePoster?: string;
-  movieYear?: number;
-  movieDescription?: string;
-  movieGenres?: string[];
-  hostUserId: string;
-  hostUsername: string;
-  participants: string[];
   date: string;
   notes?: string;
-  isHost: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Friend {
-  userId: string;
-  username: string;
+  participants: string[];
+  movie?: {
+    id: string;
+    title: string;
+    year: number;
+    poster?: string;
+    description: string;
+  };
+  hostUser?: {
+    id: string;
+    name: string;
+    username: string;
+  };
 }
 
 export default function EventDetailPage() {
-  const router = useRouter();
   const params = useParams();
-  const eventId = params.id as string;
+  const router = useRouter();
+  const eventId = params?.id as string;
 
   const [event, setEvent] = useState<EventDetail | null>(null);
-  const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [isAttending, setIsAttending] = useState(false);
+  const [guests, setGuests] = useState<any[]>([]);
 
-  const [editedDate, setEditedDate] = useState("");
-  const [editedNotes, setEditedNotes] = useState("");
-  const [selectedParticipants, setSelectedParticipants] = useState<string[]>(
-    [],
-  );
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEvent = async () => {
       try {
-        const [eventRes, friendsRes] = await Promise.all([
-          fetch(`/api/events/${eventId}`),
-          fetch("/api/friends"),
-        ]);
+        const res = await fetch(`/api/events/${eventId}`, { headers });
+        const data = await res.json();
 
-        const eventData = await eventRes.json();
-        const friendsData = await friendsRes.json();
-
-        if (!eventRes.ok) {
-          setError(eventData.error || "Event not found");
-          return;
+        if (data.success && data.data) {
+          setEvent(data.data);
+          setIsAttending(
+            data.data.participants?.includes(data.data.hostUser?.id) ?? false,
+          );
         }
-
-        setEvent(eventData.data);
-        setEditedDate(new Date(eventData.data.date).toISOString().slice(0, 16));
-        setEditedNotes(eventData.data.notes || "");
-        setSelectedParticipants(eventData.data.participants);
-
-        if (friendsRes.ok) {
-          setFriends(friendsData.data?.friends || []);
-        }
-      } catch (err) {
-        setError("Failed to load event");
-        console.error("Error:", err);
+      } catch (error) {
+        console.error("Failed to fetch event:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [eventId]);
+    if (eventId) {
+      fetchEvent();
+    }
+  }, [eventId, token]);
 
-  const handleSaveChanges = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSaving(true);
-    setError(null);
-
+  const handleRSVP = async () => {
     try {
       const res = await fetch(`/api/events/${eventId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
-          date: new Date(editedDate).toISOString(),
-          notes: editedNotes || undefined,
-          participants: selectedParticipants,
+          action: isAttending ? "unattend" : "attend",
         }),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Failed to update event");
-        return;
-      }
-
-      setEvent({
-        ...event!,
-        date: editedDate,
-        notes: editedNotes,
-        participants: selectedParticipants,
-      });
-      setEditing(false);
-    } catch (err) {
-      setError("An error occurred");
-      console.error("Error:", err);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this event?")) return;
-
-    try {
-      const res = await fetch(`/api/events/${eventId}`, { method: "DELETE" });
-
       if (res.ok) {
-        router.push("/calendar");
-      } else {
-        setError("Failed to delete event");
+        setIsAttending(!isAttending);
       }
-    } catch (err) {
-      setError("An error occurred");
-      console.error("Error:", err);
+    } catch (error) {
+      console.error("Failed to RSVP:", error);
     }
-  };
-
-  const toggleParticipant = (userId: string) => {
-    setSelectedParticipants((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId],
-    );
   };
 
   if (loading) {
-    return <p className="text-muted-foreground">Loading...</p>;
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading event details...</p>
+      </div>
+    );
   }
 
   if (!event) {
     return (
-      <div>
-        <p className="text-destructive mb-4">{error || "Event not found"}</p>
-        <Link href="/calendar" className="text-primary hover:underline">
-          Back to Calendar
-        </Link>
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Event not found</p>
+        <button
+          onClick={() => router.back()}
+          className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          Go Back
+        </button>
       </div>
     );
   }
 
+  const eventDate = new Date(event.date);
+  const isUpcoming = eventDate > new Date();
+
   return (
-    <div className="max-w-4xl">
-      <div className="mb-8">
-        <Link href="/calendar" className="text-primary hover:underline text-sm">
-          ← Back to Calendar
-        </Link>
-      </div>
+    <div className="space-y-8">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+      >
+        <ArrowLeft size={20} />
+        Back
+      </button>
 
-      {error && (
-        <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Movie Info */}
-        <div className="lg:col-span-1">
-          {event.moviePoster && (
-            <div className="aspect-video bg-muted rounded-lg overflow-hidden mb-4">
-              <img
-                src={event.moviePoster}
-                alt={event.movieTitle}
-                className="w-full h-full object-cover"
-              />
+      {/* Hero Section */}
+      <div className="relative -mx-4 md:-mx-0">
+        <div className="relative aspect-video bg-card border border-border rounded-xl overflow-hidden flex items-center justify-center">
+          {event.movie?.poster ? (
+            <img
+              src={event.movie.poster}
+              alt={event.movie.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-center">
+              <Clapperboard className="h-16 w-16 text-muted-foreground mx-auto" />
             </div>
           )}
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-2">{event.movieTitle}</h3>
-            {event.movieYear && (
-              <p className="text-sm text-muted-foreground mb-3">
-                ({event.movieYear})
-              </p>
-            )}
-            {event.movieGenres && event.movieGenres.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-3">
-                {event.movieGenres.map((genre, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded"
-                  >
-                    {genre}
-                  </span>
-                ))}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        </div>
+
+        {/* Poster Card */}
+        <div className="absolute bottom-0 left-0 md:left-8 md:bottom-8 -mb-20 md:mb-0">
+          <div className="w-32 h-48 bg-card border border-border rounded-lg overflow-hidden shadow-2xl">
+            {event.movie?.poster ? (
+              <img
+                src={event.movie.poster}
+                alt={event.movie.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <Clapperboard className="h-8 w-8 text-muted-foreground" />
               </div>
-            )}
-            {event.movieDescription && (
-              <p className="text-sm text-muted-foreground">
-                {event.movieDescription}
-              </p>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Event Details */}
-        <div className="lg:col-span-2">
-          {!editing ? (
-            <div className="bg-card border border-border rounded-lg p-6 space-y-4">
-              <div>
-                <h1 className="text-4xl font-bold mb-2">{event.movieTitle}</h1>
-                <p className="text-muted-foreground">
-                  Hosted by{" "}
-                  <span className="font-medium text-foreground">
-                    {event.hostUsername}
-                  </span>
-                </p>
-              </div>
+      {/* Content */}
+      <div className="pt-28 md:pt-0">
+        {/* Title */}
+        <h1 className="text-4xl font-bold mb-4">{event.movie?.title}</h1>
 
-              <div className="border-t border-border pt-4">
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  Date & Time
-                </p>
-                <p className="text-lg">
-                  {new Date(event.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-
-              {event.notes && (
-                <div className="border-t border-border pt-4">
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    Notes
-                  </p>
-                  <p className="text-foreground">{event.notes}</p>
-                </div>
-              )}
-
-              <div className="border-t border-border pt-4">
-                <p className="text-sm font-medium text-muted-foreground mb-3">
-                  Participants ({event.participants.length})
-                </p>
-                <div className="space-y-2">
-                  {event.participants.map((participant) => (
-                    <div
-                      key={participant}
-                      className="px-3 py-2 bg-muted rounded-lg text-sm flex items-center gap-2"
-                    >
-                      <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      {participant}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {event.isHost && (
-                <div className="border-t border-border pt-4 flex gap-3">
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Edit Event
-                  </button>
-                  <button
-                    onClick={handleDelete}
-                    className="flex-1 py-2 px-4 bg-destructive/10 text-destructive rounded-lg font-medium hover:bg-destructive/20 transition-colors"
-                  >
-                    Delete Event
-                  </button>
-                </div>
-              )}
+        {/* Event Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-card border border-border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Date & Time</p>
             </div>
-          ) : (
-            <form
-              onSubmit={handleSaveChanges}
-              className="bg-card border border-border rounded-lg p-6 space-y-4"
+            <p className="text-lg font-semibold">
+              {eventDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {eventDate.toLocaleTimeString("en-US", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Users className="h-5 w-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Attendees</p>
+            </div>
+            <p className="text-lg font-semibold">
+              {event.participants?.length || 0}
+            </p>
+            <p className="text-sm text-muted-foreground">people attending</p>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <Clapperboard className="h-5 w-5 text-primary" />
+              <p className="text-sm text-muted-foreground">Host</p>
+            </div>
+            <p className="text-lg font-semibold">
+              {event.hostUser?.name || event.hostUser?.username}
+            </p>
+          </div>
+        </div>
+
+        {/* RSVP Button */}
+        <button
+          onClick={handleRSVP}
+          className={`px-8 py-3 rounded-lg font-medium transition-colors mb-8 ${
+            isAttending
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "bg-card border border-border text-foreground hover:border-primary/50"
+          }`}
+        >
+          {isAttending ? "✓ You're Attending" : "RSVP to Event"}
+        </button>
+
+        {/* Movie Info */}
+        {event.movie && (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">About the Movie</h2>
+            <p className="text-foreground leading-relaxed">
+              {event.movie.description}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 bg-card border border-border rounded-xl p-6">
+              <div>
+                <p className="text-xs text-muted-foreground">Title</p>
+                <p className="font-semibold">{event.movie.title}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Year</p>
+                <p className="font-semibold">{event.movie.year}</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push(`/movies/${event.movieId}`)}
+              className="w-full px-4 py-2 rounded-lg bg-card border border-border text-foreground hover:border-primary/50 font-medium transition-colors"
             >
-              <h2 className="text-2xl font-bold mb-4">Edit Event</h2>
+              View Full Movie Details
+            </button>
+          </div>
+        )}
 
-              <div>
-                <label
-                  htmlFor="edit-date"
-                  className="block text-sm font-medium mb-2"
+        {/* Notes */}
+        {event.notes && (
+          <div className="mt-8 p-6 bg-card border border-border rounded-xl">
+            <h3 className="font-semibold mb-2">Event Notes</h3>
+            <p className="text-muted-foreground">{event.notes}</p>
+          </div>
+        )}
+
+        {/* Guest List */}
+        {event.participants && event.participants.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4">Guest List</h3>
+            <div className="space-y-2">
+              {event.participants.slice(0, 10).map((participant, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg"
                 >
-                  Date & Time
-                </label>
-                <input
-                  id="edit-date"
-                  type="datetime-local"
-                  value={editedDate}
-                  onChange={(e) => setEditedDate(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="edit-notes"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Notes
-                </label>
-                <textarea
-                  id="edit-notes"
-                  value={editedNotes}
-                  onChange={(e) => setEditedNotes(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-3">
-                  Participants
-                </label>
-                <div className="space-y-2">
-                  {friends.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      No friends to invite
-                    </p>
-                  ) : (
-                    friends.map((friend) => (
-                      <label
-                        key={friend.userId}
-                        className="flex items-center gap-3 cursor-pointer p-2 hover:bg-muted rounded"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedParticipants.includes(friend.userId)}
-                          onChange={() => toggleParticipant(friend.userId)}
-                          className="rounded border border-input"
-                        />
-                        <span className="text-sm">{friend.username}</span>
-                      </label>
-                    ))
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                    {participant[0].toUpperCase()}
+                  </div>
+                  <p className="font-medium text-sm">{participant}</p>
+                  {participant === event.hostUser?.username && (
+                    <span className="ml-auto text-xs text-primary font-medium">
+                      Host
+                    </span>
                   )}
                 </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-border">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
-                >
-                  {saving ? "Saving..." : "Save Changes"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditing(false)}
-                  className="flex-1 py-2 px-4 bg-muted text-muted-foreground rounded-lg font-medium hover:bg-muted/80 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

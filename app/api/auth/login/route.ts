@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,8 +39,18 @@ export async function POST(req: NextRequest) {
     const user = await prisma.authUser.findFirst({
       where: {
         OR: [
-          { email: { equals: emailOrUsername.toLowerCase(), mode: "insensitive" } },
-          { username: { equals: emailOrUsername.toLowerCase(), mode: "insensitive" } },
+          {
+            email: {
+              equals: emailOrUsername.toLowerCase(),
+              mode: "insensitive",
+            },
+          },
+          {
+            username: {
+              equals: emailOrUsername.toLowerCase(),
+              mode: "insensitive",
+            },
+          },
         ],
       },
     });
@@ -48,7 +58,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Invalid email/username or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -57,7 +67,7 @@ export async function POST(req: NextRequest) {
     if (!isValid) {
       return NextResponse.json(
         { success: false, error: "Invalid email/username or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -81,11 +91,53 @@ export async function POST(req: NextRequest) {
         token: session,
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Login error:", err);
+
+    // Database connection error
+    if (
+      err.message?.includes("ECONNREFUSED") ||
+      err.message?.includes("connect ECONNREFUSED") ||
+      err.message?.includes("getaddrinfo") ||
+      err.code === "ECONNREFUSED"
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Database connection failed. Please ensure PostgreSQL is running and accessible.",
+          details: {
+            issue: "Cannot connect to database",
+            hint: "Check DATABASE_URL environment variable and PostgreSQL service status",
+          },
+        },
+        { status: 503 },
+      );
+    }
+
+    // Timeout error
+    if (err.message?.includes("timeout") || err.code === "ETIMEDOUT") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Request timeout. Database may be unresponsive.",
+          details: {
+            issue: "Database query timed out",
+            hint: "Check PostgreSQL server status and connection",
+          },
+        },
+        { status: 503 },
+      );
+    }
+
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
+      {
+        success: false,
+        error: "Internal server error",
+        details:
+          process.env.NODE_ENV === "development" ? err.message : undefined,
+      },
+      { status: 500 },
     );
   }
 }

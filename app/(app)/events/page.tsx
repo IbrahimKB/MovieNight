@@ -1,227 +1,185 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Calendar, Users, Plus, Clock, Edit2, Trash2 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Calendar, Plus } from "lucide-react";
 
 interface Event {
   id: string;
-  movieTitle: string;
-  moviePoster?: string;
+  movieId: string;
   date: string;
-  time: string;
-  participants: string[];
-  participantCount: number;
-  notes?: string;
-  createdBy: string;
+  movie?: {
+    title: string;
+    poster?: string;
+  };
+  hostUser?: {
+    name: string;
+    username: string;
+  };
+  participants?: string[];
 }
 
 export default function EventsPage() {
-  const { user, isLoading } = useAuth();
-  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("movienight_token")
+      : null;
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
 
   useEffect(() => {
-    if (!mounted || !user) return;
-
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const res = await fetch("/api/events", {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        });
+        const res = await fetch("/api/events", { headers });
         const data = await res.json();
-        setEvents(data.data || []);
-      } catch (err) {
-        console.error("Error fetching events:", err);
+
+        if (data.success && Array.isArray(data.data)) {
+          // Sort by date
+          const sorted = data.data.sort(
+            (a: Event, b: Event) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime(),
+          );
+          setEvents(sorted);
+        }
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [mounted, user]);
+  }, [token]);
 
-  if (!mounted || isLoading) {
+  const EventCard = ({ event }: { event: Event }) => {
+    const eventDate = new Date(event.date);
+    const isUpcoming = eventDate > new Date();
+
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-muted-foreground">Loading...</p>
+      <button
+        onClick={() => router.push(`/events/${event.id}`)}
+        className="flex gap-4 p-4 rounded-lg bg-card border border-border hover:border-primary/50 hover:bg-card/80 transition-all text-left"
+      >
+        {/* Date Bubble */}
+        <div className="flex-shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-lg bg-primary/10 border border-primary/20">
+          <p className="text-xs text-muted-foreground">
+            {eventDate.toLocaleDateString("en-US", { month: "short" })}
+          </p>
+          <p className="text-lg font-bold text-primary">
+            {eventDate.getDate()}
+          </p>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-lg truncate">
+            {event.movie?.title}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Hosted by {event.hostUser?.name || event.hostUser?.username}
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {eventDate.toLocaleDateString("en-US", {
+              weekday: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+          {event.participants && event.participants.length > 0 && (
+            <p className="text-xs text-primary mt-2 font-medium">
+              {event.participants.length} people attending
+            </p>
+          )}
+        </div>
+
+        {/* Poster */}
+        {event.movie?.poster && (
+          <div className="flex-shrink-0 w-12 h-16 rounded-lg overflow-hidden">
+            <img
+              src={event.movie.poster}
+              alt={event.movie.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+      </button>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading events...</p>
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  const upcomingEvents = events.filter((e) => new Date(e.date) > new Date());
+  const pastEvents = events.filter((e) => new Date(e.date) <= new Date());
 
   return (
-    <div className="p-4 md:p-8 lg:p-12">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Movie Nights</h1>
-          <p className="text-base md:text-lg text-muted-foreground">
-            Plan and organize movie nights with friends
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Movie Events</h1>
+          <p className="text-muted-foreground">
+            Plan movie nights with friends
           </p>
         </div>
+        <button
+          onClick={() => router.push("/events/create")}
+          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          <Plus size={20} />
+          Create Event
+        </button>
+      </div>
 
-        {/* Create Event Button */}
-        <div className="mb-8">
-          <button className="px-4 md:px-6 py-2 md:py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold flex items-center gap-2 text-sm md:text-base">
-            <Plus size={18} />
-            Create Movie Night
-          </button>
-        </div>
-
-        {/* Events Grid */}
-        {events.length > 0 ? (
-          <div className="space-y-4 md:space-y-6">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-                  {/* Poster */}
-                  <div className="md:col-span-1 h-48 md:h-64 bg-secondary overflow-hidden">
-                    {event.moviePoster ? (
-                      <img
-                        src={event.moviePoster}
-                        alt={event.movieTitle}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Calendar size={60} className="text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Event Details */}
-                  <div className="md:col-span-2 p-4 md:p-8 flex flex-col justify-between">
-                    <div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-4">
-                        {event.movieTitle}
-                      </h2>
-
-                      {/* Date and Time */}
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-3 text-sm md:text-base">
-                          <Calendar
-                            size={18}
-                            className="text-primary flex-shrink-0"
-                          />
-                          <span>{event.date}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm md:text-base">
-                          <Clock
-                            size={18}
-                            className="text-primary flex-shrink-0"
-                          />
-                          <span>{event.time}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm md:text-base">
-                          <Users
-                            size={18}
-                            className="text-primary flex-shrink-0"
-                          />
-                          <span>{event.participantCount} people attending</span>
-                        </div>
-                      </div>
-
-                      {/* Participants */}
-                      <div className="mb-6">
-                        <p className="text-xs md:text-sm text-muted-foreground mb-2">
-                          Participants
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {event.participants.map((participant) => (
-                            <div
-                              key={participant}
-                              className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs md:text-sm"
-                            >
-                              {participant}
-                            </div>
-                          ))}
-                          {event.participantCount > event.participants.length && (
-                            <div className="px-3 py-1 rounded-full bg-muted text-muted-foreground text-xs md:text-sm">
-                              +{event.participantCount - event.participants.length}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Notes */}
-                      {event.notes && (
-                        <div className="mb-6">
-                          <p className="text-xs md:text-sm text-muted-foreground mb-2">
-                            Notes
-                          </p>
-                          <p className="text-sm md:text-base italic">
-                            "{event.notes}"
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Organizer */}
-                      <div className="text-xs md:text-sm text-muted-foreground">
-                        Created by{" "}
-                        <span className="text-foreground font-medium">
-                          {event.createdBy}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-2 mt-6 pt-6 border-t border-border">
-                      {event.createdBy === "You" ? (
-                        <>
-                          <button className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium flex items-center justify-center gap-2 text-sm md:text-base">
-                            <Edit2 size={16} />
-                            <span className="hidden sm:inline">Edit</span>
-                          </button>
-                          <button className="flex-1 px-4 py-2 rounded-lg border border-border text-destructive hover:bg-destructive/10 transition-colors font-medium flex items-center justify-center gap-2 text-sm md:text-base">
-                            <Trash2 size={16} />
-                            <span className="hidden sm:inline">Delete</span>
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button className="flex-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold text-sm md:text-base">
-                            Join
-                          </button>
-                          <button className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-secondary transition-colors font-medium text-sm md:text-base">
-                            Maybe
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+      {/* Upcoming Events */}
+      {upcomingEvents.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Upcoming</h2>
+          <div className="space-y-2">
+            {upcomingEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
             ))}
           </div>
-        ) : (
-          <div className="text-center py-20">
-            <Calendar size={48} className="text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">No movie nights planned</h2>
-            <p className="text-muted-foreground mb-6">
-              Create one to get started!
-            </p>
-            <button className="px-6 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-bold inline-flex items-center gap-2">
-              <Plus size={18} />
-              Create Movie Night
-            </button>
+        </div>
+      )}
+
+      {/* Past Events */}
+      {pastEvents.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">Past Events</h2>
+          <div className="space-y-2">
+            {pastEvents.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {events.length === 0 && (
+        <div className="text-center py-12 bg-card border border-border rounded-xl">
+          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground mb-6">No events yet</p>
+          <button
+            onClick={() => router.push("/events/create")}
+            className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+          >
+            Create First Event
+          </button>
+        </div>
+      )}
     </div>
   );
 }

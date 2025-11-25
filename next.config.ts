@@ -14,8 +14,6 @@ const nextConfig: NextConfig = {
   // Compression and optimization
   compress: true,
   poweredByHeader: false,
-  // SWR for better incremental builds
-  swcMinify: true,
   // Disable ESLint during production builds to prevent circular reference issues
   eslint: {
     ignoreDuringBuilds: true,
