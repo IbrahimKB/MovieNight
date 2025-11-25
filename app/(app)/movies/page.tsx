@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Clapperboard, X } from "lucide-react";
+import { Search, Clapperboard } from "lucide-react";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 
 interface Movie {
   id: string;
@@ -14,6 +16,8 @@ interface Movie {
   imdbRating?: number;
 }
 
+const MOVIES_PER_PAGE = 20;
+
 export default function MoviesPage() {
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -22,6 +26,9 @@ export default function MoviesPage() {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [allGenres, setAllGenres] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [displayedMovies, setDisplayedMovies] = useState<Movie[]>([]);
 
   const token =
     typeof window !== "undefined"
@@ -42,6 +49,9 @@ export default function MoviesPage() {
         if (data.success && Array.isArray(data.data)) {
           setMovies(data.data);
           setFilteredMovies(data.data);
+          setCurrentPage(1);
+          setDisplayedMovies(data.data.slice(0, MOVIES_PER_PAGE));
+          setHasMore(data.data.length > MOVIES_PER_PAGE);
 
           // Extract unique genres
           const genres = new Set<string>();
@@ -79,7 +89,28 @@ export default function MoviesPage() {
     }
 
     setFilteredMovies(results);
+    setCurrentPage(1);
+    setDisplayedMovies(results.slice(0, MOVIES_PER_PAGE));
+    setHasMore(results.length > MOVIES_PER_PAGE);
   }, [searchQuery, selectedGenre, movies]);
+
+  // Load more movies
+  const handleLoadMore = async () => {
+    const nextPage = currentPage + 1;
+    const startIdx = nextPage * MOVIES_PER_PAGE - MOVIES_PER_PAGE;
+    const endIdx = startIdx + MOVIES_PER_PAGE;
+    const newMovies = filteredMovies.slice(0, endIdx);
+
+    setDisplayedMovies(newMovies);
+    setCurrentPage(nextPage);
+    setHasMore(endIdx < filteredMovies.length);
+  };
+
+  const { observerTarget, isLoading: isLoadingMore } = useInfiniteScroll({
+    onLoadMore: handleLoadMore,
+    hasMore,
+    threshold: 300,
+  });
 
   const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => (
     <motion.button
@@ -142,53 +173,72 @@ export default function MoviesPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <Search
           size={20}
-          className="absolute left-4 top-3.5 text-muted-foreground"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
         />
         <input
           type="text"
           placeholder="Search by title or year..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all"
+          className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
         />
-      </div>
+      </motion.div>
 
       {/* Genre Filter Chips */}
       {allGenres.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <button
+        <motion.div
+          className="flex flex-wrap gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.button
             onClick={() => setSelectedGenre(null)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
               selectedGenre === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-card border border-border text-foreground hover:border-primary/50"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
             }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             All Genres
-          </button>
-          {allGenres.map((genre) => (
-            <button
+          </motion.button>
+          {allGenres.map((genre, idx) => (
+            <motion.button
               key={genre}
               onClick={() => setSelectedGenre(genre)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
                 selectedGenre === genre
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-card border border-border text-foreground hover:border-primary/50"
+                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                  : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
               }`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {genre}
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Results */}
       {loading ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Loading movies...</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <MovieCardSkeleton key={i} />
+          ))}
         </div>
       ) : filteredMovies.length > 0 ? (
         <div>
@@ -196,14 +246,58 @@ export default function MoviesPage() {
             Found {filteredMovies.length} movie
             {filteredMovies.length !== 1 ? "s" : ""}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {filteredMovies.map((movie, index) => (
+          <motion.div
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.05,
+                },
+              },
+            }}
+          >
+            {displayedMovies.map((movie, index) => (
               <MovieCard key={movie.id} movie={movie} index={index} />
             ))}
-          </div>
+          </motion.div>
+
+          {/* Infinite scroll trigger */}
+          {hasMore && (
+            <div ref={observerTarget} className="mt-8 flex justify-center py-8">
+              {isLoadingMore && (
+                <motion.div
+                  className="flex items-center gap-2"
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                  <div className="h-2 w-2 rounded-full bg-primary" />
+                </motion.div>
+              )}
+            </div>
+          )}
+
+          {!hasMore && displayedMovies.length > 0 && (
+            <motion.div
+              className="text-center py-8 text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <p>No more movies to load</p>
+            </motion.div>
+          )}
         </div>
       ) : (
-        <div className="text-center py-12 bg-card border border-border rounded-xl">
+        <motion.div
+          className="text-center py-12 bg-card border border-primary/20 rounded-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
             No movies found matching your criteria
@@ -213,11 +307,11 @@ export default function MoviesPage() {
               setSearchQuery("");
               setSelectedGenre(null);
             }}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
           >
             Clear Filters
           </button>
-        </div>
+        </motion.div>
       )}
     </motion.div>
   );

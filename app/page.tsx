@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  MovieGridSkeleton,
+  ListItemSkeleton,
+} from "@/components/ui/skeleton-loader";
 import HeroSection from "@/components/hero-section";
 
 import {
@@ -19,6 +23,7 @@ import {
   Target,
   MessageSquare,
   Home,
+  RefreshCw,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -56,6 +61,9 @@ export default function HomePage() {
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const pullStartY = useRef(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Check authentication
   useEffect(() => {
@@ -89,14 +97,41 @@ export default function HomePage() {
     }
   };
 
+  // Pull-to-refresh handler
+  const handlePullToRefresh = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.type === "touchstart") {
+      pullStartY.current = e.touches[0].clientY;
+    } else if (e.type === "touchmove") {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - pullStartY.current;
+
+      if (diff > 80 && !isRefreshing && contentRef.current?.scrollTop === 0) {
+        setIsRefreshing(true);
+      }
+    } else if (e.type === "touchend") {
+      if (isRefreshing) {
+        loadDashboardData().finally(() => setIsRefreshing(false));
+      }
+    }
+  };
+
   // Show loading while checking auth
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
+        <motion.div
+          className="text-center space-y-4"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="text-muted-foreground">Loading MovieNight...</p>
+        </motion.div>
       </div>
     );
   }
@@ -108,6 +143,10 @@ export default function HomePage() {
 
   return (
     <motion.div
+      ref={contentRef}
+      onTouchStart={handlePullToRefresh}
+      onTouchMove={handlePullToRefresh}
+      onTouchEnd={handlePullToRefresh}
       className="min-h-screen bg-background text-foreground"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -182,66 +221,99 @@ export default function HomePage() {
           </p>
         </motion.div>
 
+        {/* Pull-to-Refresh Indicator */}
+        {isRefreshing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center py-4"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <RefreshCw className="h-5 w-5 text-primary" />
+            </motion.div>
+            <span className="ml-2 text-sm text-muted-foreground">
+              Refreshing...
+            </span>
+          </motion.div>
+        )}
+
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatCard
-            title="Friends"
-            value={isLoading ? "..." : stats.totalFriends}
-            icon={Users}
-            trend={
-              stats.totalFriends > 0
-                ? `${stats.totalFriends} in your squad`
-                : "Find friends to get started"
-            }
-            color="text-blue-500"
-            index={0}
-          />
+        <motion.div
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-32 bg-card rounded-lg border border-primary/10 animate-pulse"
+              />
+            ))
+          ) : (
+            <>
+              <StatCard
+                title="Friends"
+                value={stats.totalFriends}
+                icon={Users}
+                trend={
+                  stats.totalFriends > 0
+                    ? `${stats.totalFriends} in your squad`
+                    : "Find friends to get started"
+                }
+                color="text-blue-500"
+                index={0}
+              />
 
-          <StatCard
-            title="Suggestions"
-            value={isLoading ? "..." : stats.activeSuggestions}
-            icon={MessageSquare}
-            trend={
-              stats.activeSuggestions > 0
-                ? "Respond now"
-                : "No pending suggestions"
-            }
-            color="text-green-500"
-            index={1}
-          />
+              <StatCard
+                title="Suggestions"
+                value={stats.activeSuggestions}
+                icon={MessageSquare}
+                trend={
+                  stats.activeSuggestions > 0
+                    ? "Respond now"
+                    : "No pending suggestions"
+                }
+                color="text-green-500"
+                index={1}
+              />
 
-          <StatCard
-            title="This Week"
-            value={isLoading ? "..." : stats.moviesWatchedThisWeek}
-            icon={Eye}
-            trend={
-              stats.moviesWatchedThisWeek > 0
-                ? "Great progress!"
-                : "Start watching"
-            }
-            color="text-purple-500"
-            index={2}
-          />
+              <StatCard
+                title="This Week"
+                value={stats.moviesWatchedThisWeek}
+                icon={Eye}
+                trend={
+                  stats.moviesWatchedThisWeek > 0
+                    ? "Great progress!"
+                    : "Start watching"
+                }
+                color="text-purple-500"
+                index={2}
+              />
 
-          <StatCard
-            title="Accuracy"
-            value={
-              isLoading
-                ? "..."
-                : stats.suggestionAccuracy > 0
-                  ? `${stats.suggestionAccuracy}%`
-                  : "N/A"
-            }
-            icon={Target}
-            trend={
-              stats.suggestionAccuracy > 0
-                ? "Great predictor!"
-                : "Make suggestions to track"
-            }
-            color="text-orange-500"
-            index={3}
-          />
-        </div>
+              <StatCard
+                title="Accuracy"
+                value={
+                  stats.suggestionAccuracy > 0
+                    ? `${stats.suggestionAccuracy}%`
+                    : "N/A"
+                }
+                icon={Target}
+                trend={
+                  stats.suggestionAccuracy > 0
+                    ? "Great predictor!"
+                    : "Make suggestions to track"
+                }
+                color="text-orange-500"
+                index={3}
+              />
+            </>
+          )}
+        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -253,76 +325,90 @@ export default function HomePage() {
           {/* Right Column */}
           <div className="space-y-4 sm:space-y-6 order-1 lg:order-2">
             {/* Trending */}
-            <Card>
-              <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="hidden sm:inline">
-                      Trending in Network
-                    </span>
-                    <span className="sm:hidden">Trending</span>
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                    onClick={() => router.push("/movies")}
-                  >
-                    View All
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-2 sm:space-y-3">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
-                      >
-                        <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-muted rounded animate-pulse" />
-                          <div className="h-2 bg-muted rounded animate-pulse w-2/3" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : trendingMovies.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No trending movies yet
-                  </p>
-                ) : (
-                  trendingMovies.slice(0, 3).map((movie) => (
-                    <div
-                      key={movie.id}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+            >
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline">
+                        Trending in Network
+                      </span>
+                      <span className="sm:hidden">Trending</span>
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                       onClick={() => router.push("/movies")}
                     >
-                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
-                            {movie.title}
-                          </p>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs">{movie.rating}</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {movie.watchCount} friends
-                        </p>
-                      </div>
+                      View All
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-2 sm:space-y-3">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <ListItemSkeleton key={i} />
+                      ))}
                     </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
+                  ) : trendingMovies.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No trending movies yet
+                    </p>
+                  ) : (
+                    <motion.div
+                      className="space-y-2"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        visible: {
+                          transition: {
+                            staggerChildren: 0.1,
+                          },
+                        },
+                      }}
+                    >
+                      {trendingMovies.slice(0, 3).map((movie, idx) => (
+                        <motion.div
+                          key={movie.id}
+                          variants={{
+                            hidden: { opacity: 0, x: -20 },
+                            visible: { opacity: 1, x: 0 },
+                          }}
+                          className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                          onClick={() => router.push("/movies")}
+                        >
+                          <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium text-xs sm:text-sm leading-none truncate pr-2">
+                                {movie.title}
+                              </p>
+                              <div className="flex items-center gap-1 flex-shrink-0">
+                                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                                <span className="text-xs">{movie.rating}</span>
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {movie.watchCount} friends
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Suggestion Accuracy */}
             {user && (
@@ -342,80 +428,96 @@ export default function HomePage() {
             />
 
             {/* Upcoming Releases */}
-            <Card className="lg:block">
-              <CardHeader className="pb-2 sm:pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="hidden sm:inline">Coming Soon</span>
-                    <span className="sm:hidden">Releases</span>
-                  </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/releases")}
-                    className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
-                  >
-                    <span className="hidden sm:inline">View Calendar</span>
-                    <span className="sm:hidden">View All</span>
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-2 sm:space-y-3">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg"
-                      >
-                        <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded animate-pulse" />
-                        <div className="flex-1 space-y-2">
-                          <div className="h-3 bg-muted rounded animate-pulse" />
-                          <div className="h-2 bg-muted rounded animate-pulse w-1/2" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : recentReleases.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No upcoming releases
-                  </p>
-                ) : (
-                  recentReleases.slice(0, 2).map((release) => (
-                    <div
-                      key={release.id}
-                      className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Card className="lg:block">
+                <CardHeader className="pb-2 sm:pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                      <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline">Coming Soon</span>
+                      <span className="sm:hidden">Releases</span>
+                    </CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => router.push("/releases")}
+                      className="text-xs sm:text-sm h-7 sm:h-8 px-2 sm:px-3"
                     >
-                      <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
-                        <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                      </div>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <p className="font-medium text-xs sm:text-sm leading-none truncate">
-                          {release.title}
-                        </p>
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            {release.platform}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {new Date(release.releaseDate).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )}
-                          </span>
-                        </div>
-                      </div>
+                      <span className="hidden sm:inline">View Calendar</span>
+                      <span className="sm:hidden">View All</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-2 sm:space-y-3">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2].map((i) => (
+                        <ListItemSkeleton key={i} />
+                      ))}
                     </div>
-                  ))
-                )}
-              </CardContent>
-            </Card>
+                  ) : recentReleases.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No upcoming releases
+                    </p>
+                  ) : (
+                    <motion.div
+                      className="space-y-2"
+                      initial="hidden"
+                      animate="visible"
+                      variants={{
+                        visible: {
+                          transition: {
+                            staggerChildren: 0.1,
+                          },
+                        },
+                      }}
+                    >
+                      {recentReleases.slice(0, 2).map((release) => (
+                        <motion.div
+                          key={release.id}
+                          variants={{
+                            hidden: { opacity: 0, x: -20 },
+                            visible: { opacity: 1, x: 0 },
+                          }}
+                          className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer touch-manipulation active:scale-95"
+                          onClick={() => router.push("/releases")}
+                        >
+                          <div className="w-6 h-8 sm:w-8 sm:h-10 bg-muted rounded flex items-center justify-center shrink-0">
+                            <Film className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1 min-w-0">
+                            <p className="font-medium text-xs sm:text-sm leading-none truncate">
+                              {release.title}
+                            </p>
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <Badge
+                                variant="outline"
+                                className="text-xs shrink-0"
+                              >
+                                {release.platform}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground truncate">
+                                {new Date(
+                                  release.releaseDate,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
 
             {/* Suggestion Leaderboard */}
             <SuggestionLeaderboard />

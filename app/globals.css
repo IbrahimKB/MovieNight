@@ -80,6 +80,58 @@
   }
 }
 
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 10px rgba(59, 130, 246, 0.5),
+      inset 0 0 10px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.8),
+      inset 0 0 15px rgba(59, 130, 246, 0.3);
+  }
+}
+
+@keyframes neon-border-glow {
+  0%,
+  100% {
+    border-color: hsl(217 91.2% 59.8%);
+    box-shadow:
+      0 0 10px rgba(59, 130, 246, 0.3),
+      inset 0 0 5px rgba(59, 130, 246, 0.1);
+  }
+  50% {
+    border-color: hsl(217 100% 70%);
+    box-shadow:
+      0 0 20px rgba(59, 130, 246, 0.6),
+      inset 0 0 10px rgba(59, 130, 246, 0.2);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scale-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @layer base {
   /* Mobile-first optimizations */
   html {
@@ -118,6 +170,16 @@
 }
 
 @layer components {
+  /* Cinematic card component with neon glow */
+  .card-cinematic {
+    @apply rounded-xl border border-primary/20 bg-card text-card-foreground shadow-sm;
+    @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300;
+  }
+
+  .card-cinematic.glow {
+    @apply animate-glow-pulse;
+  }
+
   /* Mobile-optimized card component */
   .mobile-card {
     @apply rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-shadow;
@@ -125,6 +187,24 @@
 
   .mobile-card.interactive {
     @apply active:scale-[0.98] transition-transform;
+  }
+
+  /* Cinematic button with micro-interactions */
+  .btn-cinematic {
+    @apply relative inline-flex items-center justify-center whitespace-nowrap text-sm font-medium;
+    @apply rounded-lg px-4 py-2 transition-all duration-200;
+    @apply hover:scale-105 active:scale-95;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .btn-cinematic-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+    @apply hover:shadow-lg hover:shadow-primary/50;
+  }
+
+  .btn-cinematic-ghost {
+    @apply bg-transparent hover:bg-accent/50;
+    @apply border border-primary/30 hover:border-primary/60;
   }
 
   /* Touch-friendly buttons */
@@ -274,6 +354,16 @@
     --input: 0 0% 12%;
     --ring: 217 91.2% 59.8%;
 
+    /* Cinema colors for neon effects */
+    --cinema-blue: 217 91.2% 59.8%;
+    --cinema-red: 0 84.2% 60.2%;
+    --cinema-dark: 0 0% 5.1%;
+
+    /* Neon accent colors */
+    --neon-blue: 217 100% 70%;
+    --neon-red: 0 100% 60%;
+    --neon-purple: 280 100% 70%;
+
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 7%;
@@ -359,12 +449,33 @@
   }
 
   /* Interactive element minimum sizes (WCAG 2.5.5) */
-  button:not(.btn-sm),
-  [role="button"]:not(.btn-sm),
+  button,
+  [role="button"],
   input[type="checkbox"],
-  input[type="radio"] {
+  input[type="radio"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="button"],
+  a[role="button"] {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Search inputs and text inputs should be at least 44px in height on mobile */
+  input[type="text"],
+  input[type="search"],
+  textarea,
+  select {
+    min-height: 44px;
+  }
+
+  @media (min-width: 768px) {
+    input[type="text"],
+    input[type="search"],
+    textarea,
+    select {
+      min-height: auto;
+    }
   }
 
   /* Error state indicators */

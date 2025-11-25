@@ -43,6 +43,16 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
+        cinema: {
+          red: "hsl(var(--cinema-red))",
+          blue: "hsl(var(--cinema-blue))",
+          dark: "hsl(var(--cinema-dark))",
+        },
+        neon: {
+          blue: "hsl(var(--neon-blue))",
+          red: "hsl(var(--neon-red))",
+          purple: "hsl(var(--neon-purple))",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -133,6 +143,47 @@ export default {
             "background-position": "1000px 0",
           },
         },
+        "glow-pulse": {
+          "0%, 100%": {
+            "text-shadow": "0 0 10px rgba(59, 130, 246, 0.5)",
+            opacity: "1",
+          },
+          "50%": {
+            "text-shadow": "0 0 20px rgba(59, 130, 246, 0.8)",
+            opacity: "1",
+          },
+        },
+        "neon-flicker": {
+          "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": {
+            "text-shadow":
+              "0 0 10px rgba(59, 130, 246, 0.7), 0 0 20px rgba(59, 130, 246, 0.4)",
+            opacity: "1",
+          },
+          "20%, 24%, 55%": {
+            "text-shadow": "0 0 5px rgba(59, 130, 246, 0.3)",
+            opacity: "0.8",
+          },
+        },
+        "slide-in-left": {
+          from: {
+            opacity: "0",
+            transform: "translateX(-20px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        "scale-pop": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(0.9)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -143,6 +194,10 @@ export default {
         "slide-out-down": "slide-out-down 0.4s ease-in",
         "bounce-in": "bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
         shimmer: "shimmer 2s infinite",
+        "glow-pulse": "glow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "neon-flicker": "neon-flicker 0.15s infinite",
+        "slide-in-left": "slide-in-left 0.4s ease-out",
+        "scale-pop": "scale-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
       },
     },
   },

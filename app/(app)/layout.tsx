@@ -72,11 +72,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <nav className="border-b border-border bg-card sticky top-0 z-50">
-        <div className="px-4 py-3 flex items-center justify-between">
+      <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+        <div className="px-4 py-3 flex items-center justify-between min-h-[64px]">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-3 hover:opacity-80 active:scale-95 transition-all duration-200"
           >
             <div className="w-9 h-9">
               <BrandLogo size="md" className="text-primary" />
@@ -92,7 +92,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
               >
                 <item.icon size={18} />
                 {item.label}
@@ -100,14 +100,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             ))}
             <button
               onClick={() => router.push("/settings")}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
+              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
             >
               <Settings size={18} />
               Settings
             </button>
             <button
               onClick={handleLogout}
-              className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-2"
+              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
             >
               <LogOut size={18} />
               Logout
@@ -117,7 +117,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden text-foreground"
+            className="md:hidden text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-transform"
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -125,8 +125,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile Sidebar */}
         {sidebarOpen && (
-          <div className="md:hidden border-t border-border bg-background">
-            <div className="flex flex-col p-4 gap-2">
+          <div className="md:hidden border-t border-primary/10 bg-background">
+            <div className="flex flex-col p-4 gap-2 pb-6">
               {navItems.map((item) => (
                 <button
                   key={item.href}
@@ -134,9 +134,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     router.push(item.href);
                     setSidebarOpen(false);
                   }}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors text-left py-2 px-3 rounded-lg hover:bg-card flex items-center gap-3"
+                  className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
                 >
-                  <item.icon size={18} />
+                  <item.icon size={20} />
                   {item.label}
                 </button>
               ))}
@@ -145,16 +145,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   router.push("/settings");
                   setSidebarOpen(false);
                 }}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors text-left py-2 px-3 rounded-lg hover:bg-card flex items-center gap-3"
+                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
               >
-                <Settings size={18} />
+                <Settings size={20} />
                 Settings
               </button>
               <button
                 onClick={handleLogout}
-                className="text-sm text-destructive hover:text-destructive/80 transition-colors text-left py-2 px-3 rounded-lg hover:bg-card flex items-center gap-3"
+                className="text-sm text-destructive hover:text-destructive/80 active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
               >
-                <LogOut size={18} />
+                <LogOut size={20} />
                 Logout
               </button>
             </div>
