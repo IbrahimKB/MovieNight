@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
@@ -21,6 +21,16 @@ const sizeMap = {
  * Uses primary brand colors and scales responsively
  */
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch by not rendering until client is ready
+  if (!mounted) {
+    return <div className={cn(sizeMap[size], className)} />;
+  }
   return (
     <svg
       viewBox="0 0 512 512"
