@@ -38,6 +38,12 @@ services:
 
     ports:
       - "127.0.0.1:3001:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - movienight_net
 
@@ -52,7 +58,8 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./certs:/etc/nginx/certs:ro
     depends_on:
-      - movienight
+      movienight:
+        condition: service_healthy
     networks:
       - movienight_net
 

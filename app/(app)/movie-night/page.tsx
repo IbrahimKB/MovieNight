@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +20,11 @@ import {
   Play,
   TrendingUp,
   Filter,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/use-toast';
 
 interface Friend {
   id: string;
@@ -48,120 +51,6 @@ interface SurpriseMovie {
   isVisible: boolean;
 }
 
-// Mock data
-const mockFriends: Friend[] = [
-  { id: '1', name: 'Ibrahim' },
-  { id: '2', name: 'Omar' },
-  { id: '3', name: 'Sara' },
-  { id: '4', name: 'Alex' },
-  { id: '5', name: 'Maya' },
-];
-
-const mockMoviesWithScores: MovieWithScores[] = [
-  {
-    id: '1',
-    title: 'The Menu',
-    year: 2022,
-    genres: ['Thriller', 'Horror'],
-    platform: 'Netflix',
-    description:
-      'A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.',
-    imdbRating: 7.2,
-    rtRating: 88,
-    avgWatchDesire: 8.7,
-    userScores: [
-      { userId: '1', userName: 'Ibrahim', score: 9 },
-      { userId: '2', userName: 'Omar', score: 8 },
-      { userId: '3', userName: 'Sara', score: 9 },
-    ],
-  },
-  {
-    id: '2',
-    title: 'Glass Onion',
-    year: 2022,
-    genres: ['Mystery', 'Comedy'],
-    platform: 'Netflix',
-    description:
-      'Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.',
-    imdbRating: 7.1,
-    rtRating: 85,
-    avgWatchDesire: 8.3,
-    userScores: [
-      { userId: '1', userName: 'Ibrahim', score: 8 },
-      { userId: '2', userName: 'Omar', score: 9 },
-      { userId: '3', userName: 'Sara', score: 8 },
-    ],
-  },
-  {
-    id: '3',
-    title: 'Avatar: The Way of Water',
-    year: 2022,
-    genres: ['Action', 'Adventure', 'Sci-Fi'],
-    platform: 'Disney+',
-    description:
-      'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na\'vi race to protect their home.',
-    imdbRating: 7.6,
-    rtRating: 76,
-    avgWatchDesire: 7.8,
-    userScores: [
-      { userId: '1', userName: 'Ibrahim', score: 8 },
-      { userId: '4', userName: 'Alex', score: 7 },
-      { userId: '5', userName: 'Maya', score: 8 },
-    ],
-  },
-  {
-    id: '4',
-    title: 'Wednesday',
-    year: 2022,
-    genres: ['Comedy', 'Horror', 'Mystery'],
-    platform: 'Netflix',
-    description:
-      'Wednesday Addams is sent to Nevermore Academy, a supernatural boarding school where she attempts to master her psychic powers, stop a monstrous killing spree and solve a murder mystery.',
-    imdbRating: 8.1,
-    rtRating: 74,
-    avgWatchDesire: 7.5,
-    userScores: [
-      { userId: '2', userName: 'Omar', score: 6 },
-      { userId: '3', userName: 'Sara', score: 9 },
-      { userId: '5', userName: 'Maya', score: 8 },
-    ],
-  },
-  {
-    id: '5',
-    title: 'The Bear',
-    year: 2022,
-    genres: ['Comedy', 'Drama'],
-    platform: 'Hulu',
-    description:
-      'Carmen "Carmy" Berzatto, a young chef from the fine dining world, comes home to Chicago to run his family sandwich shop after a heartbreaking death in his family.',
-    imdbRating: 8.7,
-    rtRating: 100,
-    avgWatchDesire: 7.2,
-    userScores: [
-      { userId: '1', userName: 'Ibrahim', score: 7 },
-      { userId: '4', userName: 'Alex', score: 8 },
-      { userId: '5', userName: 'Maya', score: 7 },
-    ],
-  },
-  {
-    id: '6',
-    title: 'Top Gun: Maverick',
-    year: 2022,
-    genres: ['Action', 'Drama'],
-    platform: 'Paramount+',
-    description:
-      'After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN\'s elite graduates on a mission that demands the ultimate sacrifice.',
-    imdbRating: 8.3,
-    rtRating: 96,
-    avgWatchDesire: 6.8,
-    userScores: [
-      { userId: '1', userName: 'Ibrahim', score: 7 },
-      { userId: '2', userName: 'Omar', score: 7 },
-      { userId: '4', userName: 'Alex', score: 6 },
-    ],
-  },
-];
-
 const genres = [
   'All Genres',
   'Action',
@@ -175,6 +64,8 @@ const genres = [
 ];
 
 export default function MovieNightPage() {
+  const { user } = useAuth();
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [presentFriends, setPresentFriends] = useState<string[]>([]);
   const [selectedGenre, setSelectedGenre] = useState('All Genres');
   const [filteredMovies, setFilteredMovies] = useState<MovieWithScores[]>([]);
@@ -182,6 +73,33 @@ export default function MovieNightPage() {
   const [surpriseMovie, setSurpriseMovie] = useState<SurpriseMovie | null>(
     null
   );
+  const [isFinding, setIsFinding] = useState(false);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+        const res = await fetch("/api/friends", { headers });
+        const data = await res.json();
+        if (data.success) {
+           setFriends(data.data.friends.map((f: any) => ({
+             id: f.userId,
+             name: f.name,
+             avatar: f.avatar
+           })) || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch friends", error);
+      } finally {
+        setIsLoadingFriends(false);
+      }
+    };
+    fetchFriends();
+  }, [user]);
+
 
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
@@ -191,38 +109,56 @@ export default function MovieNightPage() {
     );
   };
 
-  const handleFindMovies = () => {
+  const handleFindMovies = async () => {
     if (presentFriends.length === 0) return;
 
-    let filtered = mockMoviesWithScores.filter((movie) => {
-      const hasScore = movie.userScores.some((score) =>
-        presentFriends.includes(score.userId)
-      );
-      const matchesGenre =
-        selectedGenre === 'All Genres' || movie.genres.includes(selectedGenre);
-      return hasScore && matchesGenre;
-    });
-
-    filtered = filtered.map((movie) => {
-      const presentScores = movie.userScores.filter((score) =>
-        presentFriends.includes(score.userId)
-      );
-      const avgWatchDesire =
-        presentScores.reduce((sum, score) => sum + score.score, 0) /
-        presentScores.length;
-
-      return {
-        ...movie,
-        avgWatchDesire: Number(avgWatchDesire.toFixed(1)),
-        userScores: presentScores,
-      };
-    });
-
-    filtered.sort((a, b) => b.avgWatchDesire - a.avgWatchDesire);
-
-    setFilteredMovies(filtered);
-    setShowResults(true);
+    setIsFinding(true);
+    setShowResults(false);
     setSurpriseMovie(null);
+
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/movie-night", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+           Authorization: token ? `Bearer ${token}` : ""
+        },
+        body: JSON.stringify({
+          friendIds: presentFriends,
+          genre: selectedGenre
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setFilteredMovies(data.movies);
+        setShowResults(true);
+        if (data.movies.length === 0) {
+            toast({
+                title: "No matches found",
+                description: "Try selecting different friends or changing the genre.",
+            });
+        }
+      } else {
+          toast({
+            title: "Error",
+            description: "Failed to find movies.",
+            variant: "destructive"
+          });
+      }
+
+    } catch (error) {
+      console.error("Find movies error", error);
+      toast({
+        title: "Error",
+        description: "Failed to find movies.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFinding(false);
+    }
   };
 
   const handleSurpriseMe = () => {
@@ -273,6 +209,10 @@ export default function MovieNightPage() {
     if (score >= 6.5) return 'bg-orange-500';
     return 'bg-red-500';
   };
+
+  if (isLoadingFriends) {
+      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -391,7 +331,7 @@ export default function MovieNightPage() {
               👥 Who's Present?
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              {mockFriends.map((friend) => (
+              {friends.map((friend) => (
                 <div
                   key={friend.id}
                   className={cn(
@@ -405,7 +345,7 @@ export default function MovieNightPage() {
                   <Checkbox
                     id={friend.id}
                     checked={presentFriends.includes(friend.id)}
-                    onChange={() => handleFriendToggle(friend.id)}
+                    onCheckedChange={() => handleFriendToggle(friend.id)}
                   />
                   <label
                     htmlFor={friend.id}
@@ -415,6 +355,9 @@ export default function MovieNightPage() {
                   </label>
                 </div>
               ))}
+               {friends.length === 0 && (
+                  <p className="text-sm text-muted-foreground col-span-full">No friends found.</p>
+              )}
             </div>
           </div>
 
@@ -441,11 +384,15 @@ export default function MovieNightPage() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               onClick={handleFindMovies}
-              disabled={presentFriends.length === 0}
+              disabled={presentFriends.length === 0 || isFinding}
               className="flex-1 sm:flex-none"
               size="lg"
             >
-              <TrendingUp className="h-4 w-4 mr-2" />
+              {isFinding ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                  <TrendingUp className="h-4 w-4 mr-2" />
+              )}
               Find Movies
             </Button>
             {showResults && filteredMovies.length > 0 && (

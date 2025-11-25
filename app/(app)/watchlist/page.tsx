@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,9 +31,11 @@ import {
   History,
   Target,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Friend {
   id: string;
@@ -42,14 +44,15 @@ interface Friend {
 }
 
 interface WatchlistItem {
-  id: string;
+  id: string; // Movie ID
+  desireId?: string; // ID from WatchDesire table
   title: string;
   year: number;
   genres: string[];
   platform: string;
   poster?: string;
   description: string;
-  releaseDate: string;
+  releaseDate: string | null;
   userDesireScore: number;
   selectedFriends: string[];
   suggestedBy?: string;
@@ -58,7 +61,8 @@ interface WatchlistItem {
 }
 
 interface HistoryItem {
-  id: string;
+  id: string; // Movie ID
+  historyId?: string; // WatchedMovie ID
   title: string;
   year: number;
   genres: string[];
@@ -70,109 +74,13 @@ interface HistoryItem {
   actualRating?: number;
 }
 
-// Mock data
-const mockFriends: Friend[] = [
-  { id: '1', name: 'Ibrahim' },
-  { id: '2', name: 'Omar' },
-  { id: '3', name: 'Sara' },
-  { id: '4', name: 'Alex' },
-  { id: '5', name: 'Maya' },
-];
-
-const mockWatchlist: WatchlistItem[] = [
-  {
-    id: '1',
-    title: 'The Menu',
-    year: 2022,
-    genres: ['Thriller', 'Horror'],
-    platform: 'Netflix',
-    description:
-      'A young couple travels to a remote island to eat at an exclusive restaurant.',
-    releaseDate: '2024-01-15',
-    userDesireScore: 9,
-    selectedFriends: ['2', '3'],
-    suggestedBy: 'Omar',
-    dateAdded: '2024-01-10',
-    isWatched: false,
-  },
-  {
-    id: '2',
-    title: 'Glass Onion',
-    year: 2022,
-    genres: ['Mystery', 'Comedy'],
-    platform: 'Netflix',
-    description: 'Detective Benoit Blanc travels to Greece to solve a mystery.',
-    releaseDate: '2024-01-16',
-    userDesireScore: 8,
-    selectedFriends: ['1', '4'],
-    dateAdded: '2024-01-12',
-    isWatched: false,
-  },
-  {
-    id: '3',
-    title: 'Avatar: The Way of Water',
-    year: 2022,
-    genres: ['Action', 'Adventure', 'Sci-Fi'],
-    platform: 'Disney+',
-    description: 'Jake Sully continues his story on Pandora.',
-    releaseDate: '2024-01-17',
-    userDesireScore: 7,
-    selectedFriends: ['2', '5'],
-    dateAdded: '2024-01-08',
-    isWatched: false,
-  },
-];
-
-const mockHistory: HistoryItem[] = [
-  {
-    id: '1',
-    title: 'Everything Everywhere All at Once',
-    year: 2022,
-    genres: ['Sci-Fi', 'Comedy', 'Drama'],
-    platform: 'Amazon Prime',
-    watchedDate: '2024-01-05',
-    watchedWith: ['2', '3'],
-    originalScore: 8,
-    actualRating: 9,
-  },
-  {
-    id: '2',
-    title: 'Top Gun: Maverick',
-    year: 2022,
-    genres: ['Action', 'Drama'],
-    platform: 'Paramount+',
-    watchedDate: '2023-12-28',
-    watchedWith: ['1', '4'],
-    originalScore: 7,
-    actualRating: 8,
-  },
-  {
-    id: '3',
-    title: 'The Bear Season 2',
-    year: 2023,
-    genres: ['Comedy', 'Drama'],
-    platform: 'Hulu',
-    watchedDate: '2023-12-20',
-    watchedWith: ['5'],
-    originalScore: 9,
-    actualRating: 10,
-  },
-  {
-    id: '4',
-    title: 'Wednesday',
-    year: 2022,
-    genres: ['Comedy', 'Horror', 'Mystery'],
-    platform: 'Netflix',
-    watchedDate: '2023-12-15',
-    watchedWith: ['2', '3', '5'],
-    originalScore: 7,
-    actualRating: 8,
-  },
-];
-
 export default function WatchlistPage() {
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>(mockWatchlist);
-  const [history] = useState<HistoryItem[]>(mockHistory);
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [markAsWatchedItem, setMarkAsWatchedItem] = useState<string | null>(
     null
@@ -180,6 +88,49 @@ export default function WatchlistPage() {
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
   const [historyFilter, setHistoryFilter] = useState('All');
   const [selectedFriend, setSelectedFriend] = useState('All Friends');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+      
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+
+        const [watchlistRes, friendsRes] = await Promise.all([
+          fetch("/api/watchlist", { headers }),
+          fetch("/api/friends", { headers })
+        ]);
+
+        const watchlistData = await watchlistRes.json();
+        const friendsData = await friendsRes.json();
+
+        if (watchlistData.success) {
+          setWatchlist(watchlistData.watchlist);
+          setHistory(watchlistData.history);
+        }
+
+        if (friendsData.success) {
+          setFriends(friendsData.data.friends.map((f: any) => ({
+             id: f.userId,
+             name: f.name,
+             avatar: f.avatar
+          })) || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch watchlist data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load watchlist. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const getPlatformColor = (platform: string) => {
     switch (platform) {
@@ -201,11 +152,14 @@ export default function WatchlistPage() {
   };
 
   const handleDesireScoreChange = (itemId: string, newScore: number[]) => {
+    // Optimistic update
     setWatchlist((prev) =>
       prev.map((item) =>
         item.id === itemId ? { ...item, userDesireScore: newScore[0] } : item
       )
     );
+    
+    // TODO: Debounce and save to API
   };
 
   const handleFriendsChange = (itemId: string, friendId: string) => {
@@ -230,32 +184,73 @@ export default function WatchlistPage() {
     setMarkAsWatchedItem(itemId);
   };
 
-  const confirmMarkAsWatched = () => {
+  const confirmMarkAsWatched = async () => {
     if (!markAsWatchedItem) return;
 
     const item = watchlist.find((w) => w.id === markAsWatchedItem);
     if (!item) return;
 
-    setWatchlist((prev) =>
-      prev.map((w) =>
-        w.id === markAsWatchedItem ? { ...w, isWatched: true } : w
-      )
-    );
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/watchlist", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : "" 
+        },
+        body: JSON.stringify({
+            action: 'markWatched',
+            movieId: item.id,
+            watchedWith
+        })
+      });
 
-    toast({
-      title: 'Movie marked as watched! ✅',
-      description: `${item.title} has been added to your watch history.`,
-    });
+      if (res.ok) {
+          setWatchlist((prev) =>
+            prev.map((w) =>
+              w.id === markAsWatchedItem ? { ...w, isWatched: true } : w
+            )
+          );
+          
+          // Add to history locally
+          const newItem: HistoryItem = {
+              id: item.id,
+              title: item.title,
+              year: item.year,
+              genres: item.genres,
+              platform: item.platform,
+              poster: item.poster,
+              watchedDate: new Date().toISOString(),
+              watchedWith: watchedWith,
+              originalScore: 0 // Default until rated?
+          };
+          setHistory(prev => [newItem, ...prev]);
+
+          toast({
+            title: 'Movie marked as watched! ✅',
+            description: `${item.title} has been added to your watch history.`,
+          });
+      } else {
+          throw new Error("Failed to update");
+      }
+    } catch (error) {
+        toast({
+            title: "Error",
+            description: "Failed to mark as watched.",
+            variant: "destructive"
+        });
+    }
 
     setMarkAsWatchedItem(null);
     setWatchedWith([]);
   };
 
   const getFriendName = (friendId: string) => {
-    return mockFriends.find((f) => f.id === friendId)?.name || 'Unknown';
+    return friends.find((f) => f.id === friendId)?.name || 'Unknown';
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -271,7 +266,7 @@ export default function WatchlistPage() {
     }
 
     if (selectedFriend !== 'All Friends') {
-      const friendId = mockFriends.find((f) => f.name === selectedFriend)?.id;
+      const friendId = friends.find((f) => f.name === selectedFriend)?.id;
       if (friendId) {
         filtered = filtered.filter((item) =>
           item.watchedWith.includes(friendId)
@@ -284,6 +279,10 @@ export default function WatchlistPage() {
         new Date(b.watchedDate).getTime() - new Date(a.watchedDate).getTime()
     );
   };
+
+  if (isLoading) {
+      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -387,7 +386,7 @@ export default function WatchlistPage() {
                         </div>
 
                         {/* Description */}
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground line-clamp-3">
                           {item.description}
                         </p>
 
@@ -417,7 +416,7 @@ export default function WatchlistPage() {
                               Who to watch with
                             </label>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {mockFriends.map((friend) => (
+                              {friends.map((friend) => (
                                 <div
                                   key={friend.id}
                                   className={cn(
@@ -446,6 +445,9 @@ export default function WatchlistPage() {
                                   </label>
                                 </div>
                               ))}
+                              {friends.length === 0 && (
+                                <p className="text-xs text-muted-foreground col-span-full">Add friends to plan viewing!</p>
+                              )}
                             </div>
                           </div>
 
@@ -497,6 +499,7 @@ export default function WatchlistPage() {
                 <SelectItem value="Horror">Horror</SelectItem>
                 <SelectItem value="Sci-Fi">Sci-Fi</SelectItem>
                 <SelectItem value="Mystery">Mystery</SelectItem>
+                <SelectItem value="Thriller">Thriller</SelectItem>
               </SelectContent>
             </Select>
             <Select value={selectedFriend} onValueChange={setSelectedFriend}>
@@ -506,7 +509,7 @@ export default function WatchlistPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All Friends">All Friends</SelectItem>
-                {mockFriends.map((friend) => (
+                {friends.map((friend) => (
                   <SelectItem key={friend.id} value={friend.name}>
                     {friend.name}
                   </SelectItem>
@@ -602,7 +605,7 @@ export default function WatchlistPage() {
                             Watched with:{' '}
                           </span>
                           <div className="flex gap-1">
-                            {item.watchedWith.map((friendId, idx) => (
+                            {item.watchedWith.length > 0 ? item.watchedWith.map((friendId, idx) => (
                               <Badge
                                 key={friendId}
                                 variant="outline"
@@ -611,7 +614,9 @@ export default function WatchlistPage() {
                                 {getFriendName(friendId)}
                                 {idx < item.watchedWith.length - 1 && ','}
                               </Badge>
-                            ))}
+                            )) : (
+                                <span className="text-xs text-muted-foreground">Just me</span>
+                            )}
                           </div>
                         </div>
 
@@ -649,7 +654,7 @@ export default function WatchlistPage() {
                 Who did you watch with?
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {mockFriends.map((friend) => (
+                {friends.map((friend) => (
                   <div
                     key={friend.id}
                     className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:bg-accent"
@@ -665,6 +670,9 @@ export default function WatchlistPage() {
                     <span className="text-sm">{friend.name}</span>
                   </div>
                 ))}
+                {friends.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No friends found.</p>
+                )}
               </div>
             </div>
             <div className="flex gap-2">

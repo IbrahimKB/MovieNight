@@ -69,12 +69,28 @@ export async function GET(req: NextRequest) {
       const tmdbResponse = await tmdbClient.searchMovies(q, page);
       
       if (tmdbResponse) {
-        // Map TMDB results to local format
-        const mappedMovies = tmdbResponse.results.map(mapTMDBMovieToLocal);
+        // Sync found movies to local database to ensure they have IDs
+        const syncedMovies = await Promise.all(
+          tmdbResponse.results.map(async (tmdbMovie) => {
+             try {
+               // We dynamically import to avoid circular dependencies if any, 
+               // though here it should be fine. 
+               // Using the helper from lib/tmdb-sync
+               const { syncTMDBMovie } = await import("@/lib/tmdb-sync");
+               return await syncTMDBMovie(tmdbMovie);
+             } catch (e) {
+               console.error("Failed to sync movie", e);
+               return null;
+             }
+          })
+        );
+
+        // Filter out any failed syncs
+        const validMovies = syncedMovies.filter((m) => m !== null);
         
         return NextResponse.json({
           success: true,
-          data: mappedMovies,
+          data: validMovies,
           pagination: {
             page: tmdbResponse.page,
             totalPages: tmdbResponse.total_pages,

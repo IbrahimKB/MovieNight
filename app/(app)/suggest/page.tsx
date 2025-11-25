@@ -21,6 +21,7 @@ import {
   Check,
   X,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/components/ui/use-toast';
@@ -32,7 +33,8 @@ interface Movie {
   genres: string[];
   poster?: string;
   description: string;
-  rating?: number;
+  rating?: number; // imdbRating
+  tmdbId?: number;
 }
 
 interface Friend {
@@ -50,77 +52,63 @@ interface Suggestion {
   myRating?: number;
 }
 
-// Mock data
-const mockMovies: Movie[] = [
-  {
-    id: '1',
-    title: 'The Menu',
-    year: 2022,
-    genres: ['Thriller', 'Horror'],
-    description:
-      'A young couple travels to a remote island to eat at an exclusive restaurant where the chef has prepared a lavish menu, with some shocking surprises.',
-    rating: 7.2,
-  },
-  {
-    id: '2',
-    title: 'Glass Onion: A Knives Out Mystery',
-    year: 2022,
-    genres: ['Mystery', 'Comedy'],
-    description:
-      'Tech billionaire Miles Bron invites his friends for a getaway on his private Greek island. When someone turns up dead, Detective Benoit Blanc is put on the case.',
-    rating: 7.1,
-  },
-  {
-    id: '3',
-    title: 'Avatar: The Way of Water',
-    year: 2022,
-    genres: ['Action', 'Adventure', 'Sci-Fi'],
-    description:
-      'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na\'vi race to protect their home.',
-    rating: 7.6,
-  },
-];
-
-const mockFriends: Friend[] = [
-  { id: '1', name: 'Ibrahim' },
-  { id: '2', name: 'Omar' },
-  { id: '3', name: 'Sara' },
-  { id: '4', name: 'Alex' },
-  { id: '5', name: 'Maya' },
-];
-
-const mockSuggestions: Suggestion[] = [
-  {
-    id: '1',
-    movie: mockMovies[0],
-    suggestedBy: mockFriends[0],
-    comment: 'Perfect for our Friday night horror marathon!',
-    suggestedAt: '2024-01-14T10:30:00Z',
-  },
-  {
-    id: '2',
-    movie: mockMovies[1],
-    suggestedBy: mockFriends[1],
-    comment: 'Loved the first one, this sequel looks amazing!',
-    suggestedAt: '2024-01-13T15:45:00Z',
-  },
-];
-
 export default function SuggestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [isFromHome, setIsFromHome] = useState(false);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(mockSuggestions);
+  
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
     Record<string, number>
   >({});
+  const [loadingInitial, setLoadingInitial] = useState(true);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+
+        const [friendsRes, suggestionsRes] = await Promise.all([
+          fetch("/api/friends", { headers }),
+          fetch("/api/suggestions", { headers })
+        ]);
+
+        const friendsData = await friendsRes.json();
+        const suggestionsData = await suggestionsRes.json();
+
+        if (friendsData.success) {
+           setFriends(friendsData.data.friends.map((f: any) => ({
+             id: f.userId,
+             name: f.name,
+             avatar: f.avatar
+           })) || []);
+        }
+
+        if (suggestionsData.success) {
+           setSuggestions(suggestionsData.suggestions);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      } finally {
+        setLoadingInitial(false);
+      }
+    };
+
+    fetchInitialData();
+  }, [user]);
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
@@ -129,12 +117,15 @@ export default function SuggestPage() {
     const movieGenres = searchParams.get('genres');
     const movieDescription = searchParams.get('description');
     const fromHome = searchParams.get('isFromHome');
-
-    if (movieTitle && movieYear && fromHome) {
-      const prefilledMovie: Movie = {
-        id: `prefilled_${Date.now()}`,
+    // If we have ID, we should rely on that, but params might be just text.
+    // If passing from home, ideally pass ID. 
+    
+    // We treat it as a "search result" that is selected
+    if (movieTitle && fromHome) {
+       const prefilledMovie: Movie = {
+        id: `temp_${Date.now()}`, // Placeholder if we don't have real ID
         title: movieTitle,
-        year: parseInt(movieYear),
+        year: movieYear ? parseInt(movieYear) : new Date().getFullYear(),
         genres: movieGenres ? JSON.parse(movieGenres) : [],
         description: movieDescription || '',
       };
@@ -149,9 +140,43 @@ export default function SuggestPage() {
     }
   }, [searchParams]);
 
-  const filteredMovies = mockMovies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Debounced search
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchTerm.length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`, {
+             headers: { Authorization: token ? `Bearer ${token}` : "" }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setSearchResults(data.data.map((m: any) => ({
+            id: m.id || `tmdb_${m.tmdbId}`,
+            title: m.title,
+            year: m.year,
+            genres: m.genres,
+            poster: m.poster,
+            description: m.description,
+            rating: m.imdbRating,
+            tmdbId: m.tmdbId
+          })));
+        }
+      } catch (error) {
+        console.error("Search failed", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
 
   const handleFriendToggle = (friendId: string) => {
     setSelectedFriends((prev) =>
@@ -161,51 +186,120 @@ export default function SuggestPage() {
     );
   };
 
-  const handleSuggest = () => {
+  const handleSuggest = async () => {
     if (!selectedMovie || selectedFriends.length === 0) return;
 
-    const friendNames = selectedFriends
-      .map((id) => mockFriends.find((f) => f.id === id)?.name)
-      .filter(Boolean)
-      .join(', ');
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : ""
+        },
+        body: JSON.stringify({
+          movieId: selectedMovie.id, // This assumes ID is valid UUID. If it's from TMDB search (synced), it should be UUID.
+          friendIds: selectedFriends,
+          comment: comment,
+          desireRating: desireRating[0]
+        })
+      });
 
-    toast({
-      title: 'Movie suggested! 🎬',
-      description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
-    });
+      if (res.ok) {
+          const friendNames = selectedFriends
+            .map((id) => friends.find((f) => f.id === id)?.name)
+            .filter(Boolean)
+            .join(', ');
 
-    // Reset form
-    setSelectedMovie(null);
-    setDesireRating([7]);
-    setSelectedFriends([]);
-    setComment('');
-    setSearchTerm('');
+          toast({
+            title: 'Movie suggested! 🎬',
+            description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+          });
+
+          // Reset form
+          setSelectedMovie(null);
+          setDesireRating([7]);
+          setSelectedFriends([]);
+          setComment('');
+          setSearchTerm('');
+      } else {
+        toast({
+            title: "Error",
+            description: "Failed to send suggestion. Try again.",
+            variant: "destructive"
+        });
+      }
+    } catch (error) {
+        console.error("Suggest error", error);
+    }
   };
 
-  const handleAcceptSuggestion = (
+  const handleAcceptSuggestion = async (
     suggestionId: string,
     movieTitle: string
   ) => {
     const rating = suggestionRatings[suggestionId] || 5;
 
-    toast({
-      title: 'Suggestion accepted! ✅',
-      description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
-    });
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch(`/api/suggestions/${suggestionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : ""
+        },
+        body: JSON.stringify({
+            action: 'accept',
+            rating: rating
+        })
+      });
 
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      if (res.ok) {
+          toast({
+            title: 'Suggestion accepted! ✅',
+            description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
+          });
+
+          setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+      }
+    } catch (error) {
+        console.error(error);
+        toast({
+            title: "Error",
+            description: "Failed to accept suggestion.",
+            variant: "destructive"
+        });
+    }
   };
 
-  const handleIgnoreSuggestion = (
+  const handleIgnoreSuggestion = async (
     suggestionId: string,
     movieTitle: string
   ) => {
-    toast({
-      title: 'Suggestion ignored',
-      description: `"${movieTitle}" has been removed from your suggestions.`,
-    });
-
-    setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+    try {
+        const token = localStorage.getItem("movienight_token");
+        const res = await fetch(`/api/suggestions/${suggestionId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token ? `Bearer ${token}` : ""
+          },
+          body: JSON.stringify({
+              action: 'reject'
+          })
+        });
+  
+        if (res.ok) {
+            toast({
+              title: 'Suggestion ignored',
+              description: `"${movieTitle}" has been removed from your suggestions.`,
+            });
+        
+            setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+        }
+      } catch (error) {
+          console.error(error);
+      }
   };
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
@@ -224,6 +318,10 @@ export default function SuggestPage() {
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
   };
+
+  if (loadingInitial) {
+      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -281,12 +379,13 @@ export default function SuggestPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
+              {isSearching && <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin" />}
             </div>
 
             {/* Search Results */}
             {searchTerm && (
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {filteredMovies.map((movie) => (
+                {searchResults.map((movie) => (
                   <Card
                     key={movie.id}
                     className={`cursor-pointer transition-colors hover:bg-accent/50 ${
@@ -331,9 +430,9 @@ export default function SuggestPage() {
                     </CardContent>
                   </Card>
                 ))}
-                {filteredMovies.length === 0 && (
+                {!isSearching && searchResults.length === 0 && searchTerm.length >= 2 && (
                   <p className="text-center text-muted-foreground py-4">
-                    No movies found. Try a different search term.
+                    No movies found.
                   </p>
                 )}
               </div>
@@ -393,7 +492,7 @@ export default function SuggestPage() {
                     Suggest to friends
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {mockFriends.map((friend) => (
+                    {friends.map((friend) => (
                       <div
                         key={friend.id}
                         className="flex items-center space-x-2"
@@ -411,6 +510,9 @@ export default function SuggestPage() {
                         </label>
                       </div>
                     ))}
+                    {friends.length === 0 && (
+                        <p className="text-xs text-muted-foreground col-span-full">Add friends to share suggestions!</p>
+                    )}
                   </div>
                 </div>
 

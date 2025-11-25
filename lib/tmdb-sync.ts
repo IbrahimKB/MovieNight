@@ -258,3 +258,37 @@ export async function checkTMDBStatus(): Promise<{
     };
   }
 }
+
+/**
+ * Synchronizes a single movie from TMDB search result to the local database
+ */
+export async function syncTMDBMovie(tmdbMovie: TMDBMovie): Promise<any> {
+  try {
+    const existing = await prisma.movie.findUnique({
+      where: { tmdbId: tmdbMovie.id },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    const movie = await prisma.movie.create({
+      data: {
+        tmdbId: tmdbMovie.id,
+        title: tmdbMovie.title,
+        year: new Date(tmdbMovie.release_date || '2024-01-01').getFullYear(),
+        genres: tmdbMovie.genre_ids?.map(String) || [],
+        poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
+        description: tmdbMovie.overview || 'No description available',
+        imdbRating: tmdbMovie.vote_average || null,
+        releaseDate: tmdbMovie.release_date ? new Date(tmdbMovie.release_date) : null,
+      },
+    });
+
+    return movie;
+  } catch (error) {
+    console.error(`[TMDB Sync] Failed to sync movie ${tmdbMovie.title}:`, error);
+    return null;
+  }
+}
+

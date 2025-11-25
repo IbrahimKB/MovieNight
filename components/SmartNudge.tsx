@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SmartNudgeProps {
   onWatchTonight?: (movieTitle: string) => void;
@@ -13,20 +14,31 @@ export default function SmartNudge({
   onWatchTonight,
   onDismiss,
 }: SmartNudgeProps) {
+  const { user } = useAuth();
   const [nudge, setNudge] = useState<{
     id: string;
     movie: string;
     reason: string;
   } | null>(null);
 
-  // Fake AI nudge generator (you can connect to real API later)
   useEffect(() => {
-    setNudge({
-      id: "nudge-1",
-      movie: "The Dark Knight",
-      reason: "3 of your friends rated it 9+ recently",
-    });
-  }, []);
+    const fetchNudge = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+        const res = await fetch("/api/nudge", { headers });
+        const data = await res.json();
+        if (data.success && data.nudge) {
+          setNudge(data.nudge);
+        }
+      } catch (error) {
+        console.error("Failed to fetch nudge", error);
+      }
+    };
+
+    fetchNudge();
+  }, [user]);
 
   if (!nudge) return null;
 

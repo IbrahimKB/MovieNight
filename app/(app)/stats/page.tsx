@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,72 +14,61 @@ import {
   BarChart3,
   Crown,
   Award,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface StatsEntry {
   rank: number;
+  id: string;
   name: string;
   totalWatched: number;
   suggestions: number;
-  avgRating: number;
+  avgRating: number; // TODO: implement rating tracking
   avgDesire: number;
+  acceptanceRate: number;
 }
 
-// Mock data
-const mockUserStats = {
-  totalMoviesWatched: 24,
-  totalSuggestionsMade: 18,
-  acceptanceRate: 72,
-  avgWatchDesireScore: 7.8,
-  favGenre: 'Thriller',
-};
-
-const mockSquadStats: StatsEntry[] = [
-  {
-    rank: 1,
-    name: 'Ibrahim',
-    totalWatched: 24,
-    suggestions: 18,
-    avgRating: 8.2,
-    avgDesire: 7.8,
-  },
-  {
-    rank: 2,
-    name: 'Omar',
-    totalWatched: 22,
-    suggestions: 16,
-    avgRating: 8.0,
-    avgDesire: 7.5,
-  },
-  {
-    rank: 3,
-    name: 'Sara',
-    totalWatched: 20,
-    suggestions: 15,
-    avgRating: 7.9,
-    avgDesire: 7.3,
-  },
-  {
-    rank: 4,
-    name: 'Alex',
-    totalWatched: 18,
-    suggestions: 12,
-    avgRating: 7.6,
-    avgDesire: 7.0,
-  },
-  {
-    rank: 5,
-    name: 'Maya',
-    totalWatched: 16,
-    suggestions: 10,
-    avgRating: 7.4,
-    avgDesire: 6.8,
-  },
-];
+interface UserStats {
+  rank: number;
+  totalWatched: number;
+  suggestions: number;
+  acceptanceRate: number;
+  avgDesire: number;
+  favGenre: string;
+}
 
 export default function StatsPage() {
-  const [viewMode] = useState<'individual' | 'group'>('group');
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [squadStats, setSquadStats] = useState<StatsEntry[]>([]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return;
+      
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+
+        const res = await fetch("/api/stats", { headers });
+        const data = await res.json();
+
+        if (data.success) {
+          setSquadStats(data.squadStats);
+          setUserStats(data.userStats);
+        }
+      } catch (error) {
+        console.error("Failed to fetch stats:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [user]);
 
   const getStatsCardColor = (value: number) => {
     if (value >= 8) return 'bg-green-500';
@@ -94,6 +83,10 @@ export default function StatsPage() {
     if (rank === 3) return '🥉';
     return `#${rank}`;
   };
+
+  if (isLoading) {
+      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -116,16 +109,19 @@ export default function StatsPage() {
             📊 Your Stats
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">Squad Rank: 1st 👑</Badge>
-            <Badge className="bg-yellow-500 text-white text-xs">
-              👑 Movie Maestro
-            </Badge>
-            <Badge className="bg-blue-500 text-white text-xs">
-              🎬 Suggestion King
-            </Badge>
+            {userStats && (
+                <Badge variant="outline">Squad Rank: {getMedalIcon(userStats.rank)}</Badge>
+            )}
+            {/* Badges logic could be dynamic based on stats */}
+            {userStats && userStats.totalWatched > 10 && (
+                <Badge className="bg-yellow-500 text-white text-xs">
+                👑 Movie Maestro
+                </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent>
+          {userStats ? (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Movies Watched */}
             <Card className="border-0 bg-accent/30">
@@ -135,7 +131,7 @@ export default function StatsPage() {
                     <Film className="h-6 w-6" />
                   </div>
                   <div className="text-2xl font-bold">
-                    {mockUserStats.totalMoviesWatched}
+                    {userStats.totalWatched}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     🎬 Movies Watched
@@ -152,7 +148,7 @@ export default function StatsPage() {
                     <Target className="h-6 w-6" />
                   </div>
                   <div className="text-2xl font-bold">
-                    {mockUserStats.totalSuggestionsMade}
+                    {userStats.suggestions}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     🎯 Suggestions Made
@@ -169,7 +165,7 @@ export default function StatsPage() {
                     <TrendingUp className="h-6 w-6" />
                   </div>
                   <div className="text-2xl font-bold">
-                    {mockUserStats.acceptanceRate}%
+                    {userStats.acceptanceRate}%
                   </div>
                   <div className="text-sm text-muted-foreground">
                     ✅ Acceptance Rate
@@ -185,13 +181,13 @@ export default function StatsPage() {
                   <div
                     className={cn(
                       'w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white',
-                      getStatsCardColor(mockUserStats.avgWatchDesireScore)
+                      getStatsCardColor(userStats.avgDesire)
                     )}
                   >
                     <Star className="h-6 w-6" />
                   </div>
                   <div className="text-2xl font-bold">
-                    {mockUserStats.avgWatchDesireScore}
+                    {userStats.avgDesire}
                   </div>
                   <div className="text-sm text-muted-foreground">
                     🔥 Avg Desire Score
@@ -200,8 +196,12 @@ export default function StatsPage() {
               </CardContent>
             </Card>
           </div>
+          ) : (
+              <div className="text-center py-4">No stats available yet.</div>
+          )}
 
           {/* Additional Info */}
+          {userStats && (
           <div className="mt-6 pt-6 border-t">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -209,17 +209,18 @@ export default function StatsPage() {
                   Favorite Genre
                 </p>
                 <p className="text-lg font-semibold">
-                  {mockUserStats.favGenre}
+                  {userStats.favGenre}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <p className="text-sm text-muted-foreground mb-1">
                   Movies this month
                 </p>
                 <p className="text-lg font-semibold">7 new</p>
-              </div>
+              </div> */}
             </div>
           </div>
+          )}
         </CardContent>
       </Card>
 
@@ -240,21 +241,8 @@ export default function StatsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {['January', 'December', 'November'].map((month, i) => (
-                  <div key={month} className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium">{month}</div>
-                    <div className="flex-1 h-8 bg-accent rounded-lg overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-primary/50 rounded-lg"
-                        style={{ width: `${(i + 1) * 30}%` }}
-                      />
-                    </div>
-                    <div className="w-12 text-right text-sm font-medium">
-                      {(i + 1) * 8} movies
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8 text-muted-foreground">
+                  Coming soon...
               </div>
             </CardContent>
           </Card>
@@ -274,9 +262,9 @@ export default function StatsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockSquadStats.map((entry) => (
+                {squadStats.map((entry) => (
                   <div
-                    key={entry.rank}
+                    key={entry.id}
                     className={cn(
                       'flex items-center gap-4 p-4 rounded-lg border transition-colors',
                       entry.rank === 1
@@ -312,22 +300,25 @@ export default function StatsPage() {
                           variant="secondary"
                           className={cn(
                             'text-white',
-                            getStatsCardColor(entry.avgRating)
+                            getStatsCardColor(entry.avgDesire) // Using avgDesire as color indicator for now
                           )}
                         >
-                          {entry.avgRating}
+                          {entry.avgDesire}
                         </Badge>
                       </div>
                     </div>
                   </div>
                 ))}
+                {squadStats.length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground">No squad stats yet.</div>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Achievements Section */}
+      {/* Achievements Section - Static for now or TODO */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SuggestionAccuracyProps {
-  userId: string;
+  userId?: string; // Optional, defaults to current user
   showDetails?: boolean;
   className?: string;
 }
@@ -22,19 +23,56 @@ export default function SuggestionAccuracy({
   showDetails = false,
   className,
 }: SuggestionAccuracyProps) {
+  const { user } = useAuth();
   const [data, setData] = useState<AccuracyData | null>(null);
 
   useEffect(() => {
-    // Fake data – you can replace with real API later
-    setTimeout(() => {
-      setData({
-        accuracy: 82,
-        totalSuggestions: 17,
-        accepted: 14,
-        rejected: 3,
-      });
-    }, 500);
-  }, [userId]);
+    const fetchStats = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+        const res = await fetch("/api/stats", { headers });
+        const json = await res.json();
+        if (json.success) {
+            // If userId is provided, find in squadStats, else use userStats
+            // Currently /api/stats returns detailed userStats for current user
+            // and basic squadStats for everyone.
+            // Basic squadStats doesn't have accepted/rejected counts explicitly in the current API response structure
+            // (it has acceptanceRate).
+            
+            if (userId && userId !== user.id) {
+                const squadStat = json.squadStats.find((s: any) => s.id === userId);
+                if (squadStat) {
+                    setData({
+                        accuracy: squadStat.acceptanceRate,
+                        totalSuggestions: squadStat.suggestions,
+                        accepted: Math.round(squadStat.suggestions * (squadStat.acceptanceRate / 100)),
+                        rejected: squadStat.suggestions - Math.round(squadStat.suggestions * (squadStat.acceptanceRate / 100))
+                    });
+                }
+            } else {
+                // Current user
+                const u = json.userStats;
+                setData({
+                    accuracy: u.acceptanceRate,
+                    totalSuggestions: u.suggestions,
+                    // Calculate raw numbers from rate if not provided?
+                    // The API calculates rate.
+                    // For now let's approximate or update API.
+                    // Let's just use rate.
+                    accepted: Math.round(u.suggestions * (u.acceptanceRate / 100)),
+                    rejected: u.suggestions - Math.round(u.suggestions * (u.acceptanceRate / 100))
+                });
+            }
+        }
+      } catch (error) {
+        console.error("Failed to fetch accuracy", error);
+      }
+    };
+
+    fetchStats();
+  }, [user, userId]);
 
   if (!data) {
     return (
@@ -77,20 +115,32 @@ export default function SuggestionAccuracy({
 ------------------------------------------------------- */
 
 export function SuggestionLeaderboard() {
+  const { user } = useAuth();
   const [board, setBoard] = useState<
     { username: string; accuracy: number }[]
   >([]);
 
   useEffect(() => {
-    // Fake leaderboard data
-    setTimeout(() => {
-      setBoard([
-        { username: "Aisha", accuracy: 91 },
-        { username: "Sam", accuracy: 88 },
-        { username: "Nora", accuracy: 79 },
-      ]);
-    }, 500);
-  }, []);
+    const fetchLeaderboard = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+        const res = await fetch("/api/stats", { headers });
+        const data = await res.json();
+        if (data.success) {
+            setBoard(data.squadStats.map((s: any) => ({
+                username: s.name,
+                accuracy: s.acceptanceRate
+            })).sort((a: any, b: any) => b.accuracy - a.accuracy).slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Failed to fetch leaderboard", error);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [user]);
 
   return (
     <Card>

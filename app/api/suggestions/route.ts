@@ -1,38 +1,77 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser, getUserExternalId } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
-import { ApiResponse } from "@/types";
 
-// ---------------------------------------------
-// Validation
-// ---------------------------------------------
 const CreateSuggestionSchema = z.object({
-  movieId: z.string().uuid(),
-  toUserId: z.string(), // external ID (puid or internal UUID)
-  message: z.string().optional(),
+  movieId: z.string(),
+  friendIds: z.array(z.string()),
+  comment: z.string().optional(),
+  desireRating: z.number().optional(),
 });
 
-// ---------------------------------------------
-// Helper: resolve external ID (puid or uuid)
-// ---------------------------------------------
-async function resolveUserId(externalId: string) {
-  const user = await prisma.authUser.findFirst({
-    where: {
-      OR: [{ puid: externalId }, { id: externalId }],
-    },
-  });
+export async function GET(req: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
+      );
+    }
 
-  return user?.id ?? null;
+    // Get incoming suggestions (to me)
+    const suggestions = await prisma.suggestion.findMany({
+      where: {
+        toUserId: user.id,
+        status: 'pending' // Only pending suggestions?
+      },
+      include: {
+        movie: true,
+        fromUser: true
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Map to frontend format
+    const data = suggestions.map(s => ({
+      id: s.id,
+      movie: {
+        id: s.movie.id,
+        title: s.movie.title,
+        year: s.movie.year,
+        genres: s.movie.genres,
+        poster: s.movie.poster,
+        description: s.movie.description,
+        rating: s.movie.imdbRating,
+      },
+      suggestedBy: {
+        id: s.fromUser.id,
+        name: s.fromUser.name,
+        avatar: s.fromUser.avatar
+      },
+      comment: s.message,
+      suggestedAt: s.createdAt.toISOString(),
+    }));
+
+    return NextResponse.json({
+      success: true,
+      suggestions: data,
+    });
+
+  } catch (err) {
+    console.error("Get suggestions error:", err);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
-// ---------------------------------------------
-// POST /api/suggestions
-// ---------------------------------------------
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(req: NextRequest) {
   try {
-    const sessionUser = await getCurrentUser();
-    if (!sessionUser) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
         { status: 401 }
@@ -44,119 +83,57 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     if (!parsed.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: parsed.error.errors.map((e) => ({
-            field: e.path.join("."),
-            message: e.message,
-          })),
-        },
+        { success: false, error: "Invalid data" },
         { status: 400 }
       );
     }
 
-    const { movieId, toUserId, message } = parsed.data;
+    const { movieId, friendIds, comment, desireRating } = parsed.data;
 
-    // Validate movie exists
-    const movieExists = await prisma.movie.findUnique({ where: { id: movieId } });
-    if (!movieExists) {
-      return NextResponse.json(
-        { success: false, error: "Movie not found" },
-        { status: 404 }
-      );
+    // Check if movie exists (it should, based on search flow)
+    // But if it came from TMDB search and wasn't synced properly (idk how), we might have issue.
+    // Assuming movieId is a UUID from our DB.
+    
+    // Create suggestions for each friend
+    // Also potentially create a WatchDesire for the sender?
+    if (desireRating) {
+       await prisma.watchDesire.upsert({
+         where: {
+           userId_movieId: {
+             userId: user.id,
+             movieId: movieId
+           }
+         },
+         update: { rating: desireRating },
+         create: {
+            userId: user.id,
+            movieId: movieId,
+            rating: desireRating
+         }
+       });
     }
 
-    // Map external → internal user ID
-    const toInternal = await resolveUserId(toUserId);
-    if (!toInternal) {
-      return NextResponse.json(
-        { success: false, error: `Invalid user ID: ${toUserId}` },
-        { status: 400 }
-      );
-    }
-
-    // Create suggestion
-    const suggestion = await prisma.suggestion.create({
-      data: {
-        movieId,
-        fromUserId: sessionUser.id,
-        toUserId: toInternal,
-        message: message ?? null,
-        status: "pending",
-      },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          id: suggestion.id,
-          movieId,
-          fromUserId: getUserExternalId(sessionUser),
-          toUserId,
-          message: suggestion.message,
-          status: suggestion.status,
-          createdAt: suggestion.createdAt,
-          updatedAt: suggestion.updatedAt,
-        },
-      },
-      { status: 201 }
+    const createdSuggestions = await Promise.all(
+      friendIds.map(friendId => 
+        prisma.suggestion.create({
+          data: {
+            movieId,
+            fromUserId: user.id,
+            toUserId: friendId,
+            message: comment,
+            status: 'pending'
+          }
+        })
+      )
     );
-  } catch (err) {
-    console.error("Create suggestion error:", err);
-    return NextResponse.json(
-      { success: false, error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-// ---------------------------------------------
-// GET /api/suggestions
-// ---------------------------------------------
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthenticated" },
-        { status: 401 }
-      );
-    }
-
-    const suggestions = await prisma.suggestion.findMany({
-      where: {
-        OR: [{ fromUserId: user.id }, { toUserId: user.id }],
-      },
-      include: {
-        movie: true,
-        fromUser: true,
-        toUser: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    const formatted = suggestions.map((s) => ({
-      id: s.id,
-      movieId: s.movieId,
-      movieTitle: s.movie.title,
-      moviePoster: s.movie.poster,
-      fromUserId: s.fromUser.puid || s.fromUser.id,
-      fromUserUsername: s.fromUser.username,
-      toUserId: s.toUser ? s.toUser.puid || s.toUser.id : null,
-      toUserUsername: s.toUser ? s.toUser.username : null,
-      message: s.message,
-      status: s.status,
-      createdAt: s.createdAt,
-      updatedAt: s.updatedAt,
-    }));
 
     return NextResponse.json({
       success: true,
-      data: formatted,
+      count: createdSuggestions.length
     });
+
   } catch (err) {
-    console.error("Get suggestions error:", err);
+    console.error("Create suggestion error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 }

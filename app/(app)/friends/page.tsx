@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,40 +35,6 @@ interface FriendRequest {
   sentAt: string;
 }
 
-// Mock data
-const mockFriends: Friend[] = [
-  { id: '1', name: 'Ibrahim', username: 'ibrahim' },
-  { id: '2', name: 'Omar', username: 'omar' },
-  { id: '3', name: 'Sara', username: 'sara' },
-  { id: '4', name: 'Alex', username: 'alex' },
-  { id: '5', name: 'Maya', username: 'maya' },
-];
-
-const mockAllUsers: Friend[] = [
-  ...mockFriends,
-  { id: '6', name: 'Jordan', username: 'jordan' },
-  { id: '7', name: 'Casey', username: 'casey' },
-  { id: '8', name: 'Morgan', username: 'morgan' },
-];
-
-const mockIncomingRequests: FriendRequest[] = [
-  {
-    id: 'req-1',
-    fromUser: mockAllUsers[5],
-    toUser: mockAllUsers[0],
-    sentAt: '2024-01-14T10:30:00Z',
-  },
-];
-
-const mockOutgoingRequests: FriendRequest[] = [
-  {
-    id: 'req-2',
-    fromUser: mockAllUsers[0],
-    toUser: mockAllUsers[6],
-    sentAt: '2024-01-13T15:45:00Z',
-  },
-];
-
 export default function FriendsPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,86 +44,180 @@ export default function FriendsPage() {
     type: 'success' | 'error' | 'info';
     text: string;
   } | null>(null);
-  const [sentRequests, setSentRequests] = useState<Set<string>>(
-    new Set(mockOutgoingRequests.map((r) => r.toUser.id))
-  );
-  const [incomingRequests, setIncomingRequests] =
-    useState<FriendRequest[]>(mockIncomingRequests);
-  const [currentFriends, setCurrentFriends] = useState<Set<string>>(
-    new Set(mockFriends.map((f) => f.id))
-  );
+  
+  // Real State
+  const [sentRequests, setSentRequests] = useState<Set<string>>(new Set());
+  const [incomingRequests, setIncomingRequests] = useState<FriendRequest[]>([]);
+  const [currentFriends, setCurrentFriends] = useState<Set<string>>(new Set());
+  const [friendsList, setFriendsList] = useState<Friend[]>([]); // Store full friend objects
 
-  const handleSearch = () => {
+  // Fetch real data on mount
+  useEffect(() => {
+    const fetchFriendsData = async () => {
+      try {
+        const token = localStorage.getItem("movienight_token");
+        const headers = { Authorization: token ? `Bearer ${token}` : "" };
+
+        const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
+          fetch("/api/friends", { headers }),
+          fetch("/api/friends/incoming", { headers }),
+          fetch("/api/friends/outgoing", { headers }),
+        ]);
+
+        const friendsData = await friendsRes.json();
+        const incomingData = await incomingRes.json();
+        const outgoingData = await outgoingRes.json();
+
+        if (friendsData.success) {
+          const friends = friendsData.data.friends || [];
+          setFriendsList(friends);
+          setCurrentFriends(new Set(friends.map((f: any) => f.userId)));
+        }
+
+        if (incomingData.success) {
+          setIncomingRequests(incomingData.data || []);
+        }
+
+        if (outgoingData.success) {
+          const outgoing = outgoingData.data || [];
+          setSentRequests(new Set(outgoing.map((r: any) => r.toUserId)));
+        }
+      } catch (error) {
+        console.error("Failed to fetch friends data:", error);
+      }
+    };
+
+    if (user) fetchFriendsData();
+  }, [user]);
+
+  const handleSearch = async () => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       return;
     }
 
     setIsSearching(true);
-    setTimeout(() => {
-      const results = mockAllUsers.filter(
-        (user) =>
-          user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.username.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setSearchResults(results);
-      setIsSearching(false);
-
-      if (results.length === 0) {
-        setMessage({ type: 'error', text: 'User not found' });
-        setTimeout(() => setMessage(null), 3000);
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch(`/api/auth/search-users?q=${encodeURIComponent(searchQuery)}`, {
+        headers: { Authorization: token ? `Bearer ${token}` : "" }
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        // Filter out self
+        const results = data.data.filter((u: Friend) => u.username !== user?.username);
+        setSearchResults(results);
+        
+        if (results.length === 0) {
+          setMessage({ type: 'info', text: 'No users found' });
+          setTimeout(() => setMessage(null), 3000);
+        }
       }
-    }, 500);
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Search failed' });
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const handleSendRequest = (targetUserId: string, username: string) => {
-    if (currentFriends.has(targetUserId)) {
-      setMessage({
-        type: 'info',
-        text: `You're already friends with @${username}`,
+  const handleSendRequest = async (targetUserId: string, username: string) => {
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch("/api/friends/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({ toUserId: targetUserId }),
       });
-      setTimeout(() => setMessage(null), 3000);
-      return;
-    }
 
-    if (sentRequests.has(targetUserId)) {
-      setMessage({
-        type: 'info',
-        text: `Request already sent to @${username}`,
-      });
-      setTimeout(() => setMessage(null), 3000);
-      return;
-    }
+      const data = await res.json();
 
-    setSentRequests((prev) => new Set([...prev, targetUserId]));
-    setMessage({ type: 'success', text: `Request sent to @${username}` });
+      if (data.success) {
+        setSentRequests((prev) => new Set([...prev, targetUserId]));
+        setMessage({ type: 'success', text: `Request sent to @${username}` });
+        toast({
+          title: 'Request sent! ✨',
+          description: `${username} will see your friend request.`,
+        });
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Failed to send request' });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Network error' });
+    }
     setTimeout(() => setMessage(null), 3000);
-    toast({
-      title: 'Request sent! ✨',
-      description: `${username} will see your friend request.`,
-    });
   };
 
-  const handleAcceptRequest = (requestId: string, username: string) => {
-    const request = incomingRequests.find((r) => r.id === requestId);
-    if (request) {
-      setCurrentFriends((prev) => new Set([...prev, request.fromUser.id]));
-      setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
-      setMessage({
-        type: 'success',
-        text: `You're now friends with @${username}!`,
+  const handleAcceptRequest = async (requestId: string, username: string) => {
+    try {
+      const token = localStorage.getItem("movienight_token");
+      // Note: API expects friend request ID (which is friendship ID), not user ID
+      // But we need to ensure we pass the correct ID. 
+      // The incomingRequests array has items with 'id' being the friendship ID.
+      
+      const res = await fetch(`/api/friends/${requestId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({ action: "accept" }),
       });
-      toast({
-        title: 'Friend added! 🎉',
-        description: `${username} is now in your squad.`,
-      });
-      setTimeout(() => setMessage(null), 3000);
+
+      if (res.ok) {
+        // Optimistic update
+        const request = incomingRequests.find(r => r.id === requestId);
+        if (request) {
+           const newFriend = {
+             id: request.fromUser.id, // This needs to match the structure of Friend
+             name: request.fromUser.name, 
+             username: request.fromUser.username,
+             // userId property for consistency with fetched friends
+             userId: request.fromUser.id 
+           };
+           
+           setFriendsList(prev => [...prev, newFriend as unknown as Friend]);
+           setCurrentFriends(prev => new Set([...prev, request.fromUser.id]));
+           setIncomingRequests(prev => prev.filter(r => r.id !== requestId));
+        }
+
+        setMessage({
+          type: 'success',
+          text: `You're now friends with @${username}!`,
+        });
+        toast({
+          title: 'Friend added! 🎉',
+          description: `${username} is now in your squad.`,
+        });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to accept request' });
     }
+    setTimeout(() => setMessage(null), 3000);
   };
 
-  const handleRejectRequest = (requestId: string, username: string) => {
-    setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
-    setMessage({ type: 'info', text: `Declined request from @${username}` });
+  const handleRejectRequest = async (requestId: string, username: string) => {
+    try {
+      const token = localStorage.getItem("movienight_token");
+      const res = await fetch(`/api/friends/${requestId}`, {
+        method: "PATCH", // Or DELETE depending on API implementation, usually PATCH {action: reject}
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: JSON.stringify({ action: "reject" }),
+      });
+
+      if (res.ok) {
+        setIncomingRequests((prev) => prev.filter((r) => r.id !== requestId));
+        setMessage({ type: 'info', text: `Declined request from @${username}` });
+      }
+    } catch (error) {
+       console.error(error);
+    }
     setTimeout(() => setMessage(null), 3000);
   };
 
@@ -174,9 +234,7 @@ export default function FriendsPage() {
     return 'none';
   };
 
-  const userFriendsArray = Array.from(currentFriends)
-    .map((id) => mockFriends.find((f) => f.id === id))
-    .filter(Boolean) as Friend[];
+  const userFriendsArray = friendsList;
 
   return (
     <div className="space-y-8">
