@@ -64,7 +64,7 @@ export function BottomSheet({
             )}
 
             {/* Content */}
-            <div className="px-6 py-4 max-h-[80vh] overflow-y-auto pb-safe-area">
+            <div className="px-6 py-4 max-h-[80vh] overflow-y-auto safe-area-pb">
               {children}
             </div>
           </motion.div>
