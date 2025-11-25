@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Bookmark,
@@ -12,6 +13,8 @@ import {
   Share2,
   Clapperboard,
 } from "lucide-react";
+import { useConfetti } from "@/hooks/use-confetti";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 interface Movie {
   id: string;
