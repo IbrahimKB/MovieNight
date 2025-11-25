@@ -35,7 +35,7 @@ export function StatCard({
         "rounded-lg border border-border bg-card p-4 sm:p-6",
         "hover:border-primary/50 hover:shadow-lg transition-all duration-300",
         "touch-manipulation active:scale-95",
-        className
+        className,
       )}
     >
       {/* Background gradient on hover */}
