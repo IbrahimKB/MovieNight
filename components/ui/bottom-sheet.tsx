@@ -51,14 +51,15 @@ export function BottomSheet({
 
             {/* Header */}
             {title && (
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-primary/10">
                 <h2 className="text-lg font-semibold">{title}</h2>
-                <button
+                <motion.button
                   onClick={onClose}
-                  className="p-1 hover:bg-accent rounded-lg transition-colors"
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-accent rounded-lg transition-colors active:scale-95"
+                  whileTap={{ scale: 0.95 }}
                 >
                   <X size={20} />
-                </button>
+                </motion.button>
               </div>
             )}
 
