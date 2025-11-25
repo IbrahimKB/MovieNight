@@ -218,66 +218,94 @@ export default function HomePage() {
           </p>
         </motion.div>
 
+        {/* Pull-to-Refresh Indicator */}
+        {isRefreshing && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center py-4"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <RefreshCw className="h-5 w-5 text-primary" />
+            </motion.div>
+            <span className="ml-2 text-sm text-muted-foreground">Refreshing...</span>
+          </motion.div>
+        )}
+
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <StatCard
-            title="Friends"
-            value={isLoading ? "..." : stats.totalFriends}
-            icon={Users}
-            trend={
-              stats.totalFriends > 0
-                ? `${stats.totalFriends} in your squad`
-                : "Find friends to get started"
-            }
-            color="text-blue-500"
-            index={0}
-          />
+        <motion.div
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+        >
+          {isLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-32 bg-card rounded-lg border border-primary/10 animate-pulse" />
+            ))
+          ) : (
+            <>
+              <StatCard
+                title="Friends"
+                value={stats.totalFriends}
+                icon={Users}
+                trend={
+                  stats.totalFriends > 0
+                    ? `${stats.totalFriends} in your squad`
+                    : "Find friends to get started"
+                }
+                color="text-blue-500"
+                index={0}
+              />
 
-          <StatCard
-            title="Suggestions"
-            value={isLoading ? "..." : stats.activeSuggestions}
-            icon={MessageSquare}
-            trend={
-              stats.activeSuggestions > 0
-                ? "Respond now"
-                : "No pending suggestions"
-            }
-            color="text-green-500"
-            index={1}
-          />
+              <StatCard
+                title="Suggestions"
+                value={stats.activeSuggestions}
+                icon={MessageSquare}
+                trend={
+                  stats.activeSuggestions > 0
+                    ? "Respond now"
+                    : "No pending suggestions"
+                }
+                color="text-green-500"
+                index={1}
+              />
 
-          <StatCard
-            title="This Week"
-            value={isLoading ? "..." : stats.moviesWatchedThisWeek}
-            icon={Eye}
-            trend={
-              stats.moviesWatchedThisWeek > 0
-                ? "Great progress!"
-                : "Start watching"
-            }
-            color="text-purple-500"
-            index={2}
-          />
+              <StatCard
+                title="This Week"
+                value={stats.moviesWatchedThisWeek}
+                icon={Eye}
+                trend={
+                  stats.moviesWatchedThisWeek > 0
+                    ? "Great progress!"
+                    : "Start watching"
+                }
+                color="text-purple-500"
+                index={2}
+              />
 
-          <StatCard
-            title="Accuracy"
-            value={
-              isLoading
-                ? "..."
-                : stats.suggestionAccuracy > 0
-                  ? `${stats.suggestionAccuracy}%`
-                  : "N/A"
-            }
-            icon={Target}
-            trend={
-              stats.suggestionAccuracy > 0
-                ? "Great predictor!"
-                : "Make suggestions to track"
-            }
-            color="text-orange-500"
-            index={3}
-          />
-        </div>
+              <StatCard
+                title="Accuracy"
+                value={
+                  stats.suggestionAccuracy > 0
+                    ? `${stats.suggestionAccuracy}%`
+                    : "N/A"
+                }
+                icon={Target}
+                trend={
+                  stats.suggestionAccuracy > 0
+                    ? "Great predictor!"
+                    : "Make suggestions to track"
+                }
+                color="text-orange-500"
+                index={3}
+              />
+            </>
+          )}
+        </motion.div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
