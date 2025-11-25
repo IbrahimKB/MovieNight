@@ -1,13 +1,15 @@
 "use client";
 
-import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import type { FC, SVGProps } from "react";
+
+type IconType = FC<SVGProps<SVGSVGElement>>;
 
 interface StatCardProps {
   title: string;
   value: string | number;
-  icon: LucideIcon;
+  icon: IconType;
   trend?: string;
   color?: string;
   index?: number;
