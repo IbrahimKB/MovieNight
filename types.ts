@@ -11,6 +11,15 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Session {
+  id: string;
+  session_token: string;
+  user_id: string;
+  userId?: string; // Alias for user_id
+  expires: string;
+  created_at: string;
+}
+
 export interface Movie {
   id: string;
   title: string;

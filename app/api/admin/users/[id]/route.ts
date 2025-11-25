@@ -5,9 +5,10 @@ import { hash } from 'bcryptjs';
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: userId } = await params;
     const user = await getCurrentUser();
     if (!user || user.role !== 'admin') {
       return NextResponse.json(
@@ -15,8 +16,6 @@ export async function DELETE(
         { status: 403 }
       );
     }
-
-    const userId = params.id;
 
     if (userId === user.id) {
       return NextResponse.json(

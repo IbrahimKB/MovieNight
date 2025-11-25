@@ -6,9 +6,10 @@ import { randomBytes } from 'crypto';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: userId } = await params;
     const user = await getCurrentUser();
     if (!user || user.role !== 'admin') {
       return NextResponse.json(
@@ -16,8 +17,6 @@ export async function POST(
         { status: 403 }
       );
     }
-
-    const userId = params.id;
 
     // Generate temporary password
     const temporaryPassword = randomBytes(8).toString('hex');

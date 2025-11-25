@@ -275,10 +275,10 @@ export default function SignupPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full mt-8 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-bold text-lg hover:from-primary hover:to-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60 group transform hover:scale-105 active:scale-95"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     Creating account...
@@ -296,24 +296,25 @@ export default function SignupPage() {
             </form>
 
             {/* Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-primary/20" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
-                  Already have an account?
-                </span>
-              </div>
+             <div className="relative my-8">
+               <div className="absolute inset-0 flex items-center">
+                 <div className="w-full border-t border-primary/20" />
+               </div>
+               <div className="relative flex justify-center">
+                 <span className="px-4 bg-gradient-to-br from-[#1a1a2e] to-[#0f0f1e] text-muted-foreground text-sm">
+                   Already have an account?
+                 </span>
+               </div>
+             </div>
 
-            {/* Login Link */}
-            <Link
-              href="/login"
-              className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
-            >
-              Sign In
-            </Link>
-          </div>
+             {/* Login Link */}
+             <Link
+               href="/login"
+               className="w-full py-3 px-4 rounded-xl border-2 border-primary/50 text-primary hover:bg-primary/10 hover:border-primary transition-all font-bold text-center block"
+             >
+               Sign In
+             </Link>
+            </div>
 
           {/* Footer */}
           <p className="text-center text-muted-foreground text-sm mt-8">

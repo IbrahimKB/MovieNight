@@ -535,7 +535,7 @@ export default function SuggestPage() {
                           min={1}
                           step={1}
                           className="w-full"
-                          onValueChange={(rating) =>
+                          onValueChange={(rating: number[]) =>
                             handleRatingChange(suggestion.id, rating)
                           }
                         />

@@ -12,6 +12,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    emailOrUsername: '',
+    password: '',
+  });
   const router = useRouter();
   const { login } = useAuth();
 
@@ -165,10 +169,10 @@ export default function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isLoading}
                 className="w-full mt-8 py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-bold text-lg hover:from-primary hover:to-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60 group transform hover:scale-105 active:scale-95"
               >
-                {loading ? (
+                {isLoading ? (
                   <>
                     <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     Signing in...

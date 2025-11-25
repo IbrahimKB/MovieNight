@@ -399,16 +399,16 @@ export default function WatchlistPage() {
                               Your WatchDesire ({item.userDesireScore}/10)
                             </label>
                             <Slider
-                              value={[item.userDesireScore]}
-                              onValueChange={(value) =>
-                                handleDesireScoreChange(item.id, value)
-                              }
-                              max={10}
-                              min={1}
-                              step={1}
-                              className="w-full"
-                              disabled={editingItem !== item.id}
-                            />
+                               value={[item.userDesireScore]}
+                               onValueChange={(value: number[]) =>
+                                 handleDesireScoreChange(item.id, value)
+                               }
+                               max={10}
+                               min={1}
+                               step={1}
+                               className="w-full"
+                               disabled={editingItem !== item.id}
+                             />
                           </div>
 
                           {/* Who to watch with */}
