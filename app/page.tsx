@@ -58,6 +58,9 @@ export default function HomePage() {
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const pullStartY = useRef(0);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Check authentication
   useEffect(() => {
@@ -88,6 +91,24 @@ export default function HomePage() {
       console.error("Failed to load dashboard data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Pull-to-refresh handler
+  const handlePullToRefresh = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.type === "touchstart") {
+      pullStartY.current = e.touches[0].clientY;
+    } else if (e.type === "touchmove") {
+      const currentY = e.touches[0].clientY;
+      const diff = currentY - pullStartY.current;
+
+      if (diff > 80 && !isRefreshing && contentRef.current?.scrollTop === 0) {
+        setIsRefreshing(true);
+      }
+    } else if (e.type === "touchend") {
+      if (isRefreshing) {
+        loadDashboardData().finally(() => setIsRefreshing(false));
+      }
     }
   };
 
