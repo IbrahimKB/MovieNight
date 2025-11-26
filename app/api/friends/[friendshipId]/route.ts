@@ -3,13 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
-// ---------------------------------------------
-// PATCH /api/friends/[id]
-// Accept or reject friend requests
-// ---------------------------------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { friendshipId: string } }
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -20,10 +16,9 @@ export async function PATCH(
       );
     }
 
-    const friendshipId = params.id;
-    const body = await req.json();
+    const friendshipId = params.friendshipId;
+    const { action } = await req.json();
 
-    const { action } = body; // "accept" | "reject"
     if (!["accept", "reject"].includes(action)) {
       return NextResponse.json(
         { success: false, error: "Invalid action" },
@@ -42,10 +37,10 @@ export async function PATCH(
       );
     }
 
-    // Validate the user is involved
     const isInvolved =
       friendship.userId1 === currentUser.id ||
       friendship.userId2 === currentUser.id;
+
     if (!isInvolved) {
       return NextResponse.json(
         { success: false, error: "Not authorised" },
@@ -71,7 +66,6 @@ export async function PATCH(
 
     if (action === "reject") {
       await prisma.friendship.delete({ where: { id: friendshipId } });
-
       return NextResponse.json({
         success: true,
         data: { id: friendshipId, removed: true },
