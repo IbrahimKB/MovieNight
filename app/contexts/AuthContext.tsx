@@ -124,18 +124,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // LOGIN
   // -----------------------------------------------------
   const login = async (
-    email: string,
+    emailOrUsername: string,
     password: string
   ): Promise<{ success: boolean; error?: AuthError }> => {
     setIsLoading(true);
     setLastError(null);
 
     // --- Validation ---
-    if (!email.trim()) {
+    if (!emailOrUsername.trim()) {
       const error: AuthError = {
         type: "validation",
         message: "Email or username is required",
-        field: "email",
+        field: "emailOrUsername",
       };
       setLastError(error);
       setIsLoading(false);
@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ emailOrUsername, password }),
       });
 
       const result: ApiResponse<{ user: User }> =
