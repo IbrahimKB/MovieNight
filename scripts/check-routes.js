@@ -13,6 +13,7 @@ function getFiles(dir) {
 }
 
 const files = getFiles(API_DIR);
+console.log(`Found ${files.length} route files.`);
 let errors = 0;
 
 files.forEach(file => {
@@ -23,20 +24,17 @@ files.forEach(file => {
     const paramName = match[1];
     const content = readFileSync(file, "utf-8");
     
-    // Look for type definitions. We want to see `params: { paramName: string }`
+    // Look for type definitions. We want to see `params: Promise<{ paramName: string }>`
     // Flexible regex to catch different formatting
-    const typeRegex = new RegExp(`params\\s*:\\s*\\{\\s*${paramName}\\s*:\\s*string\\s*\\}`);
-    
-    // Also check if we are using the Promise pattern (which we migrated AWAY from, but checking anyway)
     const promiseRegex = new RegExp(`params\\s*:\\s*Promise\\s*<\\s*\\{\\s*${paramName}\\s*:\\s*string\\s*\\}\\s*>`);
     
     // Check if context is untyped (context: any) - this is also safe/valid
     const untypedRegex = /context:\s*any/;
 
-    if (!typeRegex.test(content) && !promiseRegex.test(content) && !untypedRegex.test(content)) {
+    if (!promiseRegex.test(content) && !untypedRegex.test(content)) {
       console.error(`❌ MISMATCH: ${file}`);
       console.error(`   Expected param: "${paramName}"`);
-      console.error(`   Content validation failed. Ensure route handler signature matches folder name.`);
+      console.error(`   Content validation failed. Ensure route handler signature uses Promise for params (Next.js 15).`);
       errors++;
     } else {
       console.log(`✅ VALID: ${file} matches [${paramName}]`);

@@ -4,10 +4,10 @@ import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: userId } = params;
+    const { id: userId } = await params;
     const user = await getCurrentUser();
     if (!user || user.role !== 'admin') {
       return NextResponse.json(

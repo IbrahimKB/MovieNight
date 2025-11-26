@@ -63,7 +63,7 @@ function getEventIdFromRequest(req: NextRequest): string | null {
 // ---------------------------------------------------------------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser();
@@ -74,7 +74,7 @@ export async function GET(
       );
     }
 
-    const { id: eventId } = params;
+    const { id: eventId } = await params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
@@ -161,7 +161,7 @@ export async function GET(
 // ---------------------------------------------------------------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser();
@@ -172,7 +172,7 @@ export async function PATCH(
       );
     }
 
-    const { id: eventId } = params;
+    const { id: eventId } = await params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
@@ -299,7 +299,7 @@ export async function PATCH(
 // ---------------------------------------------------------------------------
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const currentUser = await getCurrentUser();
@@ -310,7 +310,7 @@ export async function DELETE(
       );
     }
 
-    const { id: eventId } = params;
+    const { id: eventId } = await params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
