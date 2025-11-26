@@ -58,9 +58,12 @@ function isTMDBId(id: string): boolean {
 // ---------------------------------------------
 // GET /api/movies/[id]
 // ---------------------------------------------
-export async function GET(req: NextRequest): Promise<NextResponse> {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const id = getMovieId(req);
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(
@@ -112,7 +115,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 // (Admin-only)
 // ---------------------------------------------
 export async function PATCH(
-  req: NextRequest
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Auth required + must be admin
@@ -124,7 +128,7 @@ export async function PATCH(
       );
     }
 
-    const id = getMovieId(req);
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(

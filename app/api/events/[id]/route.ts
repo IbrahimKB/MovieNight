@@ -61,7 +61,10 @@ function getEventIdFromRequest(req: NextRequest): string | null {
 // ---------------------------------------------------------------------------
 // GET /api/events/[id]
 // ---------------------------------------------------------------------------
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const eventId = getEventIdFromRequest(req);
+    const { id: eventId } = params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
@@ -156,7 +159,10 @@ export async function GET(req: NextRequest) {
 // ---------------------------------------------------------------------------
 // PATCH /api/events/[id]
 // ---------------------------------------------------------------------------
-export async function PATCH(req: NextRequest) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -166,7 +172,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const eventId = getEventIdFromRequest(req);
+    const { id: eventId } = params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
@@ -291,7 +297,10 @@ export async function PATCH(req: NextRequest) {
 // ---------------------------------------------------------------------------
 // DELETE /api/events/[id]
 // ---------------------------------------------------------------------------
-export async function DELETE(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
@@ -301,7 +310,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    const eventId = getEventIdFromRequest(req);
+    const { id: eventId } = params;
     if (!eventId) {
       return NextResponse.json(
         { success: false, error: "Event ID is required" },
