@@ -10,7 +10,7 @@ const UpdateSuggestionSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const user = await getCurrentUser();
@@ -32,7 +32,7 @@ export async function PATCH(
     }
 
     const { action, rating } = parsed.data;
-    const { id: suggestionId } = await params;
+    const { id: suggestionId } = params;
 
     // Verify suggestion exists and belongs to user (toUserId)
     const suggestion = await prisma.suggestion.findUnique({

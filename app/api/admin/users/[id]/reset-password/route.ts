@@ -6,10 +6,10 @@ import { randomBytes } from 'crypto';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: userId } = await params;
+    const { id: userId } = params;
     const user = await getCurrentUser();
     if (!user || user.role !== 'admin') {
       return NextResponse.json(

@@ -5,7 +5,7 @@ import { ApiResponse } from "@/types";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } }
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -19,7 +19,7 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params;
+    const { id } = params;
     const notificationId = id;
 
     // Verify notification belongs to current user
