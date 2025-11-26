@@ -16,7 +16,7 @@ const FriendRequestSchema = z.object({
 // Helper: map external PUID → internal UUID
 // ---------------------------------------------
 async function resolveUserId(externalId: string): Promise<string | null> {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.authUser.findFirst({
     where: {
       OR: [{ puid: externalId }, { id: externalId }],
     },
