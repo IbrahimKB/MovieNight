@@ -2,115 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { cacheFunction, CACHE_TTL } from "@/lib/cache";
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
-  try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthenticated" },
-        { status: 401 }
-      );
-    }
+// ------------------------------------------------------
+// CACHED DATA FETCHERS
+// ------------------------------------------------------
 
-    const userId = user.id; // Assuming user is already resolved to internal ID by auth lib
+// Cached Trending Movies (Global)
+const getCachedTrendingMovies = cacheFunction(
+  async () => {
+    const trendingGroups = await prisma.watchedMovie.groupBy({
+      by: ['movieId'],
+      _count: { movieId: true },
+      orderBy: { _count: { movieId: 'desc' } },
+      take: 5,
+    });
 
-    // Use Promise.all to parallelize independent DB queries
-    const [
-      friendsCount,
-      activeSuggestions,
-      watchHistory,
-      suggestionsMade,
-      trendingMovies,
-      upcomingReleases,
-      nudge
-    ] = await Promise.all([
-      // 1. Friends Count
-      prisma.friendship.count({
-        where: {
-          status: "accepted",
-          OR: [{ userId1: userId }, { userId2: userId }],
-        },
-      }),
-
-      // 2. Active Suggestions (received)
-      prisma.suggestion.count({
-        where: {
-          toUserId: userId,
-          status: "pending",
-        },
-      }),
-
-      // 3. Watch History (last 7 days)
-      prisma.watchedMovie.findMany({
-        where: {
-          userId: userId,
-          watchedAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          },
-        },
-        select: { id: true },
-      }),
-
-      // 4. Suggestions Made (for accuracy)
-      prisma.suggestion.findMany({
-        where: { fromUserId: userId },
-        include: {
-          movie: true,
-        },
-      }),
-
-      // 5. Trending Movies (Global - simplified)
-      // Complex aggregation should ideally be cached or computed via cron
-      // For now, we'll just fetch top 5 movies by watch count from a materialized view or simple query
-      // Since we don't have a materialized view, we'll do a simplified query on recent watches
-      prisma.watchedMovie.groupBy({
-        by: ['movieId'],
-        _count: {
-          movieId: true,
-        },
-        orderBy: {
-          _count: {
-            movieId: 'desc',
-          },
-        },
-        take: 5,
-      }),
-
-      // 6. Upcoming Releases
-      // We fetch from our LOCAL Postgres 'Release' table which is populated by cron
-      prisma.movie.findMany({
-        where: {
-          releaseDate: {
-            gte: new Date(),
-          },
-        },
-        orderBy: { releaseDate: 'asc' },
-        take: 5,
-        select: {
-            id: true,
-            title: true,
-            year: true,
-            releaseDate: true,
-            poster: true,
-            genres: true,
-            platform: true
-        }
-      }),
-
-      // 7. Nudge (simplified logic for now)
-      // Just get a pending suggestion or random movie from watchlist
-      prisma.watchDesire.findFirst({
-        where: { userId: userId },
-        include: { movie: true },
-        orderBy: { createdAt: 'desc' },
-      })
-    ]);
-
-    // Fetch movie details for trending
-    const trendingMovieIds = trendingMovies.map(t => t.movieId);
-    const trendingMoviesDetails = await prisma.movie.findMany({
-      where: { id: { in: trendingMovieIds } },
+    const movieIds = trendingGroups.map(g => g.movieId);
+    const movies = await prisma.movie.findMany({
+      where: { id: { in: movieIds } },
       select: {
         id: true,
         title: true,
@@ -121,9 +31,8 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       }
     });
 
-    // Map counts back to movies
-    const trending = trendingMoviesDetails.map(movie => {
-        const count = trendingMovies.find(t => t.movieId === movie.id)?._count.movieId || 0;
+    return movies.map(movie => {
+        const count = trendingGroups.find(t => t.movieId === movie.id)?._count.movieId || 0;
         return {
             id: movie.id,
             title: movie.title,
@@ -133,25 +42,126 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
             watchCount: count,
         };
     }).sort((a, b) => b.watchCount - a.watchCount);
+  },
+  ['dashboard-trending-movies'],
+  { revalidate: CACHE_TTL.HOUR } // Cache for 1 hour
+);
 
-
-    // Calculate Accuracy
-    // Fetch watched movies by the user (to check if suggestions were watched)
-    // Note: This is a heavy query if history is huge.
-    // Optimisation: Only fetch watched IDs.
-    const allWatchedIds = await prisma.watchedMovie.findMany({
-        where: { userId: userId },
-        select: { movieId: true }
+// Cached Upcoming Releases
+const getCachedUpcomingReleases = cacheFunction(
+  async () => {
+    return await prisma.movie.findMany({
+      where: {
+        releaseDate: {
+          gte: new Date(),
+        },
+      },
+      orderBy: { releaseDate: 'asc' },
+      take: 5,
+      select: {
+          id: true,
+          title: true,
+          year: true,
+          releaseDate: true,
+          poster: true,
+          genres: true,
+          platform: true
+      }
     });
+  },
+  ['dashboard-upcoming-releases'],
+  { revalidate: CACHE_TTL.HOUR * 12 } // Cache for 12 hours
+);
+
+
+// ------------------------------------------------------
+// MAIN HANDLER
+// ------------------------------------------------------
+export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
+
+    // Fetch user-specific data live (cannot be globally cached)
+    // But we can parallelize it with cached global data
+    const [
+      friendsCount,
+      activeSuggestions,
+      watchHistoryCount,
+      suggestionsMade,
+      nudge,
+      allWatchedIds,
+      trending,
+      upcomingReleases
+    ] = await Promise.all([
+      // 1. Friends Count
+      prisma.friendship.count({
+        where: {
+          status: "accepted",
+          OR: [{ userId1: userId }, { userId2: userId }],
+        },
+      }),
+
+      // 2. Active Suggestions
+      prisma.suggestion.count({
+        where: {
+          toUserId: userId,
+          status: "pending",
+        },
+      }),
+
+      // 3. Watch History Count (Last 7 days)
+      prisma.watchedMovie.count({
+        where: {
+          userId: userId,
+          watchedAt: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+          },
+        },
+      }),
+
+      // 4. Suggestions Made (for accuracy)
+      prisma.suggestion.findMany({
+        where: { fromUserId: userId },
+        select: { movieId: true } // Optimized select
+      }),
+
+      // 5. Nudge (Optimized)
+      prisma.watchDesire.findFirst({
+        where: { userId: userId },
+        include: { movie: { select: { title: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+
+      // 6. All Watched IDs (for accuracy calc)
+      prisma.watchedMovie.findMany({
+          where: { userId: userId },
+          select: { movieId: true }
+      }),
+
+      // 7. Cached Trending
+      getCachedTrendingMovies(),
+
+      // 8. Cached Upcoming
+      getCachedUpcomingReleases()
+    ]);
+
+    // Calculate Accuracy (in memory, cheap)
     const watchedSet = new Set(allWatchedIds.map(w => w.movieId));
-    
     let accuracy = 0;
     if (suggestionsMade.length > 0) {
         const correct = suggestionsMade.filter(s => watchedSet.has(s.movieId)).length;
         accuracy = Math.round((correct / suggestionsMade.length) * 100);
     }
 
-    // Nudge logic
+    // Nudge formatting
     let smartNudge = null;
     if (nudge) {
         smartNudge = {
@@ -167,7 +177,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
         stats: {
             totalFriends: friendsCount,
             activeSuggestions: activeSuggestions,
-            moviesWatchedThisWeek: watchHistory.length,
+            moviesWatchedThisWeek: watchHistoryCount,
             suggestionAccuracy: accuracy,
         },
         trending,

@@ -148,6 +148,7 @@ model WatchedMovie {
 
   @@index([userId])
   @@index([movieId])
+  @@index([userId, watchedAt]) // Optimization: Compound index for "watched recently" queries
   @@unique([userId, movieId])
   @@map("watch_history")
 }
@@ -197,6 +198,7 @@ model Suggestion {
   @@index([movieId])
   @@index([status])
   @@index([fromUserId, toUserId])
+  @@index([toUserId, status]) // Optimization: Index for filtering pending suggestions
   @@map("suggestions")
 }
 

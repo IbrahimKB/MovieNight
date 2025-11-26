@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { tmdbClient } from "@/lib/tmdb";
 import { getCurrentUser } from "@/lib/auth";
+import { cacheFunction, CACHE_TTL } from "@/lib/cache";
 
 const SearchSchema = z.object({
   q: z.string().min(1),
@@ -25,6 +26,33 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
     releaseDate: releaseDate ? new Date(releaseDate) : null,
   };
 }
+
+// Cached TMDB Search
+const getCachedTMDBSearch = cacheFunction(
+  async (query: string, page: number) => {
+    if (!process.env.TMDB_API_KEY) return null;
+    return await tmdbClient.searchMovies(query, page);
+  },
+  ['tmdb-search'], // Dynamic keys are handled by the cacheFunction if passed correctly, but here we need query-specific keys
+  { revalidate: CACHE_TTL.DAY } // Cache search results for a day
+);
+
+// Wrapper to handle dynamic keys properly since unstable_cache expects fixed key parts
+// We actually need to call unstable_cache INSIDE a function that takes the dynamic parts
+const cachedSearch = async (query: string, page: number) => {
+    // Create a specific cache key for this query
+    return unstable_cache(
+        async () => {
+             if (!process.env.TMDB_API_KEY) return null;
+             return await tmdbClient.searchMovies(query, page);
+        },
+        [`tmdb-search-${query}-${page}`], // Unique key per query
+        { revalidate: CACHE_TTL.DAY }
+    )();
+};
+
+import { unstable_cache } from "next/cache"; // Import needed for the fix above
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -51,13 +79,14 @@ export async function GET(req: NextRequest) {
 
     const { q, page } = parsed.data;
 
-    // LIVE TMDB SEARCH
+    // LIVE TMDB SEARCH WITH CACHING
     if (!process.env.TMDB_API_KEY) {
         console.error("TMDB_API_KEY missing for live search");
         return NextResponse.json({ success: false, error: "Search unavailable" }, { status: 503 });
     }
 
-    const tmdbResponse = await tmdbClient.searchMovies(q, page);
+    // Use cached search
+    const tmdbResponse = await cachedSearch(q, page);
     
     if (!tmdbResponse) {
         return NextResponse.json({ success: false, error: "External API error" }, { status: 502 });
