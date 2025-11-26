@@ -24,16 +24,15 @@ services:
   movienight:
     build:
       context: .
-      args:
-        DATABASE_URL: ${DATABASE_URL}
     image: movienight:prod
     container_name: movienight
     restart: unless-stopped
+
     depends_on:
       postgres:
         condition: service_healthy
 
-    # Healthcheck that actually works inside the container
+    # Healthcheck must confirm Next.js server is responding
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ || exit 1"]
       interval: 10s
@@ -43,15 +42,16 @@ services:
 
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
+      # INTERNAL DB connection for inside the container
+      DATABASE_URL: "postgres://postgres:${POSTGRES_PASSWORD:-SuperSecurePassword123}@postgres:5432/boksh_apps"
       TMDB_API_KEY: ${TMDB_API_KEY}
 
-    # Stable DNS for inside-container requests
+    # DNS for stable API calls (optional but good)
     dns:
       - 8.8.8.8
       - 1.1.1.1
 
-    # Only accessible internally; nginx handles public traffic
+    # Expose only internally; nginx proxy handles public traffic
     ports:
       - "127.0.0.1:3001:3000"
 
@@ -65,16 +65,13 @@ services:
     depends_on:
       movienight:
         condition: service_healthy
-
     ports:
       - "80:80"
       - "443:443"
-
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./certs:/etc/nginx/certs:ro
-
     networks:
       - movienight_net
 
