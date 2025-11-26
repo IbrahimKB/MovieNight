@@ -112,9 +112,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // Initialize cron jobs on server startup
-  initCronJobs();
-
   return (
     <html lang="en" className="dark">
       <body>

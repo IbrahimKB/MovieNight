@@ -79,29 +79,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // LOAD SESSION ON MOUNT
   // -----------------------------------------------------
   useEffect(() => {
-    const storedUser = localStorage.getItem("movienight_user");
-    const loginTime = localStorage.getItem("movienight_login_time");
+    const checkSession = async () => {
+      const storedUser = localStorage.getItem("movienight_user");
+      const token = localStorage.getItem("movienight_token"); // Assuming token is stored here too
 
-    if (storedUser) {
-      try {
-        const loginTimestamp = loginTime ? parseInt(loginTime) : 0;
-        const now = Date.now();
-        const sessionDuration = now - loginTimestamp;
-        const maxSessionAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-
-        if (sessionDuration < maxSessionAge) {
-          setUser(JSON.parse(storedUser));
-        } else {
+      if (storedUser && token) {
+        try {
+          // Verify with server
+          const res = await fetch(`${API_BASE}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.data) {
+               setUser(data.data);
+               // Update local storage with fresh data
+               localStorage.setItem("movienight_user", JSON.stringify(data.data));
+            } else {
+               throw new Error("Invalid session");
+            }
+          } else {
+             throw new Error("Session expired");
+          }
+        } catch (e) {
+          // If server check fails (e.g. 401), clear session
+          // Only clear if it's an auth error, not network error
+          // For now, safe to clear on 401/403 from API
           localStorage.removeItem("movienight_user");
+          localStorage.removeItem("movienight_token");
           localStorage.removeItem("movienight_login_time");
+          setUser(null);
         }
-      } catch {
-        localStorage.removeItem("movienight_user");
-        localStorage.removeItem("movienight_login_time");
       }
-    }
+      setIsLoading(false);
+    };
 
-    setIsLoading(false);
+    checkSession();
   }, []);
 
   const clearError = () => setLastError(null);

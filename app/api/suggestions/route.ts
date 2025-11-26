@@ -20,6 +20,10 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const offset = parseInt(searchParams.get("offset") || "0");
+
     // Get incoming suggestions (to me)
     const suggestions = await prisma.suggestion.findMany({
       where: {
@@ -30,7 +34,9 @@ export async function GET(req: NextRequest) {
         movie: true,
         fromUser: true
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      skip: offset,
     });
 
     // Map to frontend format

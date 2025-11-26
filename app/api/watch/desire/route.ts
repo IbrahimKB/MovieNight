@@ -157,12 +157,18 @@ export async function GET(
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const offset = parseInt(searchParams.get("offset") || "0");
+
     const desires = await prisma.watchDesire.findMany({
       where: { userId: userIdInternal },
       include: {
         movie: true,
       },
       orderBy: { createdAt: "desc" },
+      take: limit,
+      skip: offset,
     });
 
     const mapped = desires.map((d) => ({

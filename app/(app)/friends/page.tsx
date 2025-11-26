@@ -59,28 +59,18 @@ export default function FriendsPage() {
         const token = localStorage.getItem("movienight_token");
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
 
-        const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
-          fetch("/api/friends", { headers }),
-          fetch("/api/friends/incoming", { headers }),
-          fetch("/api/friends/outgoing", { headers }),
-        ]);
+        // Use consolidated endpoint
+        const res = await fetch("/api/friends", { headers });
+        const data = await res.json();
 
-        const friendsData = await friendsRes.json();
-        const incomingData = await incomingRes.json();
-        const outgoingData = await outgoingRes.json();
+        if (data.success) {
+          const friends = data.data.friends || [];
+          const incoming = data.data.incomingRequests || [];
+          const outgoing = data.data.outgoingRequests || [];
 
-        if (friendsData.success) {
-          const friends = friendsData.data.friends || [];
           setFriendsList(friends);
           setCurrentFriends(new Set(friends.map((f: any) => f.userId)));
-        }
-
-        if (incomingData.success) {
-          setIncomingRequests(incomingData.data || []);
-        }
-
-        if (outgoingData.success) {
-          const outgoing = outgoingData.data || [];
+          setIncomingRequests(incoming);
           setSentRequests(new Set(outgoing.map((r: any) => r.toUserId)));
         }
       } catch (error) {

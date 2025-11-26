@@ -36,12 +36,18 @@ export async function GET(
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const offset = parseInt(searchParams.get("offset") || "0");
+
     const history = await prisma.watchedMovie.findMany({
       where: { userId: userIdInternal },
       include: {
         movie: true,
       },
       orderBy: { watchedAt: "desc" },
+      take: limit,
+      skip: offset,
     });
 
     const mapped = history.map((wm) => ({

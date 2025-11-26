@@ -248,80 +248,37 @@ export function hasExistingRequest(
 }
 
 // Dashboard and statistics
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(): Promise<{
+  stats: DashboardStats;
+  trending: TrendingMovie[];
+  upcoming: any[];
+  nudge: any;
+}> {
   try {
-    // Get friends count
-    const friendsResponse = await fetch(`/api/friends`, {
+    // Use the consolidated endpoint
+    const response = await fetch("/api/dashboard", {
       headers: getAuthHeaders(),
     });
-    const friendsData = await handleApiResponse<{
-      friends: Friend[];
-      incomingRequests: any[];
-      outgoingRequests: any[];
-    }>(friendsResponse);
-    const friends = friendsData.friends || [];
+    const data = await handleApiResponse<{
+      stats: DashboardStats;
+      trending: TrendingMovie[];
+      upcoming: any[];
+      nudge: any;
+    }>(response);
 
-    // Get active suggestions count
-    const suggestionsResponse = await fetch("/api/suggestions", {
-      headers: getAuthHeaders(),
-    });
-    const suggestionsData = await handleApiResponse<any[]>(suggestionsResponse);
-
-    // Calculate real suggestion accuracy
-    let suggestionAccuracy = 0;
-    try {
-      const accuracyResponse = await fetch(
-        `/api/analytics/suggestion-accuracy`,
-        {
-          headers: getAuthHeaders(),
-        },
-      );
-      if (accuracyResponse.ok) {
-        const accuracyData = await handleApiResponse<{ accuracy: number }>(
-          accuracyResponse,
-        );
-        suggestionAccuracy = Math.round(accuracyData.accuracy || 0);
-      }
-    } catch (error) {
-      console.log("Could not load suggestion accuracy:", error);
-    }
-
-    // Get movies watched this week
-    let moviesWatchedThisWeek = 0;
-    try {
-      const historyResponse = await fetch("/api/watch/history", {
-        headers: getAuthHeaders(),
-      });
-      if (historyResponse.ok) {
-        const historyData = await handleApiResponse<any[]>(historyResponse);
-        
-        // Calculate movies watched in the last 7 days
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        
-        moviesWatchedThisWeek = historyData.filter((movie) => {
-          const watchedDate = new Date(movie.watchedAt);
-          return watchedDate >= oneWeekAgo;
-        }).length;
-      }
-    } catch (error) {
-      console.log("Could not load watch history:", error);
-    }
-
-    return {
-      totalFriends: friends.length,
-      activeSuggestions: suggestionsData.length,
-      moviesWatchedThisWeek,
-      suggestionAccuracy,
-    };
+    return data;
   } catch (error) {
-    console.error("Failed to load dashboard stats:", error);
-    // Return fallback stats
+    console.error("Failed to load dashboard data:", error);
     return {
-      totalFriends: 0,
-      activeSuggestions: 0,
-      moviesWatchedThisWeek: 0,
-      suggestionAccuracy: 0,
+      stats: {
+        totalFriends: 0,
+        activeSuggestions: 0,
+        moviesWatchedThisWeek: 0,
+        suggestionAccuracy: 0,
+      },
+      trending: [],
+      upcoming: [],
+      nudge: null,
     };
   }
 }

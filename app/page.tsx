@@ -81,11 +81,7 @@ export default function HomePage() {
     try {
       setIsLoading(true);
 
-      const [dashboardStats, trending, upcoming] = await Promise.all([
-        getDashboardStats(),
-        getTrendingMovies(),
-        getUpcomingReleases(),
-      ]);
+      const { stats: dashboardStats, trending, upcoming } = await getDashboardStats();
 
       setStats(dashboardStats);
       setTrendingMovies(trending);
