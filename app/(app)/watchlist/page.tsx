@@ -41,6 +41,7 @@ import { useAuth } from "@/contexts/AuthContext";
 interface Friend {
   id: string;
   name: string | null;
+  username: string;
   avatar?: string;
 }
 
@@ -116,6 +117,7 @@ export default function WatchlistPage() {
             friendsData.data.friends.map((f: any) => ({
               id: f.userId,
               name: f.name,
+              username: f.username,
               avatar: f.avatar,
             })) || [],
           );
@@ -250,7 +252,7 @@ export default function WatchlistPage() {
 
   const getFriendName = (friendId: string) => {
     const friend = friends.find((f) => f.id === friendId);
-    return friend?.name || "Unknown";
+    return friend ? friend.name || friend.username || "Unknown" : "Unknown";
   };
 
   const formatDate = (dateString: string | null) => {
@@ -270,7 +272,9 @@ export default function WatchlistPage() {
     }
 
     if (selectedFriend !== "All Friends") {
-      const friendId = friends.find((f) => f.name === selectedFriend)?.id;
+      const friendId = friends.find(
+        (f) => (f.name || f.username || "Unknown friend") === selectedFriend,
+      )?.id;
       if (friendId) {
         filtered = filtered.filter((item) =>
           item.watchedWith.includes(friendId),
@@ -449,7 +453,9 @@ export default function WatchlistPage() {
                                     htmlFor={`${item.id}-${friend.id}`}
                                     className="text-sm font-medium leading-none cursor-pointer"
                                   >
-                                    {friend.name}
+                                    {friend.name ||
+                                      friend.username ||
+                                      "Unknown friend"}
                                   </label>
                                 </div>
                               ))}
@@ -519,11 +525,15 @@ export default function WatchlistPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="All Friends">All Friends</SelectItem>
-                {friends.map((friend) => (
-                  <SelectItem key={friend.id} value={friend.name}>
-                    {friend.name}
-                  </SelectItem>
-                ))}
+                {friends.map((friend) => {
+                  const displayName =
+                    friend.name || friend.username || "Unknown friend";
+                  return (
+                    <SelectItem key={friend.id} value={displayName}>
+                      {displayName}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -681,9 +691,11 @@ export default function WatchlistPage() {
                     }
                   >
                     <Checkbox checked={watchedWith.includes(friend.id)} />
-                    <span className="text-sm">{friend.name || "Unknown"}</span>
+                    <span className="text-sm">
+                      {friend.name || friend.username || "Unknown friend"}
+                    </span>
                   </div>
-                ))}
+                  ))}
                 {friends.length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     No friends found.

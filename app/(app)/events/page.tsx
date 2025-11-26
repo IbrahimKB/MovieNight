@@ -13,7 +13,7 @@ interface Event {
     poster?: string;
   };
   hostUser?: {
-    name: string;
+    name: string | null;
     username: string;
   };
   participants?: string[];
@@ -83,7 +83,8 @@ export default function EventsPage() {
             {event.movie?.title}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Hosted by {event.hostUser?.name || event.hostUser?.username}
+            Hosted by{" "}
+            {event.hostUser?.name || event.hostUser?.username || "Unknown"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             {eventDate.toLocaleDateString("en-US", {

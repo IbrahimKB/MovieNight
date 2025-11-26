@@ -40,6 +40,7 @@ interface Movie {
 interface Friend {
   id: string;
   name: string | null;
+  username: string;
   avatar?: string;
 }
 
@@ -92,6 +93,7 @@ export default function SuggestPage() {
            setFriends(friendsData.data.friends.map((f: any) => ({
              id: f.userId,
              name: f.name,
+             username: f.username,
              avatar: f.avatar
            })) || []);
         }
@@ -506,7 +508,7 @@ export default function SuggestPage() {
                           htmlFor={friend.id}
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          {friend.name || "Unknown"}
+                          {friend.name || friend.username || "Unknown"}
                         </label>
                       </div>
                     ))}
@@ -575,7 +577,9 @@ export default function SuggestPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
-                              {suggestion.suggestedBy.name || "Unknown"}
+                              {suggestion.suggestedBy.name ||
+                                suggestion.suggestedBy.username ||
+                                "Unknown"}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               suggested

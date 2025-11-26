@@ -201,7 +201,9 @@ export default function EventDetailPage() {
               <p className="text-sm text-muted-foreground">Host</p>
             </div>
             <p className="text-lg font-semibold">
-              {event.hostUser?.name || event.hostUser?.username}
+              {event.hostUser?.name ||
+                event.hostUser?.username ||
+                "Unknown Host"}
             </p>
           </div>
         </div>

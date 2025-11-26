@@ -24,7 +24,7 @@ import { toast } from "@/components/ui/use-toast";
 
 interface Friend {
   id: string;
-  name: string;
+  name: string | null;
   username: string;
   avatar?: string;
 }
@@ -317,7 +317,9 @@ export default function FriendsPage() {
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium">{foundUser.name || foundUser.username}</p>
+                          <p className="font-medium">
+                            {foundUser.name || foundUser.username || "Unknown"}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             @{foundUser.username}
                           </p>
@@ -388,7 +390,11 @@ export default function FriendsPage() {
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
-                          <p className="font-medium">{request.fromUser.name || request.fromUser.username}</p>
+                          <p className="font-medium">
+                            {request.fromUser.name ||
+                              request.fromUser.username ||
+                              "Unknown"}
+                          </p>
                           <p className="text-sm text-muted-foreground">
                             @{request.fromUser.username} •{" "}
                             {formatDate(request.sentAt)}
@@ -468,11 +474,19 @@ export default function FriendsPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
                           <span className="text-lg font-bold">
-                            {(friend.name || friend.username).charAt(0).toUpperCase()}
+                            {(
+                              friend.name ||
+                              friend.username ||
+                              "U"
+                            )
+                              .charAt(0)
+                              .toUpperCase()}
                           </span>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold">{friend.name || friend.username}</h4>
+                          <h4 className="font-semibold">
+                            {friend.name || friend.username || "Unknown"}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
                             @{friend.username}
                           </p>

@@ -54,6 +54,7 @@ export async function GET(req: NextRequest) {
       suggestedBy: {
         id: s.fromUser.id,
         name: s.fromUser.name,
+        username: s.fromUser.username,
         avatar: s.fromUser.avatar
       },
       comment: s.message,
