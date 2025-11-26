@@ -67,7 +67,21 @@ export async function GET(req: NextRequest) {
 
     // If TMDB API is available, prefer it for searches
     if (q && process.env.TMDB_API_KEY) {
-      const tmdbResponse = await tmdbClient.searchMovies(q, page);
+      // Import cached search utility
+      const { cacheFunction, CACHE_TTL } = await import("@/lib/cache");
+      const { unstable_cache } = await import("next/cache");
+
+      // Create a specific cache key for this query
+      const cachedSearch = unstable_cache(
+          async () => {
+               if (!process.env.TMDB_API_KEY) return null;
+               return await tmdbClient.searchMovies(q, page);
+          },
+          [`tmdb-search-db-${q}-${page}`], // Unique key per query, distinct from the other endpoint
+          { revalidate: CACHE_TTL.DAY }
+      );
+
+      const tmdbResponse = await cachedSearch();
       
       if (tmdbResponse) {
         // Sync found movies to local database to ensure they have IDs

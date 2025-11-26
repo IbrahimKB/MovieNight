@@ -40,7 +40,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 interface Friend {
   id: string;
-  name: string;
+  name: string | null;
   avatar?: string;
 }
 
@@ -249,7 +249,8 @@ export default function WatchlistPage() {
   };
 
   const getFriendName = (friendId: string) => {
-    return friends.find((f) => f.id === friendId)?.name || "Unknown";
+    const friend = friends.find((f) => f.id === friendId);
+    return friend?.name || "Unknown";
   };
 
   const formatDate = (dateString: string | null) => {
@@ -680,7 +681,7 @@ export default function WatchlistPage() {
                     }
                   >
                     <Checkbox checked={watchedWith.includes(friend.id)} />
-                    <span className="text-sm">{friend.name}</span>
+                    <span className="text-sm">{friend.name || "Unknown"}</span>
                   </div>
                 ))}
                 {friends.length === 0 && (

@@ -485,9 +485,7 @@ export default function MovieDetailPage() {
                 >
                   <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-bold text-primary">
-                      {friend.name?.charAt(0) ||
-                        friend.username?.charAt(0) ||
-                        "U"}
+                      {(friend.name || friend.username || "U").charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">

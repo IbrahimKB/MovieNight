@@ -19,7 +19,7 @@ interface EventDetail {
   };
   hostUser?: {
     id: string;
-    name: string;
+    name: string | null;
     username: string;
   };
 }

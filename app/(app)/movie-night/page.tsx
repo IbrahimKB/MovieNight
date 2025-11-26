@@ -28,7 +28,7 @@ import { toast } from '@/components/ui/use-toast';
 
 interface Friend {
   id: string;
-  name: string;
+  name: string | null;
   avatar?: string;
 }
 
@@ -351,7 +351,7 @@ export default function MovieNightPage() {
                     htmlFor={friend.id}
                     className="text-sm font-medium leading-none cursor-pointer"
                   >
-                    {friend.name}
+                    {friend.name || "Unknown"}
                   </label>
                 </div>
               ))}

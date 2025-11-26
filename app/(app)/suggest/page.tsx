@@ -39,7 +39,7 @@ interface Movie {
 
 interface Friend {
   id: string;
-  name: string;
+  name: string | null;
   avatar?: string;
 }
 
@@ -506,7 +506,7 @@ export default function SuggestPage() {
                           htmlFor={friend.id}
                           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
-                          {friend.name}
+                          {friend.name || "Unknown"}
                         </label>
                       </div>
                     ))}
@@ -575,7 +575,7 @@ export default function SuggestPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="font-medium">
-                              {suggestion.suggestedBy.name}
+                              {suggestion.suggestedBy.name || "Unknown"}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               suggested

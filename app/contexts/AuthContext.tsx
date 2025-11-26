@@ -15,7 +15,7 @@ export interface User {
   id: string; // PUID from backend
   username: string;
   email: string;
-  name: string;
+  name: string | null;
   role: "user" | "admin";
   joinedAt: string;
   createdAt?: string;

@@ -4,10 +4,9 @@ import { getCurrentUser } from '@/lib/auth';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: userId } = await params;
     const user = await getCurrentUser();
     if (!user || user.role !== 'admin') {
       return NextResponse.json(
@@ -16,15 +15,14 @@ export async function POST(
       );
     }
 
-    await prisma.authUser.update({
-      where: { id: userId },
+    const { id } = await context.params;
+
+    const updated = await prisma.authUser.update({
+      where: { id },
       data: { role: 'admin' },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: 'User promoted to admin',
-    });
+    return NextResponse.json({ success: true, data: updated });
   } catch (err) {
     console.error('Error promoting user:', err);
     return NextResponse.json(

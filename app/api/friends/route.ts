@@ -5,18 +5,34 @@ import { ApiResponse } from "@/types";
 
 type FriendshipRow = {
   id: string;
-  userId1: string;
-  userId2: string;
-  requestedBy: string;
-  status: string;
-  createdAt: Date;
-  updatedAt: Date;
+  name: string | null;
+  username: string;
+  avatar: string | null;
+  userId: string;
+  friendshipId: string;
+};
+
+type FriendRequestRow = {
+  id: string;
+  fromUser?: {
+    id: string;
+    name: string | null;
+    username: string;
+    avatar: string | null;
+  };
+  toUser?: {
+    id: string;
+    name: string | null;
+    username: string;
+    avatar: string | null;
+  };
+  sentAt: Date;
 };
 
 type FriendsListPayload = {
   friends: FriendshipRow[];
-  incomingRequests: FriendshipRow[];
-  outgoingRequests: FriendshipRow[];
+  incomingRequests: FriendRequestRow[];
+  outgoingRequests: FriendRequestRow[];
 };
 
 type UserSearchResult = {
@@ -89,42 +105,86 @@ export async function GET(
     // ---------------------------------------------
 
     // Accepted friends (either side)
-    const friends = await prisma.friendship.findMany({
+    const friendsRaw = await prisma.friendship.findMany({
       where: {
         status: "accepted",
         OR: [{ userId1: currentUser.id }, { userId2: currentUser.id }],
       },
+      include: {
+        user1: true,
+        user2: true,
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    // Incoming requests: you are the receiver
-    const incomingRequests = await prisma.friendship.findMany({
+    // Map friends to User objects (the *other* person)
+    const friends = friendsRaw.map((f) => {
+      const isUser1 = f.userId1 === currentUser.id;
+      const otherUser = isUser1 ? f.user2 : f.user1;
+      return {
+        id: otherUser.id,
+        name: otherUser.name,
+        username: otherUser.username,
+        avatar: otherUser.avatar,
+        userId: otherUser.id, // Legacy support for frontend mapping if needed
+        friendshipId: f.id,
+      };
+    });
+
+    // Incoming requests: you are the receiver (userId2)
+    const incomingRaw = await prisma.friendship.findMany({
       where: {
         status: "pending",
         userId2: currentUser.id,
       },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Outgoing requests: you are the sender
-    const outgoingRequests = await prisma.friendship.findMany({
-      where: {
-        status: "pending",
-        userId1: currentUser.id,
+      include: {
+        user1: true, // Sender
       },
       orderBy: { createdAt: "desc" },
     });
 
-    const data: FriendsListPayload = {
-      friends,
-      incomingRequests,
-      outgoingRequests,
-    };
+    const incomingRequests = incomingRaw.map((f) => ({
+      id: f.id,
+      fromUser: {
+        id: f.user1.id,
+        name: f.user1.name,
+        username: f.user1.username,
+        avatar: f.user1.avatar,
+      },
+      sentAt: f.createdAt,
+    }));
+
+    // Outgoing requests: you are the sender (userId1)
+    const outgoingRaw = await prisma.friendship.findMany({
+      where: {
+        status: "pending",
+        userId1: currentUser.id,
+      },
+      include: {
+        user2: true, // Receiver
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const outgoingRequests = outgoingRaw.map((f) => ({
+      id: f.id,
+      toUser: {
+        id: f.user2.id,
+        name: f.user2.name,
+        username: f.user2.username,
+        avatar: f.user2.avatar,
+      },
+      sentAt: f.createdAt,
+    }));
 
     return NextResponse.json(
       {
         success: true,
-        data,
+        data: {
+          friends,
+          incomingRequests,
+          outgoingRequests,
+        },
       },
       { status: 200 }
     );

@@ -12,11 +12,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const [totalUsers, totalAdmins, totalMovies, totalSuggestions] = await Promise.all([
+    const [totalUsers, totalAdmins, totalMovies, totalSuggestions, totalEvents] = await Promise.all([
       prisma.authUser.count(),
       prisma.authUser.count({ where: { role: 'admin' } }),
       prisma.movie.count(),
       prisma.suggestion.count(),
+      prisma.event.count(),
     ]);
 
     return NextResponse.json({
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
         totalAdmins,
         totalMovies,
         totalSuggestions,
+        totalEvents,
       },
     });
   } catch (err) {

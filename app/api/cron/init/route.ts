@@ -92,7 +92,7 @@ export async function POST(
   req: NextRequest
 ): Promise<NextResponse<ApiResponse>> {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({})); // Handle empty body
     const action = body.action || "run-all";
 
     console.log(`[API] POST cron action: ${action}`);
