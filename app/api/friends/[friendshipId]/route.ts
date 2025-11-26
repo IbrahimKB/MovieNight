@@ -5,7 +5,7 @@ import { ApiResponse } from "@/types";
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ friendshipId: string }> }
+  { params }: { params: { friendshipId: string } }
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -16,7 +16,7 @@ export async function PATCH(
       );
     }
 
-    const { friendshipId } = await context.params;
+    const { friendshipId } = params;
     const { action } = await req.json();
 
     if (!["accept", "reject"].includes(action)) {
