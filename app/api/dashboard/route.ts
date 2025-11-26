@@ -78,7 +78,8 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       }),
 
       // 6. Upcoming Releases
-      prisma.release.findMany({
+      // We fetch from our LOCAL Postgres 'Release' table which is populated by cron
+      prisma.movie.findMany({
         where: {
           releaseDate: {
             gte: new Date(),
@@ -86,6 +87,15 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
         },
         orderBy: { releaseDate: 'asc' },
         take: 5,
+        select: {
+            id: true,
+            title: true,
+            year: true,
+            releaseDate: true,
+            poster: true,
+            genres: true,
+            platform: true
+        }
       }),
 
       // 7. Nudge (simplified logic for now)

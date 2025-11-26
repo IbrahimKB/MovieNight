@@ -87,6 +87,7 @@ export async function syncUpcomingReleases() {
                   : null,
                 genres: movie.genre_ids?.map(String) || [],
                 imdbRating: movie.vote_average,
+                rtRating: movie.vote_average * 10, // Approximation
                 releaseDate: new Date(movie.release_date),
                 updatedAt: new Date(),
               },
@@ -100,6 +101,7 @@ export async function syncUpcomingReleases() {
                   : null,
                 genres: movie.genre_ids?.map(String) || [],
                 imdbRating: movie.vote_average,
+                rtRating: movie.vote_average * 10, // Approximation
                 releaseDate: new Date(movie.release_date),
               },
             });

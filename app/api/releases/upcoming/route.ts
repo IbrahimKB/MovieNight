@@ -55,32 +55,9 @@ export async function GET(req: NextRequest) {
 
     const { page, limit } = parsed.data;
 
-    // Try TMDB API first if available
-    if (process.env.TMDB_API_KEY) {
-      const tmdbResponse = await tmdbClient.getUpcomingMovies(page);
-      
-      if (tmdbResponse) {
-        const mappedReleases = tmdbResponse.results
-          .slice(0, limit)
-          .map(mapTMDBMovieToLocal);
-        
-        return NextResponse.json(
-          {
-            success: true,
-            data: mappedReleases,
-            pagination: {
-              page: tmdbResponse.page,
-              totalPages: tmdbResponse.total_pages,
-              totalResults: tmdbResponse.total_results,
-            },
-            message: "Upcoming releases retrieved successfully from TMDB",
-          },
-          { status: 200 }
-        );
-      }
-    }
-
     // Fallback to local database
+    // We strictly serve from Postgres as per the "Postgres-backed endpoint" policy for this route.
+    // This ensures speed and stability for calendar views.
     const now = new Date();
     const nineDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 

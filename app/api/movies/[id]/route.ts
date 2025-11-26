@@ -72,19 +72,24 @@ export async function GET(
       );
     }
 
-    // If ID looks like TMDB ID (all digits) and TMDB API is available
-    if (isTMDBId(id) && process.env.TMDB_API_KEY) {
+    // 1. Try TMDB Live Lookup First (if ID is numeric or looks like TMDB ID)
+    // Note: Our local IDs are UUIDs, TMDB IDs are integers.
+    // If the ID is an integer, it's definitely a TMDB ID request (from live search).
+    // If it's a UUID, it's a request for a local movie (e.g. from watchlist history).
+    const isTmdbId = /^\d+$/.test(id);
+
+    if (isTmdbId && process.env.TMDB_API_KEY) {
       const tmdbMovie = await tmdbClient.getMovieDetails(parseInt(id));
       if (tmdbMovie) {
         return NextResponse.json({
           success: true,
           data: mapTMDBMovieDetailsToLocal(tmdbMovie),
-          source: 'tmdb',
+          source: 'tmdb-live',
         });
       }
     }
 
-    // Fallback to local database
+    // 2. Fallback to local database (for UUIDs or if TMDB fails/not numeric)
     const movie = await prisma.movie.findUnique({
       where: { id },
     });
@@ -99,7 +104,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       data: movie,
-      source: 'local',
+      source: 'local-postgres',
     });
   } catch (err) {
     console.error("GET movie error:", err);

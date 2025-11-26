@@ -75,6 +75,7 @@ export async function syncPopularMovies() {
                   : null,
                 genres: movie.genre_ids?.map(String) || [],
                 imdbRating: movie.vote_average,
+                rtRating: movie.vote_average * 10, // Approximation for RT rating
                 releaseDate: new Date(movie.release_date),
                 updatedAt: new Date(),
               },
@@ -88,6 +89,7 @@ export async function syncPopularMovies() {
                   : null,
                 genres: movie.genre_ids?.map(String) || [],
                 imdbRating: movie.vote_average,
+                rtRating: movie.vote_average * 10, // Approximation for RT rating
                 releaseDate: new Date(movie.release_date),
               },
             });
