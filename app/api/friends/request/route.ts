@@ -8,6 +8,7 @@ import { ApiResponse } from "@/types";
 // Validation schema
 // ---------------------------------------------
 const FriendRequestSchema = z.object({
+  // Can be internal user ID OR public PUID
   toUserId: z.string(),
 });
 
@@ -15,7 +16,7 @@ const FriendRequestSchema = z.object({
 // Helper: map external PUID → internal UUID
 // ---------------------------------------------
 async function resolveUserId(externalId: string): Promise<string | null> {
-  const user = await prisma.authUser.findFirst({
+  const user = await prisma.user.findFirst({
     where: {
       OR: [{ puid: externalId }, { id: externalId }],
     },
@@ -75,7 +76,7 @@ export async function POST(
       );
     }
 
-    // Check if friendship already exists
+    // Check if friendship already exists (any direction)
     const existing = await prisma.friendship.findFirst({
       where: {
         OR: [
@@ -101,13 +102,10 @@ export async function POST(
       }
     }
 
-    // Determine consistent ordering for userId1/userId2
-    const [userId1, userId2] =
-      currentUser.id < targetUserId
-        ? [currentUser.id, targetUserId]
-        : [targetUserId, currentUser.id];
+    // ✅ DIRECTIONAL: sender = userId1, receiver = userId2
+    const userId1 = currentUser.id; // sender
+    const userId2 = targetUserId; // receiver
 
-    // Create friend request
     const friendship = await prisma.friendship.create({
       data: {
         userId1,
@@ -122,7 +120,8 @@ export async function POST(
         success: true,
         data: {
           id: friendship.id,
-          toUserId,
+          fromUserId: currentUser.id,
+          toUserId: targetUserId,
           status: friendship.status,
           createdAt: friendship.createdAt,
         },

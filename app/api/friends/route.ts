@@ -3,113 +3,136 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
+type FriendshipRow = {
+  id: string;
+  userId1: string;
+  userId2: string;
+  requestedBy: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+type FriendsListPayload = {
+  friends: FriendshipRow[];
+  incomingRequests: FriendshipRow[];
+  outgoingRequests: FriendshipRow[];
+};
+
+type UserSearchResult = {
+  id: string;
+  puid: string | null;
+  username: string | null;
+  name: string | null;
+  avatar: string | null;
+};
+
 export async function GET(
-  req: NextRequest,
-): Promise<NextResponse<ApiResponse>> {
+  req: NextRequest
+): Promise<NextResponse<ApiResponse<FriendsListPayload | { users: UserSearchResult[] }>>> {
   try {
-    // Require authentication
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthenticated",
-        },
-        { status: 401 },
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
       );
     }
 
-    const userId = currentUser.id;
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q");
 
-    // ---------------------------
-    // Friends (accepted)
-    // ---------------------------
-    const friendships = await prisma.friendship.findMany({
+    // ---------------------------------------------
+    // MODE 1: search users for "add friend"
+    // ---------------------------------------------
+    if (q && q.trim().length > 0) {
+      const term = q.trim();
+
+      const users = await prisma.user.findMany({
+        where: {
+          AND: [
+            {
+              OR: [
+                { username: { contains: term, mode: "insensitive" } },
+                { name: { contains: term, mode: "insensitive" } },
+              ],
+            },
+            {
+              // Exclude yourself
+              id: { not: currentUser.id },
+            },
+          ],
+        },
+        orderBy: { id: "asc" },
+        take: 20,
+      });
+
+      const payload: UserSearchResult[] = users.map((u) => ({
+        id: u.id,
+        puid: (u as any).puid ?? null,
+        username: u.username ?? null,
+        name: u.name ?? null,
+        avatar: u.avatar ?? null,
+      }));
+
+      return NextResponse.json(
+        {
+          success: true,
+          data: { users: payload },
+        },
+        { status: 200 }
+      );
+    }
+
+    // ---------------------------------------------
+    // MODE 2: return friends + incoming + outgoing
+    // ---------------------------------------------
+
+    // Accepted friends (either side)
+    const friends = await prisma.friendship.findMany({
       where: {
         status: "accepted",
-        OR: [{ userId1: userId }, { userId2: userId }],
+        OR: [{ userId1: currentUser.id }, { userId2: currentUser.id }],
       },
-      include: {
-        user1: true,
-        user2: true,
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    const friends = friendships.map((f) => {
-      const isUser1 = f.userId1 === userId;
-      const otherUser = isUser1 ? f.user2 : f.user1;
-
-      return {
-        id: f.id,
-        userId: otherUser.puid || otherUser.id,
-        username: otherUser.username,
-      };
-    });
-
-    // ---------------------------
-    // Incoming friend requests
-    // userId2 = current user, status = pending
-    // ---------------------------
-    const incoming = await prisma.friendship.findMany({
+    // Incoming requests: you are the receiver
+    const incomingRequests = await prisma.friendship.findMany({
       where: {
         status: "pending",
-        userId2: userId,
+        userId2: currentUser.id,
       },
-      include: {
-        user1: true, // requester
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    const incomingRequests = incoming.map((f) => ({
-      id: f.id,
-      fromUserId: f.user1.puid || f.user1.id,
-      username: f.user1.username,
-      createdAt: f.createdAt,
-    }));
-
-    // ---------------------------
-    // Outgoing friend requests
-    // userId1 = current user, status = pending
-    // ---------------------------
-    const outgoing = await prisma.friendship.findMany({
+    // Outgoing requests: you are the sender
+    const outgoingRequests = await prisma.friendship.findMany({
       where: {
         status: "pending",
-        userId1: userId,
+        userId1: currentUser.id,
       },
-      include: {
-        user2: true, // recipient
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    const outgoingRequests = outgoing.map((f) => ({
-      id: f.id,
-      toUserId: f.user2.puid || f.user2.id,
-      username: f.user2.username,
-      createdAt: f.createdAt,
-    }));
+    const data: FriendsListPayload = {
+      friends,
+      incomingRequests,
+      outgoingRequests,
+    };
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        friends,
-        incomingRequests,
-        outgoingRequests,
-      },
-    });
-  } catch (err) {
-    console.error("Get friends error:", err);
     return NextResponse.json(
       {
-        success: false,
-        error: "Internal server error",
+        success: true,
+        data,
       },
-      { status: 500 },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("Friends list/search error:", err);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
     );
   }
 }

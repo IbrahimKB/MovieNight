@@ -29,7 +29,6 @@
   "@/app/*": ["./app/*"],
   "@/contexts/*": ["./app/contexts/*"],
   "@/lib/*": ["./lib/*"],
-  "@/types": ["./types/index.ts"],
   "@/types/*": ["./types/*"],
   "@/components/*": ["./components/*"],
   "@/components/ui/*": ["./components/ui/*"],
