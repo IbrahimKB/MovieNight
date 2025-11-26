@@ -553,7 +553,7 @@ export default function MovieDetailPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold mb-4">Suggest to a Friend</h2>
               <p className="text-muted-foreground mb-4">

@@ -48,7 +48,7 @@ export async function GET(
     if (q && q.trim().length > 0) {
       const term = q.trim();
 
-      const users = await prisma.user.findMany({
+      const users = await prisma.authUser.findMany({
         where: {
           AND: [
             {
