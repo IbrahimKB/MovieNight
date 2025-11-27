@@ -24,25 +24,52 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
+    const type = searchParams.get("type") || "received"; // "received" or "sent"
 
-    // Get incoming suggestions (to me)
-    const suggestions = await prisma.suggestion.findMany({
-      where: {
-        toUserId: user.id,
-        status: 'pending' // Only pending suggestions?
-      },
-      include: {
-        movie: true,
-        fromUser: true
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      skip: offset,
-    });
+    let suggestions;
+
+    if (type === "sent") {
+      // Get sent suggestions (from me)
+      suggestions = await prisma.suggestion.findMany({
+        where: {
+          fromUserId: user.id,
+        },
+        include: {
+          movie: true,
+          fromUser: true,
+          toUser: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      });
+    } else {
+      // Get incoming suggestions (to me) - default
+      suggestions = await prisma.suggestion.findMany({
+        where: {
+          toUserId: user.id,
+        },
+        include: {
+          movie: true,
+          fromUser: true,
+          toUser: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      });
+    }
 
     // Map to frontend format
     const data = suggestions.map(s => ({
       id: s.id,
+      movieId: s.movieId,
+      fromUserId: s.fromUserId,
+      toUserId: s.toUserId,
+      status: s.status,
+      message: s.message,
+      createdAt: s.createdAt.toISOString(),
+      updatedAt: s.updatedAt.toISOString(),
       movie: {
         id: s.movie.id,
         title: s.movie.title,
@@ -52,19 +79,23 @@ export async function GET(req: NextRequest) {
         description: s.movie.description,
         rating: s.movie.imdbRating,
       },
-      suggestedBy: {
+      fromUser: {
         id: s.fromUser.id,
         name: s.fromUser.name,
         username: s.fromUser.username,
         avatar: s.fromUser.avatar
       },
-      comment: s.message,
-      suggestedAt: s.createdAt.toISOString(),
+      toUser: s.toUser ? {
+        id: s.toUser.id,
+        name: s.toUser.name,
+        username: s.toUser.username,
+        avatar: s.toUser.avatar
+      } : null,
     }));
 
     return NextResponse.json({
       success: true,
-      suggestions: data,
+      data: data,
     });
 
   } catch (err) {
