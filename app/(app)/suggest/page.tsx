@@ -343,7 +343,7 @@ export default function SuggestPage() {
       {isFromHome && selectedMovie && (
         <Alert className="border-primary/50 bg-primary/10">
           <Star className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <span>
               <strong>{selectedMovie.title}</strong> was pre-selected from
               upcoming releases. Add your rating and select friends below to
@@ -353,7 +353,7 @@ export default function SuggestPage() {
               variant="ghost"
               size="sm"
               onClick={() => router.push('/')}
-              className="ml-4"
+              className="sm:ml-4 w-full sm:w-auto"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Home
