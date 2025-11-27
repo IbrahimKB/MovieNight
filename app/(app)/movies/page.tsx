@@ -92,7 +92,9 @@ export default function MoviesPage() {
           setAllGenres(Array.from(genres).sort());
 
           // Track which movies are already in database
-          const addedIds = new Set<string>(moviesData.data.map((m: Movie) => m.id));
+          const addedIds = new Set<string>(
+            moviesData.data.map((m: Movie) => m.id),
+          );
           setAddedMovieIds(addedIds);
         }
 
@@ -331,190 +333,195 @@ export default function MoviesPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-          Browse Movies
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Explore thousands of films to add to your watchlist
-        </p>
-      </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+            Browse Movies
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Explore thousands of films to add to your watchlist
+          </p>
+        </div>
 
-      {/* Search Bar */}
-      <motion.div
-        className="relative z-20"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Search
-          size={20}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-        />
-        <input
-          type="text"
-          placeholder="Search movies on TMDB..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
-          className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
-        />
-        {isSearching && (
-          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
-        )}
-
-        {/* TMDB Search Results Dropdown */}
-        {showSearchResults && tmdbResults.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg max-h-96 overflow-y-auto"
-          >
-            <div className="p-3 space-y-2">
-              {tmdbResults.map((movie) => (
-                <TMDBMovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {showSearchResults &&
-          !isSearching &&
-          tmdbResults.length === 0 &&
-          searchQuery.length >= 2 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
-            >
-              No movies found
-            </motion.div>
-          )}
-      </motion.div>
-
-      {/* Genre Filter Chips */}
-      {allGenres.length > 0 && (
+        {/* Search Bar */}
         <motion.div
-          className="flex flex-wrap gap-2"
+          className="relative z-20"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <motion.button
-            onClick={() => setSelectedGenre(null)}
-            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
-              selectedGenre === null
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
-                : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Search
+            size={20}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search movies on TMDB..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() =>
+              searchQuery.length >= 2 && setShowSearchResults(true)
+            }
+            className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
+          />
+          {isSearching && (
+            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+          )}
+
+          {/* TMDB Search Results Dropdown */}
+          {showSearchResults && tmdbResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg max-h-96 overflow-y-auto"
+            >
+              <div className="p-3 space-y-2">
+                {tmdbResults.map((movie) => (
+                  <TMDBMovieCard key={movie.id} movie={movie} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {showSearchResults &&
+            !isSearching &&
+            tmdbResults.length === 0 &&
+            searchQuery.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
+              >
+                No movies found
+              </motion.div>
+            )}
+        </motion.div>
+
+        {/* Genre Filter Chips */}
+        {allGenres.length > 0 && (
+          <motion.div
+            className="flex flex-wrap gap-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            All Genres
-          </motion.button>
-          {allGenres.map((genre, idx) => (
             <motion.button
-              key={genre}
-              onClick={() => setSelectedGenre(genre)}
+              onClick={() => setSelectedGenre(null)}
               className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
-                selectedGenre === genre
+                selectedGenre === null
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
                   : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
               }`}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {genre}
+              All Genres
             </motion.button>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Local Movies Browse */}
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <MovieCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : filteredMovies.length > 0 ? (
-        <div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Found {filteredMovies.length} movie
-            {filteredMovies.length !== 1 ? "s" : ""}
-          </p>
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: {
-                transition: {
-                  staggerChildren: 0.05,
-                },
-              },
-            }}
-          >
-            {displayedMovies.map((movie, index) => (
-              <MovieCard key={movie.id} movie={movie} index={index} />
+            {allGenres.map((genre, idx) => (
+              <motion.button
+                key={genre}
+                onClick={() => setSelectedGenre(genre)}
+                className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
+                  selectedGenre === genre
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                    : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
+                }`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {genre}
+              </motion.button>
             ))}
           </motion.div>
+        )}
 
-          {/* Infinite scroll trigger */}
-          {hasMore && (
-            <div ref={observerTarget} className="mt-8 flex justify-center py-8">
-              {isLoadingMore && (
-                <motion.div
-                  className="flex items-center gap-2"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                </motion.div>
-              )}
-            </div>
-          )}
-
-          {!hasMore && displayedMovies.length > 0 && (
+        {/* Local Movies Browse */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <MovieCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredMovies.length > 0 ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Found {filteredMovies.length} movie
+              {filteredMovies.length !== 1 ? "s" : ""}
+            </p>
             <motion.div
-              className="text-center py-8 text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.05,
+                  },
+                },
+              }}
             >
-              <p>No more movies to load</p>
+              {displayedMovies.map((movie, index) => (
+                <MovieCard key={movie.id} movie={movie} index={index} />
+              ))}
             </motion.div>
-          )}
-        </div>
-      ) : (
-        <motion.div
-          className="text-center py-12 bg-card border border-primary/20 rounded-xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            No movies found matching your criteria
-          </p>
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedGenre(null);
-            }}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
+
+            {/* Infinite scroll trigger */}
+            {hasMore && (
+              <div
+                ref={observerTarget}
+                className="mt-8 flex justify-center py-8"
+              >
+                {isLoadingMore && (
+                  <motion.div
+                    className="flex items-center gap-2"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {!hasMore && displayedMovies.length > 0 && (
+              <motion.div
+                className="text-center py-8 text-muted-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <p>No more movies to load</p>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <motion.div
+            className="text-center py-12 bg-card border border-primary/20 rounded-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
-            Clear Filters
-          </button>
-        </motion.div>
-      )}
-    </motion.div>
+            <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No movies found matching your criteria
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedGenre(null);
+              }}
+              className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
+            >
+              Clear Filters
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
     </>
   );
 }

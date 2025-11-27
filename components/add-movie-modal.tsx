@@ -356,7 +356,11 @@ export function AddMovieModal({
                     {movie.genres && movie.genres.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {movie.genres.slice(0, 3).map((genre) => (
-                          <Badge key={genre} variant="secondary" className="text-xs">
+                          <Badge
+                            key={genre}
+                            variant="secondary"
+                            className="text-xs"
+                          >
                             {genre}
                           </Badge>
                         ))}
@@ -402,7 +406,9 @@ export function AddMovieModal({
                       >
                         <tab.icon size={16} />
                         <span className="hidden sm:inline">{tab.label}</span>
-                        <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                        <span className="sm:hidden">
+                          {tab.label.split(" ")[0]}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -488,7 +494,9 @@ export function AddMovieModal({
                                 {i < rating[0] ? (
                                   <span className="text-yellow-400">★</span>
                                 ) : (
-                                  <span className="text-muted-foreground">☆</span>
+                                  <span className="text-muted-foreground">
+                                    ☆
+                                  </span>
                                 )}
                               </button>
                             ))}
@@ -500,7 +508,9 @@ export function AddMovieModal({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="review">Review / Notes (Optional)</Label>
+                        <Label htmlFor="review">
+                          Review / Notes (Optional)
+                        </Label>
                         <Textarea
                           id="review"
                           placeholder="Write your thoughts about this movie..."
@@ -532,7 +542,8 @@ export function AddMovieModal({
                           </div>
                         ) : (
                           <p className="text-sm text-muted-foreground">
-                            No friends to add. Add friends to track who you watched with.
+                            No friends to add. Add friends to track who you
+                            watched with.
                           </p>
                         )}
                       </div>
@@ -586,7 +597,8 @@ export function AddMovieModal({
                           </div>
                         ) : (
                           <p className="text-sm text-muted-foreground">
-                            No friends added yet. Add friends to send suggestions.
+                            No friends added yet. Add friends to send
+                            suggestions.
                           </p>
                         )}
                       </div>
@@ -618,7 +630,9 @@ export function AddMovieModal({
                           <>
                             <Users className="h-4 w-4 mr-2" />
                             Suggest to {selectedFriends.length}{" "}
-                            {selectedFriends.length === 1 ? "Friend" : "Friends"}
+                            {selectedFriends.length === 1
+                              ? "Friend"
+                              : "Friends"}
                           </>
                         )}
                       </Button>

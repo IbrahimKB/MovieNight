@@ -700,7 +700,8 @@ export default function WatchlistPage() {
           <DialogHeader>
             <DialogTitle className="text-2xl">Mark as Watched</DialogTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              {watchlist.find((w) => w.id === markAsWatchedItem)?.title || "Movie"}
+              {watchlist.find((w) => w.id === markAsWatchedItem)?.title ||
+                "Movie"}
             </p>
           </DialogHeader>
 
