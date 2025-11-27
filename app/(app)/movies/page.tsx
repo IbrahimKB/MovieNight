@@ -43,7 +43,9 @@ export default function MoviesPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [tmdbResults, setTmdbResults] = useState<Movie[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [addingMovieId, setAddingMovieId] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [showAddMovieModal, setShowAddMovieModal] = useState(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
