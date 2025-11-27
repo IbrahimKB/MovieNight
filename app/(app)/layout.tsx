@@ -73,57 +73,86 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
       <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="px-4 py-3 flex items-center justify-between min-h-[64px]">
+        <div className="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between min-h-[64px]">
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-3 hover:opacity-80 active:scale-95 transition-all duration-200"
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 active:scale-95 transition-all duration-200 flex-shrink-0"
           >
             <div className="w-9 h-9">
               <BrandLogo size="md" className="text-primary" />
             </div>
-            <span className="hidden sm:inline text-xl font-bold text-primary">
+            <span className="hidden sm:inline text-lg sm:text-xl font-bold text-primary whitespace-nowrap">
               MovieNight
             </span>
           </button>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex gap-6 items-center">
+          <div className="hidden lg:flex gap-1 items-center">
             {navItems.map((item) => (
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
+                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
               >
                 <item.icon size={18} />
-                {item.label}
+                <span className="hidden xl:inline">{item.label}</span>
               </button>
             ))}
+            <div className="h-6 w-px bg-border mx-1" />
             <button
               onClick={() => router.push("/settings")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
+              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
             >
               <Settings size={18} />
-              Settings
+              <span className="hidden xl:inline">Settings</span>
             </button>
             <button
               onClick={handleLogout}
-              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-2"
+              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
             >
               <LogOut size={18} />
-              Logout
+              <span className="hidden xl:inline">Logout</span>
+            </button>
+          </div>
+
+          {/* Tablet/Mobile - Icon Only Navigation */}
+          <div className="hidden md:flex lg:hidden items-center gap-1">
+            {navItems.slice(0, 3).map((item) => (
+              <button
+                key={item.href}
+                onClick={() => router.push(item.href)}
+                title={item.label}
+                className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2.5 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <item.icon size={20} />
+              </button>
+            ))}
+            <div className="h-6 w-px bg-border mx-1" />
+            <button
+              onClick={() => router.push("/settings")}
+              title="Settings"
+              className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2.5 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              <Settings size={20} />
+            </button>
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-foreground p-2.5 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+            >
+              {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center active:scale-95 transition-transform"
+            className="md:hidden text-foreground p-2.5 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Sidebar */}
+        {/* Mobile/Tablet Sidebar */}
         {sidebarOpen && (
           <div className="md:hidden border-t border-primary/10 bg-background">
             <div className="flex flex-col p-4 gap-2 pb-6">
@@ -140,6 +169,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   {item.label}
                 </button>
               ))}
+              <div className="h-px bg-border my-2" />
               <button
                 onClick={() => {
                   router.push("/settings");
@@ -163,7 +193,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       </nav>
 
       {/* Main Content */}
-      <main className="container max-w-7xl mx-auto px-4 py-8">{children}</main>
+      <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {children}
+      </main>
     </div>
   );
 }

@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +36,7 @@ import {
   Target,
   Sparkles,
   Loader2,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/components/ui/use-toast";
@@ -87,9 +91,15 @@ export default function WatchlistPage() {
   const [markAsWatchedItem, setMarkAsWatchedItem] = useState<string | null>(
     null,
   );
+  const [watchedDate, setWatchedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [rating, setRating] = useState([3]);
+  const [review, setReview] = useState("");
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
   const [historyFilter, setHistoryFilter] = useState("All");
   const [selectedFriend, setSelectedFriend] = useState("All Friends");
+  const [isSavingWatched, setIsSavingWatched] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -185,6 +195,9 @@ export default function WatchlistPage() {
     const item = watchlist.find((w) => w.id === itemId);
     if (!item) return;
 
+    setWatchedDate(new Date().toISOString().split("T")[0]);
+    setRating([3]);
+    setReview("");
     setWatchedWith(item.selectedFriends);
     setMarkAsWatchedItem(itemId);
   };
@@ -195,9 +208,11 @@ export default function WatchlistPage() {
     const item = watchlist.find((w) => w.id === markAsWatchedItem);
     if (!item) return;
 
+    setIsSavingWatched(true);
+
     try {
       const token = localStorage.getItem("movienight_token");
-      const res = await fetch("/api/watchlist", {
+      const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -205,8 +220,11 @@ export default function WatchlistPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          action: "markWatched",
           movieId: item.id,
+          desireId: item.desireId,
+          watchedDate: watchedDate,
+          rating: rating[0],
+          review: review || undefined,
           watchedWith,
         }),
       });
@@ -226,9 +244,10 @@ export default function WatchlistPage() {
           genres: item.genres,
           platform: item.platform,
           poster: item.poster,
-          watchedDate: new Date().toISOString(),
+          watchedDate: watchedDate,
           watchedWith: watchedWith,
-          originalScore: 0, // Default until rated?
+          originalScore: item.userDesireScore,
+          actualRating: rating[0],
         };
         setHistory((prev) => [newItem, ...prev]);
 
@@ -237,18 +256,24 @@ export default function WatchlistPage() {
           description: `${item.title} has been added to your watch history.`,
         });
       } else {
-        throw new Error("Failed to update");
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update");
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to mark as watched.",
+        description:
+          error instanceof Error ? error.message : "Failed to mark as watched.",
         variant: "error",
       });
+    } finally {
+      setIsSavingWatched(false);
+      setMarkAsWatchedItem(null);
+      setWatchedDate(new Date().toISOString().split("T")[0]);
+      setRating([3]);
+      setReview("");
+      setWatchedWith([]);
     }
-
-    setMarkAsWatchedItem(null);
-    setWatchedWith([]);
   };
 
   const getFriendName = (friendId: string) => {
@@ -671,50 +696,126 @@ export default function WatchlistPage() {
         open={markAsWatchedItem !== null}
         onOpenChange={() => setMarkAsWatchedItem(null)}
       >
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Mark as Watched</DialogTitle>
+            <DialogTitle className="text-2xl">Mark as Watched</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              {watchlist.find((w) => w.id === markAsWatchedItem)?.title ||
+                "Movie"}
+            </p>
           </DialogHeader>
-          <div className="space-y-4">
+
+          <div className="space-y-6 mt-6">
+            {/* Date Watched */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Who did you watch with?
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {friends.map((friend) => (
-                  <div
-                    key={friend.id}
-                    className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:bg-accent"
-                    onClick={() =>
-                      setWatchedWith((prev) =>
-                        prev.includes(friend.id)
-                          ? prev.filter((id) => id !== friend.id)
-                          : [...prev, friend.id],
-                      )
-                    }
-                  >
-                    <Checkbox checked={watchedWith.includes(friend.id)} />
-                    <span className="text-sm">
-                      {friend.name || friend.username || "Unknown friend"}
-                    </span>
-                  </div>
-                ))}
-                {friends.length === 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    No friends found.
-                  </p>
-                )}
+              <Label htmlFor="watched-date">Date Watched</Label>
+              <Input
+                id="watched-date"
+                type="date"
+                value={watchedDate}
+                onChange={(e) => setWatchedDate(e.target.value)}
+                className="w-full"
+              />
+              <p className="text-xs text-muted-foreground">
+                When did you watch this movie?
+              </p>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-2">
+              <Label>Your Rating</Label>
+              <div className="space-y-3">
+                <div className="flex gap-1 text-4xl cursor-pointer">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setRating([i + 1])}
+                      className="transition-transform hover:scale-110 active:scale-95"
+                    >
+                      {i < rating[0] ? (
+                        <span className="text-yellow-400">★</span>
+                      ) : (
+                        <span className="text-muted-foreground">☆</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {rating[0]}/5 Stars - Letterboxd Style Rating
+                </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={confirmMarkAsWatched} className="flex-1">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Confirm
+
+            {/* Review/Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="review">Review / Notes (Optional)</Label>
+              <Textarea
+                id="review"
+                placeholder="Share your thoughts about this movie... (optional)"
+                value={review}
+                onChange={(e) => setReview(e.target.value)}
+                className="min-h-24 resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                What did you think about this movie?
+              </p>
+            </div>
+
+            {/* Who did you watch with */}
+            <div className="space-y-2">
+              <Label>Watched With (Optional)</Label>
+              {friends.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {friends.map((friend) => (
+                    <div
+                      key={friend.id}
+                      className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:bg-accent/50 transition-colors"
+                      onClick={() =>
+                        setWatchedWith((prev) =>
+                          prev.includes(friend.id)
+                            ? prev.filter((id) => id !== friend.id)
+                            : [...prev, friend.id],
+                        )
+                      }
+                    >
+                      <Checkbox checked={watchedWith.includes(friend.id)} />
+                      <span className="text-sm">
+                        {friend.name || friend.username || "Unknown friend"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No friends added. Watch history is still tracked.
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={confirmMarkAsWatched}
+                disabled={isSavingWatched}
+                className="flex-1"
+              >
+                {isSavingWatched ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Mark as Watched
+                  </>
+                )}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setMarkAsWatchedItem(null)}
                 className="flex-1"
+                disabled={isSavingWatched}
               >
                 Cancel
               </Button>

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Search, Clapperboard, Loader2, Plus, Check } from "lucide-react";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
+import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
@@ -16,6 +17,13 @@ interface Movie {
   genres?: string[];
   imdbRating?: number;
   tmdbId?: number;
+}
+
+interface Friend {
+  id: string;
+  name: string | null;
+  username: string;
+  avatar?: string;
 }
 
 const MOVIES_PER_PAGE = 20;
@@ -35,7 +43,9 @@ export default function MoviesPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [tmdbResults, setTmdbResults] = useState<Movie[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [addingMovieId, setAddingMovieId] = useState<string | null>(null);
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [showAddMovieModal, setShowAddMovieModal] = useState(false);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -49,39 +59,60 @@ export default function MoviesPage() {
     ...(token && { Authorization: `Bearer ${token}` }),
   };
 
-  // Fetch local movies from database
+  // Fetch local movies and friends from database
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/movies", {
-          headers,
-          credentials: "include",
-        });
-        const data = await res.json();
+        const [moviesRes, friendsRes] = await Promise.all([
+          fetch("/api/movies", {
+            headers,
+            credentials: "include",
+          }),
+          fetch("/api/friends", {
+            headers,
+            credentials: "include",
+          }),
+        ]);
 
-        if (data.success && Array.isArray(data.data)) {
-          setMovies(data.data);
-          setFilteredMovies(data.data);
+        const moviesData = await moviesRes.json();
+        const friendsData = await friendsRes.json();
+
+        if (moviesData.success && Array.isArray(moviesData.data)) {
+          setMovies(moviesData.data);
+          setFilteredMovies(moviesData.data);
           setCurrentPage(1);
-          setDisplayedMovies(data.data.slice(0, MOVIES_PER_PAGE));
-          setHasMore(data.data.length > MOVIES_PER_PAGE);
+          setDisplayedMovies(moviesData.data.slice(0, MOVIES_PER_PAGE));
+          setHasMore(moviesData.data.length > MOVIES_PER_PAGE);
 
           // Extract unique genres
           const genres = new Set<string>();
-          data.data.forEach((movie: Movie) => {
+          moviesData.data.forEach((movie: Movie) => {
             movie.genres?.forEach((g) => genres.add(g));
           });
           setAllGenres(Array.from(genres).sort());
 
           // Track which movies are already in database
-          const addedIds = new Set<string>(data.data.map((m: Movie) => m.id));
+          const addedIds = new Set<string>(
+            moviesData.data.map((m: Movie) => m.id),
+          );
           setAddedMovieIds(addedIds);
         }
+
+        if (friendsData.success && friendsData.data?.friends) {
+          setFriends(
+            friendsData.data.friends.map((f: any) => ({
+              id: f.userId,
+              name: f.name,
+              username: f.username,
+              avatar: f.avatar,
+            })),
+          );
+        }
       } catch (error) {
-        console.error("Failed to fetch movies:", error);
+        console.error("Failed to fetch data:", error);
         toast({
           title: "Error",
-          description: "Failed to load movies",
+          description: "Failed to load data",
           variant: "error",
         });
       } finally {
@@ -89,7 +120,7 @@ export default function MoviesPage() {
       }
     };
 
-    fetchMovies();
+    fetchData();
   }, []);
 
   // Live TMDB search with debounce
@@ -179,53 +210,17 @@ export default function MoviesPage() {
     setHasMore(endIdx < filteredMovies.length);
   };
 
-  // Add TMDB movie to database/watchlist
-  const handleAddMovie = async (movie: Movie) => {
-    setAddingMovieId(movie.id);
-    try {
-      const res = await fetch("/api/watch/desire/add-from-tmdb", {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
-          description: "",
-          imdbRating: movie.imdbRating,
-          rating: 5,
-        }),
-      });
+  // Open the add movie modal
+  const handleOpenModal = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setShowAddMovieModal(true);
+  };
 
-      if (res.ok) {
-        setAddedMovieIds((prev) => new Set([...prev, movie.id]));
-        toast({
-          title: "Added!",
-          description: `"${movie.title}" added to watchlist`,
-        });
-        setSearchQuery("");
-        setTmdbResults([]);
-        setShowSearchResults(false);
-      } else {
-        const data = await res.json();
-        toast({
-          title: "Error",
-          description: data.error || "Failed to add movie",
-          variant: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to add movie:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add movie",
-        variant: "error",
-      });
-    } finally {
-      setAddingMovieId(null);
-    }
+  // Handle movie added from modal
+  const handleMovieAdded = () => {
+    setSearchQuery("");
+    setTmdbResults([]);
+    setShowSearchResults(false);
   };
 
   const { observerTarget, isLoading: isLoadingMore } = useInfiniteScroll({
@@ -280,14 +275,12 @@ export default function MoviesPage() {
   );
 
   const TMDBMovieCard = ({ movie }: { movie: Movie }) => {
-    const isAdded = addedMovieIds.has(movie.id);
-    const isAdding = addingMovieId === movie.id;
-
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group"
+        onClick={() => handleOpenModal(movie)}
+        className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group cursor-pointer hover:shadow-md"
       >
         <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-background flex items-center justify-center">
           {movie.poster ? (
@@ -311,27 +304,14 @@ export default function MoviesPage() {
             )}
           </div>
           <button
-            onClick={() => handleAddMovie(movie)}
-            disabled={isAdded || isAdding}
-            className={`w-full px-3 py-1.5 rounded text-xs font-medium transition-all mt-2 flex items-center justify-center gap-1 ${
-              isAdded
-                ? "bg-primary/20 text-primary"
-                : "bg-primary text-primary-foreground hover:bg-primary/90"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenModal(movie);
+            }}
+            className="w-full px-3 py-1.5 rounded text-xs font-medium transition-all mt-2 flex items-center justify-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95"
           >
-            {isAdding ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : isAdded ? (
-              <>
-                <Check className="h-3 w-3" />
-                Added
-              </>
-            ) : (
-              <>
-                <Plus className="h-3 w-3" />
-                Add
-              </>
-            )}
+            <Plus className="h-3 w-3" />
+            Add Movie
           </button>
         </div>
       </motion.div>
@@ -339,195 +319,209 @@ export default function MoviesPage() {
   };
 
   return (
-    <motion.div
-      className="space-y-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-          Browse Movies
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Explore thousands of films to add to your watchlist
-        </p>
-      </div>
-
-      {/* Search Bar */}
+    <>
+      <AddMovieModal
+        isOpen={showAddMovieModal}
+        onClose={() => setShowAddMovieModal(false)}
+        movie={selectedMovie}
+        friends={friends}
+        onMovieAdded={handleMovieAdded}
+      />
       <motion.div
-        className="relative z-20"
-        initial={{ opacity: 0, y: -10 }}
+        className="space-y-8"
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4 }}
       >
-        <Search
-          size={20}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-        />
-        <input
-          type="text"
-          placeholder="Search movies on TMDB..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
-          className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
-        />
-        {isSearching && (
-          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
-        )}
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+            Browse Movies
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Explore thousands of films to add to your watchlist
+          </p>
+        </div>
 
-        {/* TMDB Search Results Dropdown */}
-        {showSearchResults && tmdbResults.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg max-h-96 overflow-y-auto"
-          >
-            <div className="p-3 space-y-2">
-              {tmdbResults.map((movie) => (
-                <TMDBMovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {showSearchResults &&
-          !isSearching &&
-          tmdbResults.length === 0 &&
-          searchQuery.length >= 2 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
-            >
-              No movies found
-            </motion.div>
-          )}
-      </motion.div>
-
-      {/* Genre Filter Chips */}
-      {allGenres.length > 0 && (
+        {/* Search Bar */}
         <motion.div
-          className="flex flex-wrap gap-2"
+          className="relative z-20"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <motion.button
-            onClick={() => setSelectedGenre(null)}
-            className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
-              selectedGenre === null
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
-                : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Search
+            size={20}
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search movies on TMDB..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() =>
+              searchQuery.length >= 2 && setShowSearchResults(true)
+            }
+            className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
+          />
+          {isSearching && (
+            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+          )}
+
+          {/* TMDB Search Results Dropdown */}
+          {showSearchResults && tmdbResults.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg max-h-96 overflow-y-auto"
+            >
+              <div className="p-3 space-y-2">
+                {tmdbResults.map((movie) => (
+                  <TMDBMovieCard key={movie.id} movie={movie} />
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {showSearchResults &&
+            !isSearching &&
+            tmdbResults.length === 0 &&
+            searchQuery.length >= 2 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
+              >
+                No movies found
+              </motion.div>
+            )}
+        </motion.div>
+
+        {/* Genre Filter Chips */}
+        {allGenres.length > 0 && (
+          <motion.div
+            className="flex flex-wrap gap-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
           >
-            All Genres
-          </motion.button>
-          {allGenres.map((genre, idx) => (
             <motion.button
-              key={genre}
-              onClick={() => setSelectedGenre(genre)}
+              onClick={() => setSelectedGenre(null)}
               className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
-                selectedGenre === genre
+                selectedGenre === null
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
                   : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
               }`}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              {genre}
+              All Genres
             </motion.button>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Local Movies Browse */}
-      {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <MovieCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : filteredMovies.length > 0 ? (
-        <div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Found {filteredMovies.length} movie
-            {filteredMovies.length !== 1 ? "s" : ""}
-          </p>
-          <motion.div
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
-            initial="hidden"
-            animate="visible"
-            variants={{
-              visible: {
-                transition: {
-                  staggerChildren: 0.05,
-                },
-              },
-            }}
-          >
-            {displayedMovies.map((movie, index) => (
-              <MovieCard key={movie.id} movie={movie} index={index} />
+            {allGenres.map((genre, idx) => (
+              <motion.button
+                key={genre}
+                onClick={() => setSelectedGenre(genre)}
+                className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all min-h-[44px] ${
+                  selectedGenre === genre
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/50 hover:shadow-lg hover:shadow-primary/70"
+                    : "bg-card border border-primary/20 text-foreground hover:border-primary/60 hover:bg-accent/30"
+                }`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {genre}
+              </motion.button>
             ))}
           </motion.div>
+        )}
 
-          {/* Infinite scroll trigger */}
-          {hasMore && (
-            <div ref={observerTarget} className="mt-8 flex justify-center py-8">
-              {isLoadingMore && (
-                <motion.div
-                  className="flex items-center gap-2"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                </motion.div>
-              )}
-            </div>
-          )}
-
-          {!hasMore && displayedMovies.length > 0 && (
+        {/* Local Movies Browse */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <MovieCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredMovies.length > 0 ? (
+          <div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Found {filteredMovies.length} movie
+              {filteredMovies.length !== 1 ? "s" : ""}
+            </p>
             <motion.div
-              className="text-center py-8 text-muted-foreground"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4 }}
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: {
+                    staggerChildren: 0.05,
+                  },
+                },
+              }}
             >
-              <p>No more movies to load</p>
+              {displayedMovies.map((movie, index) => (
+                <MovieCard key={movie.id} movie={movie} index={index} />
+              ))}
             </motion.div>
-          )}
-        </div>
-      ) : (
-        <motion.div
-          className="text-center py-12 bg-card border border-primary/20 rounded-xl"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">
-            No movies found matching your criteria
-          </p>
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedGenre(null);
-            }}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
+
+            {/* Infinite scroll trigger */}
+            {hasMore && (
+              <div
+                ref={observerTarget}
+                className="mt-8 flex justify-center py-8"
+              >
+                {isLoadingMore && (
+                  <motion.div
+                    className="flex items-center gap-2"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {!hasMore && displayedMovies.length > 0 && (
+              <motion.div
+                className="text-center py-8 text-muted-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4 }}
+              >
+                <p>No more movies to load</p>
+              </motion.div>
+            )}
+          </div>
+        ) : (
+          <motion.div
+            className="text-center py-12 bg-card border border-primary/20 rounded-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
-            Clear Filters
-          </button>
-        </motion.div>
-      )}
-    </motion.div>
+            <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No movies found matching your criteria
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedGenre(null);
+              }}
+              className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
+            >
+              Clear Filters
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
+    </>
   );
 }
