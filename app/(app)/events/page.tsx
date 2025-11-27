@@ -130,7 +130,7 @@ export default function EventsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold mb-2">Movie Events</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Movie Events</h1>
           <p className="text-muted-foreground">
             Plan movie nights with friends
           </p>
