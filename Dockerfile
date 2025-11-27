@@ -8,7 +8,9 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci --legacy-peer-deps
+RUN npm config set fetch-retry-maxtimeout 600000 \
+    && npm config set fetch-retry-mintimeout 10000 \
+    && npm ci --legacy-peer-deps
 
 
 # Rebuild the source code only when needed
