@@ -92,3 +92,54 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Unauthenticated" },
+        { status: 401 }
+      );
+    }
+
+    const { id: suggestionId } = await params;
+
+    // Verify suggestion exists and belongs to user (either fromUserId or toUserId)
+    const suggestion = await prisma.suggestion.findUnique({
+      where: { id: suggestionId },
+    });
+
+    if (!suggestion) {
+      return NextResponse.json(
+        { success: false, error: "Suggestion not found" },
+        { status: 404 }
+      );
+    }
+
+    // Allow deletion if user is the one who sent it or received it
+    if (suggestion.fromUserId !== user.id && suggestion.toUserId !== user.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
+    // Delete the suggestion
+    await prisma.suggestion.delete({
+      where: { id: suggestionId },
+    });
+
+    return NextResponse.json({ success: true });
+
+  } catch (err) {
+    console.error("Delete suggestion error:", err);
+    return NextResponse.json(
+      { success: false, error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
