@@ -342,8 +342,8 @@ export default function MovieDetailPage() {
       <div className="pt-28 md:pt-0">
         {/* Title and Rating */}
         <div className="mb-4">
-          <h1 className="text-4xl font-bold mb-2">{movie.title}</h1>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">{movie.title}</h1>
+          <div className="flex items-center gap-4 text-xs sm:text-sm text-muted-foreground">
             <span>{movie.year}</span>
             {movie.imdbRating && (
               <span className="flex items-center gap-1">

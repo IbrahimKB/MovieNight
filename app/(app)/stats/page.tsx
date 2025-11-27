@@ -93,10 +93,10 @@ export default function StatsPage() {
       {/* Page Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Trophy className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">🏆 ReelTalk</h1>
+          <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">🏆 ReelTalk</h1>
         </div>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Your squad's movie-watching stats & wins
         </p>
       </div>

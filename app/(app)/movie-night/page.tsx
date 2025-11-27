@@ -221,10 +221,10 @@ export default function MovieNightPage() {
       {/* Page Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Movie Night</h1>
+          <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Movie Night</h1>
         </div>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Select who's here and get movie recommendations your group is most
           excited about.
         </p>
@@ -252,7 +252,7 @@ export default function MovieNightPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-4">
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
                   {surpriseMovie.movie.title} ({surpriseMovie.movie.year})
                 </h3>
                 <div className="flex items-center gap-4 flex-wrap">
