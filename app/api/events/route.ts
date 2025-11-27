@@ -84,7 +84,12 @@ export async function POST(
       );
     }
 
-    const { movieId: inputMovieId, date, notes, participants } = validation.data;
+    const {
+      movieId: inputMovieId,
+      date,
+      notes,
+      participants,
+    } = validation.data;
 
     // Map current user to internal ID
     const hostUserId = await mapExternalUserIdToInternal(currentUser.id);
@@ -224,10 +229,14 @@ export async function GET(
         return {
           id: event.id,
           movieId: event.movieId,
-          movieTitle: event.movie?.title ?? null,
-          moviePoster: event.movie?.poster ?? null,
-          hostUserId: hostExternalId,
-          hostUsername: event.hostUser?.username ?? null,
+          movie: {
+            title: event.movie?.title ?? null,
+            poster: event.movie?.poster ?? null,
+          },
+          hostUser: {
+            name: event.hostUser?.name ?? null,
+            username: event.hostUser?.username ?? null,
+          },
           participants: externalParticipants,
           date: event.date,
           notes: event.notes,
