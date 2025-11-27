@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +53,7 @@ interface Suggestion {
   myRating?: number;
 }
 
-export default function SuggestPage() {
+function SuggestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -78,12 +78,10 @@ export default function SuggestPage() {
     const fetchInitialData = async () => {
       if (!user) return;
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-
+        // Removed manual token header as we use cookies now
         const [friendsRes, suggestionsRes] = await Promise.all([
-          fetch("/api/friends", { headers }),
-          fetch("/api/suggestions", { headers })
+          fetch("/api/friends"),
+          fetch("/api/suggestions")
         ]);
 
         const friendsData = await friendsRes.json();
@@ -119,13 +117,10 @@ export default function SuggestPage() {
     const movieGenres = searchParams.get('genres');
     const movieDescription = searchParams.get('description');
     const fromHome = searchParams.get('isFromHome');
-    // If we have ID, we should rely on that, but params might be just text.
-    // If passing from home, ideally pass ID. 
     
-    // We treat it as a "search result" that is selected
     if (movieTitle && fromHome) {
        const prefilledMovie: Movie = {
-        id: `temp_${Date.now()}`, // Placeholder if we don't have real ID
+        id: `temp_${Date.now()}`,
         title: movieTitle,
         year: movieYear ? parseInt(movieYear) : new Date().getFullYear(),
         genres: movieGenres ? JSON.parse(movieGenres) : [],
@@ -152,10 +147,8 @@ export default function SuggestPage() {
 
       setIsSearching(true);
       try {
-        const token = localStorage.getItem("movienight_token");
-        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`, {
-             headers: { Authorization: token ? `Bearer ${token}` : "" }
-        });
+        // Removed manual token header
+        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`);
         const data = await res.json();
         if (data.success) {
           setSearchResults(data.data.map((m: any) => ({
@@ -192,15 +185,13 @@ export default function SuggestPage() {
     if (!selectedMovie || selectedFriends.length === 0) return;
 
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/suggestions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : ""
         },
         body: JSON.stringify({
-          movieId: selectedMovie.id, // This assumes ID is valid UUID. If it's from TMDB search (synced), it should be UUID.
+          movieId: selectedMovie.id,
           friendIds: selectedFriends,
           comment: comment,
           desireRating: desireRating[0]
@@ -243,12 +234,10 @@ export default function SuggestPage() {
     const rating = suggestionRatings[suggestionId] || 5;
 
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch(`/api/suggestions/${suggestionId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : ""
         },
         body: JSON.stringify({
             action: 'accept',
@@ -279,12 +268,10 @@ export default function SuggestPage() {
     movieTitle: string
   ) => {
     try {
-        const token = localStorage.getItem("movienight_token");
         const res = await fetch(`/api/suggestions/${suggestionId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : ""
           },
           body: JSON.stringify({
               action: 'reject'
@@ -684,5 +671,13 @@ export default function SuggestPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SuggestPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <SuggestPageContent />
+    </Suspense>
   );
 }
