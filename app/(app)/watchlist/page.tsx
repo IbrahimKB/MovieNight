@@ -208,9 +208,11 @@ export default function WatchlistPage() {
     const item = watchlist.find((w) => w.id === markAsWatchedItem);
     if (!item) return;
 
+    setIsSavingWatched(true);
+
     try {
       const token = localStorage.getItem("movienight_token");
-      const res = await fetch("/api/watchlist", {
+      const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -218,8 +220,11 @@ export default function WatchlistPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          action: "markWatched",
           movieId: item.id,
+          desireId: item.desireId,
+          watchedDate: watchedDate,
+          rating: rating[0],
+          review: review || undefined,
           watchedWith,
         }),
       });
@@ -239,9 +244,10 @@ export default function WatchlistPage() {
           genres: item.genres,
           platform: item.platform,
           poster: item.poster,
-          watchedDate: new Date().toISOString(),
+          watchedDate: watchedDate,
           watchedWith: watchedWith,
-          originalScore: 0, // Default until rated?
+          originalScore: item.userDesireScore,
+          actualRating: rating[0],
         };
         setHistory((prev) => [newItem, ...prev]);
 
@@ -250,18 +256,24 @@ export default function WatchlistPage() {
           description: `${item.title} has been added to your watch history.`,
         });
       } else {
-        throw new Error("Failed to update");
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update");
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to mark as watched.",
+        description:
+          error instanceof Error ? error.message : "Failed to mark as watched.",
         variant: "error",
       });
+    } finally {
+      setIsSavingWatched(false);
+      setMarkAsWatchedItem(null);
+      setWatchedDate(new Date().toISOString().split("T")[0]);
+      setRating([3]);
+      setReview("");
+      setWatchedWith([]);
     }
-
-    setMarkAsWatchedItem(null);
-    setWatchedWith([]);
   };
 
   const getFriendName = (friendId: string) => {
