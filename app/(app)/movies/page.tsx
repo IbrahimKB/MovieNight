@@ -166,8 +166,8 @@ export default function MoviesPage() {
     >
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Browse Movies</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Explore thousands of films to add to your watchlist
         </p>
       </div>
