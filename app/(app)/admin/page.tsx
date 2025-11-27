@@ -168,7 +168,9 @@ export default function AdminPage() {
             <Shield className="h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 text-primary" />
             Admin Dashboard
           </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Manage MovieNight</p>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Manage MovieNight
+          </p>
         </div>
       </div>
 
@@ -202,12 +204,24 @@ export default function AdminPage() {
           <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Username</th>
-                <th className="hidden sm:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Email</th>
-                <th className="hidden md:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Name</th>
-                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Role</th>
-                <th className="hidden lg:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Joined</th>
-                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Actions</th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">
+                  Username
+                </th>
+                <th className="hidden sm:table-cell text-left py-3 px-2 sm:px-4 font-semibold">
+                  Email
+                </th>
+                <th className="hidden md:table-cell text-left py-3 px-2 sm:px-4 font-semibold">
+                  Name
+                </th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">
+                  Role
+                </th>
+                <th className="hidden lg:table-cell text-left py-3 px-2 sm:px-4 font-semibold">
+                  Joined
+                </th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>

@@ -302,7 +302,9 @@ export default function WatchlistPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Bookmark className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Watchlist & History</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+            Watchlist & History
+          </h1>
         </div>
         <p className="text-muted-foreground text-lg">
           Manage your movie preferences and track your viewing history.
@@ -695,7 +697,7 @@ export default function WatchlistPage() {
                       {friend.name || friend.username || "Unknown friend"}
                     </span>
                   </div>
-                  ))}
+                ))}
                 {friends.length === 0 && (
                   <p className="text-sm text-muted-foreground">
                     No friends found.

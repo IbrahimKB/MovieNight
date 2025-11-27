@@ -64,7 +64,16 @@ export async function POST(
       );
     }
 
-    const { tmdbId, title, year, genres, poster, description, imdbRating, rating } = validation.data;
+    const {
+      tmdbId,
+      title,
+      year,
+      genres,
+      poster,
+      description,
+      imdbRating,
+      rating,
+    } = validation.data;
 
     // Check if movie already exists (by tmdbId if provided, or by title+year)
     let movie = null;

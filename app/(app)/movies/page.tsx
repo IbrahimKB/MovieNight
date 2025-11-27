@@ -69,7 +69,7 @@ export default function MoviesPage() {
             movie.genres?.forEach((g) => genres.add(g));
           });
           setAllGenres(Array.from(genres).sort());
-          
+
           // Track which movies are already in database
           const addedIds = new Set(data.data.map((m: Movie) => m.id));
           setAddedMovieIds(addedIds);
@@ -79,7 +79,7 @@ export default function MoviesPage() {
         toast({
           title: "Error",
           description: "Failed to load movies",
-          variant: "error"
+          variant: "error",
         });
       } finally {
         setLoading(false);
@@ -107,7 +107,7 @@ export default function MoviesPage() {
       try {
         const res = await fetch(
           `/api/movies/search?q=${encodeURIComponent(searchQuery)}&page=1`,
-          { headers }
+          { headers },
         );
         const data = await res.json();
 
@@ -131,7 +131,7 @@ export default function MoviesPage() {
         toast({
           title: "Search Error",
           description: "Failed to search movies",
-          variant: "error"
+          variant: "error",
         });
       } finally {
         setIsSearching(false);
@@ -151,7 +151,7 @@ export default function MoviesPage() {
 
     if (selectedGenre) {
       results = results.filter((movie) =>
-        movie.genres?.includes(selectedGenre)
+        movie.genres?.includes(selectedGenre),
       );
     }
 
@@ -206,7 +206,7 @@ export default function MoviesPage() {
         toast({
           title: "Error",
           description: data.error || "Failed to add movie",
-          variant: "error"
+          variant: "error",
         });
       }
     } catch (error) {
@@ -214,7 +214,7 @@ export default function MoviesPage() {
       toast({
         title: "Error",
         description: "Failed to add movie",
-        variant: "error"
+        variant: "error",
       });
     } finally {
       setAddingMovieId(null);
@@ -298,7 +298,9 @@ export default function MoviesPage() {
             <h4 className="font-semibold text-sm truncate">{movie.title}</h4>
             <p className="text-xs text-muted-foreground">{movie.year}</p>
             {movie.imdbRating && (
-              <p className="text-xs text-yellow-500 mt-1">⭐ {movie.imdbRating.toFixed(1)}</p>
+              <p className="text-xs text-yellow-500 mt-1">
+                ⭐ {movie.imdbRating.toFixed(1)}
+              </p>
             )}
           </div>
           <button
@@ -338,7 +340,9 @@ export default function MoviesPage() {
     >
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Browse Movies</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          Browse Movies
+        </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Explore thousands of films to add to your watchlist
         </p>
@@ -382,15 +386,18 @@ export default function MoviesPage() {
           </motion.div>
         )}
 
-        {showSearchResults && !isSearching && tmdbResults.length === 0 && searchQuery.length >= 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
-          >
-            No movies found
-          </motion.div>
-        )}
+        {showSearchResults &&
+          !isSearching &&
+          tmdbResults.length === 0 &&
+          searchQuery.length >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
+            >
+              No movies found
+            </motion.div>
+          )}
       </motion.div>
 
       {/* Genre Filter Chips */}

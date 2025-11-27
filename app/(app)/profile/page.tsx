@@ -124,7 +124,9 @@ export default function ProfilePage() {
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
                 {user?.name || user?.username}
               </h1>
-              <p className="text-muted-foreground text-sm truncate">@{user?.username}</p>
+              <p className="text-muted-foreground text-sm truncate">
+                @{user?.username}
+              </p>
               <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                 Member since{" "}
                 {user?.joinedAt
@@ -159,17 +161,25 @@ export default function ProfilePage() {
         <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            <p className="text-xs sm:text-sm text-muted-foreground">Movies Watched</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Movies Watched
+            </p>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold">{stats.moviesWatched}</p>
+          <p className="text-2xl sm:text-3xl font-bold">
+            {stats.moviesWatched}
+          </p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
             <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            <p className="text-xs sm:text-sm text-muted-foreground">In Watchlist</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              In Watchlist
+            </p>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold">{stats.activeWatchlist}</p>
+          <p className="text-2xl sm:text-3xl font-bold">
+            {stats.activeWatchlist}
+          </p>
         </div>
       </div>
 

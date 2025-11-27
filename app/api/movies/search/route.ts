@@ -16,12 +16,14 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
   return {
     id: tmdbMovie.id.toString(), // Use TMDB ID as ID for live results (frontend needs to handle this distinction)
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
-    year: new Date(releaseDate || '2024-01-01').getFullYear(),
+    title: tmdbMovie.title || tmdbMovie.name || "Unknown Title",
+    year: new Date(releaseDate || "2024-01-01").getFullYear(),
     genres: tmdbMovie.genre_ids || [],
     platform: null,
-    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-    description: tmdbMovie.overview || '',
+    poster: tmdbMovie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
+      : null,
+    description: tmdbMovie.overview || "",
     imdbRating: tmdbMovie.vote_average || null,
     rtRating: null,
     releaseDate: releaseDate ? new Date(releaseDate) : null,
@@ -34,18 +36,17 @@ const getCachedTMDBSearch = unstable_cache(
     if (!process.env.TMDB_API_KEY) return null;
     return await tmdbClient.searchMovies(query, page);
   },
-  ['tmdb-search'],
-  { revalidate: CACHE_TTL.DAY }
+  ["tmdb-search"],
+  { revalidate: CACHE_TTL.DAY },
 );
-
 
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-       return NextResponse.json(
+      return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: "Query parameter 'q' is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -66,20 +67,26 @@ export async function GET(req: NextRequest) {
 
     // LIVE TMDB SEARCH WITH CACHING
     if (!process.env.TMDB_API_KEY) {
-        console.error("TMDB_API_KEY missing for live search");
-        return NextResponse.json({ success: false, error: "Search unavailable" }, { status: 503 });
+      console.error("TMDB_API_KEY missing for live search");
+      return NextResponse.json(
+        { success: false, error: "Search unavailable" },
+        { status: 503 },
+      );
     }
 
     // Use cached search
     let tmdbResponse = null;
     try {
-        tmdbResponse = await getCachedTMDBSearch(q, page);
+      tmdbResponse = await getCachedTMDBSearch(q, page);
     } catch (e) {
-        console.error("Search error:", e);
+      console.error("Search error:", e);
     }
 
     if (!tmdbResponse) {
-        return NextResponse.json({ success: false, error: "External API error" }, { status: 502 });
+      return NextResponse.json(
+        { success: false, error: "External API error" },
+        { status: 502 },
+      );
     }
 
     const mappedMovies = tmdbResponse.results.map(mapTMDBMovieToLocal);
@@ -92,14 +99,13 @@ export async function GET(req: NextRequest) {
         totalPages: tmdbResponse.total_pages,
         totalResults: tmdbResponse.total_results,
       },
-      source: 'tmdb-live'
+      source: "tmdb-live",
     });
-
   } catch (err) {
     console.error("Search movies error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

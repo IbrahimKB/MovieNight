@@ -104,7 +104,9 @@ export default function CreateEventPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Create Movie Event</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          Create Movie Event
+        </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Plan a movie night with your friends
         </p>
