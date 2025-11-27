@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,9 +41,7 @@ export async function GET(req: NextRequest) {
       id: `tmdb_${movie.id}`,
       tmdbId: movie.id,
       title: movie.title || "Unknown Title",
-      year: movie.release_date
-        ? new Date(movie.release_date).getFullYear()
-        : 0,
+      year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
       poster: tmdbClient.getPosterUrl(movie.poster_path),
       description: movie.overview || "",
       genres: movie.genre_ids
@@ -65,7 +63,7 @@ export async function GET(req: NextRequest) {
     console.error("Search error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

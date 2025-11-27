@@ -84,7 +84,12 @@ export async function POST(
       );
     }
 
-    const { movieId: inputMovieId, date, notes, participants } = validation.data;
+    const {
+      movieId: inputMovieId,
+      date,
+      notes,
+      participants,
+    } = validation.data;
 
     // Map current user to internal ID
     const hostUserId = await mapExternalUserIdToInternal(currentUser.id);
