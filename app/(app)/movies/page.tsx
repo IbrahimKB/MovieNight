@@ -208,53 +208,17 @@ export default function MoviesPage() {
     setHasMore(endIdx < filteredMovies.length);
   };
 
-  // Add TMDB movie to database/watchlist
-  const handleAddMovie = async (movie: Movie) => {
-    setAddingMovieId(movie.id);
-    try {
-      const res = await fetch("/api/watch/desire/add-from-tmdb", {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
-          description: "",
-          imdbRating: movie.imdbRating,
-          rating: 5,
-        }),
-      });
+  // Open the add movie modal
+  const handleOpenModal = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setShowAddMovieModal(true);
+  };
 
-      if (res.ok) {
-        setAddedMovieIds((prev) => new Set([...prev, movie.id]));
-        toast({
-          title: "Added!",
-          description: `"${movie.title}" added to watchlist`,
-        });
-        setSearchQuery("");
-        setTmdbResults([]);
-        setShowSearchResults(false);
-      } else {
-        const data = await res.json();
-        toast({
-          title: "Error",
-          description: data.error || "Failed to add movie",
-          variant: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to add movie:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add movie",
-        variant: "error",
-      });
-    } finally {
-      setAddingMovieId(null);
-    }
+  // Handle movie added from modal
+  const handleMovieAdded = () => {
+    setSearchQuery("");
+    setTmdbResults([]);
+    setShowSearchResults(false);
   };
 
   const { observerTarget, isLoading: isLoadingMore } = useInfiniteScroll({
