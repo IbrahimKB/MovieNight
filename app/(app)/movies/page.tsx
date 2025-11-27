@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search, Clapperboard } from "lucide-react";
+import { Search, Clapperboard, Loader2, Plus, Check } from "lucide-react";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
@@ -14,9 +15,11 @@ interface Movie {
   poster?: string;
   genres?: string[];
   imdbRating?: number;
+  tmdbId?: number;
 }
 
 const MOVIES_PER_PAGE = 20;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export default function MoviesPage() {
   const router = useRouter();
@@ -29,20 +32,27 @@ export default function MoviesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [displayedMovies, setDisplayedMovies] = useState<Movie[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [tmdbResults, setTmdbResults] = useState<Movie[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [addingMovieId, setAddingMovieId] = useState<string | null>(null);
+  const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
   const token =
     typeof window !== "undefined"
       ? localStorage.getItem("movienight_token")
       : null;
 
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
+  };
+
+  // Fetch local movies from database
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
-
         const res = await fetch("/api/movies", { headers });
         const data = await res.json();
 
@@ -59,28 +69,85 @@ export default function MoviesPage() {
             movie.genres?.forEach((g) => genres.add(g));
           });
           setAllGenres(Array.from(genres).sort());
+
+          // Track which movies are already in database
+          const addedIds = new Set(data.data.map((m: Movie) => m.id));
+          setAddedMovieIds(addedIds);
         }
       } catch (error) {
         console.error("Failed to fetch movies:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load movies",
+          variant: "error",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchMovies();
-  }, [token]);
+  }, []);
 
-  // Filter movies based on search and genre
+  // Live TMDB search with debounce
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery.length < 2) {
+      setTmdbResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `/api/movies/search?q=${encodeURIComponent(searchQuery)}&page=1`,
+          { headers },
+        );
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          const results = data.data.map((movie: any) => ({
+            id: movie.id || `tmdb_${movie.tmdbId}`,
+            tmdbId: movie.tmdbId,
+            title: movie.title,
+            year: movie.year,
+            poster: movie.poster,
+            genres: movie.genres || [],
+            imdbRating: movie.imdbRating,
+          }));
+          setTmdbResults(results);
+          setShowSearchResults(true);
+        } else {
+          setTmdbResults([]);
+        }
+      } catch (error) {
+        console.error("Search failed:", error);
+        toast({
+          title: "Search Error",
+          description: "Failed to search movies",
+          variant: "error",
+        });
+      } finally {
+        setIsSearching(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Filter local movies based on genre
   useEffect(() => {
     let results = movies;
-
-    if (searchQuery) {
-      results = results.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          movie.year.toString().includes(searchQuery),
-      );
-    }
 
     if (selectedGenre) {
       results = results.filter((movie) =>
@@ -92,9 +159,9 @@ export default function MoviesPage() {
     setCurrentPage(1);
     setDisplayedMovies(results.slice(0, MOVIES_PER_PAGE));
     setHasMore(results.length > MOVIES_PER_PAGE);
-  }, [searchQuery, selectedGenre, movies]);
+  }, [selectedGenre, movies]);
 
-  // Load more movies
+  // Load more local movies
   const handleLoadMore = async () => {
     const nextPage = currentPage + 1;
     const startIdx = nextPage * MOVIES_PER_PAGE - MOVIES_PER_PAGE;
@@ -104,6 +171,54 @@ export default function MoviesPage() {
     setDisplayedMovies(newMovies);
     setCurrentPage(nextPage);
     setHasMore(endIdx < filteredMovies.length);
+  };
+
+  // Add TMDB movie to database/watchlist
+  const handleAddMovie = async (movie: Movie) => {
+    setAddingMovieId(movie.id);
+    try {
+      const res = await fetch("/api/watch/desire/add-from-tmdb", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          tmdbId: movie.tmdbId,
+          title: movie.title,
+          year: movie.year,
+          genres: movie.genres,
+          poster: movie.poster,
+          description: "",
+          imdbRating: movie.imdbRating,
+          rating: 5,
+        }),
+      });
+
+      if (res.ok) {
+        setAddedMovieIds((prev) => new Set([...prev, movie.id]));
+        toast({
+          title: "Added!",
+          description: `"${movie.title}" added to watchlist`,
+        });
+        setSearchQuery("");
+        setTmdbResults([]);
+        setShowSearchResults(false);
+      } else {
+        const data = await res.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to add movie",
+          variant: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to add movie:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add movie",
+        variant: "error",
+      });
+    } finally {
+      setAddingMovieId(null);
+    }
   };
 
   const { observerTarget, isLoading: isLoadingMore } = useInfiniteScroll({
@@ -157,6 +272,65 @@ export default function MoviesPage() {
     </motion.button>
   );
 
+  const TMDBMovieCard = ({ movie }: { movie: Movie }) => {
+    const isAdded = addedMovieIds.has(movie.id);
+    const isAdding = addingMovieId === movie.id;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group"
+      >
+        <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-background flex items-center justify-center">
+          {movie.poster ? (
+            <img
+              src={movie.poster}
+              alt={movie.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+            />
+          ) : (
+            <Clapperboard className="h-6 w-6 text-muted-foreground" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+          <div>
+            <h4 className="font-semibold text-sm truncate">{movie.title}</h4>
+            <p className="text-xs text-muted-foreground">{movie.year}</p>
+            {movie.imdbRating && (
+              <p className="text-xs text-yellow-500 mt-1">
+                ⭐ {movie.imdbRating.toFixed(1)}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => handleAddMovie(movie)}
+            disabled={isAdded || isAdding}
+            className={`w-full px-3 py-1.5 rounded text-xs font-medium transition-all mt-2 flex items-center justify-center gap-1 ${
+              isAdded
+                ? "bg-primary/20 text-primary"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
+          >
+            {isAdding ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : isAdded ? (
+              <>
+                <Check className="h-3 w-3" />
+                Added
+              </>
+            ) : (
+              <>
+                <Plus className="h-3 w-3" />
+                Add
+              </>
+            )}
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <motion.div
       className="space-y-8"
@@ -166,15 +340,17 @@ export default function MoviesPage() {
     >
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold mb-2">Browse Movies</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          Browse Movies
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Explore thousands of films to add to your watchlist
         </p>
       </div>
 
       {/* Search Bar */}
       <motion.div
-        className="relative"
+        className="relative z-20"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -185,11 +361,43 @@ export default function MoviesPage() {
         />
         <input
           type="text"
-          placeholder="Search by title or year..."
+          placeholder="Search movies on TMDB..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
           className="w-full pl-12 pr-4 py-3 md:py-2 rounded-xl bg-card border border-primary/20 text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all min-h-[44px]"
         />
+        {isSearching && (
+          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+        )}
+
+        {/* TMDB Search Results Dropdown */}
+        {showSearchResults && tmdbResults.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg max-h-96 overflow-y-auto"
+          >
+            <div className="p-3 space-y-2">
+              {tmdbResults.map((movie) => (
+                <TMDBMovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {showSearchResults &&
+          !isSearching &&
+          tmdbResults.length === 0 &&
+          searchQuery.length >= 2 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute top-full left-0 right-0 mt-2 bg-card border border-primary/30 rounded-xl shadow-lg p-4 text-center text-muted-foreground"
+            >
+              No movies found
+            </motion.div>
+          )}
       </motion.div>
 
       {/* Genre Filter Chips */}
@@ -233,7 +441,7 @@ export default function MoviesPage() {
         </motion.div>
       )}
 
-      {/* Results */}
+      {/* Local Movies Browse */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {Array.from({ length: 10 }).map((_, i) => (

@@ -128,11 +128,13 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold mb-2">Movie Calendar</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          Movie Calendar
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Plan and track your movie nights
         </p>
       </div>
@@ -140,7 +142,7 @@ export default function CalendarPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Calendar */}
         <div className="lg:col-span-2">
-          <div className="bg-card border border-border rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
             {/* Month Navigation */}
             <div className="flex items-center justify-between mb-6">
               <button

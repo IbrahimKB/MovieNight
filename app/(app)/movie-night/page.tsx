@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Users,
   Shuffle,
@@ -21,10 +21,10 @@ import {
   TrendingUp,
   Filter,
   Loader2,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface Friend {
   id: string;
@@ -53,26 +53,26 @@ interface SurpriseMovie {
 }
 
 const genres = [
-  'All Genres',
-  'Action',
-  'Adventure',
-  'Comedy',
-  'Drama',
-  'Horror',
-  'Mystery',
-  'Sci-Fi',
-  'Thriller',
+  "All Genres",
+  "Action",
+  "Adventure",
+  "Comedy",
+  "Drama",
+  "Horror",
+  "Mystery",
+  "Sci-Fi",
+  "Thriller",
 ];
 
 export default function MovieNightPage() {
   const { user } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [presentFriends, setPresentFriends] = useState<string[]>([]);
-  const [selectedGenre, setSelectedGenre] = useState('All Genres');
+  const [selectedGenre, setSelectedGenre] = useState("All Genres");
   const [filteredMovies, setFilteredMovies] = useState<MovieWithScores[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [surpriseMovie, setSurpriseMovie] = useState<SurpriseMovie | null>(
-    null
+    null,
   );
   const [isFinding, setIsFinding] = useState(false);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
@@ -86,12 +86,14 @@ export default function MovieNightPage() {
         const res = await fetch("/api/friends", { headers });
         const data = await res.json();
         if (data.success) {
-           setFriends(data.data.friends.map((f: any) => ({
-             id: f.userId,
-             name: f.name,
-             username: f.username,
-             avatar: f.avatar
-           })) || []);
+          setFriends(
+            data.data.friends.map((f: any) => ({
+              id: f.userId,
+              name: f.name,
+              username: f.username,
+              avatar: f.avatar,
+            })) || [],
+          );
         }
       } catch (error) {
         console.error("Failed to fetch friends", error);
@@ -102,12 +104,11 @@ export default function MovieNightPage() {
     fetchFriends();
   }, [user]);
 
-
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
       prev.includes(friendId)
         ? prev.filter((id) => id !== friendId)
-        : [...prev, friendId]
+        : [...prev, friendId],
     );
   };
 
@@ -124,12 +125,12 @@ export default function MovieNightPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-           Authorization: token ? `Bearer ${token}` : ""
+          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify({
           friendIds: presentFriends,
-          genre: selectedGenre
-        })
+          genre: selectedGenre,
+        }),
       });
 
       const data = await res.json();
@@ -138,25 +139,25 @@ export default function MovieNightPage() {
         setFilteredMovies(data.movies);
         setShowResults(true);
         if (data.movies.length === 0) {
-            toast({
-                title: "No matches found",
-                description: "Try selecting different friends or changing the genre.",
-            });
+          toast({
+            title: "No matches found",
+            description:
+              "Try selecting different friends or changing the genre.",
+          });
         }
       } else {
-          toast({
-            title: "Error",
-            description: "Failed to find movies.",
-            variant: "error"
-          });
+        toast({
+          title: "Error",
+          description: "Failed to find movies.",
+          variant: "error",
+        });
       }
-
     } catch (error) {
       console.error("Find movies error", error);
       toast({
         title: "Error",
         description: "Failed to find movies.",
-        variant: "error"
+        variant: "error",
       });
     } finally {
       setIsFinding(false);
@@ -168,11 +169,11 @@ export default function MovieNightPage() {
 
     const topMovies = filteredMovies.slice(
       0,
-      Math.min(5, filteredMovies.length)
+      Math.min(5, filteredMovies.length),
     );
 
     const weightedMovies = topMovies.flatMap((movie) =>
-      Array(Math.ceil(movie.avgWatchDesire)).fill(movie)
+      Array(Math.ceil(movie.avgWatchDesire)).fill(movie),
     );
 
     const randomMovie =
@@ -183,37 +184,41 @@ export default function MovieNightPage() {
       isVisible: true,
     });
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const getPlatformColor = (platform: string) => {
     switch (platform) {
-      case 'Netflix':
-        return 'bg-red-600';
-      case 'Disney+':
-        return 'bg-blue-600';
-      case 'Hulu':
-        return 'bg-green-600';
-      case 'Amazon Prime':
-        return 'bg-orange-600';
-      case 'HBO Max':
-        return 'bg-purple-600';
-      case 'Paramount+':
-        return 'bg-blue-500';
+      case "Netflix":
+        return "bg-red-600";
+      case "Disney+":
+        return "bg-blue-600";
+      case "Hulu":
+        return "bg-green-600";
+      case "Amazon Prime":
+        return "bg-orange-600";
+      case "HBO Max":
+        return "bg-purple-600";
+      case "Paramount+":
+        return "bg-blue-500";
       default:
-        return 'bg-gray-600';
+        return "bg-gray-600";
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 8.5) return 'bg-green-500';
-    if (score >= 7.5) return 'bg-yellow-500';
-    if (score >= 6.5) return 'bg-orange-500';
-    return 'bg-red-500';
+    if (score >= 8.5) return "bg-green-500";
+    if (score >= 7.5) return "bg-yellow-500";
+    if (score >= 6.5) return "bg-orange-500";
+    return "bg-red-500";
   };
 
   if (isLoadingFriends) {
-      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -221,10 +226,12 @@ export default function MovieNightPage() {
       {/* Page Header Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Movie Night</h1>
+          <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+            Movie Night
+          </h1>
         </div>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Select who's here and get movie recommendations your group is most
           excited about.
         </p>
@@ -252,14 +259,14 @@ export default function MovieNightPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 space-y-4">
-                <h3 className="text-3xl font-bold">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
                   {surpriseMovie.movie.title} ({surpriseMovie.movie.year})
                 </h3>
                 <div className="flex items-center gap-4 flex-wrap">
                   <Badge
                     className={cn(
-                      'text-white font-bold px-3 py-1',
-                      getScoreColor(surpriseMovie.movie.avgWatchDesire)
+                      "text-white font-bold px-3 py-1",
+                      getScoreColor(surpriseMovie.movie.avgWatchDesire),
                     )}
                   >
                     🎯 {surpriseMovie.movie.avgWatchDesire}
@@ -267,8 +274,8 @@ export default function MovieNightPage() {
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
-                        'w-3 h-3 rounded-full',
-                        getPlatformColor(surpriseMovie.movie.platform)
+                        "w-3 h-3 rounded-full",
+                        getPlatformColor(surpriseMovie.movie.platform),
                       )}
                     />
                     <span className="font-medium">
@@ -302,7 +309,7 @@ export default function MovieNightPage() {
                     <span key={score.userId} className="font-medium">
                       {score.userName} ({score.score})
                       {index < surpriseMovie.movie.userScores.length - 1 &&
-                        ', '}
+                        ", "}
                     </span>
                   ))}
                 </div>
@@ -337,10 +344,10 @@ export default function MovieNightPage() {
                 <div
                   key={friend.id}
                   className={cn(
-                    'flex items-center space-x-2 p-3 rounded-lg border transition-colors cursor-pointer',
+                    "flex items-center space-x-2 p-3 rounded-lg border transition-colors cursor-pointer",
                     presentFriends.includes(friend.id)
-                      ? 'bg-primary/10 border-primary'
-                      : 'border-border hover:bg-accent/50'
+                      ? "bg-primary/10 border-primary"
+                      : "border-border hover:bg-accent/50",
                   )}
                   onClick={() => handleFriendToggle(friend.id)}
                 >
@@ -357,8 +364,10 @@ export default function MovieNightPage() {
                   </label>
                 </div>
               ))}
-               {friends.length === 0 && (
-                  <p className="text-sm text-muted-foreground col-span-full">No friends found.</p>
+              {friends.length === 0 && (
+                <p className="text-sm text-muted-foreground col-span-full">
+                  No friends found.
+                </p>
               )}
             </div>
           </div>
@@ -391,9 +400,9 @@ export default function MovieNightPage() {
               size="lg"
             >
               {isFinding ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                  <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="h-4 w-4 mr-2" />
               )}
               Find Movies
             </Button>
@@ -423,7 +432,7 @@ export default function MovieNightPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">
-              Ranked Recommendations{' '}
+              Ranked Recommendations{" "}
               {filteredMovies.length > 0 && `(${filteredMovies.length})`}
             </h2>
             {filteredMovies.length > 0 && (
@@ -452,8 +461,8 @@ export default function MovieNightPage() {
                 <Card
                   key={movie.id}
                   className={cn(
-                    'group hover:bg-accent/30 transition-all duration-200 relative',
-                    index === 0 && 'ring-2 ring-primary/30 bg-primary/5'
+                    "group hover:bg-accent/30 transition-all duration-200 relative",
+                    index === 0 && "ring-2 ring-primary/30 bg-primary/5",
                   )}
                 >
                   {index === 0 && (
@@ -471,8 +480,8 @@ export default function MovieNightPage() {
                           </h3>
                           <Badge
                             className={cn(
-                              'text-white font-bold shrink-0',
-                              getScoreColor(movie.avgWatchDesire)
+                              "text-white font-bold shrink-0",
+                              getScoreColor(movie.avgWatchDesire),
                             )}
                           >
                             🎯 {movie.avgWatchDesire}
@@ -483,8 +492,8 @@ export default function MovieNightPage() {
                           <div className="flex items-center gap-2">
                             <div
                               className={cn(
-                                'w-2 h-2 rounded-full',
-                                getPlatformColor(movie.platform)
+                                "w-2 h-2 rounded-full",
+                                getPlatformColor(movie.platform),
                               )}
                             />
                             <span className="text-sm text-muted-foreground">

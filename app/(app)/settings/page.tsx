@@ -49,12 +49,14 @@ export default function SettingsPage() {
     description: string;
     children: React.ReactNode;
   }) => (
-    <div className="bg-card border border-border rounded-xl p-6">
-      <div className="flex items-start gap-4 mb-4">
-        <Icon className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg">{title}</h3>
-          <p className="text-sm text-muted-foreground">{description}</p>
+    <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+      <div className="flex items-start gap-3 sm:gap-4 mb-4">
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0 mt-1" />
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-base sm:text-lg">{title}</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
+            {description}
+          </p>
         </div>
       </div>
       {children}
@@ -88,11 +90,13 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="space-y-6 sm:space-y-8 max-w-2xl">
       {/* Header */}
       <div>
-        <h1 className="text-4xl font-bold mb-2">Settings</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+          Settings
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Manage your account and preferences
         </p>
       </div>
