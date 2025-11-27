@@ -81,7 +81,7 @@ function SuggestPageContent() {
         // Removed manual token header as we use cookies now
         const [friendsRes, suggestionsRes] = await Promise.all([
           fetch("/api/friends", { credentials: "include" }),
-          fetch("/api/suggestions", { credentials: "include" })
+          fetch("/api/suggestions?type=received", { credentials: "include" })
         ]);
 
         const friendsData = await friendsRes.json();
@@ -96,8 +96,30 @@ function SuggestPageContent() {
            })) || []);
         }
 
-        if (suggestionsData.success) {
-           setSuggestions(suggestionsData.suggestions);
+        if (suggestionsData.success && Array.isArray(suggestionsData.data)) {
+           const formattedSuggestions = suggestionsData.data.map((s: any) => ({
+             id: s.id,
+             movie: {
+               id: s.movie.id,
+               title: s.movie.title,
+               year: s.movie.year,
+               genres: s.movie.genres,
+               poster: s.movie.poster,
+               description: s.movie.description,
+               rating: s.movie.rating,
+               tmdbId: s.movie.tmdbId
+             },
+             suggestedBy: {
+               id: s.fromUser.id,
+               name: s.fromUser.name,
+               username: s.fromUser.username,
+               avatar: s.fromUser.avatar
+             },
+             comment: s.message,
+             suggestedAt: s.createdAt,
+             myRating: s.rating
+           }));
+           setSuggestions(formattedSuggestions);
         }
 
       } catch (error) {
