@@ -317,12 +317,20 @@ export default function MoviesPage() {
   };
 
   return (
-    <motion.div
-      className="space-y-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+    <>
+      <AddMovieModal
+        isOpen={showAddMovieModal}
+        onClose={() => setShowAddMovieModal(false)}
+        movie={selectedMovie}
+        friends={friends}
+        onMovieAdded={handleMovieAdded}
+      />
+      <motion.div
+        className="space-y-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
       {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
@@ -507,5 +515,6 @@ export default function MoviesPage() {
         </motion.div>
       )}
     </motion.div>
+    </>
   );
 }
