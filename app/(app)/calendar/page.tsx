@@ -140,7 +140,7 @@ export default function CalendarPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Calendar */}
         <div className="lg:col-span-2">
-          <div className="bg-card border border-border rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
             {/* Month Navigation */}
             <div className="flex items-center justify-between mb-6">
               <button
