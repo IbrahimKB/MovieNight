@@ -91,9 +91,15 @@ export default function WatchlistPage() {
   const [markAsWatchedItem, setMarkAsWatchedItem] = useState<string | null>(
     null,
   );
+  const [watchedDate, setWatchedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [rating, setRating] = useState([3]);
+  const [review, setReview] = useState("");
   const [watchedWith, setWatchedWith] = useState<string[]>([]);
   const [historyFilter, setHistoryFilter] = useState("All");
   const [selectedFriend, setSelectedFriend] = useState("All Friends");
+  const [isSavingWatched, setIsSavingWatched] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
