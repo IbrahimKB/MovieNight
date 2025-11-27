@@ -382,7 +382,7 @@ export default function SuggestionsPage() {
                   Ignore
                 </Button>
               </div>
-            ) : !isReceived && (
+            ) : !isReceived ? (
               <div className="flex gap-2 mt-4 pt-4 border-t">
                 <Button
                   size="sm"
