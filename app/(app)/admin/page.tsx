@@ -190,7 +190,7 @@ export default function AdminPage() {
           className="flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           <RotateCw size={20} className={syncingMovies ? "animate-spin" : ""} />
-          {syncingMovies ? "Syncing..." : "Sync Popular Movies"}
+          {syncingMovies ? "Syncing..." : "Sync Movies & Releases"}
         </button>
         <p className="text-sm text-muted-foreground mt-2">
           Sync the latest movies and releases from the database

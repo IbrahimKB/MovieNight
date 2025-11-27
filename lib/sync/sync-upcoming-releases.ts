@@ -10,6 +10,29 @@ import { prisma } from "@/lib/prisma";
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
+// Static map for TMDB Genre IDs to Names (Movies)
+const TMDB_GENRE_MAP: Record<number, string> = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western"
+};
+
 interface TMDBMovie {
   id: number;
   title: string;
@@ -74,9 +97,10 @@ export async function syncUpcomingReleases() {
 
           try {
             const releaseYear = new Date(movie.release_date).getFullYear();
+            const mappedGenres = movie.genre_ids?.map(id => TMDB_GENRE_MAP[id] || String(id)) || [];
 
             // Upsert: update if exists, create if new
-            await prisma.movie.upsert({
+            const dbMovie = await prisma.movie.upsert({
               where: { tmdbId: movie.id },
               update: {
                 title: movie.title,
@@ -85,7 +109,7 @@ export async function syncUpcomingReleases() {
                 poster: movie.poster_path
                   ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                   : null,
-                genres: movie.genre_ids?.map(String) || [],
+                genres: mappedGenres,
                 imdbRating: movie.vote_average,
                 rtRating: movie.vote_average * 10, // Approximation
                 releaseDate: new Date(movie.release_date),
@@ -99,11 +123,41 @@ export async function syncUpcomingReleases() {
                 poster: movie.poster_path
                   ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                   : null,
-                genres: movie.genre_ids?.map(String) || [],
+                genres: mappedGenres,
                 imdbRating: movie.vote_average,
                 rtRating: movie.vote_average * 10, // Approximation
                 releaseDate: new Date(movie.release_date),
               },
+            });
+
+            // Upsert Release entry
+            await prisma.release.upsert({
+              where: { tmdbId: movie.id },
+              update: {
+                 title: movie.title,
+                 movieId: dbMovie.id,
+                 platform: "Theater", // Default for now
+                 releaseDate: new Date(movie.release_date),
+                 genres: mappedGenres,
+                 description: movie.overview,
+                 poster: movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                  : null,
+                 year: releaseYear,
+              },
+              create: {
+                 tmdbId: movie.id,
+                 movieId: dbMovie.id,
+                 title: movie.title,
+                 platform: "Theater",
+                 releaseDate: new Date(movie.release_date),
+                 genres: mappedGenres,
+                 description: movie.overview,
+                 poster: movie.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                  : null,
+                 year: releaseYear,
+              }
             });
 
             totalImported++;

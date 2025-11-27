@@ -58,10 +58,12 @@ export async function GET(req: NextRequest) {
     // Fallback to local database
     // We strictly serve from Postgres as per the "Postgres-backed endpoint" policy for this route.
     // This ensures speed and stability for calendar views.
+    console.log("[RELEASES] Upcoming hit");
+    
     const now = new Date();
     const nineDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
-    const releases = await prisma.movie.findMany({
+    const releases = await prisma.release.findMany({
       where: {
         releaseDate: {
           gte: now,
@@ -76,13 +78,17 @@ export async function GET(req: NextRequest) {
         year: true,
         genres: true,
         description: true,
-        imdbRating: true,
+        // Release model doesn't have imdbRating directly, it's on the relation movie
+        // checking schema... Release has: id, tmdbId, movieId, title, platform, releaseDate, genres, description, poster, year
+        // It links to Movie which has imdbRating.
       },
       orderBy: {
         releaseDate: "asc",
       },
       take: limit,
     });
+    
+    console.log("[RELEASES] Returning count:", releases.length);
 
     return NextResponse.json(
       {

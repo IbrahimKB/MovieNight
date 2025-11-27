@@ -97,7 +97,7 @@ export async function POST(
 
     console.log(`[API] POST cron action: ${action}`);
 
-    if (action === "run-now") {
+    if (action === "run-now" || action === "run-all") {
       await runSyncsNow();
       return NextResponse.json({
         success: true,
