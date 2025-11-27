@@ -17,7 +17,6 @@ export const TMDB_GENRE_MAP: Record<number, string> = {
   36: "History",
   27: "Horror",
   10402: "Music",
-  27: "Horror", // Duplicate in original list?
   9648: "Mystery",
   10749: "Romance",
   878: "Science Fiction",
