@@ -83,7 +83,7 @@ export default function MovieNightPage() {
       try {
         const token = localStorage.getItem("movienight_token");
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
-        const res = await fetch("/api/friends", { headers });
+        const res = await fetch("/api/friends", { headers, credentials: "include" });
         const data = await res.json();
         if (data.success) {
           setFriends(
@@ -127,6 +127,7 @@ export default function MovieNightPage() {
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({
           friendIds: presentFriends,
           genre: selectedGenre,

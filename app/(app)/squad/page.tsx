@@ -44,9 +44,9 @@ export default function SquadPage() {
         };
 
         const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
-          fetch("/api/friends", { headers }),
-          fetch("/api/friends/incoming", { headers }),
-          fetch("/api/friends/outgoing", { headers }),
+          fetch("/api/friends", { headers, credentials: "include" }),
+          fetch("/api/friends/incoming", { headers, credentials: "include" }),
+          fetch("/api/friends/outgoing", { headers, credentials: "include" }),
         ]);
 
         const friendsData = await friendsRes.json();

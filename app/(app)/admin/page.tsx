@@ -46,8 +46,8 @@ export default function AdminPage() {
     const fetchAdminData = async () => {
       try {
         const [usersRes, statsRes] = await Promise.all([
-          fetch("/api/admin/users", { headers }),
-          fetch("/api/admin/stats", { headers }),
+          fetch("/api/admin/users", { headers, credentials: "include" }),
+          fetch("/api/admin/stats", { headers, credentials: "include" }),
         ]);
 
         const usersData = await usersRes.json();
@@ -76,11 +76,12 @@ export default function AdminPage() {
       const res = await fetch("/api/cron/init", {
         method: "POST",
         headers,
+        credentials: "include",
       });
 
       if (res.ok) {
         // Refresh stats
-        const statsRes = await fetch("/api/admin/stats", { headers });
+        const statsRes = await fetch("/api/admin/stats", { headers, credentials: "include" });
         const statsData = await statsRes.json();
         if (statsData.success && statsData.data) {
           setStats(statsData.data);
@@ -98,6 +99,7 @@ export default function AdminPage() {
       const res = await fetch(`/api/admin/users/${userId}/promote`, {
         method: "POST",
         headers,
+        credentials: "include",
       });
 
       if (res.ok) {
@@ -118,6 +120,7 @@ export default function AdminPage() {
       const res = await fetch(`/api/admin/users/${userId}/reset-password`, {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ newPassword }),
       });
 

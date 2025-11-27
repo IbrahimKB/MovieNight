@@ -53,7 +53,7 @@ export default function SuggestionsPage() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       try {
-        const res = await fetch("/api/suggestions", { headers });
+        const res = await fetch("/api/suggestions", { headers, credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -87,6 +87,7 @@ export default function SuggestionsPage() {
       await fetch("/api/watch/desire", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ movieId, suggestionId }),
       });
 

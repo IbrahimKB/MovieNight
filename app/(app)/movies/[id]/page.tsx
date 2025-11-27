@@ -67,7 +67,7 @@ export default function MovieDetailPage() {
           ...(token && { Authorization: `Bearer ${token}` }),
         };
 
-        const res = await fetch(`/api/movies/${movieId}`, { headers });
+        const res = await fetch(`/api/movies/${movieId}`, { headers, credentials: "include" });
         const data = await res.json();
 
         if (data.success && data.data) {
@@ -75,7 +75,7 @@ export default function MovieDetailPage() {
         }
 
         // Check if in watchlist
-        const watchlistRes = await fetch("/api/watch/desire", { headers });
+        const watchlistRes = await fetch("/api/watch/desire", { headers, credentials: "include" });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
           const isInList = watchlistData.data.some(
@@ -85,7 +85,7 @@ export default function MovieDetailPage() {
         }
 
         // Check if watched
-        const historyRes = await fetch("/api/watch/history", { headers });
+        const historyRes = await fetch("/api/watch/history", { headers, credentials: "include" });
         const historyData = await historyRes.json();
         if (historyData.success && Array.isArray(historyData.data)) {
           const isWatched = historyData.data.some(
@@ -95,14 +95,14 @@ export default function MovieDetailPage() {
         }
 
         // Fetch friends for suggestions
-        const friendsRes = await fetch("/api/friends", { headers });
+        const friendsRes = await fetch("/api/friends", { headers, credentials: "include" });
         const friendsData = await friendsRes.json();
         if (friendsData.success && friendsData.data?.friends) {
           setFriends(friendsData.data.friends);
         }
 
         // Fetch friends who watched this movie (from activity/stats)
-        const friendsActivityRes = await fetch("/api/friends", { headers });
+        const friendsActivityRes = await fetch("/api/friends", { headers, credentials: "include" });
         const friendsActivityData = await friendsActivityRes.json();
         if (
           friendsActivityData.success &&
@@ -159,6 +159,7 @@ export default function MovieDetailPage() {
       const res = await fetch("/api/watch/desire", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ movieId }),
       });
 
@@ -195,6 +196,7 @@ export default function MovieDetailPage() {
       const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({ movieId }),
       });
 
@@ -227,6 +229,7 @@ export default function MovieDetailPage() {
       const res = await fetch("/api/suggestions", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({
           movieId,
           toUserId: selectedFriend,

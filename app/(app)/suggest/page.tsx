@@ -80,8 +80,8 @@ function SuggestPageContent() {
       try {
         // Removed manual token header as we use cookies now
         const [friendsRes, suggestionsRes] = await Promise.all([
-          fetch("/api/friends"),
-          fetch("/api/suggestions")
+          fetch("/api/friends", { credentials: "include" }),
+          fetch("/api/suggestions", { credentials: "include" })
         ]);
 
         const friendsData = await friendsRes.json();
@@ -148,7 +148,7 @@ function SuggestPageContent() {
       setIsSearching(true);
       try {
         // Removed manual token header
-        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`);
+        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`, { credentials: "include" });
         const data = await res.json();
         if (data.success) {
           setSearchResults(data.data.map((m: any) => ({
@@ -190,6 +190,7 @@ function SuggestPageContent() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           movieId: selectedMovie.id,
           friendIds: selectedFriends,
@@ -239,6 +240,7 @@ function SuggestPageContent() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
             action: 'accept',
             rating: rating
@@ -273,6 +275,7 @@ function SuggestPageContent() {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
               action: 'reject'
           })

@@ -40,10 +40,10 @@ export default function ProfilePage() {
       try {
         const [friendsRes, watchlistRes, historyRes, suggestionsRes] =
           await Promise.all([
-            fetch("/api/friends", { headers }),
-            fetch("/api/watch/desire", { headers }),
-            fetch("/api/watch/history", { headers }),
-            fetch("/api/suggestions", { headers }),
+            fetch("/api/friends", { headers, credentials: "include" }),
+            fetch("/api/watch/desire", { headers, credentials: "include" }),
+            fetch("/api/watch/history", { headers, credentials: "include" }),
+            fetch("/api/suggestions", { headers, credentials: "include" }),
           ]);
 
         const friendsData = await friendsRes.json();

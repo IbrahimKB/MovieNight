@@ -100,8 +100,8 @@ export default function WatchlistPage() {
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
 
         const [watchlistRes, friendsRes] = await Promise.all([
-          fetch("/api/watchlist", { headers }),
-          fetch("/api/friends", { headers }),
+          fetch("/api/watchlist", { headers, credentials: "include" }),
+          fetch("/api/friends", { headers, credentials: "include" }),
         ]);
 
         const watchlistData = await watchlistRes.json();
@@ -203,6 +203,7 @@ export default function WatchlistPage() {
           "Content-Type": "application/json",
           Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({
           action: "markWatched",
           movieId: item.id,

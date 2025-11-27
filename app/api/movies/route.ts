@@ -39,6 +39,8 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
 // ---------------------------------------------
 export async function GET(req: NextRequest) {
   console.log("[MOVIE ROUTE] Hit:", req.nextUrl.toString());
+  console.log("[MOVIE ROUTE] TMDB_API_KEY Configured:", !!process.env.TMDB_API_KEY);
+  
   try {
     const user = await getCurrentUser();
     if (!user) {

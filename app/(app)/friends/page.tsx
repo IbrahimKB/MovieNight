@@ -60,7 +60,7 @@ export default function FriendsPage() {
         const headers = { Authorization: token ? `Bearer ${token}` : "" };
 
         // Use consolidated endpoint
-        const res = await fetch("/api/friends", { headers });
+        const res = await fetch("/api/friends", { headers, credentials: "include" });
         const data = await res.json();
 
         if (data.success) {

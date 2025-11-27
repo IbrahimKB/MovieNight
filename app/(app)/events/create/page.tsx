@@ -34,7 +34,7 @@ export default function CreateEventPage() {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await fetch("/api/movies", { headers });
+        const res = await fetch("/api/movies", { headers, credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

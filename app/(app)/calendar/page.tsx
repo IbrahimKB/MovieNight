@@ -39,7 +39,7 @@ export default function CalendarPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("/api/events", { headers });
+        const res = await fetch("/api/events", { headers, credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

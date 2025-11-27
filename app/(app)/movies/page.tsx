@@ -53,7 +53,10 @@ export default function MoviesPage() {
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await fetch("/api/movies", { headers });
+        const res = await fetch("/api/movies", {
+          headers,
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -107,7 +110,10 @@ export default function MoviesPage() {
       try {
         const res = await fetch(
           `/api/movies/search?q=${encodeURIComponent(searchQuery)}&page=1`,
-          { headers },
+          {
+            headers,
+            credentials: "include",
+          },
         );
         const data = await res.json();
 
@@ -180,6 +186,7 @@ export default function MoviesPage() {
       const res = await fetch("/api/watch/desire/add-from-tmdb", {
         method: "POST",
         headers,
+        credentials: "include",
         body: JSON.stringify({
           tmdbId: movie.tmdbId,
           title: movie.title,

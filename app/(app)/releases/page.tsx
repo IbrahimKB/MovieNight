@@ -32,7 +32,10 @@ export default function ReleasesPage() {
   useEffect(() => {
     const fetchReleases = async () => {
       try {
-        const res = await fetch("/api/releases/upcoming", { headers });
+        const res = await fetch("/api/releases/upcoming?page=1&limit=40", {
+          headers,
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

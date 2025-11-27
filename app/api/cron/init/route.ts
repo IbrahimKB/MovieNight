@@ -98,6 +98,14 @@ export async function POST(
     console.log(`[API] POST cron action: ${action}`);
 
     if (action === "run-now" || action === "run-all") {
+      if (!process.env.TMDB_API_KEY) {
+         console.error("[API] Cannot sync: TMDB_API_KEY missing");
+         return NextResponse.json({
+            success: false,
+            error: "TMDB_API_KEY is missing on server"
+         }, { status: 500 });
+      }
+
       await runSyncsNow();
       return NextResponse.json({
         success: true,
