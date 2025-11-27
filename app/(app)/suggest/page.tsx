@@ -330,10 +330,10 @@ export default function SuggestPage() {
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <PlusCircle className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold">Suggest a Movie</h1>
+          <PlusCircle className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold">Suggest a Movie</h1>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Find movies to suggest to your friends and respond to their
           suggestions
         </p>
