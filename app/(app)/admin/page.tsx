@@ -196,18 +196,18 @@ export default function AdminPage() {
       </div>
 
       {/* Users Management */}
-      <div className="bg-card border border-border rounded-xl p-6">
-        <h2 className="text-2xl font-bold mb-4">Users Management</h2>
+      <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4">Users Management</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left py-3 px-4 font-semibold">Username</th>
-                <th className="text-left py-3 px-4 font-semibold">Email</th>
-                <th className="text-left py-3 px-4 font-semibold">Name</th>
-                <th className="text-left py-3 px-4 font-semibold">Role</th>
-                <th className="text-left py-3 px-4 font-semibold">Joined</th>
-                <th className="text-left py-3 px-4 font-semibold">Actions</th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Username</th>
+                <th className="hidden sm:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Email</th>
+                <th className="hidden md:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Name</th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Role</th>
+                <th className="hidden lg:table-cell text-left py-3 px-2 sm:px-4 font-semibold">Joined</th>
+                <th className="text-left py-3 px-2 sm:px-4 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -216,18 +216,18 @@ export default function AdminPage() {
                   key={u.id}
                   className="border-b border-border hover:bg-background/50 transition-colors"
                 >
-                  <td className="py-3 px-4">
-                    <p className="font-medium">{u.username}</p>
+                  <td className="py-3 px-2 sm:px-4">
+                    <p className="font-medium truncate">{u.username}</p>
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs truncate">
+                  <td className="hidden sm:table-cell py-3 px-2 sm:px-4 text-muted-foreground truncate">
                     {u.email}
                   </td>
-                  <td className="py-3 px-4 text-muted-foreground">
+                  <td className="hidden md:table-cell py-3 px-2 sm:px-4 text-muted-foreground">
                     {u.name || "-"}
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-2 sm:px-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
                         u.role === "admin"
                           ? "bg-primary/20 text-primary"
                           : "bg-muted text-muted-foreground"
@@ -236,28 +236,30 @@ export default function AdminPage() {
                       {u.role}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-xs text-muted-foreground">
+                  <td className="hidden lg:table-cell py-3 px-2 sm:px-4 text-xs text-muted-foreground">
                     {new Date(u.joinedAt).toLocaleDateString()}
                   </td>
-                  <td className="py-3 px-4 text-right space-x-2">
-                    {u.role !== "admin" && (
+                  <td className="py-3 px-2 sm:px-4">
+                    <div className="flex flex-col sm:flex-row gap-1">
+                      {u.role !== "admin" && (
+                        <button
+                          onClick={() => handlePromoteUser(u.id)}
+                          className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors whitespace-nowrap"
+                          title="Promote to Admin"
+                        >
+                          <Shield size={12} className="sm:w-3.5 sm:h-3.5" />
+                          <span className="hidden sm:inline">Promote</span>
+                        </button>
+                      )}
                       <button
-                        onClick={() => handlePromoteUser(u.id)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                        title="Promote to Admin"
+                        onClick={() => handleResetPassword(u.id)}
+                        className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded text-xs bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors whitespace-nowrap"
+                        title="Reset Password"
                       >
-                        <Shield size={14} />
-                        Promote
+                        <Lock size={12} className="sm:w-3.5 sm:h-3.5" />
+                        <span className="hidden sm:inline">Reset</span>
                       </button>
-                    )}
-                    <button
-                      onClick={() => handleResetPassword(u.id)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-                      title="Reset Password"
-                    >
-                      <Lock size={14} />
-                      Reset
-                    </button>
+                    </div>
                   </td>
                 </tr>
               ))}
