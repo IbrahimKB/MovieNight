@@ -80,39 +80,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // -----------------------------------------------------
   useEffect(() => {
     const checkSession = async () => {
-      const storedUser = localStorage.getItem("movienight_user");
-      const token = localStorage.getItem("movienight_token"); // Assuming token is stored here too
-
-      if (storedUser && token) {
-        try {
-          // Verify with server
-          const res = await fetch(`${API_BASE}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            if (data.success && data.data) {
-               setUser(data.data);
-               // Update local storage with fresh data
-               localStorage.setItem("movienight_user", JSON.stringify(data.data));
-            } else {
-               throw new Error("Invalid session");
-            }
+      // We rely on httpOnly cookies, so just hit the endpoint
+      try {
+        // Verify with server
+        const res = await fetch(`${API_BASE}/auth/me`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data) {
+             setUser(data.data);
+             localStorage.setItem("movienight_user", JSON.stringify(data.data));
           } else {
-             throw new Error("Session expired");
+             throw new Error("Invalid session");
           }
-        } catch (e) {
-          // If server check fails (e.g. 401), clear session
-          // Only clear if it's an auth error, not network error
-          // For now, safe to clear on 401/403 from API
-          localStorage.removeItem("movienight_user");
-          localStorage.removeItem("movienight_token");
-          localStorage.removeItem("movienight_login_time");
-          setUser(null);
+        } else {
+           throw new Error("Session expired");
         }
+      } catch (e) {
+        // If server check fails, clear local user data
+        localStorage.removeItem("movienight_user");
+        // Token is not used, but clean up if exists
+        localStorage.removeItem("movienight_token"); 
+        localStorage.removeItem("movienight_login_time");
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkSession();
