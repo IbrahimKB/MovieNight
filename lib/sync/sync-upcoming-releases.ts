@@ -49,6 +49,10 @@ export async function syncUpcomingReleases() {
     return;
   }
 
+  // Debug DB connection
+  const dbUrl = process.env.DATABASE_URL;
+  console.log(`[SYNC] DATABASE_URL is ${dbUrl ? "set" : "MISSING"} (${dbUrl ? dbUrl.replace(/:[^:]*@/, ":***@") : "N/A"})`);
+
   try {
     console.log("[SYNC] Starting upcoming releases sync...");
     const startTime = Date.now();
@@ -90,7 +94,8 @@ export async function syncUpcomingReleases() {
 
         for (const movie of movies) {
           // Skip movies without essential data
-          if (!movie.title || !movie.release_date) {
+          if (!movie.title || !movie.release_date || !movie.id) {
+            if (!movie.id) console.warn(`[SYNC] Skipping movie "${movie.title}" - Missing ID`);
             totalSkipped++;
             continue;
           }
@@ -100,22 +105,7 @@ export async function syncUpcomingReleases() {
             const mappedGenres = movie.genre_ids?.map(id => TMDB_GENRE_MAP[id] || String(id)) || [];
 
             // Upsert: update if exists, create if new
-            const dbMovie = await prisma.movie.upsert({
-              where: { tmdbId: movie.id },
-              update: {
-                title: movie.title,
-                year: releaseYear,
-                description: movie.overview,
-                poster: movie.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                  : null,
-                genres: mappedGenres,
-                imdbRating: movie.vote_average,
-                rtRating: movie.vote_average * 10, // Approximation
-                releaseDate: new Date(movie.release_date),
-                updatedAt: new Date(),
-              },
-              create: {
+            const movieData = {
                 tmdbId: movie.id,
                 title: movie.title,
                 year: releaseYear,
@@ -127,7 +117,17 @@ export async function syncUpcomingReleases() {
                 imdbRating: movie.vote_average,
                 rtRating: movie.vote_average * 10, // Approximation
                 releaseDate: new Date(movie.release_date),
-              },
+            };
+            
+            // Debug log first item
+            if (totalImported === 0) {
+               console.log("[SYNC] First movie payload:", JSON.stringify(movieData, null, 2));
+            }
+
+            const dbMovie = await prisma.movie.upsert({
+              where: { tmdbId: movie.id },
+              update: { ...movieData, updatedAt: new Date() },
+              create: movieData,
             });
 
             // Upsert Release entry
@@ -162,7 +162,11 @@ export async function syncUpcomingReleases() {
 
             totalImported++;
           } catch (err) {
-            console.error(`[SYNC] Error importing release ${movie.title}:`, err);
+            console.error(`[SYNC] Error importing release ${movie.title} (ID: ${movie.id}):`, err);
+            // Log the specific error if it is a Prisma error
+            if (err instanceof Error) {
+                 console.error("[SYNC] Stack:", err.stack);
+            }
             totalSkipped++;
           }
         }
