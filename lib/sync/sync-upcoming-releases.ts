@@ -174,7 +174,7 @@ export async function syncUpcomingReleases() {
   }
 }
 
-// Allow running as standalone script
-if (require.main === module) {
-  syncUpcomingReleases();
-}
+// Allow running as standalone script (CommonJS check removed for Next.js compatibility)
+// if (require.main === module) {
+//   syncUpcomingReleases();
+// }
