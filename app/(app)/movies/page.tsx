@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Search, Clapperboard, Loader2, Plus, Check } from "lucide-react";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
+import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
@@ -16,6 +17,13 @@ interface Movie {
   genres?: string[];
   imdbRating?: number;
   tmdbId?: number;
+}
+
+interface Friend {
+  id: string;
+  name: string | null;
+  username: string;
+  avatar?: string;
 }
 
 const MOVIES_PER_PAGE = 20;
