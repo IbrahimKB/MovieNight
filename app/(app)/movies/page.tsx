@@ -71,7 +71,7 @@ export default function MoviesPage() {
           setAllGenres(Array.from(genres).sort());
 
           // Track which movies are already in database
-          const addedIds = new Set(data.data.map((m: Movie) => m.id));
+          const addedIds = new Set<string>(data.data.map((m: Movie) => m.id));
           setAddedMovieIds(addedIds);
         }
       } catch (error) {
