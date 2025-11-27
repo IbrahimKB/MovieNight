@@ -195,6 +195,9 @@ export default function WatchlistPage() {
     const item = watchlist.find((w) => w.id === itemId);
     if (!item) return;
 
+    setWatchedDate(new Date().toISOString().split("T")[0]);
+    setRating([3]);
+    setReview("");
     setWatchedWith(item.selectedFriends);
     setMarkAsWatchedItem(itemId);
   };
