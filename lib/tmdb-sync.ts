@@ -27,6 +27,9 @@ export async function syncTrendingMovies(
 
     // Process each movie
     for (const tmdbMovie of tmdbResponse.results.slice(0, limit)) {
+      // SAFETY CHECK: Skip if not a movie
+      if (tmdbMovie.media_type && tmdbMovie.media_type !== 'movie') continue;
+
       try {
         // Check if movie already exists
         const existing = await prisma.movie.findUnique({
@@ -100,6 +103,9 @@ export async function syncUpcomingMovies(
 
     // Process each movie
     for (const tmdbMovie of tmdbResponse.results.slice(0, limit)) {
+      // SAFETY CHECK: Skip if not a movie
+      if (tmdbMovie.media_type && tmdbMovie.media_type !== 'movie') continue;
+
       try {
         // Check if movie already exists
         const existing = await prisma.movie.findUnique({
@@ -263,6 +269,12 @@ export async function checkTMDBStatus(): Promise<{
  * Synchronizes a single movie from TMDB search result to the local database
  */
 export async function syncTMDBMovie(tmdbMovie: TMDBMovie): Promise<any> {
+  // SAFETY CHECK: Skip if not a movie
+  if (tmdbMovie.media_type && tmdbMovie.media_type !== 'movie') {
+    console.warn(`[TMDB Sync] Skipped non-movie: ${tmdbMovie.title || tmdbMovie.name} (${tmdbMovie.media_type})`);
+    return null;
+  }
+
   try {
     const existing = await prisma.movie.findUnique({
       where: { tmdbId: tmdbMovie.id },

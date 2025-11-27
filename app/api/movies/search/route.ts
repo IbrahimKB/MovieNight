@@ -44,9 +44,11 @@ const cachedSearch = async (query: string, page: number) => {
     return unstable_cache(
         async () => {
              if (!process.env.TMDB_API_KEY) return null;
-             return await tmdbClient.searchMovies(query, page);
+             const res = await tmdbClient.searchMovies(query, page);
+             if (!res) throw new Error("TMDB Search failed");
+             return res;
         },
-        [`tmdb-search-${query}-${page}`], // Unique key per query
+        [`tmdb-search-v2-${query}-${page}`], // Bumped version to v2
         { revalidate: CACHE_TTL.DAY }
     )();
 };
@@ -86,7 +88,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Use cached search
-    const tmdbResponse = await cachedSearch(q, page);
+    let tmdbResponse = null;
+    try {
+        tmdbResponse = await cachedSearch(q, page);
+    } catch (e) {
+        console.error("Cached search error:", e);
+    }
     
     if (!tmdbResponse) {
         return NextResponse.json({ success: false, error: "External API error" }, { status: 502 });

@@ -64,7 +64,7 @@ class TMDBClient {
 
       // Search for both movies and TV shows separately and combine them if needed
       // For now, let's focus on movies as per the method name, but we can extend this.
-      const response = await this.getAxiosInstance().get('/search/multi', {
+      const response = await this.getAxiosInstance().get('/search/movie', { // Changed from multi to movie
         params: {
           query,
           page,
@@ -72,10 +72,10 @@ class TMDBClient {
         },
       });
       
-      // Filter to keep only movies and tv shows
+      // Filter to keep only movies (API should handle this now, but extra safety)
       if (response.data && response.data.results) {
         response.data.results = response.data.results.filter(
-          (item: any) => item.media_type === 'movie' || item.media_type === 'tv'
+          (item: any) => !item.media_type || item.media_type === 'movie' // Search/movie doesn't always return media_type
         );
       }
       

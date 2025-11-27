@@ -75,13 +75,24 @@ export async function GET(req: NextRequest) {
       const cachedSearch = unstable_cache(
           async () => {
                if (!process.env.TMDB_API_KEY) return null;
-               return await tmdbClient.searchMovies(q, page);
+               const result = await tmdbClient.searchMovies(q, page);
+               if (!result) {
+                   // Throwing prevents caching of null (failed) results
+                   throw new Error("TMDB Search failed"); 
+               }
+               return result;
           },
-          [`tmdb-search-db-${q}-${page}`], // Unique key per query, distinct from the other endpoint
+          [`tmdb-search-db-v2-${q}-${page}`], // Bumped version to v2
           { revalidate: CACHE_TTL.DAY }
       );
 
-      const tmdbResponse = await cachedSearch();
+      let tmdbResponse = null;
+      try {
+          tmdbResponse = await cachedSearch();
+      } catch (e) {
+          console.error("TMDB search error (not cached):", e);
+          // Fallback to null, which triggers local DB search
+      }
       
       if (tmdbResponse) {
         // Sync found movies to local database to ensure they have IDs

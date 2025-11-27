@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { tmdbClient } from "@/lib/tmdb";
 
 export async function GET() {
   const diagnostics: Record<string, any> = {
@@ -7,6 +8,10 @@ export async function GET() {
     environment: process.env.NODE_ENV,
     database: {
       url: process.env.DATABASE_URL ? "SET (hidden)" : "NOT SET",
+    },
+    tmdb: {
+      apiKey: process.env.TMDB_API_KEY ? "SET (hidden)" : "NOT SET",
+      clientConfigured: !!(tmdbClient as any).apiKey,
     },
     api: {
       status: "running",
@@ -37,11 +42,31 @@ export async function GET() {
     };
   }
 
+  // Test TMDB connection
+  try {
+    const tmdbResult = await tmdbClient.searchMovies("Inception", 1);
+    if (tmdbResult) {
+       diagnostics.tmdb.status = "✅ CONNECTED";
+       diagnostics.tmdb.resultsFound = tmdbResult.total_results;
+    } else {
+       diagnostics.tmdb.status = "❌ FAILED (Returns null)";
+    }
+  } catch (err: any) {
+     diagnostics.tmdb.status = "❌ ERROR";
+     diagnostics.tmdb.error = err.message;
+  }
+
   // Check for common issues
   const issues = [];
 
   if (!process.env.DATABASE_URL) {
     issues.push("DATABASE_URL environment variable is not set");
+  }
+  
+  if (!process.env.TMDB_API_KEY) {
+    issues.push("TMDB_API_KEY environment variable is not set");
+  } else if (diagnostics.tmdb.status.startsWith("❌")) {
+    issues.push("TMDB API check failed");
   }
 
   if (diagnostics.database.status === "❌ FAILED") {

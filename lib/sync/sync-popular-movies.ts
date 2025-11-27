@@ -33,12 +33,15 @@ export async function syncPopularMovies() {
     let totalSkipped = 0;
 
     // Fetch popular movies from multiple pages (entire TMDB database)
-    // TMDB has ~500+ pages of popular movies, but we'll fetch first 50 pages (~1000 movies)
-    // For full database, would need to use all pages or alternate endpoints
-    for (let page = 1; page <= 50; page++) {
+    // TMDB limits standard list endpoints to 500 pages (10,000 movies)
+    // We will fetch all 500 pages to maximize the library size (~10k movies)
+    const MAX_PAGES = 500;
+
+    for (let page = 1; page <= MAX_PAGES; page++) {
       try {
-        if (page % 10 === 0) {
-          console.log(`[SYNC] Fetching popular movies page ${page}...`);
+        // Log progress every 20 pages
+        if (page % 20 === 0) {
+          console.log(`[SYNC] Fetching popular movies page ${page}/${MAX_PAGES}...`);
         }
 
         const response = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
@@ -51,8 +54,7 @@ export async function syncPopularMovies() {
         });
 
         const movies: TMDBMovie[] = response.data.results || [];
-        console.log(`[SYNC] Found ${movies.length} movies on page ${page}`);
-
+        
         for (const movie of movies) {
           // Skip movies without essential data
           if (!movie.title || !movie.release_date) {
@@ -63,7 +65,9 @@ export async function syncPopularMovies() {
           try {
             const releaseYear = new Date(movie.release_date).getFullYear();
 
-            // Upsert: update if exists, create if new
+            // DEDUPLICATION LOGIC:
+            // using upsert() ensures that if a movie with this tmdbId already exists,
+            // it is updated instead of duplicated.
             await prisma.movie.upsert({
               where: { tmdbId: movie.id },
               update: {
@@ -101,8 +105,9 @@ export async function syncPopularMovies() {
           }
         }
 
-        // Rate limit: wait 1 second between pages
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // Rate limit: wait 200ms between pages (5 req/s is usually safe for TMDB)
+        // Reduced from 1000ms to speed up the massive 500-page sync
+        await new Promise((resolve) => setTimeout(resolve, 200));
       } catch (pageErr) {
         console.error(`[SYNC] Error fetching page ${page}:`, pageErr);
         continue;
