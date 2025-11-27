@@ -177,11 +177,10 @@ export default function MoviesPage() {
   const handleAddMovie = async (movie: Movie) => {
     setAddingMovieId(movie.id);
     try {
-      const res = await fetch("/api/watch/desire", {
+      const res = await fetch("/api/watch/desire/add-from-tmdb", {
         method: "POST",
         headers,
         body: JSON.stringify({
-          movieId: movie.id,
           tmdbId: movie.tmdbId,
           title: movie.title,
           year: movie.year,
@@ -203,9 +202,10 @@ export default function MoviesPage() {
         setTmdbResults([]);
         setShowSearchResults(false);
       } else {
+        const data = await res.json();
         toast({
           title: "Error",
-          description: "Failed to add movie",
+          description: data.error || "Failed to add movie",
           variant: "error"
         });
       }
