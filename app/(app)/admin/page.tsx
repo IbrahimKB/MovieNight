@@ -150,12 +150,12 @@ export default function AdminPage() {
     label: string;
     value: number;
   }) => (
-    <div className="bg-card border border-border rounded-xl p-6">
+    <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
       <div className="flex items-center gap-3 mb-2">
-        <Icon className="h-5 w-5 text-primary" />
-        <p className="text-sm text-muted-foreground">{label}</p>
+        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+        <p className="text-xs sm:text-sm text-muted-foreground">{label}</p>
       </div>
-      <p className="text-3xl font-bold">{value}</p>
+      <p className="text-2xl sm:text-3xl font-bold">{value}</p>
     </div>
   );
 

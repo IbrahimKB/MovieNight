@@ -148,28 +148,28 @@ export default function ProfilePage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-xl p-6">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Users className="h-5 w-5 text-primary" />
-            <p className="text-sm text-muted-foreground">Friends</p>
+            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <p className="text-xs sm:text-sm text-muted-foreground">Friends</p>
           </div>
-          <p className="text-3xl font-bold">{stats.totalFriends}</p>
+          <p className="text-2xl sm:text-3xl font-bold">{stats.totalFriends}</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Clock className="h-5 w-5 text-primary" />
-            <p className="text-sm text-muted-foreground">Movies Watched</p>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <p className="text-xs sm:text-sm text-muted-foreground">Movies Watched</p>
           </div>
-          <p className="text-3xl font-bold">{stats.moviesWatched}</p>
+          <p className="text-2xl sm:text-3xl font-bold">{stats.moviesWatched}</p>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6">
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-2">
-            <Bookmark className="h-5 w-5 text-primary" />
-            <p className="text-sm text-muted-foreground">In Watchlist</p>
+            <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <p className="text-xs sm:text-sm text-muted-foreground">In Watchlist</p>
           </div>
-          <p className="text-3xl font-bold">{stats.activeWatchlist}</p>
+          <p className="text-2xl sm:text-3xl font-bold">{stats.activeWatchlist}</p>
         </div>
       </div>
 
