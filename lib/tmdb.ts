@@ -46,7 +46,7 @@ class TMDBClient {
     return axios.create({
       baseURL: this.baseUrl,
       params: {
-        api_key: this.apiKey,
+        api_key: this.apiKey || process.env.TMDB_API_KEY,
       },
       timeout: 10000,
     });
@@ -57,7 +57,8 @@ class TMDBClient {
     page: number = 1
   ): Promise<TMDBResponse | null> {
     try {
-      if (!this.apiKey) {
+      const key = this.apiKey || process.env.TMDB_API_KEY;
+      if (!key) {
         console.warn('TMDB_API_KEY not configured');
         return null;
       }
@@ -88,7 +89,8 @@ class TMDBClient {
 
   async getMovieDetails(movieId: number): Promise<TMDBMovieDetails | null> {
     try {
-      if (!this.apiKey) {
+      const key = this.apiKey || process.env.TMDB_API_KEY;
+      if (!key) {
         console.warn('TMDB_API_KEY not configured');
         return null;
       }
@@ -115,7 +117,8 @@ class TMDBClient {
 
   async getUpcomingMovies(page: number = 1): Promise<TMDBResponse | null> {
     try {
-      if (!this.apiKey) {
+      const key = this.apiKey || process.env.TMDB_API_KEY;
+      if (!key) {
         console.warn('TMDB_API_KEY not configured');
         return null;
       }
@@ -138,7 +141,8 @@ class TMDBClient {
     page: number = 1
   ): Promise<TMDBResponse | null> {
     try {
-      if (!this.apiKey) {
+      const key = this.apiKey || process.env.TMDB_API_KEY;
+      if (!key) {
         console.warn('TMDB_API_KEY not configured');
         return null;
       }
