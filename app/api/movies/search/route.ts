@@ -3,6 +3,7 @@ import { z } from "zod";
 import { tmdbClient } from "@/lib/tmdb";
 import { getCurrentUser } from "@/lib/auth";
 import { cacheFunction, CACHE_TTL } from "@/lib/cache";
+import { unstable_cache } from "next/cache";
 
 const SearchSchema = z.object({
   q: z.string().min(1),
@@ -27,33 +28,15 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
   };
 }
 
-// Cached TMDB Search
-const getCachedTMDBSearch = cacheFunction(
+// Cached TMDB Search - defined at module level
+const getCachedTMDBSearch = unstable_cache(
   async (query: string, page: number) => {
     if (!process.env.TMDB_API_KEY) return null;
     return await tmdbClient.searchMovies(query, page);
   },
-  ['tmdb-search'], // Dynamic keys are handled by the cacheFunction if passed correctly, but here we need query-specific keys
-  { revalidate: CACHE_TTL.DAY } // Cache search results for a day
+  ['tmdb-search'],
+  { revalidate: CACHE_TTL.DAY }
 );
-
-// Wrapper to handle dynamic keys properly since unstable_cache expects fixed key parts
-// We actually need to call unstable_cache INSIDE a function that takes the dynamic parts
-const cachedSearch = async (query: string, page: number) => {
-    // Create a specific cache key for this query
-    return unstable_cache(
-        async () => {
-             if (!process.env.TMDB_API_KEY) return null;
-             const res = await tmdbClient.searchMovies(query, page);
-             if (!res) throw new Error("TMDB Search failed");
-             return res;
-        },
-        [`tmdb-search-v2-${query}-${page}`], // Bumped version to v2
-        { revalidate: CACHE_TTL.DAY }
-    )();
-};
-
-import { unstable_cache } from "next/cache"; // Import needed for the fix above
 
 
 export async function GET(req: NextRequest) {
@@ -90,11 +73,11 @@ export async function GET(req: NextRequest) {
     // Use cached search
     let tmdbResponse = null;
     try {
-        tmdbResponse = await cachedSearch(q, page);
+        tmdbResponse = await getCachedTMDBSearch(q, page);
     } catch (e) {
-        console.error("Cached search error:", e);
+        console.error("Search error:", e);
     }
-    
+
     if (!tmdbResponse) {
         return NextResponse.json({ success: false, error: "External API error" }, { status: 502 });
     }
