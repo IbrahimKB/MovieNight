@@ -59,39 +59,58 @@ export default function MoviesPage() {
     ...(token && { Authorization: `Bearer ${token}` }),
   };
 
-  // Fetch local movies from database
+  // Fetch local movies and friends from database
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/movies", {
-          headers,
-          credentials: "include",
-        });
-        const data = await res.json();
+        const [moviesRes, friendsRes] = await Promise.all([
+          fetch("/api/movies", {
+            headers,
+            credentials: "include",
+          }),
+          fetch("/api/friends", {
+            headers,
+            credentials: "include",
+          }),
+        ]);
 
-        if (data.success && Array.isArray(data.data)) {
-          setMovies(data.data);
-          setFilteredMovies(data.data);
+        const moviesData = await moviesRes.json();
+        const friendsData = await friendsRes.json();
+
+        if (moviesData.success && Array.isArray(moviesData.data)) {
+          setMovies(moviesData.data);
+          setFilteredMovies(moviesData.data);
           setCurrentPage(1);
-          setDisplayedMovies(data.data.slice(0, MOVIES_PER_PAGE));
-          setHasMore(data.data.length > MOVIES_PER_PAGE);
+          setDisplayedMovies(moviesData.data.slice(0, MOVIES_PER_PAGE));
+          setHasMore(moviesData.data.length > MOVIES_PER_PAGE);
 
           // Extract unique genres
           const genres = new Set<string>();
-          data.data.forEach((movie: Movie) => {
+          moviesData.data.forEach((movie: Movie) => {
             movie.genres?.forEach((g) => genres.add(g));
           });
           setAllGenres(Array.from(genres).sort());
 
           // Track which movies are already in database
-          const addedIds = new Set<string>(data.data.map((m: Movie) => m.id));
+          const addedIds = new Set<string>(moviesData.data.map((m: Movie) => m.id));
           setAddedMovieIds(addedIds);
         }
+
+        if (friendsData.success && friendsData.data?.friends) {
+          setFriends(
+            friendsData.data.friends.map((f: any) => ({
+              id: f.userId,
+              name: f.name,
+              username: f.username,
+              avatar: f.avatar,
+            })),
+          );
+        }
       } catch (error) {
-        console.error("Failed to fetch movies:", error);
+        console.error("Failed to fetch data:", error);
         toast({
           title: "Error",
-          description: "Failed to load movies",
+          description: "Failed to load data",
           variant: "error",
         });
       } finally {
@@ -99,7 +118,7 @@ export default function MoviesPage() {
       }
     };
 
-    fetchMovies();
+    fetchData();
   }, []);
 
   // Live TMDB search with debounce
