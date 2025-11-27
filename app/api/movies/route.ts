@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, results: [] });
     }
 
+    console.log(`[SEARCH] TMDB Query: "${q}" (Page: ${page})`);
+
     const tmdbResponse = await tmdbClient.searchMovies(q, page);
     
     if (!tmdbResponse || !tmdbResponse.results) {
