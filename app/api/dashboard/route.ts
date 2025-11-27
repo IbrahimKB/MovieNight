@@ -99,7 +99,8 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       nudge,
       allWatchedIds,
       trending,
-      upcomingReleases
+      upcomingReleases,
+      upcomingEvents
     ] = await Promise.all([
       // 1. Friends Count
       prisma.friendship.count({
@@ -150,7 +151,18 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
       getCachedTrendingMovies(),
 
       // 8. Cached Upcoming
-      getCachedUpcomingReleases()
+      getCachedUpcomingReleases(),
+
+      // 9. Upcoming Events (Personal)
+      prisma.event.findMany({
+        where: {
+          OR: [{ hostUserId: userId }, { participants: { has: userId } }],
+          date: { gte: new Date() }
+        },
+        include: { movie: { select: { title: true, poster: true } } },
+        orderBy: { date: 'asc' },
+        take: 3
+      })
     ]);
 
     // Calculate Accuracy (in memory, cheap)
@@ -182,7 +194,13 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
         },
         trending,
         upcoming: upcomingReleases,
-        nudge: smartNudge
+        nudge: smartNudge,
+        upcomingEvents: upcomingEvents.map(e => ({
+            id: e.id,
+            title: e.movie.title,
+            date: e.date,
+            poster: e.movie.poster
+        }))
       },
     });
 

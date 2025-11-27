@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
+import { ensureMovieExists } from "@/lib/movies";
 
 const CreateSuggestionSchema = z.object({
-  movieId: z.string(),
+  movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   friendIds: z.array(z.string()),
   comment: z.string().optional(),
   desireRating: z.number().optional(),
@@ -95,11 +96,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { movieId, friendIds, comment, desireRating } = parsed.data;
+    const { movieId: inputMovieId, friendIds, comment, desireRating } = parsed.data;
 
-    // Check if movie exists (it should, based on search flow)
-    // But if it came from TMDB search and wasn't synced properly (idk how), we might have issue.
-    // Assuming movieId is a UUID from our DB.
+    // Ensure movie exists
+    const internalMovieId = await ensureMovieExists(inputMovieId);
+    if (!internalMovieId) {
+        return NextResponse.json(
+            { success: false, error: "Movie not found" },
+            { status: 404 }
+        );
+    }
     
     // Create suggestions for each friend
     // Also potentially create a WatchDesire for the sender?
@@ -108,13 +114,13 @@ export async function POST(req: NextRequest) {
          where: {
            userId_movieId: {
              userId: user.id,
-             movieId: movieId
+             movieId: internalMovieId
            }
          },
          update: { rating: desireRating },
          create: {
             userId: user.id,
-            movieId: movieId,
+            movieId: internalMovieId,
             rating: desireRating
          }
        });
@@ -136,7 +142,7 @@ export async function POST(req: NextRequest) {
       internalFriendIds.map(id => 
         prisma.suggestion.create({
           data: {
-            movieId,
+            movieId: internalMovieId,
             fromUserId: user.id,
             toUserId: id,
             message: comment,

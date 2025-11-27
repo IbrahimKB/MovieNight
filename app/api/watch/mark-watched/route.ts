@@ -7,8 +7,10 @@ import { Prisma } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
+import { ensureMovieExists } from "@/lib/movies";
+
 const MarkWatchedSchema = z.object({
-  movieId: z.string().uuid(),
+  movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   watchedDate: z.string().datetime().optional(),
   originalScore: z.number().min(1).max(10).optional(),
   reaction: z.record(z.any()).optional(), // generic JSON
@@ -61,15 +63,12 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       );
     }
 
-    const { movieId, watchedDate, originalScore, reaction } = validation.data;
+    const { movieId: inputMovieId, watchedDate, originalScore, reaction } = validation.data;
 
-    // Validate movie exists
-    const movie = await prisma.movie.findUnique({
-      where: { id: movieId },
-      select: { id: true },
-    });
+    // Ensure movie exists (lazy sync)
+    const internalMovieId = await ensureMovieExists(inputMovieId);
 
-    if (!movie) {
+    if (!internalMovieId) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
         { status: 404 }
@@ -86,7 +85,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     const watched = await prisma.watchedMovie.create({
       data: {
         userId: userIdInternal,
-        movieId,
+        movieId: internalMovieId,
         watchedAt,
         originalScore: originalScore ?? null,
         reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
@@ -99,7 +98,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     await prisma.watchDesire.deleteMany({
       where: {
         userId: userIdInternal,
-        movieId,
+        movieId: internalMovieId,
       },
     });
 
@@ -109,7 +108,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
         data: {
           id: watched.id,
           userId: currentUser.id, // external (puid/id)
-          movieId,
+          movieId: internalMovieId,
           watchedAt: watched.watchedAt,
           originalScore: watched.originalScore ?? null,
           reaction: watched.reaction ?? null,

@@ -10,28 +10,8 @@ import { prisma } from "@/lib/prisma";
 const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
-// Static map for TMDB Genre IDs to Names (Movies)
-const TMDB_GENRE_MAP: Record<number, string> = {
-  28: "Action",
-  12: "Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  14: "Fantasy",
-  36: "History",
-  27: "Horror",
-  10402: "Music",
-  9648: "Mystery",
-  10749: "Romance",
-  878: "Science Fiction",
-  10770: "TV Movie",
-  53: "Thriller",
-  10752: "War",
-  37: "Western"
-};
+// Import shared genre map
+import { TMDB_GENRE_MAP } from "@/lib/tmdb";
 
 interface TMDBMovie {
   id: number;
@@ -119,14 +99,11 @@ export async function syncUpcomingReleases() {
                 releaseDate: new Date(movie.release_date),
             };
             
-            // Debug log first item
-            if (totalImported === 0) {
-               console.log("[SYNC] First movie payload:", JSON.stringify(movieData, null, 2));
-            }
-
+            // Create/Update Movie Record (Required for Foreign Key)
+            // We keep this because Release table requires a valid movieId
             const dbMovie = await prisma.movie.upsert({
               where: { tmdbId: movie.id },
-              update: { ...movieData, updatedAt: new Date() },
+              update: { ...movieData, updatedAt: new Date() }, 
               create: movieData,
             });
 
@@ -163,10 +140,6 @@ export async function syncUpcomingReleases() {
             totalImported++;
           } catch (err) {
             console.error(`[SYNC] Error importing release ${movie.title} (ID: ${movie.id}):`, err);
-            // Log the specific error if it is a Prisma error
-            if (err instanceof Error) {
-                 console.error("[SYNC] Stack:", err.stack);
-            }
             totalSkipped++;
           }
         }

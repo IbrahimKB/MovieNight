@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
+import { ensureMovieExists } from "@/lib/movies";
+
 const CreateWatchDesireSchema = z.object({
-  movieId: z.string().uuid(),
+  movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   suggestionId: z.string().uuid().optional(),
   rating: z.number().min(1).max(10).optional(),
 });
@@ -51,7 +53,7 @@ export async function POST(
       );
     }
 
-    const { movieId, suggestionId, rating } = validation.data;
+    const { movieId: inputMovieId, suggestionId, rating } = validation.data;
 
     // Map current user external -> internal
     const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
@@ -62,13 +64,10 @@ export async function POST(
       );
     }
 
-    // Validate movie exists
-    const movie = await prisma.movie.findUnique({
-      where: { id: movieId },
-      select: { id: true },
-    });
+    // Ensure movie exists (lazy sync)
+    const internalMovieId = await ensureMovieExists(inputMovieId);
 
-    if (!movie) {
+    if (!internalMovieId) {
       return NextResponse.json(
         {
           success: false,
@@ -82,7 +81,7 @@ export async function POST(
     const existing = await prisma.watchDesire.findFirst({
       where: {
         userId: userIdInternal,
-        movieId,
+        movieId: internalMovieId,
       },
       select: { id: true },
     });
@@ -101,7 +100,7 @@ export async function POST(
     const desire = await prisma.watchDesire.create({
       data: {
         userId: userIdInternal,
-        movieId,
+        movieId: internalMovieId,
         suggestionId: suggestionId ?? null,
         rating: rating ?? null,
       },
@@ -113,7 +112,7 @@ export async function POST(
         data: {
           id: desire.id,
           userId: currentUser.id, // external ID as before
-          movieId,
+          movieId: internalMovieId,
           suggestionId: desire.suggestionId,
           rating: desire.rating,
           createdAt: desire.createdAt,

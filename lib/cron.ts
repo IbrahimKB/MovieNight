@@ -6,7 +6,7 @@
  */
 
 import cron from "node-cron";
-import { syncPopularMovies } from "./sync/sync-popular-movies";
+// import { syncPopularMovies } from "./sync/sync-popular-movies"; // REMOVED
 import { syncUpcomingReleases } from "./sync/sync-upcoming-releases";
 import type { ScheduledTask } from "node-cron";
 
@@ -20,9 +20,8 @@ export function initCronJobs() {
 
   console.log("[CRON] Initializing background jobs...");
 
-  // Popular movies sync: Every day at 3:00 AM
-  // Cron format: minute hour day month dayOfWeek
-  // 0 3 * * * = at 3:00 AM every day
+  // Popular movies sync removed – search is now TMDB-only.
+  /*
   const popularMoviesJob = cron.schedule("0 3 * * *", async () => {
     console.log("[CRON] Triggering popular movies sync at 3:00 AM...");
     try {
@@ -31,6 +30,7 @@ export function initCronJobs() {
       console.error("[CRON] Popular movies sync error:", err);
     }
   });
+  */
 
   // Upcoming releases sync: Every day at 3:15 AM (15 min after popular)
   // 15 3 * * * = at 3:15 AM every day
@@ -46,11 +46,11 @@ export function initCronJobs() {
   isScheduled = true;
 
   console.log("[CRON] ✅ Jobs scheduled:");
-  console.log("[CRON]   - Popular movies: 3:00 AM daily");
+  // console.log("[CRON]   - Popular movies: 3:00 AM daily");
   console.log("[CRON]   - Upcoming releases: 3:15 AM daily");
 
   return {
-    popularMoviesJob,
+    // popularMoviesJob,
     upcomingReleasesJob,
   };
 }
@@ -69,6 +69,6 @@ export function stopCronJobs() {
 // For testing: run syncs immediately
 export async function runSyncsNow() {
   console.log("[CRON] Running syncs immediately...");
-  await syncPopularMovies();
+  // await syncPopularMovies(); // REMOVED
   await syncUpcomingReleases();
 }

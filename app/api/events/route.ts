@@ -4,11 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser, getUserExternalId } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
+import { ensureMovieExists } from "@/lib/movies";
+
 // ------------------------------------------------------
 // Zod schema
 // ------------------------------------------------------
 const CreateEventSchema = z.object({
-  movieId: z.string().uuid(),
+  movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   date: z.string().datetime(),
   notes: z.string().optional(),
   participants: z.array(z.string()).optional(), // external IDs (puid or id)
@@ -82,7 +84,7 @@ export async function POST(
       );
     }
 
-    const { movieId, date, notes, participants } = validation.data;
+    const { movieId: inputMovieId, date, notes, participants } = validation.data;
 
     // Map current user to internal ID
     const hostUserId = await mapExternalUserIdToInternal(currentUser.id);
@@ -93,13 +95,10 @@ export async function POST(
       );
     }
 
-    // Ensure movie exists
-    const movie = await prisma.movie.findUnique({
-      where: { id: movieId },
-      select: { id: true },
-    });
+    // Ensure movie exists (lazy sync)
+    const internalMovieId = await ensureMovieExists(inputMovieId);
 
-    if (!movie) {
+    if (!internalMovieId) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
         { status: 404 },
@@ -134,7 +133,7 @@ export async function POST(
     // Create event via Prisma
     const event = await prisma.event.create({
       data: {
-        movieId,
+        movieId: internalMovieId,
         hostUserId,
         participants: internalParticipants,
         date: new Date(date),

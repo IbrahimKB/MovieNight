@@ -70,7 +70,7 @@ export async function GET(
         message: "Cron jobs initialized",
         status: "active",
         schedule: {
-          popular_movies: "0 3 * * * (Daily at 3:00 AM)",
+          // popular_movies: "0 3 * * * (Daily at 3:00 AM)", // REMOVED: Movie syncing removed – search is now TMDB-only.
           upcoming_releases: "15 3 * * * (Daily at 3:15 AM)",
         },
       },
