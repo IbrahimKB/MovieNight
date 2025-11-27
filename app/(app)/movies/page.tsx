@@ -273,14 +273,12 @@ export default function MoviesPage() {
   );
 
   const TMDBMovieCard = ({ movie }: { movie: Movie }) => {
-    const isAdded = addedMovieIds.has(movie.id);
-    const isAdding = addingMovieId === movie.id;
-
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group"
+        onClick={() => handleOpenModal(movie)}
+        className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group cursor-pointer hover:shadow-md"
       >
         <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-background flex items-center justify-center">
           {movie.poster ? (
@@ -304,27 +302,14 @@ export default function MoviesPage() {
             )}
           </div>
           <button
-            onClick={() => handleAddMovie(movie)}
-            disabled={isAdded || isAdding}
-            className={`w-full px-3 py-1.5 rounded text-xs font-medium transition-all mt-2 flex items-center justify-center gap-1 ${
-              isAdded
-                ? "bg-primary/20 text-primary"
-                : "bg-primary text-primary-foreground hover:bg-primary/90"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenModal(movie);
+            }}
+            className="w-full px-3 py-1.5 rounded text-xs font-medium transition-all mt-2 flex items-center justify-center gap-1 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95"
           >
-            {isAdding ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : isAdded ? (
-              <>
-                <Check className="h-3 w-3" />
-                Added
-              </>
-            ) : (
-              <>
-                <Plus className="h-3 w-3" />
-                Add
-              </>
-            )}
+            <Plus className="h-3 w-3" />
+            Add Movie
           </button>
         </div>
       </motion.div>
