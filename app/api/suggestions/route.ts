@@ -17,32 +17,59 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "20");
     const offset = parseInt(searchParams.get("offset") || "0");
+    const type = searchParams.get("type") || "received"; // "received" or "sent"
 
-    // Get incoming suggestions (to me)
-    const suggestions = await prisma.suggestion.findMany({
-      where: {
-        toUserId: user.id,
-        status: 'pending' // Only pending suggestions?
-      },
-      include: {
-        movie: true,
-        fromUser: true
-      },
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-      skip: offset,
-    });
+    let suggestions;
+
+    if (type === "sent") {
+      // Get sent suggestions (from me)
+      suggestions = await prisma.suggestion.findMany({
+        where: {
+          fromUserId: user.id,
+        },
+        include: {
+          movie: true,
+          fromUser: true,
+          toUser: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
+      });
+    } else {
+      // Get incoming suggestions (to me) - default
+      suggestions = await prisma.suggestion.findMany({
+        where: {
+          toUserId: user.id,
+        },
+        include: {
+          movie: true,
+          fromUser: true,
+          toUser: true,
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
+      });
+    }
 
     // Map to frontend format
-    const data = suggestions.map(s => ({
+    const data = suggestions.map((s) => ({
       id: s.id,
+      movieId: s.movieId,
+      fromUserId: s.fromUserId,
+      toUserId: s.toUserId,
+      status: s.status,
+      message: s.message,
+      createdAt: s.createdAt.toISOString(),
+      updatedAt: s.updatedAt.toISOString(),
       movie: {
         id: s.movie.id,
         title: s.movie.title,
@@ -52,26 +79,31 @@ export async function GET(req: NextRequest) {
         description: s.movie.description,
         rating: s.movie.imdbRating,
       },
-      suggestedBy: {
+      fromUser: {
         id: s.fromUser.id,
         name: s.fromUser.name,
         username: s.fromUser.username,
-        avatar: s.fromUser.avatar
+        avatar: s.fromUser.avatar,
       },
-      comment: s.message,
-      suggestedAt: s.createdAt.toISOString(),
+      toUser: s.toUser
+        ? {
+            id: s.toUser.id,
+            name: s.toUser.name,
+            username: s.toUser.username,
+            avatar: s.toUser.avatar,
+          }
+        : null,
     }));
 
     return NextResponse.json({
       success: true,
-      suggestions: data,
+      data: data,
     });
-
   } catch (err) {
     console.error("Get suggestions error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -82,7 +114,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -92,38 +124,43 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: "Invalid data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { movieId: inputMovieId, friendIds, comment, desireRating } = parsed.data;
+    const {
+      movieId: inputMovieId,
+      friendIds,
+      comment,
+      desireRating,
+    } = parsed.data;
 
     // Ensure movie exists
     const internalMovieId = await ensureMovieExists(inputMovieId);
     if (!internalMovieId) {
-        return NextResponse.json(
-            { success: false, error: "Movie not found" },
-            { status: 404 }
-        );
+      return NextResponse.json(
+        { success: false, error: "Movie not found" },
+        { status: 404 },
+      );
     }
-    
+
     // Create suggestions for each friend
     // Also potentially create a WatchDesire for the sender?
     if (desireRating) {
-       await prisma.watchDesire.upsert({
-         where: {
-           userId_movieId: {
-             userId: user.id,
-             movieId: internalMovieId
-           }
-         },
-         update: { rating: desireRating },
-         create: {
+      await prisma.watchDesire.upsert({
+        where: {
+          userId_movieId: {
             userId: user.id,
             movieId: internalMovieId,
-            rating: desireRating
-         }
-       });
+          },
+        },
+        update: { rating: desireRating },
+        create: {
+          userId: user.id,
+          movieId: internalMovieId,
+          rating: desireRating,
+        },
+      });
     }
 
     // Map friendIds (external) to internal UUIDs
@@ -131,7 +168,7 @@ export async function POST(req: NextRequest) {
     for (const externalId of friendIds) {
       const friend = await prisma.authUser.findFirst({
         where: { OR: [{ puid: externalId }, { id: externalId }] },
-        select: { id: true }
+        select: { id: true },
       });
       if (friend) {
         internalFriendIds.push(friend.id);
@@ -139,29 +176,28 @@ export async function POST(req: NextRequest) {
     }
 
     const createdSuggestions = await Promise.all(
-      internalFriendIds.map(id => 
+      internalFriendIds.map((id) =>
         prisma.suggestion.create({
           data: {
             movieId: internalMovieId,
             fromUserId: user.id,
             toUserId: id,
             message: comment,
-            status: 'pending'
-          }
-        })
-      )
+            status: "pending",
+          },
+        }),
+      ),
     );
 
     return NextResponse.json({
       success: true,
-      count: createdSuggestions.length
+      count: createdSuggestions.length,
     });
-
   } catch (err) {
     console.error("Create suggestion error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
