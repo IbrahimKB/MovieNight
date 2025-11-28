@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Search,
   PlusCircle,
@@ -22,9 +22,9 @@ import {
   X,
   ArrowLeft,
   Loader2,
-} from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/components/ui/use-toast';
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
@@ -57,16 +57,16 @@ function SuggestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
-  
-  const [searchTerm, setSearchTerm] = useState('');
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [desireRating, setDesireRating] = useState([7]);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [isFromHome, setIsFromHome] = useState(false);
-  
+
   const [friends, setFriends] = useState<Friend[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [suggestionRatings, setSuggestionRatings] = useState<
@@ -81,47 +81,48 @@ function SuggestPageContent() {
         // Removed manual token header as we use cookies now
         const [friendsRes, suggestionsRes] = await Promise.all([
           fetch("/api/friends", { credentials: "include" }),
-          fetch("/api/suggestions?type=received", { credentials: "include" })
+          fetch("/api/suggestions?type=received", { credentials: "include" }),
         ]);
 
         const friendsData = await friendsRes.json();
         const suggestionsData = await suggestionsRes.json();
 
         if (friendsData.success) {
-           setFriends(friendsData.data.friends.map((f: any) => ({
-             id: f.userId,
-             name: f.name,
-             username: f.username,
-             avatar: f.avatar
-           })) || []);
+          setFriends(
+            friendsData.data.friends.map((f: any) => ({
+              id: f.userId,
+              name: f.name,
+              username: f.username,
+              avatar: f.avatar,
+            })) || [],
+          );
         }
 
         if (suggestionsData.success && Array.isArray(suggestionsData.data)) {
-           const formattedSuggestions = suggestionsData.data.map((s: any) => ({
-             id: s.id,
-             movie: {
-               id: s.movie.id,
-               title: s.movie.title,
-               year: s.movie.year,
-               genres: s.movie.genres,
-               poster: s.movie.poster,
-               description: s.movie.description,
-               rating: s.movie.rating,
-               tmdbId: s.movie.tmdbId
-             },
-             suggestedBy: {
-               id: s.fromUser.id,
-               name: s.fromUser.name,
-               username: s.fromUser.username,
-               avatar: s.fromUser.avatar
-             },
-             comment: s.message,
-             suggestedAt: s.createdAt,
-             myRating: s.rating
-           }));
-           setSuggestions(formattedSuggestions);
+          const formattedSuggestions = suggestionsData.data.map((s: any) => ({
+            id: s.id,
+            movie: {
+              id: s.movie.id,
+              title: s.movie.title,
+              year: s.movie.year,
+              genres: s.movie.genres,
+              poster: s.movie.poster,
+              description: s.movie.description,
+              rating: s.movie.rating,
+              tmdbId: s.movie.tmdbId,
+            },
+            suggestedBy: {
+              id: s.fromUser.id,
+              name: s.fromUser.name,
+              username: s.fromUser.username,
+              avatar: s.fromUser.avatar,
+            },
+            comment: s.message,
+            suggestedAt: s.createdAt,
+            myRating: s.rating,
+          }));
+          setSuggestions(formattedSuggestions);
         }
-
       } catch (error) {
         console.error("Failed to fetch data", error);
       } finally {
@@ -134,26 +135,26 @@ function SuggestPageContent() {
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
-    const movieTitle = searchParams.get('title');
-    const movieYear = searchParams.get('year');
-    const movieGenres = searchParams.get('genres');
-    const movieDescription = searchParams.get('description');
-    const fromHome = searchParams.get('isFromHome');
-    
+    const movieTitle = searchParams.get("title");
+    const movieYear = searchParams.get("year");
+    const movieGenres = searchParams.get("genres");
+    const movieDescription = searchParams.get("description");
+    const fromHome = searchParams.get("isFromHome");
+
     if (movieTitle && fromHome) {
-       const prefilledMovie: Movie = {
+      const prefilledMovie: Movie = {
         id: `temp_${Date.now()}`,
         title: movieTitle,
         year: movieYear ? parseInt(movieYear) : new Date().getFullYear(),
         genres: movieGenres ? JSON.parse(movieGenres) : [],
-        description: movieDescription || '',
+        description: movieDescription || "",
       };
 
       setSelectedMovie(prefilledMovie);
       setIsFromHome(true);
 
       toast({
-        title: 'Movie pre-selected! 🎬',
+        title: "Movie pre-selected! 🎬",
         description: `"${movieTitle}" is ready to suggest. Add your rating and select friends below.`,
       });
     }
@@ -170,19 +171,24 @@ function SuggestPageContent() {
       setIsSearching(true);
       try {
         // Removed manual token header
-        const res = await fetch(`/api/movies?q=${encodeURIComponent(searchTerm)}`, { credentials: "include" });
+        const res = await fetch(
+          `/api/movies?q=${encodeURIComponent(searchTerm)}`,
+          { credentials: "include" },
+        );
         const data = await res.json();
         if (data.success) {
-          setSearchResults(data.data.map((m: any) => ({
-            id: m.id || `tmdb_${m.tmdbId}`,
-            title: m.title,
-            year: m.year,
-            genres: m.genres,
-            poster: m.poster,
-            description: m.description,
-            rating: m.imdbRating,
-            tmdbId: m.tmdbId
-          })));
+          setSearchResults(
+            data.data.map((m: any) => ({
+              id: m.id || `tmdb_${m.tmdbId}`,
+              title: m.title,
+              year: m.year,
+              genres: m.genres,
+              poster: m.poster,
+              description: m.description,
+              rating: m.imdbRating,
+              tmdbId: m.tmdbId,
+            })),
+          );
         }
       } catch (error) {
         console.error("Search failed", error);
@@ -194,12 +200,11 @@ function SuggestPageContent() {
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
-
   const handleFriendToggle = (friendId: string) => {
     setSelectedFriends((prev) =>
       prev.includes(friendId)
         ? prev.filter((id) => id !== friendId)
-        : [...prev, friendId]
+        : [...prev, friendId],
     );
   };
 
@@ -217,42 +222,42 @@ function SuggestPageContent() {
           movieId: selectedMovie.id,
           friendIds: selectedFriends,
           comment: comment,
-          desireRating: desireRating[0]
-        })
+          desireRating: desireRating[0],
+        }),
       });
 
       if (res.ok) {
-          const friendNames = selectedFriends
-            .map((id) => friends.find((f) => f.id === id)?.name)
-            .filter(Boolean)
-            .join(', ');
+        const friendNames = selectedFriends
+          .map((id) => friends.find((f) => f.id === id)?.name)
+          .filter(Boolean)
+          .join(", ");
 
-          toast({
-            title: 'Movie suggested! 🎬',
-            description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
-          });
+        toast({
+          title: "Movie suggested! 🎬",
+          description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+        });
 
-          // Reset form
-          setSelectedMovie(null);
-          setDesireRating([7]);
-          setSelectedFriends([]);
-          setComment('');
-          setSearchTerm('');
+        // Reset form
+        setSelectedMovie(null);
+        setDesireRating([7]);
+        setSelectedFriends([]);
+        setComment("");
+        setSearchTerm("");
       } else {
         toast({
-            title: "Error",
-            description: "Failed to send suggestion. Try again.",
-            variant: "error"
+          title: "Error",
+          description: "Failed to send suggestion. Try again.",
+          variant: "error",
         });
       }
     } catch (error) {
-        console.error("Suggest error", error);
+      console.error("Suggest error", error);
     }
   };
 
   const handleAcceptSuggestion = async (
     suggestionId: string,
-    movieTitle: string
+    movieTitle: string,
   ) => {
     const rating = suggestionRatings[suggestionId] || 5;
 
@@ -264,56 +269,56 @@ function SuggestPageContent() {
         },
         credentials: "include",
         body: JSON.stringify({
-            action: 'accept',
-            rating: rating
-        })
+          action: "accept",
+          rating: rating,
+        }),
       });
 
       if (res.ok) {
-          toast({
-            title: 'Suggestion accepted! ✅',
-            description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
-          });
+        toast({
+          title: "Suggestion accepted! ✅",
+          description: `You rated "${movieTitle}" a ${rating}/10. Added to your watchlist!`,
+        });
 
-          setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
       }
     } catch (error) {
-        console.error(error);
-        toast({
-            title: "Error",
-            description: "Failed to accept suggestion.",
-            variant: "error"
-        });
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Failed to accept suggestion.",
+        variant: "error",
+      });
     }
   };
 
   const handleIgnoreSuggestion = async (
     suggestionId: string,
-    movieTitle: string
+    movieTitle: string,
   ) => {
     try {
-        const res = await fetch(`/api/suggestions/${suggestionId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-              action: 'reject'
-          })
+      const res = await fetch(`/api/suggestions/${suggestionId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          action: "reject",
+        }),
+      });
+
+      if (res.ok) {
+        toast({
+          title: "Suggestion ignored",
+          description: `"${movieTitle}" has been removed from your suggestions.`,
         });
-  
-        if (res.ok) {
-            toast({
-              title: 'Suggestion ignored',
-              description: `"${movieTitle}" has been removed from your suggestions.`,
-            });
-        
-            setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
-        }
-      } catch (error) {
-          console.error(error);
+
+        setSuggestions((prev) => prev.filter((s) => s.id !== suggestionId));
       }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleRatingChange = (suggestionId: string, rating: number[]) => {
@@ -324,17 +329,21 @@ function SuggestPageContent() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
     );
 
-    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
   };
 
   if (loadingInitial) {
-      return <div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -364,7 +373,7 @@ function SuggestPageContent() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push('/')}
+              onClick={() => router.push("/")}
               className="ml-4"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -393,7 +402,9 @@ function SuggestPageContent() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
-              {isSearching && <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin" />}
+              {isSearching && (
+                <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin" />
+              )}
             </div>
 
             {/* Search Results */}
@@ -404,8 +415,8 @@ function SuggestPageContent() {
                     key={movie.id}
                     className={`cursor-pointer transition-colors hover:bg-accent/50 ${
                       selectedMovie?.id === movie.id
-                        ? 'ring-2 ring-primary bg-accent/30'
-                        : ''
+                        ? "ring-2 ring-primary bg-accent/30"
+                        : ""
                     }`}
                     onClick={() => setSelectedMovie(movie)}
                   >
@@ -444,11 +455,13 @@ function SuggestPageContent() {
                     </CardContent>
                   </Card>
                 ))}
-                {!isSearching && searchResults.length === 0 && searchTerm.length >= 2 && (
-                  <p className="text-center text-muted-foreground py-4">
-                    No movies found.
-                  </p>
-                )}
+                {!isSearching &&
+                  searchResults.length === 0 &&
+                  searchTerm.length >= 2 && (
+                    <p className="text-center text-muted-foreground py-4">
+                      No movies found.
+                    </p>
+                  )}
               </div>
             )}
           </div>
@@ -525,7 +538,9 @@ function SuggestPageContent() {
                       </div>
                     ))}
                     {friends.length === 0 && (
-                        <p className="text-xs text-muted-foreground col-span-full">Add friends to share suggestions!</p>
+                      <p className="text-xs text-muted-foreground col-span-full">
+                        Add friends to share suggestions!
+                      </p>
                     )}
                   </div>
                 </div>
@@ -664,7 +679,7 @@ function SuggestPageContent() {
                             onClick={() =>
                               handleAcceptSuggestion(
                                 suggestion.id,
-                                suggestion.movie.title
+                                suggestion.movie.title,
                               )
                             }
                           >
@@ -678,7 +693,7 @@ function SuggestPageContent() {
                             onClick={() =>
                               handleIgnoreSuggestion(
                                 suggestion.id,
-                                suggestion.movie.title
+                                suggestion.movie.title,
                               )
                             }
                           >
@@ -701,7 +716,13 @@ function SuggestPageContent() {
 
 export default function SuggestPage() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center h-96"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
       <SuggestPageContent />
     </Suspense>
   );

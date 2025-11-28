@@ -4,20 +4,20 @@ import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 
 const UpdateSuggestionSchema = z.object({
-  action: z.enum(['accept', 'reject']),
+  action: z.enum(["accept", "reject"]),
   rating: z.number().optional(), // If accepting, user might give a rating
 });
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function PATCH(
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: "Invalid data" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -40,18 +40,24 @@ export async function PATCH(
     });
 
     if (!suggestion) {
-      return NextResponse.json({ success: false, error: "Suggestion not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Suggestion not found" },
+        { status: 404 },
+      );
     }
 
     if (suggestion.toUserId !== user.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 403 },
+      );
     }
 
-    if (action === 'accept') {
+    if (action === "accept") {
       // Update suggestion status
       await prisma.suggestion.update({
         where: { id: suggestionId },
-        data: { status: 'accepted' }
+        data: { status: "accepted" },
       });
 
       // Create WatchDesire
@@ -60,49 +66,47 @@ export async function PATCH(
         where: {
           userId_movieId: {
             userId: user.id,
-            movieId: suggestion.movieId
-          }
+            movieId: suggestion.movieId,
+          },
         },
         update: {
           suggestionId: suggestionId,
-          rating: rating || 5 // Default rating if not provided
+          rating: rating || 5, // Default rating if not provided
         },
         create: {
           userId: user.id,
           movieId: suggestion.movieId,
           suggestionId: suggestionId,
-          rating: rating || 5
-        }
+          rating: rating || 5,
+        },
       });
-
-    } else if (action === 'reject') {
+    } else if (action === "reject") {
       await prisma.suggestion.update({
         where: { id: suggestionId },
-        data: { status: 'rejected' }
+        data: { status: "rejected" },
       });
     }
 
     return NextResponse.json({ success: true });
-
   } catch (err) {
     console.error("Update suggestion error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -116,7 +120,7 @@ export async function DELETE(
     if (!suggestion) {
       return NextResponse.json(
         { success: false, error: "Suggestion not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -124,7 +128,7 @@ export async function DELETE(
     if (suggestion.fromUserId !== user.id && suggestion.toUserId !== user.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -134,12 +138,11 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-
   } catch (err) {
     console.error("Delete suggestion error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

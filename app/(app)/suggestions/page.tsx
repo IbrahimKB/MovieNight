@@ -59,7 +59,9 @@ export default function SuggestionsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("received");
-  const [receivedSuggestions, setReceivedSuggestions] = useState<Suggestion[]>([]);
+  const [receivedSuggestions, setReceivedSuggestions] = useState<Suggestion[]>(
+    [],
+  );
   const [sentSuggestions, setSentSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export default function SuggestionsPage() {
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (!user) return;
-      
+
       try {
         setError(null);
         const [receivedRes, sentRes] = await Promise.all([
@@ -103,7 +105,7 @@ export default function SuggestionsPage() {
   const handleAcceptSuggestion = async (
     suggestionId: string,
     movieId: string,
-    movieTitle: string
+    movieTitle: string,
   ) => {
     try {
       const res = await fetch(`/api/suggestions/${suggestionId}`, {
@@ -113,7 +115,7 @@ export default function SuggestionsPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          action: 'accept',
+          action: "accept",
           rating: 5,
         }),
       });
@@ -124,7 +126,7 @@ export default function SuggestionsPage() {
           description: `"${movieTitle}" has been added to your watchlist.`,
         });
         setReceivedSuggestions(
-          receivedSuggestions.filter((s) => s.id !== suggestionId)
+          receivedSuggestions.filter((s) => s.id !== suggestionId),
         );
       } else {
         toast({
@@ -145,7 +147,7 @@ export default function SuggestionsPage() {
 
   const handleRejectSuggestion = async (
     suggestionId: string,
-    movieTitle: string
+    movieTitle: string,
   ) => {
     try {
       const res = await fetch(`/api/suggestions/${suggestionId}`, {
@@ -155,7 +157,7 @@ export default function SuggestionsPage() {
         },
         credentials: "include",
         body: JSON.stringify({
-          action: 'reject',
+          action: "reject",
         }),
       });
 
@@ -165,7 +167,7 @@ export default function SuggestionsPage() {
           description: `"${movieTitle}" has been removed.`,
         });
         setReceivedSuggestions(
-          receivedSuggestions.filter((s) => s.id !== suggestionId)
+          receivedSuggestions.filter((s) => s.id !== suggestionId),
         );
       }
     } catch (error) {
@@ -180,7 +182,7 @@ export default function SuggestionsPage() {
 
   const handleDeleteSentSuggestion = async (
     suggestionId: string,
-    movieTitle: string
+    movieTitle: string,
   ) => {
     try {
       const res = await fetch(`/api/suggestions/${suggestionId}`, {
@@ -194,7 +196,7 @@ export default function SuggestionsPage() {
           description: `Your suggestion for "${movieTitle}" has been removed.`,
         });
         setSentSuggestions(
-          sentSuggestions.filter((s) => s.id !== suggestionId)
+          sentSuggestions.filter((s) => s.id !== suggestionId),
         );
       }
     } catch (error) {
@@ -211,10 +213,10 @@ export default function SuggestionsPage() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
     );
 
-    if (diffInHours < 1) return 'Just now';
+    if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
     return `${diffInDays}d ago`;
@@ -273,11 +275,7 @@ export default function SuggestionsPage() {
               {/* Genre Badges */}
               <div className="flex flex-wrap gap-1 mb-2">
                 {suggestion.movie?.genres?.slice(0, 3).map((genre) => (
-                  <Badge
-                    key={genre}
-                    variant="secondary"
-                    className="text-xs"
-                  >
+                  <Badge key={genre} variant="secondary" className="text-xs">
                     {genre}
                   </Badge>
                 ))}
@@ -300,8 +298,8 @@ export default function SuggestionsPage() {
                     suggestion.status === "pending"
                       ? "outline"
                       : suggestion.status === "accepted"
-                      ? "default"
-                      : "secondary"
+                        ? "default"
+                        : "secondary"
                   }
                   className="text-xs"
                 >
@@ -340,8 +338,7 @@ export default function SuggestionsPage() {
                   <>
                     Suggested to{" "}
                     <span className="font-medium">
-                      {suggestion.toUser?.name ||
-                        suggestion.toUser?.username}
+                      {suggestion.toUser?.name || suggestion.toUser?.username}
                     </span>
                   </>
                 )}
@@ -364,11 +361,7 @@ export default function SuggestionsPage() {
             {/* Actions */}
             {isReceived && suggestion.status === "pending" ? (
               <div className="flex gap-2 mt-4 pt-4 border-t">
-                <Button
-                  size="sm"
-                  className="flex-1"
-                  onClick={onAccept}
-                >
+                <Button size="sm" className="flex-1" onClick={onAccept}>
                   <CheckCircle className="h-4 w-4 mr-1" />
                   Accept
                 </Button>
@@ -397,8 +390,10 @@ export default function SuggestionsPage() {
             ) : (
               <div className="mt-4 pt-4 border-t">
                 <p className="text-xs text-muted-foreground">
-                  {suggestion.status === "accepted" && "✓ You accepted this suggestion"}
-                  {suggestion.status === "rejected" && "✗ You rejected this suggestion"}
+                  {suggestion.status === "accepted" &&
+                    "✓ You accepted this suggestion"}
+                  {suggestion.status === "rejected" &&
+                    "✗ You rejected this suggestion"}
                 </p>
               </div>
             )}
@@ -425,7 +420,8 @@ export default function SuggestionsPage() {
           <h1 className="text-3xl font-bold">Suggestions</h1>
         </div>
         <p className="text-muted-foreground">
-          Discover movies recommended by friends or manage suggestions you've sent
+          Discover movies recommended by friends or manage suggestions you've
+          sent
         </p>
       </div>
 
@@ -476,7 +472,7 @@ export default function SuggestionsPage() {
                   handleAcceptSuggestion(
                     suggestion.id,
                     suggestion.movieId,
-                    suggestion.movie.title
+                    suggestion.movie.title,
                   )
                 }
                 onReject={() =>
@@ -488,9 +484,12 @@ export default function SuggestionsPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No suggestions yet</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No suggestions yet
+                </h3>
                 <p className="text-muted-foreground text-center max-w-sm">
-                  Your friends haven't suggested any movies to you yet. Once they do, they'll appear here!
+                  Your friends haven't suggested any movies to you yet. Once
+                  they do, they'll appear here!
                 </p>
               </CardContent>
             </Card>
@@ -508,7 +507,10 @@ export default function SuggestionsPage() {
                 suggestion={suggestion}
                 isReceived={false}
                 onDelete={() =>
-                  handleDeleteSentSuggestion(suggestion.id, suggestion.movie.title)
+                  handleDeleteSentSuggestion(
+                    suggestion.id,
+                    suggestion.movie.title,
+                  )
                 }
               />
             ))
@@ -516,11 +518,17 @@ export default function SuggestionsPage() {
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <Send className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No sent suggestions</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  No sent suggestions
+                </h3>
                 <p className="text-muted-foreground text-center max-w-sm mb-4">
-                  You haven't suggested any movies to your friends yet. Use the suggest feature to share movies!
+                  You haven't suggested any movies to your friends yet. Use the
+                  suggest feature to share movies!
                 </p>
-                <Button onClick={() => router.push('/suggest')} variant="default">
+                <Button
+                  onClick={() => router.push("/suggest")}
+                  variant="default"
+                >
                   Suggest a Movie
                 </Button>
               </CardContent>
