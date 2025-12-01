@@ -8,6 +8,7 @@ export function initializeSocket(server: HTTPServer) {
   if (io) return io;
 
   io = new SocketIOServer(server, {
+    path: "/api/socket.io",
     cors: {
       origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       methods: ["GET", "POST"],
