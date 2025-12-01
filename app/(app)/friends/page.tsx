@@ -114,7 +114,6 @@ export default function FriendsPage() {
       toast({
         title: "New friend request!",
         description: `${data.fromUser.name || data.fromUser.username} sent you a friend request`,
-        duration: 5000,
       });
     });
 
