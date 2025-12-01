@@ -1,11 +1,27 @@
+"use server";
+
 export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    // Only import and run cron in Node.js environment
-    const { initCronJobs } = await import('@/lib/cron');
-    
-    // Prevent running during build
-    if (process.env.NEXT_PHASE !== 'phase-production-build') {
-      initCronJobs();
-    }
+  // Only initialize in Node.js runtime (not in Edge/Middleware)
+  if (process.env.NEXT_RUNTIME !== "nodejs") {
+    return;
+  }
+
+  // Skip cron jobs during build and export phases
+  const buildPhases = ["phase-production-build", "phase-export"];
+
+  if (buildPhases.includes(process.env.NEXT_PHASE || "")) {
+    console.log(
+      `[CRON] Skipped initialization during ${process.env.NEXT_PHASE}`,
+    );
+    return;
+  }
+
+  try {
+    const { initCronJobs } = await import("@/lib/cron");
+    initCronJobs();
+    console.log("[CRON] Successfully initialized");
+  } catch (error) {
+    console.error("[CRON] Failed to initialize cron jobs:", error);
+    // Don't crash the app if cron fails to initialize
   }
 }

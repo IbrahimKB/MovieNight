@@ -1,5 +1,5 @@
 import { Server as HTTPServer } from "http";
-import { Socket } from "socket.io";
+import { Socket, Server as SocketIOServer } from "socket.io";
 
 interface SocketWithUser extends Socket {
   userId?: string;
@@ -13,8 +13,6 @@ export function initializeSocket(server: HTTPServer) {
   if (io) return io;
 
   try {
-    const { Server: SocketIOServer } = require("socket.io");
-
     io = new SocketIOServer(server, {
       path: "/api/socket.io",
       cors: {

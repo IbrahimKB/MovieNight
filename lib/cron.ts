@@ -1,3 +1,5 @@
+"use server";
+
 /**
  * Cron Job Scheduler
  * Runs background tasks at scheduled times
@@ -38,8 +40,10 @@ export function initCronJobs() {
     console.log("[CRON] Triggering upcoming releases sync at 3:15 AM...");
     try {
       await syncUpcomingReleases();
+      console.log("[CRON] Upcoming releases sync completed successfully");
     } catch (err) {
       console.error("[CRON] Upcoming releases sync error:", err);
+      // Continue running - don't let one failed sync stop the scheduler
     }
   });
 
