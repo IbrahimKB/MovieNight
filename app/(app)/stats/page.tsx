@@ -50,10 +50,7 @@ export default function StatsPage() {
       if (!user) return;
 
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-
-        const res = await fetch("/api/stats", { headers, credentials: "include" });
+        const res = await fetch("/api/stats", { credentials: "include" });
         const data = await res.json();
 
         if (data.success) {
