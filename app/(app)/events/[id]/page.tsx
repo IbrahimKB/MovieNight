@@ -58,13 +58,16 @@ export default function EventDetailPage() {
     if (eventId) {
       fetchEvent();
     }
-  }, [eventId, token]);
+  }, [eventId]);
 
   const handleRSVP = async () => {
     try {
       const res = await fetch(`/api/events/${eventId}`, {
         method: "PATCH",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({
           action: isAttending ? "unattend" : "attend",
         }),
