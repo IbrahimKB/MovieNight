@@ -5,8 +5,6 @@ import { LayoutClient } from "@/components/layout-client";
 import { initCronJobs } from "@/lib/cron";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
-export const dynamic = "force-dynamic";
-
 export const viewport: Viewport = {
   themeColor: "#0a0a0a",
   width: "device-width",
