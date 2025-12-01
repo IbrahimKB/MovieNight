@@ -17,9 +17,7 @@ const sizeMap = {
  * MovieNight Brand Logo
  * Concept: Film reel meets connection node - representing cinema + social
  * Uses primary brand colors and scales responsively
- *
- * Note: This component is for client-side only (used in app layout navbar).
- * For SSR pages (auth pages), use the Clapperboard icon instead.
+ * Works on both server and client (pure SVG, no interactivity)
  */
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
   return (
