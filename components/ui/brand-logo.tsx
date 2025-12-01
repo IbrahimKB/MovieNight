@@ -19,9 +19,7 @@ const sizeMap = {
  * MovieNight Brand Logo
  * Concept: Film reel meets connection node - representing cinema + social
  * Uses primary brand colors and scales responsively
- *
- * Note: This component is for client-side only (used in app layout navbar).
- * For SSR pages (auth pages), use the Clapperboard icon instead.
+ * Works on both server and client (pure SVG, no interactivity)
  */
 export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
   return (
@@ -33,51 +31,18 @@ export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
       role="img"
       aria-label="MovieNight"
     >
-      {/* Define gradients for depth */}
-      <defs>
-        <linearGradient id="reel-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#3b82f6", stopOpacity: 1 }} />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#1e40af", stopOpacity: 1 }}
-          />
-        </linearGradient>
-        <radialGradient id="glow">
-          <stop
-            offset="0%"
-            style={{ stopColor: "#60a5fa", stopOpacity: 0.3 }}
-          />
-          <stop
-            offset="100%"
-            style={{ stopColor: "#3b82f6", stopOpacity: 0 }}
-          />
-        </radialGradient>
-      </defs>
-
-      {/* Background circle */}
-      <circle cx="256" cy="256" r="256" fill="currentColor" opacity="0.05" />
-
-      {/* Outer film reel circles */}
-      <circle
-        cx="256"
-        cy="256"
-        r="200"
-        fill="url(#reel-gradient)"
-        opacity="0.1"
-      />
-
       {/* Main reel ring */}
       <circle
         cx="256"
         cy="256"
         r="180"
         fill="none"
-        stroke="url(#reel-gradient)"
+        stroke="currentColor"
         strokeWidth="24"
       />
 
       {/* Reel film perforations (top, right, bottom, left) */}
-      <g fill="currentColor" opacity="0.7">
+      <g fill="currentColor" opacity="0.8">
         {/* Top hole */}
         <rect x="240" y="95" width="32" height="32" rx="4" />
         {/* Right hole */}
@@ -90,8 +55,6 @@ export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
 
       {/* Central play button (representing cinema) */}
       <g transform="translate(256, 256)">
-        <circle cx="0" cy="0" r="70" fill="currentColor" opacity="0.1" />
-
         {/* Play triangle */}
         <path
           d="M -20 -35 L -20 35 L 40 0 Z"
@@ -99,40 +62,6 @@ export function BrandLogo({ className, size = "md" }: BrandLogoProps) {
           opacity="0.9"
         />
       </g>
-
-      {/* Connection nodes (representing social) - subtle highlights */}
-      <g fill="currentColor" opacity="0.5">
-        {/* Top-right */}
-        <circle cx="350" cy="170" r="12" />
-        {/* Bottom-right */}
-        <circle cx="350" cy="342" r="12" />
-        {/* Bottom-left */}
-        <circle cx="162" cy="342" r="12" />
-        {/* Top-left */}
-        <circle cx="162" cy="170" r="12" />
-      </g>
-
-      {/* Connecting lines between nodes (subtle) */}
-      <g
-        stroke="currentColor"
-        strokeWidth="3"
-        opacity="0.25"
-        strokeLinecap="round"
-      >
-        <line x1="350" y1="170" x2="350" y2="342" />
-        <line x1="350" y1="342" x2="162" y2="342" />
-        <line x1="162" y1="342" x2="162" y2="170" />
-        <line x1="162" y1="170" x2="350" y2="170" />
-      </g>
-
-      {/* Optional glow effect for premium feel */}
-      <circle
-        cx="256"
-        cy="256"
-        r="180"
-        fill="url(#glow)"
-        pointerEvents="none"
-      />
     </svg>
   );
 }

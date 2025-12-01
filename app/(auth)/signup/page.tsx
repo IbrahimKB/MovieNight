@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, User, ArrowRight, Clapperboard } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Film } from "lucide-react";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -127,9 +127,7 @@ export default function SignupPage() {
         {/* Logo Section */}
         <div className="mb-12 text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-2xl shadow-primary/50">
-              <Clapperboard size={32} className="text-white" />
-            </div>
+            <Film size={48} className="text-white" strokeWidth={1.5} />
           </div>
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
             MovieNight
