@@ -124,9 +124,7 @@ export function SuggestionLeaderboard() {
     const fetchLeaderboard = async () => {
       if (!user) return;
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-        const res = await fetch("/api/stats", { headers });
+        const res = await fetch("/api/stats", { credentials: "include" });
         const data = await res.json();
         if (data.success) {
             setBoard(data.squadStats.map((s: any) => ({
