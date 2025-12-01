@@ -100,6 +100,11 @@ export default function MovieDetailPage() {
         setFriendsWhoWatched([]);
       } catch (error) {
         console.error("Failed to fetch movie:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load movie details. Please try again.",
+          variant: "error",
+        });
       } finally {
         setLoading(false);
       }
