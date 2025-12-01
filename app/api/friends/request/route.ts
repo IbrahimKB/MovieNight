@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { emitToUser } from "@/lib/socket-server";
 import { ApiResponse } from "@/types";
 
 // ---------------------------------------------
