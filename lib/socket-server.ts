@@ -1,14 +1,7 @@
 import { Server as HTTPServer } from "http";
+import type { Server as SocketIOServer } from "socket.io";
 
-let io: any = null; // SocketIOServer type is only needed at runtime, not in dev
-
-try {
-  const SocketIO = require("socket.io");
-  // Socket.io will be imported only when custom server runs (production)
-} catch (e) {
-  // Socket.io not available (development with next dev)
-}
-
+let io: SocketIOServer | null = null;
 const userSockets = new Map<string, string>(); // userId -> socketId
 
 export function initializeSocket(server: HTTPServer) {
