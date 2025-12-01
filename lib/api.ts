@@ -67,7 +67,10 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
     const errorData = await response
       .json()
       .catch(() => ({ error: "Network error" }));
-    const errorMessage = formatErrorMessage(errorData.error, `HTTP ${response.status}`);
+    const errorMessage = formatErrorMessage(
+      errorData.error,
+      `HTTP ${response.status}`,
+    );
     throw new Error(errorMessage);
   }
 
@@ -81,15 +84,20 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
 }
 
 // Helper to format error messages from various error types
-function formatErrorMessage(error: string | Record<string, any> | { field?: string; message: string }[] | undefined, fallback: string): string {
+function formatErrorMessage(
+  error:
+    | string
+    | Record<string, any>
+    | { field?: string; message: string }[]
+    | undefined,
+  fallback: string,
+): string {
   if (typeof error === "string") {
     return error;
   }
 
   if (Array.isArray(error)) {
-    return error
-      .map((e) => e.message || JSON.stringify(e))
-      .join("; ");
+    return error.map((e) => e.message || JSON.stringify(e)).join("; ");
   }
 
   if (error && typeof error === "object") {
