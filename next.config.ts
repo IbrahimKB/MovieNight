@@ -19,10 +19,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    // Disable static prerendering of error pages
-    prerenderErrorPages: false,
-  },
 };
 
 export default nextConfig;
