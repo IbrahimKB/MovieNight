@@ -57,7 +57,7 @@ RUN chown nextjs:nodejs .next
 # We do this BEFORE switching to user nextjs to ensure we have permissions
 # Also install openssl explicitly to fix prisma detection issues
 RUN apk add --no-cache openssl
-RUN npm install prisma@5.21.1
+RUN npm install prisma@5.21.1 tsx@4.21.0
 
 # Ensure node_modules is owned by the correct user so prisma can write to it at runtime if needed
 # (though ideally we only run the CLI which writes to tmp or reads)
