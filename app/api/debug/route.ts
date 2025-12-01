@@ -3,6 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { tmdbClient } from "@/lib/tmdb";
 
 export async function GET() {
+  // Only allow debug endpoint in development
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json(
+      { error: "Debug endpoint not available in production" },
+      { status: 403 }
+    );
+  }
+
   const diagnostics: Record<string, any> = {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
