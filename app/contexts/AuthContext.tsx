@@ -357,11 +357,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // -----------------------------------------------------
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("movienight_user");
-    localStorage.removeItem("movienight_login_time");
-    
-    // Optional: Call logout API to delete session from DB
-    fetch(`${API_BASE}/auth/logout`, { method: "POST" }).catch(console.error);
+
+    // Clear localStorage safely
+    try {
+      localStorage.removeItem("movienight_user");
+      localStorage.removeItem("movienight_login_time");
+    } catch (storageError) {
+      console.error("Failed to clear localStorage during logout:", storageError);
+    }
+
+    // Call logout API to delete session from DB (best effort, don't block on failure)
+    fetch(`${API_BASE}/auth/logout`, { method: "POST" })
+      .catch((error) => {
+        console.error("Logout API call failed:", error);
+        // Not critical - session will expire anyway
+      });
   };
 
   const isAdmin = user?.role === "admin";
