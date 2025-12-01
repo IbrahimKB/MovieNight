@@ -43,7 +43,7 @@ export default function CalendarPage() {
     };
 
     fetchEvents();
-  }, [token]);
+  }, []);
 
   // Update day events when selected date changes
   useEffect(() => {
