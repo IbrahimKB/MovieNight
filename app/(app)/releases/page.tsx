@@ -44,7 +44,7 @@ export default function ReleasesPage() {
     };
 
     fetchReleases();
-  }, [token]);
+  }, []);
 
   const ReleaseCard = ({ release }: { release: Release }) => {
     const releaseDate = new Date(release.releaseDate);
