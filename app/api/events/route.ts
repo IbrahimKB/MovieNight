@@ -147,8 +147,11 @@ export async function POST(
     });
 
     // Map participants back to external IDs
-    const externalParticipants = await Promise.all(
+    const mappedResults = await Promise.allSettled(
       internalParticipants.map((id) => mapInternalUserIdToExternal(id)),
+    );
+    const externalParticipants = mappedResults.map((result) =>
+      result.status === "fulfilled" ? result.value : "",
     );
 
     return NextResponse.json(
@@ -216,11 +219,14 @@ export async function GET(
       orderBy: { date: "asc" },
     });
 
-    const mapped = await Promise.all(
+    const mapped = await Promise.allSettled(
       events.map(async (event) => {
         const participantsInternal: string[] = event.participants ?? [];
-        const externalParticipants = await Promise.all(
+        const mappedResults = await Promise.allSettled(
           participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
+        );
+        const externalParticipants = mappedResults.map((result) =>
+          result.status === "fulfilled" ? result.value : "",
         );
 
         const hostExternalId =
@@ -246,7 +252,12 @@ export async function GET(
       }),
     );
 
-    return NextResponse.json({ success: true, data: mapped });
+    const successfulMappings = mapped
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value)
+      .filter((m) => m !== null);
+
+    return NextResponse.json({ success: true, data: successfulMappings });
   } catch (err) {
     console.error("Get events error:", err);
     return NextResponse.json(

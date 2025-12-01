@@ -21,7 +21,6 @@ import {
   Bookmark,
   Check,
   Users,
-  Film,
   Star,
   X,
   Loader2,
@@ -47,7 +46,7 @@ interface Friend {
   avatar?: string;
 }
 
-type ActionTab = "watchlist" | "watched" | "suggest" | "movienight";
+type ActionTab = "watchlist" | "watched" | "suggest";
 
 interface AddMovieModalProps {
   isOpen: boolean;
@@ -97,8 +96,9 @@ export function AddMovieModal({
   };
 
   const handleAddToWatchlist = async () => {
-    if (!movie) return;
+    if (!movie || !movie.tmdbId || !movie.title) return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const res = await fetch("/api/watch/desire/add-from-tmdb", {
@@ -106,13 +106,13 @@ export function AddMovieModal({
         headers,
         credentials: "include",
         body: JSON.stringify({
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
+          tmdbId: movieSnapshot.tmdbId,
+          title: movieSnapshot.title,
+          year: movieSnapshot.year,
+          genres: movieSnapshot.genres,
+          poster: movieSnapshot.poster,
           description: "",
-          imdbRating: movie.imdbRating,
+          imdbRating: movieSnapshot.imdbRating,
           rating: desiredScore[0],
         }),
       });
@@ -120,7 +120,7 @@ export function AddMovieModal({
       if (res.ok) {
         toast({
           title: "Added!",
-          description: `"${movie.title}" added to your watchlist`,
+          description: `"${movieSnapshot.title}" added to your watchlist`,
         });
         onMovieAdded?.();
         handleClose();
@@ -145,8 +145,9 @@ export function AddMovieModal({
   };
 
   const handleMarkAsWatched = async () => {
-    if (!movie) return;
+    if (!movie || !movie.tmdbId || !movie.title) return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const res = await fetch("/api/watch/mark-watched", {
@@ -154,12 +155,12 @@ export function AddMovieModal({
         headers,
         credentials: "include",
         body: JSON.stringify({
-          movieId: movie.id || `tmdb_${movie.tmdbId}`,
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
+          movieId: movieSnapshot.id || `tmdb_${movieSnapshot.tmdbId}`,
+          tmdbId: movieSnapshot.tmdbId,
+          title: movieSnapshot.title,
+          year: movieSnapshot.year,
+          genres: movieSnapshot.genres,
+          poster: movieSnapshot.poster,
           watchedDate: watchedDate,
           rating: rating[0],
           review: review || undefined,
@@ -170,7 +171,7 @@ export function AddMovieModal({
       if (res.ok) {
         toast({
           title: "Success!",
-          description: `"${movie.title}" marked as watched`,
+          description: `"${movieSnapshot.title}" marked as watched`,
         });
         onMovieAdded?.();
         handleClose();
@@ -195,8 +196,10 @@ export function AddMovieModal({
   };
 
   const handleSuggestToFriends = async () => {
-    if (!movie || selectedFriends.length === 0) return;
+    if (!movie || !movie.tmdbId || !movie.title || selectedFriends.length === 0)
+      return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const promises = selectedFriends.map((friendId) =>
@@ -205,13 +208,13 @@ export function AddMovieModal({
           headers,
           credentials: "include",
           body: JSON.stringify({
-            movieId: movie.id || `tmdb_${movie.tmdbId}`,
-            tmdbId: movie.tmdbId,
+            movieId: movieSnapshot.id || `tmdb_${movieSnapshot.tmdbId}`,
+            tmdbId: movieSnapshot.tmdbId,
             toUserId: friendId,
-            title: movie.title,
-            year: movie.year,
-            genres: movie.genres,
-            poster: movie.poster,
+            title: movieSnapshot.title,
+            year: movieSnapshot.year,
+            genres: movieSnapshot.genres,
+            poster: movieSnapshot.poster,
             message: message || undefined,
           }),
         }),
@@ -223,7 +226,7 @@ export function AddMovieModal({
       if (allSuccessful) {
         toast({
           title: "Suggested!",
-          description: `"${movie.title}" suggested to ${selectedFriends.length} friend${selectedFriends.length > 1 ? "s" : ""}`,
+          description: `"${movieSnapshot.title}" suggested to ${selectedFriends.length} friend${selectedFriends.length > 1 ? "s" : ""}`,
         });
         onMovieAdded?.();
         handleClose();
@@ -239,53 +242,6 @@ export function AddMovieModal({
       toast({
         title: "Error",
         description: "Failed to suggest movie",
-        variant: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleAddToMovieNight = async () => {
-    if (!movie) return;
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/movie-night", {
-        method: "POST",
-        headers,
-        credentials: "include",
-        body: JSON.stringify({
-          movieId: movie.id || `tmdb_${movie.tmdbId}`,
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
-          description: message || undefined,
-        }),
-      });
-
-      if (res.ok) {
-        toast({
-          title: "Added!",
-          description: `"${movie.title}" added to movie night suggestions`,
-        });
-        onMovieAdded?.();
-        handleClose();
-      } else {
-        const data = await res.json();
-        toast({
-          title: "Error",
-          description: data.error || "Failed to add to movie night",
-          variant: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to add to movie night:", error);
-      toast({
-        title: "Error",
-        description: "Failed to add to movie night",
         variant: "error",
       });
     } finally {
@@ -387,11 +343,6 @@ export function AddMovieModal({
                         id: "suggest" as ActionTab,
                         label: "Suggest to Friends",
                         icon: Users,
-                      },
-                      {
-                        id: "movienight" as ActionTab,
-                        label: "Add to Movie Night",
-                        icon: Film,
                       },
                     ].map((tab) => (
                       <button
@@ -633,46 +584,6 @@ export function AddMovieModal({
                             {selectedFriends.length === 1
                               ? "Friend"
                               : "Friends"}
-                          </>
-                        )}
-                      </Button>
-                    </motion.div>
-                  )}
-
-                  {activeTab === "movienight" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="space-y-4"
-                    >
-                      <div className="space-y-2">
-                        <Label htmlFor="movienight-message">
-                          Why This Movie? (Optional)
-                        </Label>
-                        <Textarea
-                          id="movienight-message"
-                          placeholder="Describe why you think this would be great for movie night..."
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                          className="min-h-24 resize-none"
-                        />
-                      </div>
-
-                      <Button
-                        onClick={handleAddToMovieNight}
-                        disabled={isLoading}
-                        className="w-full"
-                      >
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Adding...
-                          </>
-                        ) : (
-                          <>
-                            <Film className="h-4 w-4 mr-2" />
-                            Add to Movie Night
                           </>
                         )}
                       </Button>

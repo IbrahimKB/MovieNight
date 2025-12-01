@@ -175,7 +175,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const createdSuggestions = await Promise.all(
+    const createdResults = await Promise.allSettled(
       internalFriendIds.map((id) =>
         prisma.suggestion.create({
           data: {
@@ -189,9 +189,13 @@ export async function POST(req: NextRequest) {
       ),
     );
 
+    const successfulSuggestions = createdResults.filter(
+      (result) => result.status === "fulfilled",
+    );
+
     return NextResponse.json({
       success: true,
-      count: createdSuggestions.length,
+      count: successfulSuggestions.length,
     });
   } catch (err) {
     console.error("Create suggestion error:", err);

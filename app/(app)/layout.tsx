@@ -73,18 +73,22 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
       <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between min-h-[64px]">
+        <div className="px-3 sm:px-6 lg:px-8 py-3 flex items-center min-h-[64px]">
+          {/* Logo */}
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 active:scale-95 transition-all duration-200 flex-shrink-0"
+            className="flex items-center gap-1.5 sm:gap-3 hover:opacity-80 active:scale-95 transition-all duration-200 flex-shrink-0"
           >
-            <div className="w-9 h-9">
+            <div className="w-8 h-8 sm:w-9 sm:h-9">
               <BrandLogo size="md" className="text-primary" />
             </div>
             <span className="hidden sm:inline text-lg sm:text-xl font-bold text-primary whitespace-nowrap">
               MovieNight
             </span>
           </button>
+
+          {/* Spacer */}
+          <div className="flex-1" />
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex gap-1 items-center">
@@ -115,29 +119,29 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
 
-          {/* Tablet/Mobile - Icon Only Navigation */}
-          <div className="hidden md:flex lg:hidden items-center gap-1">
+          {/* Tablet - Icon Only Navigation */}
+          <div className="hidden md:flex lg:hidden items-center gap-0.5 ml-auto">
             {navItems.slice(0, 3).map((item) => (
               <button
                 key={item.href}
                 onClick={() => router.push(item.href)}
                 title={item.label}
-                className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2.5 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
               >
                 <item.icon size={20} />
               </button>
             ))}
-            <div className="h-6 w-px bg-border mx-1" />
+            <div className="h-6 w-px bg-border mx-0.5" />
             <button
               onClick={() => router.push("/settings")}
               title="Settings"
-              className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2.5 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 p-2 rounded-lg hover:bg-accent/30 min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               <Settings size={20} />
             </button>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-foreground p-2.5 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="text-foreground p-2 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
             >
               {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -146,7 +150,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden text-foreground p-2.5 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="md:hidden text-foreground p-2 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center ml-auto flex-shrink-0"
           >
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
