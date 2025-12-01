@@ -29,13 +29,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Check if user is authenticated
-  useEffect(() => {
-    if (mounted && !isLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, isLoading, mounted, router]);
-
   if (!mounted || isLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
@@ -49,8 +42,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     );
   }
 
+  // Allow unauthenticated users to see landing page
+  // Navigation bar is only shown for authenticated users
   if (!user) {
-    return null; // Will redirect via useEffect
+    return <>{children}</>;
   }
 
   const handleLogout = () => {
