@@ -95,8 +95,13 @@ export default function HomePage() {
     }
   };
 
-  // Pull-to-refresh handler
+  // Pull-to-refresh handler (mobile only)
   const handlePullToRefresh = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Only enable on mobile (< 768px)
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+      return;
+    }
+
     if (e.type === "touchstart") {
       pullStartY.current = e.touches[0].clientY;
     } else if (e.type === "touchmove") {
