@@ -96,8 +96,9 @@ export function AddMovieModal({
   };
 
   const handleAddToWatchlist = async () => {
-    if (!movie) return;
+    if (!movie || !movie.tmdbId || !movie.title) return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const res = await fetch("/api/watch/desire/add-from-tmdb", {
@@ -105,13 +106,13 @@ export function AddMovieModal({
         headers,
         credentials: "include",
         body: JSON.stringify({
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
+          tmdbId: movieSnapshot.tmdbId,
+          title: movieSnapshot.title,
+          year: movieSnapshot.year,
+          genres: movieSnapshot.genres,
+          poster: movieSnapshot.poster,
           description: "",
-          imdbRating: movie.imdbRating,
+          imdbRating: movieSnapshot.imdbRating,
           rating: desiredScore[0],
         }),
       });
@@ -119,7 +120,7 @@ export function AddMovieModal({
       if (res.ok) {
         toast({
           title: "Added!",
-          description: `"${movie.title}" added to your watchlist`,
+          description: `"${movieSnapshot.title}" added to your watchlist`,
         });
         onMovieAdded?.();
         handleClose();
@@ -144,8 +145,9 @@ export function AddMovieModal({
   };
 
   const handleMarkAsWatched = async () => {
-    if (!movie) return;
+    if (!movie || !movie.tmdbId || !movie.title) return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const res = await fetch("/api/watch/mark-watched", {
@@ -153,12 +155,12 @@ export function AddMovieModal({
         headers,
         credentials: "include",
         body: JSON.stringify({
-          movieId: movie.id || `tmdb_${movie.tmdbId}`,
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          year: movie.year,
-          genres: movie.genres,
-          poster: movie.poster,
+          movieId: movieSnapshot.id || `tmdb_${movieSnapshot.tmdbId}`,
+          tmdbId: movieSnapshot.tmdbId,
+          title: movieSnapshot.title,
+          year: movieSnapshot.year,
+          genres: movieSnapshot.genres,
+          poster: movieSnapshot.poster,
           watchedDate: watchedDate,
           rating: rating[0],
           review: review || undefined,
@@ -169,7 +171,7 @@ export function AddMovieModal({
       if (res.ok) {
         toast({
           title: "Success!",
-          description: `"${movie.title}" marked as watched`,
+          description: `"${movieSnapshot.title}" marked as watched`,
         });
         onMovieAdded?.();
         handleClose();
@@ -194,8 +196,9 @@ export function AddMovieModal({
   };
 
   const handleSuggestToFriends = async () => {
-    if (!movie || selectedFriends.length === 0) return;
+    if (!movie || !movie.tmdbId || !movie.title || selectedFriends.length === 0) return;
     setIsLoading(true);
+    const movieSnapshot = { ...movie };
 
     try {
       const promises = selectedFriends.map((friendId) =>
@@ -204,13 +207,13 @@ export function AddMovieModal({
           headers,
           credentials: "include",
           body: JSON.stringify({
-            movieId: movie.id || `tmdb_${movie.tmdbId}`,
-            tmdbId: movie.tmdbId,
+            movieId: movieSnapshot.id || `tmdb_${movieSnapshot.tmdbId}`,
+            tmdbId: movieSnapshot.tmdbId,
             toUserId: friendId,
-            title: movie.title,
-            year: movie.year,
-            genres: movie.genres,
-            poster: movie.poster,
+            title: movieSnapshot.title,
+            year: movieSnapshot.year,
+            genres: movieSnapshot.genres,
+            poster: movieSnapshot.poster,
             message: message || undefined,
           }),
         }),
@@ -222,7 +225,7 @@ export function AddMovieModal({
       if (allSuccessful) {
         toast({
           title: "Suggested!",
-          description: `"${movie.title}" suggested to ${selectedFriends.length} friend${selectedFriends.length > 1 ? "s" : ""}`,
+          description: `"${movieSnapshot.title}" suggested to ${selectedFriends.length} friend${selectedFriends.length > 1 ? "s" : ""}`,
         });
         onMovieAdded?.();
         handleClose();
