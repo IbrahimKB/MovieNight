@@ -35,7 +35,9 @@ async function mapExternalUserIdToInternal(
   }
 }
 
-async function mapInternalUserIdToExternal(internalId: string): Promise<string> {
+async function mapInternalUserIdToExternal(
+  internalId: string,
+): Promise<string> {
   try {
     const user = await prisma.authUser.findUnique({
       where: { id: internalId },
@@ -63,7 +65,7 @@ function getEventIdFromRequest(req: NextRequest): string | null {
 // ---------------------------------------------------------------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const currentUser = await getCurrentUser();
@@ -122,9 +124,9 @@ export async function GET(
     const mappedResults = await Promise.allSettled(
       participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
     );
-    const externalParticipants = mappedResults.map((result) =>
-      result.status === "fulfilled" ? result.value : "",
-    ).filter((p) => p !== "");
+    const externalParticipants = mappedResults
+      .map((result) => (result.status === "fulfilled" ? result.value : ""))
+      .filter((p) => p !== "");
 
     const hostExternalId = event.hostUser
       ? event.hostUser.puid || event.hostUser.id
@@ -164,7 +166,7 @@ export async function GET(
 // ---------------------------------------------------------------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const currentUser = await getCurrentUser();
@@ -274,9 +276,9 @@ export async function PATCH(
     const mappedResults = await Promise.allSettled(
       participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
     );
-    const externalParticipants = mappedResults.map((result) =>
-      result.status === "fulfilled" ? result.value : "",
-    ).filter((p) => p !== "");
+    const externalParticipants = mappedResults
+      .map((result) => (result.status === "fulfilled" ? result.value : ""))
+      .filter((p) => p !== "");
 
     return NextResponse.json({
       success: true,
@@ -305,7 +307,7 @@ export async function PATCH(
 // ---------------------------------------------------------------------------
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const currentUser = await getCurrentUser();

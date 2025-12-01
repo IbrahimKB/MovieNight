@@ -196,7 +196,8 @@ export function AddMovieModal({
   };
 
   const handleSuggestToFriends = async () => {
-    if (!movie || !movie.tmdbId || !movie.title || selectedFriends.length === 0) return;
+    if (!movie || !movie.tmdbId || !movie.title || selectedFriends.length === 0)
+      return;
     setIsLoading(true);
     const movieSnapshot = { ...movie };
 
@@ -247,7 +248,6 @@ export function AddMovieModal({
       setIsLoading(false);
     }
   };
-
 
   const toggleFriend = (friendId: string) => {
     setSelectedFriends((prev) =>
@@ -344,7 +344,7 @@ export function AddMovieModal({
                         label: "Suggest to Friends",
                         icon: Users,
                       },
-                      ].map((tab) => (
+                    ].map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
@@ -589,7 +589,6 @@ export function AddMovieModal({
                       </Button>
                     </motion.div>
                   )}
-
                 </div>
               </div>
             </motion.div>
