@@ -132,7 +132,7 @@ export default function SuggestionsPage() {
         toast({
           title: "Error",
           description: "Failed to accept suggestion.",
-          variant: "destructive",
+          variant: "error",
         });
       }
     } catch (error) {
@@ -140,7 +140,7 @@ export default function SuggestionsPage() {
       toast({
         title: "Error",
         description: "Failed to accept suggestion.",
-        variant: "destructive",
+        variant: "error",
       });
     }
   };
@@ -175,7 +175,7 @@ export default function SuggestionsPage() {
       toast({
         title: "Error",
         description: "Failed to reject suggestion.",
-        variant: "destructive",
+        variant: "error",
       });
     }
   };
@@ -204,7 +204,7 @@ export default function SuggestionsPage() {
       toast({
         title: "Error",
         description: "Failed to delete suggestion.",
-        variant: "destructive",
+        variant: "error",
       });
     }
   };
