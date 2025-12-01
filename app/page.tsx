@@ -83,7 +83,11 @@ export default function HomePage() {
     try {
       setIsLoading(true);
 
-      const { stats: dashboardStats, trending, upcoming } = await getDashboardStats();
+      const {
+        stats: dashboardStats,
+        trending,
+        upcoming,
+      } = await getDashboardStats();
 
       setStats(dashboardStats);
       setTrendingMovies(trending);
@@ -98,7 +102,7 @@ export default function HomePage() {
   // Pull-to-refresh handler (mobile only)
   const handlePullToRefresh = (e: React.TouchEvent<HTMLDivElement>) => {
     // Only enable on mobile (< 768px)
-    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
       return;
     }
 
