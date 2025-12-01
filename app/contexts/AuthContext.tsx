@@ -98,10 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (e) {
         // If server check fails, clear local user data
-        localStorage.removeItem("movienight_user");
-        // Token is not used, but clean up if exists
-        localStorage.removeItem("movienight_token"); 
-        localStorage.removeItem("movienight_login_time");
+        try {
+          localStorage.removeItem("movienight_user");
+          localStorage.removeItem("movienight_token");
+          localStorage.removeItem("movienight_login_time");
+        } catch (storageError) {
+          // localStorage might be unavailable in private browsing mode
+          console.error("Failed to clear localStorage:", storageError);
+        }
         setUser(null);
       } finally {
         setIsLoading(false);
