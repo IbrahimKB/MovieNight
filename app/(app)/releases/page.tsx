@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clapperboard } from "lucide-react";
+import { Calendar, Clapperboard, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Release {
   id: string;
@@ -14,10 +15,20 @@ interface Release {
   genres?: string[];
 }
 
+interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
+}
+
 export default function ReleasesPage() {
   const router = useRouter();
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const token =
     typeof window !== "undefined"
