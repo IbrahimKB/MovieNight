@@ -119,9 +119,12 @@ export async function GET(
       );
     }
 
-    const externalParticipants = await Promise.all(
+    const mappedResults = await Promise.allSettled(
       participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
     );
+    const externalParticipants = mappedResults.map((result) =>
+      result.status === "fulfilled" ? result.value : "",
+    ).filter((p) => p !== "");
 
     const hostExternalId = event.hostUser
       ? event.hostUser.puid || event.hostUser.id
@@ -268,9 +271,12 @@ export async function PATCH(
     });
 
     const participantsInternal: string[] = updatedEvent.participants ?? [];
-    const externalParticipants = await Promise.all(
+    const mappedResults = await Promise.allSettled(
       participantsInternal.map((pid) => mapInternalUserIdToExternal(pid)),
     );
+    const externalParticipants = mappedResults.map((result) =>
+      result.status === "fulfilled" ? result.value : "",
+    ).filter((p) => p !== "");
 
     return NextResponse.json({
       success: true,
