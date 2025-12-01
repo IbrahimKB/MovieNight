@@ -19,10 +19,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Skip prerendering for error pages (causes issues with Next.js internal Html component)
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 5,
+  experimental: {
+    // Disable static prerendering of error pages
+    prerenderErrorPages: false,
   },
 };
 
