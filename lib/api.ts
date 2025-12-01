@@ -68,7 +68,14 @@ function getAuthHeaders() {
   };
 }
 
-// Helper to handle API responses
+// Standard API Response type
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string | { field?: string; message: string }[];
+}
+
+// Helper to handle API responses with better type safety
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response

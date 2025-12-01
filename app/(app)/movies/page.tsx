@@ -136,7 +136,7 @@ export default function MoviesPage() {
         const data = await res.json();
 
         if (data.success && data.data) {
-          const results = data.data.map((movie: any) => ({
+          const results = data.data.map((movie: Movie) => ({
             id: movie.id || `tmdb_${movie.tmdbId}`,
             tmdbId: movie.tmdbId,
             title: movie.title,
