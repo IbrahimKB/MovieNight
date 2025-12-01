@@ -57,19 +57,20 @@ export default function MovieDetailPage() {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const res = await fetch(`/api/movies/${movieId}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
+        // Parallelize independent requests
+        const [movieRes, watchlistRes, historyRes, friendsRes] = await Promise.all([
+          fetch(`/api/movies/${movieId}`, { credentials: "include" }),
+          fetch("/api/watch/desire", { credentials: "include" }),
+          fetch("/api/watch/history", { credentials: "include" }),
+          fetch("/api/friends", { credentials: "include" }),
+        ]);
 
+        const data = await movieRes.json();
         if (data.success && data.data) {
           setMovie(data.data);
         }
 
         // Check if in watchlist
-        const watchlistRes = await fetch("/api/watch/desire", {
-          credentials: "include",
-        });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
           const isInList = watchlistData.data.some(
@@ -79,9 +80,6 @@ export default function MovieDetailPage() {
         }
 
         // Check if watched
-        const historyRes = await fetch("/api/watch/history", {
-          credentials: "include",
-        });
         const historyData = await historyRes.json();
         if (historyData.success && Array.isArray(historyData.data)) {
           const isWatched = historyData.data.some(
@@ -91,9 +89,6 @@ export default function MovieDetailPage() {
         }
 
         // Fetch friends for suggestions
-        const friendsRes = await fetch("/api/friends", {
-          credentials: "include",
-        });
         const friendsData = await friendsRes.json();
         if (friendsData.success && friendsData.data?.friends) {
           setFriends(friendsData.data.friends);
