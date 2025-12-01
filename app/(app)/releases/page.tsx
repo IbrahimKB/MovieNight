@@ -43,10 +43,17 @@ export default function ReleasesPage() {
   useEffect(() => {
     const fetchReleases = async () => {
       try {
-        const res = await fetch("/api/releases/upcoming?page=1&limit=40", {
+        setLoading(true);
+        setError(null);
+        const res = await fetch(`/api/releases/upcoming?page=${currentPage}&limit=40`, {
           headers,
           credentials: "include",
         });
+
+        if (!res.ok) {
+          throw new Error(`Failed to fetch releases: ${res.status}`);
+        }
+
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -57,16 +64,23 @@ export default function ReleasesPage() {
               new Date(b.releaseDate).getTime(),
           );
           setReleases(sorted);
+          if (data.pagination) {
+            setPagination(data.pagination);
+          }
+        } else {
+          throw new Error("Invalid response format");
         }
       } catch (error) {
         console.error("Failed to fetch releases:", error);
+        setError(error instanceof Error ? error.message : "Failed to load releases");
+        setReleases([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchReleases();
-  }, [token]);
+  }, [token, currentPage]);
 
   const ReleaseCard = ({ release }: { release: Release }) => {
     const releaseDate = new Date(release.releaseDate);
