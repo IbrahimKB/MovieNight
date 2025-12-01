@@ -95,8 +95,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      watchlist: watchlistData,
-      history: historyData,
+      data: {
+        watchlist: watchlistData,
+        history: historyData,
+      }
     });
 
   } catch (err) {
