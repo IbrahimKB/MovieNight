@@ -41,6 +41,7 @@ interface FriendRequest {
 
 export default function FriendsPage() {
   const { user } = useAuth();
+  const { isConnected, emit, on } = useSocket();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -55,7 +56,7 @@ export default function FriendsPage() {
   const [currentFriends, setCurrentFriends] = useState<Set<string>>(new Set());
   const [friendsList, setFriendsList] = useState<Friend[]>([]); // Store full friend objects
 
-  // Fetch real data on mount and periodically
+  // Fetch real data on mount
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
@@ -81,13 +82,44 @@ export default function FriendsPage() {
     if (user) {
       // Fetch immediately on mount
       fetchFriendsData();
-
-      // Poll every 5 seconds to detect new incoming requests
-      const interval = setInterval(fetchFriendsData, 5000);
-
-      return () => clearInterval(interval);
     }
   }, [user]);
+
+  // Set up Socket.io listeners for real-time friend requests
+  useEffect(() => {
+    if (!user) return;
+
+    // Join user's room for notifications
+    if (isConnected) {
+      emit("user:join", user.id);
+    }
+
+    // Listen for incoming friend requests in real-time
+    const unsubscribe = on("friend:request-received", (data) => {
+      setIncomingRequests((prev) => {
+        // Avoid duplicates
+        const exists = prev.some((r) => r.id === data.id);
+        if (exists) return prev;
+        return [
+          {
+            id: data.id,
+            fromUser: data.fromUser,
+            toUser: data.toUser || {},
+            sentAt: data.sentAt,
+          },
+          ...prev,
+        ];
+      });
+
+      toast({
+        title: "New friend request!",
+        description: `${data.fromUser.name || data.fromUser.username} sent you a friend request`,
+        duration: 5000,
+      });
+    });
+
+    return () => unsubscribe();
+  }, [user, isConnected, emit, on]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
