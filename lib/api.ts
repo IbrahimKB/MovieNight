@@ -38,13 +38,6 @@ export interface Notification {
   updatedAt: string;
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
 export interface DashboardStats {
   totalFriends: number;
   activeSuggestions: number;
