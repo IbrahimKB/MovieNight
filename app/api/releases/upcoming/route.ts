@@ -15,12 +15,14 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
-    year: new Date(releaseDate || '2024-01-01').getFullYear(),
+    title: tmdbMovie.title || tmdbMovie.name || "Unknown Title",
+    year: new Date(releaseDate || "2024-01-01").getFullYear(),
     genres: tmdbMovie.genre_ids || [],
     platform: null,
-    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-    description: tmdbMovie.overview || '',
+    poster: tmdbMovie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
+      : null,
+    description: tmdbMovie.overview || "",
     imdbRating: tmdbMovie.vote_average || null,
     rtRating: null,
     releaseDate: releaseDate ? new Date(releaseDate) : null,
@@ -36,7 +38,7 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -49,7 +51,7 @@ export async function GET(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: "Invalid query parameters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -108,7 +110,7 @@ export async function GET(req: NextRequest) {
           pageSize: limit,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     console.error("Error fetching upcoming releases:", err);
@@ -117,7 +119,7 @@ export async function GET(req: NextRequest) {
         success: false,
         error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

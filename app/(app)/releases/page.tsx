@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clapperboard, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar,
+  Clapperboard,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Release {
@@ -45,10 +50,13 @@ export default function ReleasesPage() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/releases/upcoming?page=${currentPage}&limit=40`, {
-          headers,
-          credentials: "include",
-        });
+        const res = await fetch(
+          `/api/releases/upcoming?page=${currentPage}&limit=40`,
+          {
+            headers,
+            credentials: "include",
+          },
+        );
 
         if (!res.ok) {
           throw new Error(`Failed to fetch releases: ${res.status}`);
@@ -72,7 +80,9 @@ export default function ReleasesPage() {
         }
       } catch (error) {
         console.error("Failed to fetch releases:", error);
-        setError(error instanceof Error ? error.message : "Failed to load releases");
+        setError(
+          error instanceof Error ? error.message : "Failed to load releases",
+        );
         setReleases([]);
       } finally {
         setLoading(false);
@@ -231,7 +241,9 @@ export default function ReleasesPage() {
       {!loading && releases.length === 0 && (
         <div className="text-center py-12 bg-card border border-border rounded-xl">
           <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No releases found in the next 90 days</p>
+          <p className="text-muted-foreground">
+            No releases found in the next 90 days
+          </p>
         </div>
       )}
 
