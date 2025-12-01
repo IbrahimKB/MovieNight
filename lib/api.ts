@@ -61,12 +61,10 @@ export interface TrendingMovie {
   genres: string[];
 }
 
-// Helper to get auth headers
+// Helper to get auth headers (httpOnly cookies are used for auth)
 function getAuthHeaders() {
-  const token = localStorage.getItem("movienight_token");
   return {
     "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
   };
 }
 
