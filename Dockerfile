@@ -69,6 +69,11 @@ RUN chown -R nextjs:nodejs /app/node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy server files for Socket.io integration
+COPY --from=builder --chown=nextjs:nodejs /app/server.ts ./server.ts
+COPY --from=builder --chown=nextjs:nodejs /app/lib/socket-server.ts ./lib/socket-server.ts
+COPY --from=builder --chown=nextjs:nodejs /app/hooks/useSocket.ts ./hooks/useSocket.ts
+
 USER nextjs
 
 EXPOSE 3000
