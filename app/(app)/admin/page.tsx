@@ -58,21 +58,19 @@ export default function AdminPage() {
     };
 
     fetchAdminData();
-  }, [token, isAdmin, router]);
+  }, [isAdmin, router]);
 
   const handleSyncMovies = async () => {
     setSyncingMovies(true);
     try {
       const res = await fetch("/api/cron/init", {
         method: "POST",
-        headers,
         credentials: "include",
       });
 
       if (res.ok) {
         // Refresh stats
         const statsRes = await fetch("/api/admin/stats", {
-          headers,
           credentials: "include",
         });
         const statsData = await statsRes.json();
@@ -91,7 +89,6 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/admin/users/${userId}/promote`, {
         method: "POST",
-        headers,
         credentials: "include",
       });
 
@@ -112,7 +109,6 @@ export default function AdminPage() {
 
       const res = await fetch(`/api/admin/users/${userId}/reset-password`, {
         method: "POST",
-        headers,
         credentials: "include",
         body: JSON.stringify({ newPassword }),
       });
