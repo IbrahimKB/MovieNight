@@ -22,8 +22,6 @@ import {
   Eye,
   Target,
   MessageSquare,
-  Menu,
-  X,
   RefreshCw,
 } from "lucide-react";
 
