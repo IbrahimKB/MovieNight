@@ -74,12 +74,20 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
     const errorData = await response
       .json()
       .catch(() => ({ error: "Network error" }));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
+    const errorMessage = typeof errorData.error === "string"
+      ? errorData.error
+      : `HTTP ${response.status}`;
+    throw new Error(errorMessage);
   }
 
   const data: ApiResponse<T> = await response.json();
   if (!data.success) {
-    throw new Error(data.error || "API request failed");
+    const errorMessage = typeof data.error === "string"
+      ? data.error
+      : Array.isArray(data.error)
+        ? data.error.map((e) => e.message).join("; ")
+        : "API request failed";
+    throw new Error(errorMessage);
   }
 
   return data.data as T;
