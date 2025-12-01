@@ -56,11 +56,8 @@ export default function FriendsPage() {
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-
         // Use consolidated endpoint
-        const res = await fetch("/api/friends", { headers, credentials: "include" });
+        const res = await fetch("/api/friends", { credentials: "include" });
         const data = await res.json();
 
         if (data.success) {
