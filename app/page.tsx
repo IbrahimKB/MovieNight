@@ -410,7 +410,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {/* Left Column - Activity Feed */}
           <div className="lg:col-span-2 order-2 lg:order-1">
             <SocialActivityFeed className="space-y-3 sm:space-y-4" />
