@@ -1,3 +1,5 @@
+'use server';
+
 /**
  * Cron Job Scheduler
  * Runs background tasks at scheduled times
