@@ -1,5 +1,5 @@
 import { Server as HTTPServer } from "http";
-import type { Server as SocketIOServer } from "socket.io";
+import { Server as SocketIOServer, Socket } from "socket.io";
 
 let io: SocketIOServer | null = null;
 const userSockets = new Map<string, string>(); // userId -> socketId
