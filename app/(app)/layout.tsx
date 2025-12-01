@@ -72,8 +72,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navbar */}
-      <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="px-3 sm:px-6 lg:px-8 py-3 flex items-center min-h-[64px]">
+      <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50 safe-area-pb">
+        <div className="px-3 sm:px-6 lg:px-8 py-3 flex items-center min-h-[64px]" style={{
+          paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+          paddingLeft: 'max(0.75rem, env(safe-area-inset-left))',
+          paddingRight: 'max(0.75rem, env(safe-area-inset-right))',
+        }}>
           {/* Logo */}
           <button
             onClick={() => router.push("/")}
