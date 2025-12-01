@@ -80,7 +80,6 @@ export default function MovieDetailPage() {
 
         // Check if watched
         const historyRes = await fetch("/api/watch/history", {
-          headers,
           credentials: "include",
         });
         const historyData = await historyRes.json();
@@ -93,7 +92,6 @@ export default function MovieDetailPage() {
 
         // Fetch friends for suggestions
         const friendsRes = await fetch("/api/friends", {
-          headers,
           credentials: "include",
         });
         const friendsData = await friendsRes.json();
@@ -103,7 +101,6 @@ export default function MovieDetailPage() {
 
         // Fetch friends who watched this movie (from activity/stats)
         const friendsActivityRes = await fetch("/api/friends", {
-          headers,
           credentials: "include",
         });
         const friendsActivityData = await friendsActivityRes.json();
@@ -118,7 +115,7 @@ export default function MovieDetailPage() {
               try {
                 const friendHistoryRes = await fetch(
                   `/api/watch/history?userId=${friend.id}`,
-                  { headers },
+                  { credentials: "include" },
                 );
                 const friendHistoryData = await friendHistoryRes.json();
                 if (Array.isArray(friendHistoryData.data)) {
