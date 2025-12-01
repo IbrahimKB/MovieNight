@@ -38,7 +38,7 @@ export default function CreateEventPage() {
     };
 
     fetchMovies();
-  }, [token]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +52,10 @@ export default function CreateEventPage() {
 
       const res = await fetch("/api/events", {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify({
           movieId: selectedMovie,
           date: combinedDateTime,
