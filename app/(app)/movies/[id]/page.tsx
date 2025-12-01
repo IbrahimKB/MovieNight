@@ -54,20 +54,10 @@ export default function MovieDetailPage() {
     {},
   );
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
-
-        const res = await fetch(`/api/movies/${movieId}`, { headers, credentials: "include" });
+        const res = await fetch(`/api/movies/${movieId}`, { credentials: "include" });
         const data = await res.json();
 
         if (data.success && data.data) {
@@ -75,7 +65,7 @@ export default function MovieDetailPage() {
         }
 
         // Check if in watchlist
-        const watchlistRes = await fetch("/api/watch/desire", { headers, credentials: "include" });
+        const watchlistRes = await fetch("/api/watch/desire", { credentials: "include" });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
           const isInList = watchlistData.data.some(
@@ -151,14 +141,9 @@ export default function MovieDetailPage() {
     setInWatchlist(!inWatchlist);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/watch/desire", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ movieId }),
       });
@@ -188,14 +173,9 @@ export default function MovieDetailPage() {
     setWatched(!watched);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ movieId }),
       });
@@ -221,14 +201,9 @@ export default function MovieDetailPage() {
     setIsSuggestingMovie(true);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/suggestions", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           movieId,
