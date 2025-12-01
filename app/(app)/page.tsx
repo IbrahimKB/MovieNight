@@ -146,165 +146,13 @@ export default function HomePage() {
   }
 
   return (
-    <motion.div
+    <div
       ref={contentRef}
       onTouchStart={handlePullToRefresh}
       onTouchMove={handlePullToRefresh}
       onTouchEnd={handlePullToRefresh}
-      className="min-h-screen bg-background text-foreground"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
+      className="space-y-4 sm:space-y-6"
     >
-      {/* Navigation Header */}
-      <nav className="border-b border-primary/10 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center min-h-[64px]">
-          {/* Logo */}
-          <button
-            onClick={() => {
-              router.push("/");
-              setMobileMenuOpen(false);
-            }}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0 active:scale-95"
-          >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Film className="h-5 w-5 text-primary" />
-            </div>
-            <span className="hidden sm:inline text-lg font-bold text-primary whitespace-nowrap">
-              MovieNight
-            </span>
-          </button>
-
-          {/* Spacer */}
-          <div className="flex-1" />
-
-          {/* Desktop Nav */}
-          <div className="hidden md:flex gap-1 items-center">
-            <button
-              onClick={() => router.push("/movies")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <Film size={18} />
-              <span className="hidden lg:inline">Movies</span>
-            </button>
-            <button
-              onClick={() => router.push("/calendar")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <Calendar size={18} />
-              <span className="hidden lg:inline">Calendar</span>
-            </button>
-            <button
-              onClick={() => router.push("/suggestions")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <MessageSquare size={18} />
-              <span className="hidden lg:inline">Suggestions</span>
-            </button>
-            <button
-              onClick={() => router.push("/watchlist")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <Star size={18} />
-              <span className="hidden lg:inline">Watchlist</span>
-            </button>
-            <button
-              onClick={() => router.push("/friends")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <Users size={18} />
-              <span className="hidden lg:inline">Friends</span>
-            </button>
-            <div className="h-6 w-px bg-border mx-1" />
-            <button
-              onClick={logout}
-              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
-            >
-              <span className="hidden lg:inline">Logout</span>
-            </button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-foreground p-2 rounded-lg hover:bg-accent/30 active:scale-95 transition-transform min-h-[44px] min-w-[44px] flex items-center justify-center ml-auto flex-shrink-0"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-primary/10 bg-background">
-            <div className="flex flex-col p-4 gap-2 pb-6">
-              <button
-                onClick={() => {
-                  router.push("/movies");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                <Film size={20} />
-                Movies
-              </button>
-              <button
-                onClick={() => {
-                  router.push("/calendar");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                <Calendar size={20} />
-                Calendar
-              </button>
-              <button
-                onClick={() => {
-                  router.push("/suggestions");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                <MessageSquare size={20} />
-                Suggestions
-              </button>
-              <button
-                onClick={() => {
-                  router.push("/watchlist");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                <Star size={20} />
-                Watchlist
-              </button>
-              <button
-                onClick={() => {
-                  router.push("/friends");
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                <Users size={20} />
-                Friends
-              </button>
-              <div className="h-px bg-border my-2" />
-              <button
-                onClick={() => {
-                  logout();
-                  setMobileMenuOpen(false);
-                }}
-                className="text-sm text-destructive hover:text-destructive/80 active:scale-95 transition-all duration-200 text-left py-3 px-4 rounded-lg hover:bg-card/50 flex items-center gap-3 min-h-[44px]"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Main Content */}
-      <main className="container max-w-7xl mx-auto px-4 py-6 sm:py-8 space-y-4 sm:space-y-6">
         {/* Welcome Header */}
         <motion.div
           className="space-y-1 sm:space-y-2"
@@ -660,7 +508,6 @@ export default function HomePage() {
             </Card>
           </div>
         </div>
-      </main>
-    </motion.div>
+    </div>
   );
 }
