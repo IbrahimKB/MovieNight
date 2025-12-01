@@ -4,8 +4,7 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, User, ArrowRight } from "lucide-react";
-import { BrandLogo } from "@/components/ui/brand-logo";
+import { Mail, Lock, User, ArrowRight, Film } from "lucide-react";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -128,7 +127,7 @@ export default function SignupPage() {
         {/* Logo Section */}
         <div className="mb-12 text-center">
           <div className="flex justify-center mb-6">
-            <BrandLogo size="xl" className="text-white" />
+            <Film size={48} className="text-white" strokeWidth={1.5} />
           </div>
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
             MovieNight
