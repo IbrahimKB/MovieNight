@@ -51,18 +51,11 @@ COPY --from=builder /app/prisma ./prisma
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Install prisma CLI explicitly for migrations
-# Standalone output includes the Client but not the CLI
-# We match the version in package.json
-# We do this BEFORE switching to user nextjs to ensure we have permissions
-# Also install openssl explicitly to fix prisma detection issues
+# Install openssl for prisma
 RUN apk add --no-cache openssl
-RUN npm install prisma@5.21.1 tsx@4.21.0
 
-# Ensure node_modules is owned by the correct user so prisma can write to it at runtime if needed
-# (though ideally we only run the CLI which writes to tmp or reads)
-# But the error specifically says it can't write to node_modules/@prisma/engines
-RUN chown -R nextjs:nodejs /app/node_modules
+# Copy node_modules from builder to include all dependencies needed by server.ts
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
