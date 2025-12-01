@@ -209,21 +209,12 @@ export default function MovieDetailPage() {
 
   if (!movie) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Movie not found</p>
-        <button
-          onClick={() => router.back()}
-          className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
-  if (!movie) {
-    return (
-      <div className="text-center py-12">
+      <motion.div
+        className="text-center py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <p className="text-muted-foreground">Movie not found</p>
         <motion.button
           onClick={() => router.back()}
@@ -232,7 +223,7 @@ export default function MovieDetailPage() {
         >
           Go Back
         </motion.button>
-      </div>
+      </motion.div>
     );
   }
 
