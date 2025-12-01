@@ -1,3 +1,5 @@
+'use server';
+
 export async function register() {
   // Only initialize in Node.js runtime (not in Edge/Middleware)
   if (process.env.NEXT_RUNTIME !== 'nodejs') {
