@@ -74,19 +74,21 @@ async function handleApiResponse<T>(response: Response): Promise<T> {
     const errorData = await response
       .json()
       .catch(() => ({ error: "Network error" }));
-    const errorMessage = typeof errorData.error === "string"
-      ? errorData.error
-      : `HTTP ${response.status}`;
+    const errorMessage =
+      typeof errorData.error === "string"
+        ? errorData.error
+        : `HTTP ${response.status}`;
     throw new Error(errorMessage);
   }
 
   const data: ApiResponse<T> = await response.json();
   if (!data.success) {
-    const errorMessage = typeof data.error === "string"
-      ? data.error
-      : Array.isArray(data.error)
-        ? data.error.map((e) => e.message).join("; ")
-        : "API request failed";
+    const errorMessage =
+      typeof data.error === "string"
+        ? data.error
+        : Array.isArray(data.error)
+          ? data.error.map((e) => e.message).join("; ")
+          : "API request failed";
     throw new Error(errorMessage);
   }
 
@@ -133,9 +135,7 @@ export async function getOutgoingRequests(): Promise<FriendRequest[]> {
   return handleApiResponse<FriendRequest[]>(response);
 }
 
-export async function sendFriendRequest(
-  targetUserId: string,
-): Promise<void> {
+export async function sendFriendRequest(targetUserId: string): Promise<void> {
   const response = await fetch(`/api/friends/request`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -160,9 +160,7 @@ export async function respondToFriendRequest(
   await handleApiResponse(response);
 }
 
-export async function removeFriend(
-  friendshipId: string,
-): Promise<void> {
+export async function removeFriend(friendshipId: string): Promise<void> {
   const response = await fetch(`/api/friends/${friendshipId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
