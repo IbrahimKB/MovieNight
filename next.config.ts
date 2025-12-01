@@ -19,8 +19,11 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Disable static optimization for error pages to fix Html import issue
-  staticPageGenerationTimeout: 0,
+  // Skip prerendering for error pages (causes issues with Next.js internal Html component)
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 5,
+  },
 };
 
 export default nextConfig;
