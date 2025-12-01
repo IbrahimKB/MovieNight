@@ -52,7 +52,7 @@ export default function FriendsPage() {
   const [currentFriends, setCurrentFriends] = useState<Set<string>>(new Set());
   const [friendsList, setFriendsList] = useState<Friend[]>([]); // Store full friend objects
 
-  // Fetch real data on mount
+  // Fetch real data on mount and periodically
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
@@ -78,7 +78,15 @@ export default function FriendsPage() {
       }
     };
 
-    if (user) fetchFriendsData();
+    if (user) {
+      // Fetch immediately on mount
+      fetchFriendsData();
+
+      // Poll every 5 seconds to detect new incoming requests
+      const interval = setInterval(fetchFriendsData, 5000);
+
+      return () => clearInterval(interval);
+    }
   }, [user]);
 
   const handleSearch = async () => {
