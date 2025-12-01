@@ -41,7 +41,9 @@ const TMDBMovieSchema = z.object({
   poster_path: z.string().nullable().optional(),
   overview: z.string().optional(),
   vote_average: z.number().optional(),
-  production_companies: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
+  production_companies: z
+    .array(z.object({ id: z.number(), name: z.string() }))
+    .optional(),
 });
 
 // Helper function to convert TMDB movie details to local format with validation
@@ -62,17 +64,20 @@ function mapTMDBMovieDetailsToLocal(tmdbMovieData: any) {
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
+    title: tmdbMovie.title || tmdbMovie.name || "Unknown Title",
     year,
     genres: tmdbMovie.genres?.map((g) => g.name).filter(Boolean) || [],
     platform: null,
-    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-    description: tmdbMovie.overview ?? '',
+    poster: tmdbMovie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
+      : null,
+    description: tmdbMovie.overview ?? "",
     imdbRating: tmdbMovie.vote_average ?? null,
     rtRating: null,
     releaseDate: releaseDate ? new Date(releaseDate) : null,
     runtime,
-    productionCompanies: tmdbMovie.production_companies?.map((c) => c.name).filter(Boolean) || [],
+    productionCompanies:
+      tmdbMovie.production_companies?.map((c) => c.name).filter(Boolean) || [],
   };
 }
 
@@ -86,7 +91,7 @@ function isTMDBId(id: string): boolean {
 // ---------------------------------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
@@ -94,7 +99,7 @@ export async function GET(
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Movie ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -110,7 +115,7 @@ export async function GET(
         return NextResponse.json({
           success: true,
           data: mapTMDBMovieDetailsToLocal(tmdbMovie),
-          source: 'tmdb-live',
+          source: "tmdb-live",
         });
       }
     }
@@ -123,20 +128,20 @@ export async function GET(
     if (!movie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json({
       success: true,
       data: movie,
-      source: 'local-postgres',
+      source: "local-postgres",
     });
   } catch (err) {
     console.error("GET movie error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -147,7 +152,7 @@ export async function GET(
 // ---------------------------------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Auth required + must be admin
@@ -155,7 +160,7 @@ export async function PATCH(
     if (!user || user.role !== "admin") {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -164,7 +169,7 @@ export async function PATCH(
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Movie ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -180,7 +185,7 @@ export async function PATCH(
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -202,7 +207,7 @@ export async function PATCH(
     console.error("PATCH movie error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -7,7 +7,7 @@ export async function GET() {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json(
       { error: "Debug endpoint not available in production" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -54,14 +54,14 @@ export async function GET() {
   try {
     const tmdbResult = await tmdbClient.searchMovies("Inception", 1);
     if (tmdbResult) {
-       diagnostics.tmdb.status = "✅ CONNECTED";
-       diagnostics.tmdb.resultsFound = tmdbResult.total_results;
+      diagnostics.tmdb.status = "✅ CONNECTED";
+      diagnostics.tmdb.resultsFound = tmdbResult.total_results;
     } else {
-       diagnostics.tmdb.status = "❌ FAILED (Returns null)";
+      diagnostics.tmdb.status = "❌ FAILED (Returns null)";
     }
   } catch (err: any) {
-     diagnostics.tmdb.status = "❌ ERROR";
-     diagnostics.tmdb.error = err.message;
+    diagnostics.tmdb.status = "❌ ERROR";
+    diagnostics.tmdb.error = err.message;
   }
 
   // Check for common issues
@@ -70,7 +70,7 @@ export async function GET() {
   if (!process.env.DATABASE_URL) {
     issues.push("DATABASE_URL environment variable is not set");
   }
-  
+
   if (!process.env.TMDB_API_KEY) {
     issues.push("TMDB_API_KEY environment variable is not set");
   } else if (diagnostics.tmdb.status.startsWith("❌")) {

@@ -132,9 +132,7 @@ export async function getOutgoingRequests(): Promise<FriendRequest[]> {
   return handleApiResponse<FriendRequest[]>(response);
 }
 
-export async function sendFriendRequest(
-  targetUserId: string,
-): Promise<void> {
+export async function sendFriendRequest(targetUserId: string): Promise<void> {
   const response = await fetch(`/api/friends/request`, {
     method: "POST",
     headers: getAuthHeaders(),
@@ -159,9 +157,7 @@ export async function respondToFriendRequest(
   await handleApiResponse(response);
 }
 
-export async function removeFriend(
-  friendshipId: string,
-): Promise<void> {
+export async function removeFriend(friendshipId: string): Promise<void> {
   const response = await fetch(`/api/friends/${friendshipId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),

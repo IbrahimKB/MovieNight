@@ -59,12 +59,13 @@ export default function MovieDetailPage() {
     const fetchMovie = async () => {
       try {
         // Parallelize independent requests
-        const [movieRes, watchlistRes, historyRes, friendsRes] = await Promise.all([
-          fetch(`/api/movies/${movieId}`, { credentials: "include" }),
-          fetch("/api/watch/desire", { credentials: "include" }),
-          fetch("/api/watch/history", { credentials: "include" }),
-          fetch("/api/friends", { credentials: "include" }),
-        ]);
+        const [movieRes, watchlistRes, historyRes, friendsRes] =
+          await Promise.all([
+            fetch(`/api/movies/${movieId}`, { credentials: "include" }),
+            fetch("/api/watch/desire", { credentials: "include" }),
+            fetch("/api/watch/history", { credentials: "include" }),
+            fetch("/api/friends", { credentials: "include" }),
+          ]);
 
         const data = await movieRes.json();
         if (data.success && data.data) {

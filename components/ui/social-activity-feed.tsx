@@ -24,20 +24,22 @@ export default function SocialActivityFeed({
     const fetchActivity = async () => {
       try {
         // Fetch notifications as a proxy for activity for now
-        const res = await fetch("/api/notifications", { credentials: "include" });
+        const res = await fetch("/api/notifications", {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
           const formattedActivity = data.data.map((item: any) => ({
             id: item.id,
             user: "System", // You might want to enrich this with real user data if available
-            action: item.type.replace('_', ' '),
+            action: item.type.replace("_", " "),
             movie: item.title,
             timestamp: new Date(item.createdAt).toLocaleDateString(),
           }));
           setActivity(formattedActivity.slice(0, 5));
         } else {
-           setActivity([]);
+          setActivity([]);
         }
       } catch (error) {
         console.error("Failed to fetch activity");

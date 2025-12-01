@@ -33,36 +33,44 @@ export default function SuggestionAccuracy({
         const res = await fetch("/api/stats", { credentials: "include" });
         const json = await res.json();
         if (json.success) {
-            // If userId is provided, find in squadStats, else use userStats
-            // Currently /api/stats returns detailed userStats for current user
-            // and basic squadStats for everyone.
-            // Basic squadStats doesn't have accepted/rejected counts explicitly in the current API response structure
-            // (it has acceptanceRate).
-            
-            if (userId && userId !== user.id) {
-                const squadStat = json.squadStats.find((s: any) => s.id === userId);
-                if (squadStat) {
-                    setData({
-                        accuracy: squadStat.acceptanceRate,
-                        totalSuggestions: squadStat.suggestions,
-                        accepted: Math.round(squadStat.suggestions * (squadStat.acceptanceRate / 100)),
-                        rejected: squadStat.suggestions - Math.round(squadStat.suggestions * (squadStat.acceptanceRate / 100))
-                    });
-                }
-            } else {
-                // Current user
-                const u = json.userStats;
-                setData({
-                    accuracy: u.acceptanceRate,
-                    totalSuggestions: u.suggestions,
-                    // Calculate raw numbers from rate if not provided?
-                    // The API calculates rate.
-                    // For now let's approximate or update API.
-                    // Let's just use rate.
-                    accepted: Math.round(u.suggestions * (u.acceptanceRate / 100)),
-                    rejected: u.suggestions - Math.round(u.suggestions * (u.acceptanceRate / 100))
-                });
+          // If userId is provided, find in squadStats, else use userStats
+          // Currently /api/stats returns detailed userStats for current user
+          // and basic squadStats for everyone.
+          // Basic squadStats doesn't have accepted/rejected counts explicitly in the current API response structure
+          // (it has acceptanceRate).
+
+          if (userId && userId !== user.id) {
+            const squadStat = json.squadStats.find((s: any) => s.id === userId);
+            if (squadStat) {
+              setData({
+                accuracy: squadStat.acceptanceRate,
+                totalSuggestions: squadStat.suggestions,
+                accepted: Math.round(
+                  squadStat.suggestions * (squadStat.acceptanceRate / 100),
+                ),
+                rejected:
+                  squadStat.suggestions -
+                  Math.round(
+                    squadStat.suggestions * (squadStat.acceptanceRate / 100),
+                  ),
+              });
             }
+          } else {
+            // Current user
+            const u = json.userStats;
+            setData({
+              accuracy: u.acceptanceRate,
+              totalSuggestions: u.suggestions,
+              // Calculate raw numbers from rate if not provided?
+              // The API calculates rate.
+              // For now let's approximate or update API.
+              // Let's just use rate.
+              accepted: Math.round(u.suggestions * (u.acceptanceRate / 100)),
+              rejected:
+                u.suggestions -
+                Math.round(u.suggestions * (u.acceptanceRate / 100)),
+            });
+          }
         }
       } catch (error) {
         console.error("Failed to fetch accuracy", error);
@@ -114,9 +122,9 @@ export default function SuggestionAccuracy({
 
 export function SuggestionLeaderboard() {
   const { user } = useAuth();
-  const [board, setBoard] = useState<
-    { username: string; accuracy: number }[]
-  >([]);
+  const [board, setBoard] = useState<{ username: string; accuracy: number }[]>(
+    [],
+  );
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -125,10 +133,15 @@ export function SuggestionLeaderboard() {
         const res = await fetch("/api/stats", { credentials: "include" });
         const data = await res.json();
         if (data.success) {
-            setBoard(data.squadStats.map((s: any) => ({
+          setBoard(
+            data.squadStats
+              .map((s: any) => ({
                 username: s.name,
-                accuracy: s.acceptanceRate
-            })).sort((a: any, b: any) => b.accuracy - a.accuracy).slice(0, 5));
+                accuracy: s.acceptanceRate,
+              }))
+              .sort((a: any, b: any) => b.accuracy - a.accuracy)
+              .slice(0, 5),
+          );
         }
       } catch (error) {
         console.error("Failed to fetch leaderboard", error);

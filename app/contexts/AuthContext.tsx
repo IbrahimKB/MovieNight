@@ -35,13 +35,13 @@ interface AuthContextType {
   user: User | null;
   login: (
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ success: boolean; error?: AuthError }>;
   signup: (
     username: string,
     email: string,
     password: string,
-    name: string
+    name: string,
   ) => Promise<{ success: boolean; error?: AuthError }>;
   logout: () => void;
   isLoading: boolean;
@@ -84,17 +84,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // Verify with server
         const res = await fetch(`${API_BASE}/auth/me`);
-        
+
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
-             setUser(data.data);
-             localStorage.setItem("movienight_user", JSON.stringify(data.data));
+            setUser(data.data);
+            localStorage.setItem("movienight_user", JSON.stringify(data.data));
           } else {
-             throw new Error("Invalid session");
+            throw new Error("Invalid session");
           }
         } else {
-           throw new Error("Session expired");
+          throw new Error("Session expired");
         }
       } catch (e) {
         // If server check fails, clear local user data
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // -----------------------------------------------------
   const login = async (
     emailOrUsername: string,
-    password: string
+    password: string,
   ): Promise<{ success: boolean; error?: AuthError }> => {
     setIsLoading(true);
     setLastError(null);
@@ -157,8 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ emailOrUsername, password }),
       });
 
-      const result: ApiResponse<{ user: User }> =
-        await response.json();
+      const result: ApiResponse<{ user: User }> = await response.json();
 
       if (!response.ok) {
         const error: AuthError =
@@ -231,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     username: string,
     email: string,
     password: string,
-    name: string
+    name: string,
   ): Promise<{ success: boolean; error?: AuthError }> => {
     setIsLoading(true);
     setLastError(null);
@@ -288,8 +287,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ username, email, password, name }),
       });
 
-      const result: ApiResponse<{ user: User }> =
-        await response.json();
+      const result: ApiResponse<{ user: User }> = await response.json();
 
       if (!response.ok) {
         const error: AuthError =
@@ -363,15 +361,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("movienight_user");
       localStorage.removeItem("movienight_login_time");
     } catch (storageError) {
-      console.error("Failed to clear localStorage during logout:", storageError);
+      console.error(
+        "Failed to clear localStorage during logout:",
+        storageError,
+      );
     }
 
     // Call logout API to delete session from DB (best effort, don't block on failure)
-    fetch(`${API_BASE}/auth/logout`, { method: "POST" })
-      .catch((error) => {
-        console.error("Logout API call failed:", error);
-        // Not critical - session will expire anyway
-      });
+    fetch(`${API_BASE}/auth/logout`, { method: "POST" }).catch((error) => {
+      console.error("Logout API call failed:", error);
+      // Not critical - session will expire anyway
+    });
   };
 
   const isAdmin = user?.role === "admin";
