@@ -73,5 +73,5 @@ USER nextjs
 
 EXPOSE 3000
 
-# Run migrations and start the server
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
+# Run migrations and start the server with Socket.io
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && ./node_modules/.bin/tsx server.ts"]
