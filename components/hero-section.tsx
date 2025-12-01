@@ -344,7 +344,10 @@ export default function HeroSection() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="relative z-10 py-16 sm:py-20 lg:py-28 px-4">
+      <section
+        id="features"
+        className="relative z-10 py-16 sm:py-20 lg:py-28 px-4"
+      >
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <motion.div
@@ -396,7 +399,10 @@ export default function HeroSection() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="relative z-10 py-16 sm:py-20 lg:py-28 px-4">
+      <section
+        id="how-it-works"
+        className="relative z-10 py-16 sm:py-20 lg:py-28 px-4"
+      >
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <motion.div
@@ -506,7 +512,11 @@ export default function HeroSection() {
                 >
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} className="fill-primary text-primary" />
+                      <Star
+                        key={i}
+                        size={16}
+                        className="fill-primary text-primary"
+                      />
                     ))}
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground italic mb-4">
