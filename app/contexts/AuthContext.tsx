@@ -190,8 +190,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         setUser(cleanUser);
 
-        localStorage.setItem("movienight_user", JSON.stringify(cleanUser));
-        localStorage.setItem("movienight_login_time", Date.now().toString());
+        try {
+          localStorage.setItem("movienight_user", JSON.stringify(cleanUser));
+          localStorage.setItem("movienight_login_time", Date.now().toString());
+        } catch (storageError) {
+          console.error("Failed to save to localStorage:", storageError);
+          // Continue anyway - user is authenticated via cookies
+        }
 
         setIsLoading(false);
         return { success: true };
