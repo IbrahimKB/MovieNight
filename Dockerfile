@@ -72,7 +72,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy server files for Socket.io integration
 COPY --from=builder --chown=nextjs:nodejs /app/server.ts ./server.ts
 COPY --from=builder --chown=nextjs:nodejs /app/lib/socket-server.ts ./lib/socket-server.ts
-COPY --from=builder --chown=nextjs:nodejs /app/hooks/useSocket.ts ./hooks/useSocket.ts
 
 USER nextjs
 
