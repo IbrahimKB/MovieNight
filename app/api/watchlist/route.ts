@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { z } from "zod";
+
+// Validation schemas
+const WatchlistPostSchema = z.object({
+  action: z.enum(["markWatched"]).describe("Action to perform"),
+  movieId: z.string().min(1).describe("Movie ID"),
+  watchedWith: z.array(z.string()).optional().default([]).describe("IDs of users watched with"),
+});
+
+type WatchlistPostRequest = z.infer<typeof WatchlistPostSchema>;
 
 export async function GET(req: NextRequest) {
   try {
@@ -154,4 +164,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
