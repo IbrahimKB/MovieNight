@@ -99,40 +99,10 @@ export default function MovieDetailPage() {
           setFriends(friendsData.data.friends);
         }
 
-        // Fetch friends who watched this movie (from activity/stats)
-        const friendsActivityRes = await fetch("/api/friends", {
-          credentials: "include",
-        });
-        const friendsActivityData = await friendsActivityRes.json();
-        if (
-          friendsActivityData.success &&
-          Array.isArray(friendsActivityData.data?.friends)
-        ) {
-          // Filter friends who have watched this movie by checking their watch history
-          const friendsWithActivity = await Promise.all(
-            friendsActivityData.data.friends.map(async (friend: any) => {
-              // Try to fetch friend's watch history to see if they watched this movie
-              try {
-                const friendHistoryRes = await fetch(
-                  `/api/watch/history?userId=${friend.id}`,
-                  { credentials: "include" },
-                );
-                const friendHistoryData = await friendHistoryRes.json();
-                if (Array.isArray(friendHistoryData.data)) {
-                  const watched = friendHistoryData.data.some(
-                    (item: any) => item.movieId === movieId,
-                  );
-                  return watched ? friend : null;
-                }
-              } catch (e) {
-                // Silently fail for individual friend data
-              }
-              return null;
-            }),
-          );
-
-          setFriendsWhoWatched(friendsWithActivity.filter((f) => f !== null));
-        }
+        // Note: Friends who watched this movie would require a dedicated API endpoint
+        // with proper ACL checks. For now, we don't fetch this data.
+        // TODO: Add /api/movies/:id/who-watched endpoint on backend
+        setFriendsWhoWatched([]);
       } catch (error) {
         console.error("Failed to fetch movie:", error);
       } finally {
