@@ -38,15 +38,10 @@ export default function SquadPage() {
 
     const fetchFriendsData = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = {
-          Authorization: token ? `Bearer ${token}` : "",
-        };
-
         const [friendsRes, incomingRes, outgoingRes] = await Promise.all([
-          fetch("/api/friends", { headers, credentials: "include" }),
-          fetch("/api/friends/incoming", { headers, credentials: "include" }),
-          fetch("/api/friends/outgoing", { headers, credentials: "include" }),
+          fetch("/api/friends", { credentials: "include" }),
+          fetch("/api/friends/incoming", { credentials: "include" }),
+          fetch("/api/friends/outgoing", { credentials: "include" }),
         ]);
 
         const friendsData = await friendsRes.json();
