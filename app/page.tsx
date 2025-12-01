@@ -63,6 +63,7 @@ export default function HomePage() {
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pullStartY = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
