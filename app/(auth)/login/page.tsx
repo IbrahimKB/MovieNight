@@ -4,7 +4,8 @@ import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Mail, Lock, ArrowRight, Film } from "lucide-react";
+import { Mail, Lock, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/ui/brand-logo";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +72,7 @@ export default function LoginPage() {
         {/* Logo Section */}
         <div className="mb-12 text-center">
           <div className="flex justify-center mb-6">
-            <Film size={48} className="text-white" strokeWidth={1.5} />
+            <BrandLogo size="xl" className="text-white" />
           </div>
           <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
             MovieNight
