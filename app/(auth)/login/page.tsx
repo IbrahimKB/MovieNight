@@ -71,21 +71,26 @@ export default function LoginPage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
         {/* Logo Section */}
-        <div className="mb-12 text-center">
-          <button
-            onClick={() => router.push("/")}
-            className="flex flex-col items-center justify-center w-full hover:opacity-80 transition-opacity active:scale-95"
-          >
-            <div className="flex justify-center mb-6">
-              <Film size={48} className="text-white" strokeWidth={1.5} />
-            </div>
-            <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
-              MovieNight
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Discover, watch, and connect
-            </p>
-          </button>
+        <div
+          className="mb-12 text-center cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+          onClick={() => router.push("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              router.push("/");
+            }
+          }}
+        >
+          <div className="flex justify-center mb-6">
+            <Film size={48} className="text-white" strokeWidth={1.5} />
+          </div>
+          <h1 className="text-5xl font-black text-white mb-2 tracking-tight">
+            MovieNight
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Discover, watch, and connect
+          </p>
         </div>
 
         {/* Login Card */}
