@@ -132,7 +132,7 @@ export default function SuggestionsPage() {
         toast({
           title: "Error",
           description: "Failed to accept suggestion.",
-          variant: "destructive",
+          variant: "error",
         });
       }
     } catch (error) {
