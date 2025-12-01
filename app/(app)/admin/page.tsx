@@ -26,16 +26,6 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [syncingMovies, setSyncingMovies] = useState(false);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     // Redirect non-admins
     if (!isAdmin) {
@@ -46,8 +36,8 @@ export default function AdminPage() {
     const fetchAdminData = async () => {
       try {
         const [usersRes, statsRes] = await Promise.all([
-          fetch("/api/admin/users", { headers, credentials: "include" }),
-          fetch("/api/admin/stats", { headers, credentials: "include" }),
+          fetch("/api/admin/users", { credentials: "include" }),
+          fetch("/api/admin/stats", { credentials: "include" }),
         ]);
 
         const usersData = await usersRes.json();
