@@ -12,7 +12,16 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Only run middleware on API routes to minimize overhead
+// Run middleware on all routes
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/webhooks (webhook endpoints)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/webhooks|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

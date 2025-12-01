@@ -10,22 +10,6 @@
   "scope": "/",
   "lang": "en-US",
   "categories": ["entertainment", "social", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-home.png",
-      "sizes": "375x812",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Home screen showing movie suggestions and friends activity"
-    },
-    {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1280x800",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Desktop dashboard with movie recommendations"
-    }
-  ],
   "icons": [
     {
       "src": "/icons/icon.svg",
