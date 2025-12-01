@@ -25,25 +25,16 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const [friendsRes, watchlistRes, historyRes, suggestionsRes] =
           await Promise.all([
-            fetch("/api/friends", { headers, credentials: "include" }),
-            fetch("/api/watch/desire", { headers, credentials: "include" }),
-            fetch("/api/watch/history", { headers, credentials: "include" }),
-            fetch("/api/suggestions", { headers, credentials: "include" }),
+            fetch("/api/friends", { credentials: "include" }),
+            fetch("/api/watch/desire", { credentials: "include" }),
+            fetch("/api/watch/history", { credentials: "include" }),
+            fetch("/api/suggestions", { credentials: "include" }),
           ]);
 
         const friendsData = await friendsRes.json();
@@ -80,7 +71,7 @@ export default function ProfilePage() {
     };
 
     fetchProfileData();
-  }, [token, user?.id]);
+  }, [user?.id]);
 
   const MovieCard = ({ movie }: { movie: Movie }) => (
     <button
