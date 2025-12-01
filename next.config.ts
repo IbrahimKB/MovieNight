@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Disable static optimization for error pages to fix Html import issue
+  staticPageGenerationTimeout: 0,
 };
 
 export default nextConfig;
