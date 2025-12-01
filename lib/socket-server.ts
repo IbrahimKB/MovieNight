@@ -13,7 +13,6 @@ export function initializeSocket(server: HTTPServer) {
   if (io) return io;
 
   try {
-
     io = new SocketIOServer(server, {
       path: "/api/socket.io",
       cors: {
