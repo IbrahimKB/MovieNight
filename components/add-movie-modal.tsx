@@ -46,7 +46,7 @@ interface Friend {
   avatar?: string;
 }
 
-type ActionTab = "watchlist" | "watched" | "suggest" | "movienight";
+type ActionTab = "watchlist" | "watched" | "suggest";
 
 interface AddMovieModalProps {
   isOpen: boolean;
