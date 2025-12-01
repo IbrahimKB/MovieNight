@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useConfetti } from "@/hooks/use-confetti";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
