@@ -122,14 +122,16 @@ export default function WatchlistPage() {
           setHistory(watchlistData.history);
         }
 
-        if (friendsData.success) {
+        if (friendsData.success && friendsData.data?.friends) {
           setFriends(
-            friendsData.data.friends.map((f: any) => ({
-              id: f.userId,
-              name: f.name,
-              username: f.username,
-              avatar: f.avatar,
-            })) || [],
+            friendsData.data.friends
+              .filter((f: any) => f?.userId && f?.username)
+              .map((f: any) => ({
+                id: f.userId,
+                name: f.name || null,
+                username: f.username,
+                avatar: f.avatar,
+              })) || [],
           );
         }
       } catch (error) {
