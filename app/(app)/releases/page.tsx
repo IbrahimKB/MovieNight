@@ -19,21 +19,10 @@ export default function ReleasesPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     const fetchReleases = async () => {
       try {
         const res = await fetch("/api/releases/upcoming?page=1&limit=40", {
-          headers,
           credentials: "include",
         });
         const data = await res.json();

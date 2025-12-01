@@ -54,20 +54,12 @@ export default function MovieDetailPage() {
     {},
   );
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        };
-
-        const res = await fetch(`/api/movies/${movieId}`, { headers, credentials: "include" });
+        const res = await fetch(`/api/movies/${movieId}`, {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && data.data) {
@@ -75,7 +67,9 @@ export default function MovieDetailPage() {
         }
 
         // Check if in watchlist
-        const watchlistRes = await fetch("/api/watch/desire", { headers, credentials: "include" });
+        const watchlistRes = await fetch("/api/watch/desire", {
+          credentials: "include",
+        });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
           const isInList = watchlistData.data.some(
@@ -85,7 +79,10 @@ export default function MovieDetailPage() {
         }
 
         // Check if watched
-        const historyRes = await fetch("/api/watch/history", { headers, credentials: "include" });
+        const historyRes = await fetch("/api/watch/history", {
+          headers,
+          credentials: "include",
+        });
         const historyData = await historyRes.json();
         if (historyData.success && Array.isArray(historyData.data)) {
           const isWatched = historyData.data.some(
@@ -95,14 +92,20 @@ export default function MovieDetailPage() {
         }
 
         // Fetch friends for suggestions
-        const friendsRes = await fetch("/api/friends", { headers, credentials: "include" });
+        const friendsRes = await fetch("/api/friends", {
+          headers,
+          credentials: "include",
+        });
         const friendsData = await friendsRes.json();
         if (friendsData.success && friendsData.data?.friends) {
           setFriends(friendsData.data.friends);
         }
 
         // Fetch friends who watched this movie (from activity/stats)
-        const friendsActivityRes = await fetch("/api/friends", { headers, credentials: "include" });
+        const friendsActivityRes = await fetch("/api/friends", {
+          headers,
+          credentials: "include",
+        });
         const friendsActivityData = await friendsActivityRes.json();
         if (
           friendsActivityData.success &&
@@ -151,14 +154,9 @@ export default function MovieDetailPage() {
     setInWatchlist(!inWatchlist);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/watch/desire", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ movieId }),
       });
@@ -188,14 +186,9 @@ export default function MovieDetailPage() {
     setWatched(!watched);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ movieId }),
       });
@@ -221,14 +214,9 @@ export default function MovieDetailPage() {
     setIsSuggestingMovie(true);
 
     try {
-      const headers = {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-      };
-
       const res = await fetch("/api/suggestions", {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           movieId,

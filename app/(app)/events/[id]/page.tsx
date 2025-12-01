@@ -34,20 +34,12 @@ export default function EventDetailPage() {
   const [isAttending, setIsAttending] = useState(false);
   const [guests, setGuests] = useState<any[]>([]);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`/api/events/${eventId}`, { headers, credentials: "include" });
+        const res = await fetch(`/api/events/${eventId}`, {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && data.data) {

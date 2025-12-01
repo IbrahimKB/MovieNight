@@ -17,10 +17,13 @@ import {
   Film,
   Loader2,
   UserCheck,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useSocket } from "@/hooks/useSocket";
 
 interface Friend {
   id: string;
@@ -38,6 +41,7 @@ interface FriendRequest {
 
 export default function FriendsPage() {
   const { user } = useAuth();
+  const { isConnected, emit, on } = useSocket();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Friend[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -56,11 +60,8 @@ export default function FriendsPage() {
   useEffect(() => {
     const fetchFriendsData = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-
         // Use consolidated endpoint
-        const res = await fetch("/api/friends", { headers, credentials: "include" });
+        const res = await fetch("/api/friends", { credentials: "include" });
         const data = await res.json();
 
         if (data.success) {
@@ -78,8 +79,47 @@ export default function FriendsPage() {
       }
     };
 
-    if (user) fetchFriendsData();
+    if (user) {
+      // Fetch immediately on mount
+      fetchFriendsData();
+    }
   }, [user]);
+
+  // Set up Socket.io listeners for real-time friend requests
+  useEffect(() => {
+    if (!user) return;
+
+    // Join user's room for notifications
+    if (isConnected) {
+      emit("user:join", user.id);
+    }
+
+    // Listen for incoming friend requests in real-time
+    const unsubscribe = on("friend:request-received", (data) => {
+      setIncomingRequests((prev) => {
+        // Avoid duplicates
+        const exists = prev.some((r) => r.id === data.id);
+        if (exists) return prev;
+        return [
+          {
+            id: data.id,
+            fromUser: data.fromUser,
+            toUser: data.toUser || {},
+            sentAt: data.sentAt,
+          },
+          ...prev,
+        ];
+      });
+
+      toast({
+        title: "New friend request!",
+        description: `${data.fromUser.name || data.fromUser.username} sent you a friend request`,
+        duration: 5000,
+      });
+    });
+
+    return () => unsubscribe();
+  }, [user, isConnected, emit, on]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
@@ -89,11 +129,10 @@ export default function FriendsPage() {
 
     setIsSearching(true);
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch(
         `/api/auth/search-users?q=${encodeURIComponent(searchQuery)}`,
         {
-          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          credentials: "include",
         },
       );
       const data = await res.json();
@@ -119,13 +158,12 @@ export default function FriendsPage() {
 
   const handleSendRequest = async (targetUserId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/friends/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ toUserId: targetUserId }),
       });
 
@@ -152,17 +190,12 @@ export default function FriendsPage() {
 
   const handleAcceptRequest = async (requestId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
-      // Note: API expects friend request ID (which is friendship ID), not user ID
-      // But we need to ensure we pass the correct ID.
-      // The incomingRequests array has items with 'id' being the friendship ID.
-
       const res = await fetch(`/api/friends/${requestId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ action: "accept" }),
       });
 
@@ -200,13 +233,12 @@ export default function FriendsPage() {
 
   const handleRejectRequest = async (requestId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch(`/api/friends/${requestId}`, {
-        method: "PATCH", // Or DELETE depending on API implementation, usually PATCH {action: reject}
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ action: "reject" }),
       });
 
@@ -242,9 +274,29 @@ export default function FriendsPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Squad</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+              Squad
+            </h1>
+          </div>
+          {/* Connection Status Indicator */}
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <>
+                <Wifi className="h-4 w-4 text-green-500 animate-pulse" />
+                <span className="text-xs text-green-600 dark:text-green-400">
+                  Live
+                </span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Offline</span>
+              </>
+            )}
+          </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground">
           Manage your movie-watching circle and connect with friends.

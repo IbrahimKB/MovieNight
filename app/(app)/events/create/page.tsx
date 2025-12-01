@@ -21,20 +21,10 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const res = await fetch("/api/movies", { headers, credentials: "include" });
+        const res = await fetch("/api/movies", { credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

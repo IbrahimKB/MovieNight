@@ -21,20 +21,12 @@ export default function WatchHistoryPage() {
   const [watchHistory, setWatchHistory] = useState<WatchedMovie[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     const fetchWatchHistory = async () => {
       try {
-        const res = await fetch("/api/watch/history", { headers, credentials: "include" });
+        const res = await fetch("/api/watch/history", {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

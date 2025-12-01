@@ -1,5 +1,7 @@
 "use client";
 
+"use client";
+
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -69,7 +71,17 @@ export default function LoginPage() {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-12">
         {/* Logo Section */}
-        <div className="mb-12 text-center">
+        <div
+          className="mb-12 text-center cursor-pointer hover:opacity-80 transition-opacity active:scale-95"
+          onClick={() => router.push("/")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              router.push("/");
+            }
+          }}
+        >
           <div className="flex justify-center mb-6">
             <Film size={48} className="text-white" strokeWidth={1.5} />
           </div>

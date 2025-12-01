@@ -49,27 +49,15 @@ export default function MoviesPage() {
   const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   // Fetch local movies and friends from database
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [moviesRes, friendsRes] = await Promise.all([
           fetch("/api/movies", {
-            headers,
             credentials: "include",
           }),
           fetch("/api/friends", {
-            headers,
             credentials: "include",
           }),
         ]);

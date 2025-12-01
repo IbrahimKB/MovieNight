@@ -69,9 +69,13 @@ RUN chown -R nextjs:nodejs /app/node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy server files for Socket.io integration
+COPY --from=builder --chown=nextjs:nodejs /app/server.ts ./server.ts
+COPY --from=builder --chown=nextjs:nodejs /app/lib/socket-server.ts ./lib/socket-server.ts
+
 USER nextjs
 
 EXPOSE 3000
 
-# Run migrations and start the server
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
+# Run migrations and start the server with Socket.io
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && ./node_modules/.bin/tsx server.ts"]

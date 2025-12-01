@@ -24,20 +24,10 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
-
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await fetch("/api/events", { headers, credentials: "include" });
+        const res = await fetch("/api/events", { credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -56,7 +46,7 @@ export default function EventsPage() {
     };
 
     fetchEvents();
-  }, [token]);
+  }, []);
 
   const EventCard = ({ event }: { event: Event }) => {
     const eventDate = new Date(event.date);
