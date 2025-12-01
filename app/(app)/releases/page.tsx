@@ -155,14 +155,6 @@ export default function ReleasesPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Loading upcoming releases...</p>
-      </div>
-    );
-  }
-
   // Separate upcoming and past
   const upcomingReleases = releases.filter(
     (r) => new Date(r.releaseDate) > new Date(),
@@ -183,8 +175,36 @@ export default function ReleasesPage() {
         </p>
       </div>
 
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-destructive">
+          <p className="font-medium">Error loading releases</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-card border border-border rounded-xl overflow-hidden animate-pulse"
+              >
+                <div className="aspect-video bg-muted" />
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-3 bg-muted rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Upcoming */}
-      {upcomingReleases.length > 0 && (
+      {!loading && upcomingReleases.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Coming Soon</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -196,7 +216,7 @@ export default function ReleasesPage() {
       )}
 
       {/* Past */}
-      {pastReleases.length > 0 && (
+      {!loading && pastReleases.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Recent Releases</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -208,10 +228,66 @@ export default function ReleasesPage() {
       )}
 
       {/* Empty State */}
-      {releases.length === 0 && (
+      {!loading && releases.length === 0 && (
         <div className="text-center py-12 bg-card border border-border rounded-xl">
           <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">No releases found</p>
+          <p className="text-muted-foreground">No releases found in the next 90 days</p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={pagination.currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Previous
+          </Button>
+
+          <div className="flex items-center gap-2">
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+              .filter((page) => {
+                // Show first page, last page, current page, and adjacent pages
+                return (
+                  page === 1 ||
+                  page === pagination.totalPages ||
+                  (page >= pagination.currentPage - 1 &&
+                    page <= pagination.currentPage + 1)
+                );
+              })
+              .map((page, index, filtered) => (
+                <div key={page}>
+                  {index > 0 && filtered[index - 1] !== page - 1 && (
+                    <span className="text-muted-foreground">...</span>
+                  )}
+                  <Button
+                    variant={
+                      page === pagination.currentPage ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                  >
+                    {page}
+                  </Button>
+                </div>
+              ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))
+            }
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            Next
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
       )}
     </div>
