@@ -1,7 +1,13 @@
 import { Server as HTTPServer } from "http";
+import { Socket } from "socket.io";
+
+interface SocketWithUser extends Socket {
+  userId?: string;
+}
 
 let io: any = null;
 const userSockets = new Map<string, string>(); // userId -> socketId
+const socketUsers = new Map<string, string>(); // socketId -> userId (for O(1) lookup on disconnect)
 
 export function initializeSocket(server: HTTPServer) {
   if (io) return io;
@@ -19,25 +25,39 @@ export function initializeSocket(server: HTTPServer) {
       transports: ["websocket", "polling"],
     });
 
-    io.on("connection", (socket: any) => {
+    io.on("connection", (socket: SocketWithUser) => {
       console.log(`[Socket] User connected: ${socket.id}`);
 
       // User joins their personal room for notifications
       socket.on("user:join", (userId: string) => {
+        if (!userId) {
+          console.error("[Socket] user:join called without userId");
+          return;
+        }
+
+        // Store mapping bidirectionally for efficient cleanup
         userSockets.set(userId, socket.id);
+        socketUsers.set(socket.id, userId);
+        socket.userId = userId;
         socket.join(`user:${userId}`);
         console.log(`[Socket] User ${userId} joined their room`);
       });
 
-      // Handle disconnection
+      // Handle disconnection with O(1) lookup
       socket.on("disconnect", () => {
-        // Find and remove user from map
-        for (const [userId, socketId] of userSockets.entries()) {
-          if (socketId === socket.id) {
+        try {
+          // Use reverse map for efficient lookup
+          const userId = socketUsers.get(socket.id) || socket.userId;
+          if (userId) {
             userSockets.delete(userId);
+            socketUsers.delete(socket.id);
             console.log(`[Socket] User ${userId} disconnected`);
-            break;
+          } else {
+            // Socket never joined (only registered connection)
+            socketUsers.delete(socket.id);
           }
+        } catch (error) {
+          console.error("[Socket] Error during disconnect cleanup:", error);
         }
       });
     });
