@@ -274,9 +274,29 @@ export default function FriendsPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Squad</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Squad</h1>
+          </div>
+          {/* Connection Status Indicator */}
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <>
+                <Wifi className="h-4 w-4 text-green-500 animate-pulse" />
+                <span className="text-xs text-green-600 dark:text-green-400">
+                  Live
+                </span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Offline
+                </span>
+              </>
+            )}
+          </div>
         </div>
         <p className="text-sm sm:text-base text-muted-foreground">
           Manage your movie-watching circle and connect with friends.
