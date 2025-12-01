@@ -118,32 +118,36 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate request body
     const body = await req.json();
-    const { action, movieId, watchedWith } = body;
+    const validationResult = WatchlistPostSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid request",
+          details: validationResult.error.errors
+        },
+        { status: 400 }
+      );
+    }
+
+    const { action, movieId, watchedWith } = validationResult.data;
 
     if (action === 'markWatched') {
-      if (!movieId) {
-        return NextResponse.json({ success: false, error: "Missing movieId" }, { status: 400 });
-      }
-
       // Create WatchedMovie entry
       await prisma.watchedMovie.create({
         data: {
           userId: user.id,
           movieId: movieId,
-          // We could store watchedWith in a JSON field or separate table if needed,
-          // but current schema doesn't seem to have 'watchedWith' in WatchedMovie explicitly 
-          // except maybe in 'reaction' JSON?
-          // The UI passes it, but schema has: 
-          // reaction      Json?
           reaction: {
-             watchedWith: watchedWith || []
+             watchedWith: watchedWith
           }
         }
       });
 
-      // Optionally remove from WatchDesire?
-      // Usually yes.
+      // Remove from WatchDesire since it's now watched
       await prisma.watchDesire.deleteMany({
         where: {
           userId: user.id,
