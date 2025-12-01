@@ -127,13 +127,12 @@ export default function FriendsPage() {
 
   const handleSendRequest = async (targetUserId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/friends/request", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ toUserId: targetUserId }),
       });
 
@@ -160,17 +159,12 @@ export default function FriendsPage() {
 
   const handleAcceptRequest = async (requestId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
-      // Note: API expects friend request ID (which is friendship ID), not user ID
-      // But we need to ensure we pass the correct ID.
-      // The incomingRequests array has items with 'id' being the friendship ID.
-
       const res = await fetch(`/api/friends/${requestId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ action: "accept" }),
       });
 
@@ -208,13 +202,12 @@ export default function FriendsPage() {
 
   const handleRejectRequest = async (requestId: string, username: string) => {
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch(`/api/friends/${requestId}`, {
-        method: "PATCH", // Or DELETE depending on API implementation, usually PATCH {action: reject}
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
+        credentials: "include",
         body: JSON.stringify({ action: "reject" }),
       });
 
