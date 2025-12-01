@@ -61,16 +61,21 @@ export interface TrendingMovie {
   genres: string[];
 }
 
-// Helper to get auth headers
+// Helper to get auth headers (httpOnly cookies are used for auth)
 function getAuthHeaders() {
-  const token = localStorage.getItem("movienight_token");
   return {
     "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
   };
 }
 
-// Helper to handle API responses
+// Standard API Response type
+export interface ApiResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string | { field?: string; message: string }[];
+}
+
+// Helper to handle API responses with better type safety
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response
@@ -93,6 +98,7 @@ export async function searchUsers(query: string): Promise<Friend[]> {
     `/api/auth/search-users?q=${encodeURIComponent(query)}`,
     {
       headers: getAuthHeaders(),
+      credentials: "include",
     },
   );
 
@@ -102,6 +108,7 @@ export async function searchUsers(query: string): Promise<Friend[]> {
 export async function getUserFriends(): Promise<Friend[]> {
   const response = await fetch(`/api/friends`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   return handleApiResponse<Friend[]>(response);
@@ -110,6 +117,7 @@ export async function getUserFriends(): Promise<Friend[]> {
 export async function getIncomingRequests(): Promise<FriendRequest[]> {
   const response = await fetch(`/api/friends/incoming`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   return handleApiResponse<FriendRequest[]>(response);
@@ -118,17 +126,17 @@ export async function getIncomingRequests(): Promise<FriendRequest[]> {
 export async function getOutgoingRequests(): Promise<FriendRequest[]> {
   const response = await fetch(`/api/friends/outgoing`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   return handleApiResponse<FriendRequest[]>(response);
 }
 
-export async function sendFriendRequest(
-  targetUserId: string,
-): Promise<void> {
+export async function sendFriendRequest(targetUserId: string): Promise<void> {
   const response = await fetch(`/api/friends/request`, {
     method: "POST",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify({ targetUserId }),
   });
 
@@ -142,18 +150,18 @@ export async function respondToFriendRequest(
   const response = await fetch(`/api/friends/${friendshipId}`, {
     method: "PATCH",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify({ action }),
   });
 
   await handleApiResponse(response);
 }
 
-export async function removeFriend(
-  friendshipId: string,
-): Promise<void> {
+export async function removeFriend(friendshipId: string): Promise<void> {
   const response = await fetch(`/api/friends/${friendshipId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   await handleApiResponse(response);
@@ -163,6 +171,7 @@ export async function removeFriend(
 export async function getNotifications(): Promise<Notification[]> {
   const response = await fetch(`/api/notifications`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   return handleApiResponse<Notification[]>(response);
@@ -171,6 +180,7 @@ export async function getNotifications(): Promise<Notification[]> {
 export async function getUnreadNotificationCount(): Promise<number> {
   const response = await fetch(`/api/notifications/unread-count`, {
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   const data = await handleApiResponse<{ count: number }>(response);
@@ -183,6 +193,7 @@ export async function markNotificationAsRead(
   const response = await fetch(`/api/notifications/mark-read`, {
     method: "POST",
     headers: getAuthHeaders(),
+    credentials: "include",
     body: JSON.stringify({ notificationId }),
   });
 
@@ -195,6 +206,7 @@ export async function deleteNotification(
   const response = await fetch(`/api/notifications/${notificationId}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
+    credentials: "include",
   });
 
   await handleApiResponse(response);
@@ -258,6 +270,7 @@ export async function getDashboardStats(): Promise<{
     // Use the consolidated endpoint
     const response = await fetch("/api/dashboard", {
       headers: getAuthHeaders(),
+      credentials: "include",
     });
     const data = await handleApiResponse<{
       stats: DashboardStats;
@@ -287,6 +300,7 @@ export async function getTrendingMovies(): Promise<TrendingMovie[]> {
   try {
     const response = await fetch("/api/movies", {
       headers: getAuthHeaders(),
+      credentials: "include",
     });
     const movies = await handleApiResponse<any[]>(response);
 
@@ -300,6 +314,7 @@ export async function getTrendingMovies(): Promise<TrendingMovie[]> {
     try {
       const historyResponse = await fetch("/api/watch/history", {
         headers: getAuthHeaders(),
+        credentials: "include",
       });
       if (historyResponse.ok) {
         watchHistory = await handleApiResponse<any[]>(historyResponse);
@@ -339,6 +354,7 @@ export async function getUpcomingReleases(): Promise<any[]> {
   try {
     const response = await fetch("/api/releases/upcoming", {
       headers: getAuthHeaders(),
+      credentials: "include",
     });
     return handleApiResponse<any[]>(response);
   } catch (error) {

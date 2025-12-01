@@ -1,6 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { z } from "zod";
+
+// Validation schemas
+const WatchlistPostSchema = z.object({
+  action: z.enum(["markWatched"]).describe("Action to perform"),
+  movieId: z.string().min(1).describe("Movie ID"),
+  watchedWith: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe("IDs of users watched with"),
+});
+
+type WatchlistPostRequest = z.infer<typeof WatchlistPostSchema>;
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,7 +22,7 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -24,11 +38,11 @@ export async function GET(req: NextRequest) {
         movie: true,
         suggestion: {
           include: {
-            fromUser: true
-          }
-        }
+            fromUser: true,
+          },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
     // Fetch History (WatchedMovie)
@@ -37,20 +51,22 @@ export async function GET(req: NextRequest) {
       include: {
         movie: true,
       },
-      orderBy: { watchedAt: 'desc' }
+      orderBy: { watchedAt: "desc" },
     });
 
     // Map to frontend format
-    const watchlistData = watchDesires.map(wd => ({
+    const watchlistData = watchDesires.map((wd) => ({
       id: wd.movie.id, // Using movie ID as the primary identifier for the list item seems safer for uniqueness in list
       desireId: wd.id,
       title: wd.movie.title,
       year: wd.movie.year,
       genres: wd.movie.genres,
-      platform: wd.movie.platform || 'Unknown',
+      platform: wd.movie.platform || "Unknown",
       poster: wd.movie.poster,
       description: wd.movie.description,
-      releaseDate: wd.movie.releaseDate ? wd.movie.releaseDate.toISOString() : null,
+      releaseDate: wd.movie.releaseDate
+        ? wd.movie.releaseDate.toISOString()
+        : null,
       userDesireScore: wd.rating || 0,
       selectedFriends: [], // We don't store this in WatchDesire currently
       suggestedBy: wd.suggestion?.fromUser.name,
@@ -61,21 +77,21 @@ export async function GET(req: NextRequest) {
     // Check which watchlist items are also in history (watched)
     // Actually, if it's in history, it might not be in watchlist anymore?
     // Or we mark it as watched.
-    const historyMovieIds = new Set(history.map(h => h.movieId));
-    
-    watchlistData.forEach(item => {
+    const historyMovieIds = new Set(history.map((h) => h.movieId));
+
+    watchlistData.forEach((item) => {
       if (historyMovieIds.has(item.id)) {
         item.isWatched = true;
       }
     });
 
-    const historyData = history.map(h => ({
+    const historyData = history.map((h) => ({
       id: h.movie.id,
       historyId: h.id,
       title: h.movie.title,
       year: h.movie.year,
       genres: h.movie.genres,
-      platform: h.movie.platform || 'Unknown',
+      platform: h.movie.platform || "Unknown",
       poster: h.movie.poster,
       watchedDate: h.watchedAt.toISOString(),
       watchedWith: [], // We'd need to look up Events or similar to find who it was watched with
@@ -85,15 +101,16 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      watchlist: watchlistData,
-      history: historyData,
+      data: {
+        watchlist: watchlistData,
+        history: historyData,
+      },
     });
-
   } catch (err) {
     console.error("Get watchlist error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -104,54 +121,59 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
+    // Validate request body
     const body = await req.json();
-    const { action, movieId, watchedWith } = body;
+    const validationResult = WatchlistPostSchema.safeParse(body);
 
-    if (action === 'markWatched') {
-      if (!movieId) {
-        return NextResponse.json({ success: false, error: "Missing movieId" }, { status: 400 });
-      }
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid request",
+          details: validationResult.error.errors,
+        },
+        { status: 400 },
+      );
+    }
 
+    const { action, movieId, watchedWith } = validationResult.data;
+
+    if (action === "markWatched") {
       // Create WatchedMovie entry
       await prisma.watchedMovie.create({
         data: {
           userId: user.id,
           movieId: movieId,
-          // We could store watchedWith in a JSON field or separate table if needed,
-          // but current schema doesn't seem to have 'watchedWith' in WatchedMovie explicitly 
-          // except maybe in 'reaction' JSON?
-          // The UI passes it, but schema has: 
-          // reaction      Json?
           reaction: {
-             watchedWith: watchedWith || []
-          }
-        }
+            watchedWith: watchedWith,
+          },
+        },
       });
 
-      // Optionally remove from WatchDesire?
-      // Usually yes.
+      // Remove from WatchDesire since it's now watched
       await prisma.watchDesire.deleteMany({
         where: {
           userId: user.id,
-          movieId: movieId
-        }
+          movieId: movieId,
+        },
       });
 
       return NextResponse.json({ success: true });
     }
 
-    return NextResponse.json({ success: false, error: "Invalid action" }, { status: 400 });
-
+    return NextResponse.json(
+      { success: false, error: "Invalid action" },
+      { status: 400 },
+    );
   } catch (err) {
     console.error("Watchlist action error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -45,7 +45,7 @@ export default function WatchHistoryPage() {
     };
 
     fetchWatchHistory();
-  }, [token]);
+  }, []);
 
   // Group by date
   const groupedByDate = watchHistory.reduce(

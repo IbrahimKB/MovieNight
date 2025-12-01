@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useConfetti } from "@/hooks/use-confetti";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { toast } from "@/components/ui/use-toast";
 
 interface Movie {
   id: string;
@@ -57,19 +58,21 @@ export default function MovieDetailPage() {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const res = await fetch(`/api/movies/${movieId}`, {
-          credentials: "include",
-        });
-        const data = await res.json();
+        // Parallelize independent requests
+        const [movieRes, watchlistRes, historyRes, friendsRes] =
+          await Promise.all([
+            fetch(`/api/movies/${movieId}`, { credentials: "include" }),
+            fetch("/api/watch/desire", { credentials: "include" }),
+            fetch("/api/watch/history", { credentials: "include" }),
+            fetch("/api/friends", { credentials: "include" }),
+          ]);
 
+        const data = await movieRes.json();
         if (data.success && data.data) {
           setMovie(data.data);
         }
 
         // Check if in watchlist
-        const watchlistRes = await fetch("/api/watch/desire", {
-          credentials: "include",
-        });
         const watchlistData = await watchlistRes.json();
         if (watchlistData.success && Array.isArray(watchlistData.data)) {
           const isInList = watchlistData.data.some(
@@ -79,10 +82,6 @@ export default function MovieDetailPage() {
         }
 
         // Check if watched
-        const historyRes = await fetch("/api/watch/history", {
-          headers,
-          credentials: "include",
-        });
         const historyData = await historyRes.json();
         if (historyData.success && Array.isArray(historyData.data)) {
           const isWatched = historyData.data.some(
@@ -92,52 +91,22 @@ export default function MovieDetailPage() {
         }
 
         // Fetch friends for suggestions
-        const friendsRes = await fetch("/api/friends", {
-          headers,
-          credentials: "include",
-        });
         const friendsData = await friendsRes.json();
         if (friendsData.success && friendsData.data?.friends) {
           setFriends(friendsData.data.friends);
         }
 
-        // Fetch friends who watched this movie (from activity/stats)
-        const friendsActivityRes = await fetch("/api/friends", {
-          headers,
-          credentials: "include",
-        });
-        const friendsActivityData = await friendsActivityRes.json();
-        if (
-          friendsActivityData.success &&
-          Array.isArray(friendsActivityData.data?.friends)
-        ) {
-          // Filter friends who have watched this movie by checking their watch history
-          const friendsWithActivity = await Promise.all(
-            friendsActivityData.data.friends.map(async (friend: any) => {
-              // Try to fetch friend's watch history to see if they watched this movie
-              try {
-                const friendHistoryRes = await fetch(
-                  `/api/watch/history?userId=${friend.id}`,
-                  { headers },
-                );
-                const friendHistoryData = await friendHistoryRes.json();
-                if (Array.isArray(friendHistoryData.data)) {
-                  const watched = friendHistoryData.data.some(
-                    (item: any) => item.movieId === movieId,
-                  );
-                  return watched ? friend : null;
-                }
-              } catch (e) {
-                // Silently fail for individual friend data
-              }
-              return null;
-            }),
-          );
-
-          setFriendsWhoWatched(friendsWithActivity.filter((f) => f !== null));
-        }
+        // Note: Friends who watched this movie would require a dedicated API endpoint
+        // with proper ACL checks. For now, we don't fetch this data.
+        // TODO: Add /api/movies/:id/who-watched endpoint on backend
+        setFriendsWhoWatched([]);
       } catch (error) {
         console.error("Failed to fetch movie:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load movie details. Please try again.",
+          variant: "error",
+        });
       } finally {
         setLoading(false);
       }
@@ -146,7 +115,7 @@ export default function MovieDetailPage() {
     if (movieId) {
       fetchMovie();
     }
-  }, [movieId, token]);
+  }, [movieId]);
 
   const handleAddToWatchlist = async () => {
     const previousState = inWatchlist;
@@ -247,21 +216,12 @@ export default function MovieDetailPage() {
 
   if (!movie) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Movie not found</p>
-        <button
-          onClick={() => router.back()}
-          className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
-  if (!movie) {
-    return (
-      <div className="text-center py-12">
+      <motion.div
+        className="text-center py-12"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         <p className="text-muted-foreground">Movie not found</p>
         <motion.button
           onClick={() => router.back()}
@@ -270,7 +230,7 @@ export default function MovieDetailPage() {
         >
           Go Back
         </motion.button>
-      </div>
+      </motion.div>
     );
   }
 

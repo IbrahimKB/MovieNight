@@ -28,25 +28,56 @@ function getMovieId(req: NextRequest): string | null {
   return parts.at(-1) ?? null;
 }
 
-// Helper function to convert TMDB movie details to local format
-function mapTMDBMovieDetailsToLocal(tmdbMovie: any) {
+// Zod schema for TMDB movie response validation
+const TMDBMovieSchema = z.object({
+  id: z.number(),
+  title: z.string().optional(),
+  name: z.string().optional(),
+  release_date: z.string().optional(),
+  first_air_date: z.string().optional(),
+  runtime: z.number().optional(),
+  episode_run_time: z.array(z.number()).optional(),
+  genres: z.array(z.object({ id: z.number(), name: z.string() })).optional(),
+  poster_path: z.string().nullable().optional(),
+  overview: z.string().optional(),
+  vote_average: z.number().optional(),
+  production_companies: z
+    .array(z.object({ id: z.number(), name: z.string() }))
+    .optional(),
+});
+
+// Helper function to convert TMDB movie details to local format with validation
+function mapTMDBMovieDetailsToLocal(tmdbMovieData: any) {
+  // Validate TMDB data
+  const validationResult = TMDBMovieSchema.safeParse(tmdbMovieData);
+  if (!validationResult.success) {
+    throw new Error(`Invalid TMDB data: ${validationResult.error.message}`);
+  }
+
+  const tmdbMovie = validationResult.data;
   const releaseDate = tmdbMovie.release_date || tmdbMovie.first_air_date;
-  const runtime = tmdbMovie.runtime || (tmdbMovie.episode_run_time?.length > 0 ? tmdbMovie.episode_run_time[0] : 0);
-  
+  const runtime = tmdbMovie.runtime || (tmdbMovie.episode_run_time?.[0] ?? 0);
+  const year = releaseDate
+    ? new Date(releaseDate).getFullYear()
+    : new Date().getFullYear();
+
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
-    year: new Date(releaseDate || '2024-01-01').getFullYear(),
-    genres: tmdbMovie.genres?.map((g: any) => g.name) || [],
+    title: tmdbMovie.title || tmdbMovie.name || "Unknown Title",
+    year,
+    genres: tmdbMovie.genres?.map((g) => g.name).filter(Boolean) || [],
     platform: null,
-    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-    description: tmdbMovie.overview || '',
-    imdbRating: tmdbMovie.vote_average || null,
+    poster: tmdbMovie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
+      : null,
+    description: tmdbMovie.overview ?? "",
+    imdbRating: tmdbMovie.vote_average ?? null,
     rtRating: null,
     releaseDate: releaseDate ? new Date(releaseDate) : null,
-    runtime: runtime,
-    productionCompanies: tmdbMovie.production_companies?.map((c: any) => c.name) || [],
+    runtime,
+    productionCompanies:
+      tmdbMovie.production_companies?.map((c) => c.name).filter(Boolean) || [],
   };
 }
 
@@ -60,7 +91,7 @@ function isTMDBId(id: string): boolean {
 // ---------------------------------------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
     const { id } = await params;
@@ -68,7 +99,7 @@ export async function GET(
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Movie ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,7 +115,7 @@ export async function GET(
         return NextResponse.json({
           success: true,
           data: mapTMDBMovieDetailsToLocal(tmdbMovie),
-          source: 'tmdb-live',
+          source: "tmdb-live",
         });
       }
     }
@@ -97,20 +128,20 @@ export async function GET(
     if (!movie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     return NextResponse.json({
       success: true,
       data: movie,
-      source: 'local-postgres',
+      source: "local-postgres",
     });
   } catch (err) {
     console.error("GET movie error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -121,7 +152,7 @@ export async function GET(
 // ---------------------------------------------
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Auth required + must be admin
@@ -129,7 +160,7 @@ export async function PATCH(
     if (!user || user.role !== "admin") {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -138,7 +169,7 @@ export async function PATCH(
     if (!id) {
       return NextResponse.json(
         { success: false, error: "Movie ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -154,7 +185,7 @@ export async function PATCH(
             message: e.message,
           })),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -176,7 +207,7 @@ export async function PATCH(
     console.error("PATCH movie error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

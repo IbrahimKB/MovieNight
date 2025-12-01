@@ -190,23 +190,75 @@ async function handleNavigationRequest(request) {
   }
 }
 
-// Create offline fallback responses
+// Create offline fallback responses (standardized format)
 function createOfflineFallback(request) {
   const url = new URL(request.url);
+  const jsonHeader = { "Content-Type": "application/json" };
 
+  // Return standardized API response format: {success: boolean, data: T}
   if (url.pathname.includes("/api/notifications")) {
-    return new Response(JSON.stringify([]), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: [],
+      }),
+      {
+        headers: jsonHeader,
+        status: 200,
+      },
+    );
   }
 
   if (url.pathname.includes("/api/movies")) {
-    return new Response(JSON.stringify({ movies: [] }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: [],
+      }),
+      {
+        headers: jsonHeader,
+        status: 200,
+      },
+    );
   }
 
-  return new Response("Offline", { status: 503 });
+  if (url.pathname.includes("/api/friends")) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: { friends: [] },
+      }),
+      {
+        headers: jsonHeader,
+        status: 200,
+      },
+    );
+  }
+
+  if (url.pathname.includes("/api/watchlist")) {
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: { watchlist: [], history: [] },
+      }),
+      {
+        headers: jsonHeader,
+        status: 200,
+      },
+    );
+  }
+
+  // Generic fallback for other API endpoints
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: "Offline - API not available",
+    }),
+    {
+      headers: jsonHeader,
+      status: 503,
+    },
+  );
 }
 
 // Utility functions

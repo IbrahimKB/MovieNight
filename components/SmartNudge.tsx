@@ -25,9 +25,7 @@ export default function SmartNudge({
     const fetchNudge = async () => {
       if (!user) return;
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-        const res = await fetch("/api/nudge", { headers });
+        const res = await fetch("/api/nudge", { credentials: "include" });
         const data = await res.json();
         if (data.success && data.nudge) {
           setNudge(data.nudge);

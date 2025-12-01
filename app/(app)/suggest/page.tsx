@@ -135,6 +135,8 @@ function SuggestPageContent() {
 
   // Check for pre-filled movie data from URL params
   useEffect(() => {
+    if (!searchParams) return;
+
     const movieTitle = searchParams.get("title");
     const movieYear = searchParams.get("year");
     const movieGenres = searchParams.get("genres");
