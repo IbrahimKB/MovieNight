@@ -1,4 +1,4 @@
-import { User } from "@/types";
+import { User, ApiResponse } from "@/types";
 
 export interface Friend {
   id: string;
@@ -38,13 +38,6 @@ export interface Notification {
   updatedAt: string;
 }
 
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
 export interface DashboardStats {
   totalFriends: number;
   activeSuggestions: number;
@@ -66,13 +59,6 @@ function getAuthHeaders() {
   return {
     "Content-Type": "application/json",
   };
-}
-
-// Standard API Response type
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string | { field?: string; message: string }[];
 }
 
 // Helper to handle API responses with better type safety
