@@ -23,11 +23,8 @@ export default function SocialActivityFeed({
   useEffect(() => {
     const fetchActivity = async () => {
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-        
         // Fetch notifications as a proxy for activity for now
-        const res = await fetch("/api/notifications", { headers });
+        const res = await fetch("/api/notifications", { credentials: "include" });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
