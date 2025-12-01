@@ -30,9 +30,7 @@ export default function SuggestionAccuracy({
     const fetchStats = async () => {
       if (!user) return;
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-        const res = await fetch("/api/stats", { headers });
+        const res = await fetch("/api/stats", { credentials: "include" });
         const json = await res.json();
         if (json.success) {
             // If userId is provided, find in squadStats, else use userStats
