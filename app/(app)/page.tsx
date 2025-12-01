@@ -53,7 +53,7 @@ const defaultStats: DashboardStats = {
 import { StatCard } from "@/components/stat-card";
 
 export default function HomePage() {
-  const { user, isLoading: authLoading, logout } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [stats, setStats] = useState<DashboardStats>(defaultStats);
@@ -61,7 +61,6 @@ export default function HomePage() {
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pullStartY = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
