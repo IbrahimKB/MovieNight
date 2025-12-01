@@ -106,12 +106,9 @@ export default function WatchlistPage() {
       if (!user) return;
 
       try {
-        const token = localStorage.getItem("movienight_token");
-        const headers = { Authorization: token ? `Bearer ${token}` : "" };
-
         const [watchlistRes, friendsRes] = await Promise.all([
-          fetch("/api/watchlist", { headers, credentials: "include" }),
-          fetch("/api/friends", { headers, credentials: "include" }),
+          fetch("/api/watchlist", { credentials: "include" }),
+          fetch("/api/friends", { credentials: "include" }),
         ]);
 
         const watchlistData = await watchlistRes.json();
@@ -213,12 +210,10 @@ export default function WatchlistPage() {
     setIsSavingWatched(true);
 
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch("/api/watch/mark-watched", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
         },
         credentials: "include",
         body: JSON.stringify({
