@@ -74,14 +74,8 @@ export function AddMovieModal({
   const [message, setMessage] = useState("");
   const [desiredScore, setDesiredScore] = useState([5]);
 
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("movienight_token")
-      : null;
-
   const headers = {
     "Content-Type": "application/json",
-    ...(token && { Authorization: `Bearer ${token}` }),
   };
 
   const handleClose = () => {
