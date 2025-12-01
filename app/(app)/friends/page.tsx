@@ -97,11 +97,10 @@ export default function FriendsPage() {
 
     setIsSearching(true);
     try {
-      const token = localStorage.getItem("movienight_token");
       const res = await fetch(
         `/api/auth/search-users?q=${encodeURIComponent(searchQuery)}`,
         {
-          headers: { Authorization: token ? `Bearer ${token}` : "" },
+          credentials: "include",
         },
       );
       const data = await res.json();
