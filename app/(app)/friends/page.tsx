@@ -17,10 +17,13 @@ import {
   Film,
   Loader2,
   UserCheck,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useSocket } from "@/hooks/useSocket";
 
 interface Friend {
   id: string;
