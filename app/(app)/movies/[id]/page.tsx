@@ -143,7 +143,7 @@ export default function MovieDetailPage() {
     if (movieId) {
       fetchMovie();
     }
-  }, [movieId, token]);
+  }, [movieId]);
 
   const handleAddToWatchlist = async () => {
     const previousState = inWatchlist;
