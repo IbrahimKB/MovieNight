@@ -21,9 +21,9 @@ interface Friend {
 export default function SquadPage() {
   const { user, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"friends" | "incoming" | "outgoing">(
-    "friends"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "friends" | "incoming" | "outgoing"
+  >("friends");
   const [friends, setFriends] = useState<Friend[]>([]);
   const [incomingRequests, setIncomingRequests] = useState<Friend[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<Friend[]>([]);
@@ -94,7 +94,9 @@ export default function SquadPage() {
           🎬
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-base md:text-lg">{friend.name || friend.username}</h3>
+          <h3 className="font-bold text-base md:text-lg">
+            {friend.name || friend.username}
+          </h3>
           <p className="text-xs md:text-sm text-muted-foreground truncate">
             @{friend.username}
           </p>
@@ -169,7 +171,8 @@ export default function SquadPage() {
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {tab.label} <span className="hidden sm:inline">({tab.count})</span>
+              {tab.label}{" "}
+              <span className="hidden sm:inline">({tab.count})</span>
             </button>
           ))}
         </div>
@@ -191,7 +194,10 @@ export default function SquadPage() {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <Users size={48} className="text-muted-foreground mx-auto mb-4" />
+                  <Users
+                    size={48}
+                    className="text-muted-foreground mx-auto mb-4"
+                  />
                   <h2 className="text-xl font-semibold mb-2">No friends yet</h2>
                   <p className="text-muted-foreground">
                     Add friends to start sharing movie recommendations
@@ -216,7 +222,10 @@ export default function SquadPage() {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <Users size={48} className="text-muted-foreground mx-auto mb-4" />
+                  <Users
+                    size={48}
+                    className="text-muted-foreground mx-auto mb-4"
+                  />
                   <h2 className="text-xl font-semibold mb-2">
                     No pending requests
                   </h2>
@@ -240,8 +249,13 @@ export default function SquadPage() {
               ))
             ) : (
               <div className="text-center py-12">
-                <Users size={48} className="text-muted-foreground mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No pending requests</h2>
+                <Users
+                  size={48}
+                  className="text-muted-foreground mx-auto mb-4"
+                />
+                <h2 className="text-xl font-semibold mb-2">
+                  No pending requests
+                </h2>
                 <p className="text-muted-foreground">
                   Friend requests you've sent will appear here
                 </p>

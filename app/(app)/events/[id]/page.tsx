@@ -37,7 +37,9 @@ export default function EventDetailPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`/api/events/${eventId}`, { credentials: "include" });
+        const res = await fetch(`/api/events/${eventId}`, {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && data.data) {

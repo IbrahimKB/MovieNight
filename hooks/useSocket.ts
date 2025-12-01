@@ -20,14 +20,17 @@ export function useSocket() {
     }
 
     // Create new connection
-    const socket = io(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000", {
-      transports: ["websocket", "polling"],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 10,
-      path: "/api/socket.io",
-    });
+    const socket = io(
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      {
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10,
+        path: "/api/socket.io",
+      },
+    );
 
     socketRef.current = socket;
     globalSocket = socket;

@@ -31,7 +31,7 @@ async function resolveUserId(externalId: string): Promise<string | null> {
 // POST /api/friends/request
 // ---------------------------------------------
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Require authentication
@@ -39,7 +39,7 @@ export async function POST(
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -54,7 +54,7 @@ export async function POST(
             .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join("; "),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,7 +65,7 @@ export async function POST(
     if (!targetUserId) {
       return NextResponse.json(
         { success: false, error: `User not found: ${toUserId}` },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -73,7 +73,7 @@ export async function POST(
     if (targetUserId === currentUser.id) {
       return NextResponse.json(
         { success: false, error: "Cannot send friend request to yourself" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -92,13 +92,13 @@ export async function POST(
       if (existing.status === "accepted") {
         return NextResponse.json(
           { success: false, error: "Already friends" },
-          { status: 409 }
+          { status: 409 },
         );
       }
       if (existing.status === "pending") {
         return NextResponse.json(
           { success: false, error: "Friend request already pending" },
-          { status: 409 }
+          { status: 409 },
         );
       }
     }
@@ -153,13 +153,13 @@ export async function POST(
           createdAt: friendship.createdAt,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     console.error("Friend request error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

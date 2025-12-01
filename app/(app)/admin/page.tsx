@@ -71,7 +71,10 @@ export default function AdminPage() {
 
       if (res.ok) {
         // Refresh stats
-        const statsRes = await fetch("/api/admin/stats", { headers, credentials: "include" });
+        const statsRes = await fetch("/api/admin/stats", {
+          headers,
+          credentials: "include",
+        });
         const statsData = await statsRes.json();
         if (statsData.success && statsData.data) {
           setStats(statsData.data);

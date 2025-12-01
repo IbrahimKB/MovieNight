@@ -25,7 +25,6 @@ export default function ProfilePage() {
   });
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     const fetchProfileData = async () => {
       try {

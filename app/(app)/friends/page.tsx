@@ -277,7 +277,9 @@ export default function FriendsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Squad</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
+              Squad
+            </h1>
           </div>
           {/* Connection Status Indicator */}
           <div className="flex items-center gap-2">
@@ -291,9 +293,7 @@ export default function FriendsPage() {
             ) : (
               <>
                 <WifiOff className="h-4 w-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">
-                  Offline
-                </span>
+                <span className="text-xs text-muted-foreground">Offline</span>
               </>
             )}
           </div>

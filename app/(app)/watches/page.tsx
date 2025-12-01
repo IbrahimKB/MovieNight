@@ -24,7 +24,9 @@ export default function WatchHistoryPage() {
   useEffect(() => {
     const fetchWatchHistory = async () => {
       try {
-        const res = await fetch("/api/watch/history", { credentials: "include" });
+        const res = await fetch("/api/watch/history", {
+          credentials: "include",
+        });
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {

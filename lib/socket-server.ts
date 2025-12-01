@@ -8,7 +8,7 @@ export function initializeSocket(server: HTTPServer) {
 
   try {
     const { Server: SocketIOServer } = require("socket.io");
-    
+
     io = new SocketIOServer(server, {
       path: "/api/socket.io",
       cors: {
