@@ -130,7 +130,6 @@ export default function MoviesPage() {
         const res = await fetch(
           `/api/movies/search?q=${encodeURIComponent(searchQuery)}&page=1`,
           {
-            headers,
             credentials: "include",
           },
         );
