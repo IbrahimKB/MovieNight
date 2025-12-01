@@ -114,7 +114,31 @@ export async function POST(
         requestedBy: currentUser.id,
         status: "pending",
       },
+      include: {
+        user1: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
     });
+
+    // Emit real-time notification to recipient
+    const senderUser = await prisma.authUser.findUnique({
+      where: { id: userId1 },
+      select: { id: true, name: true, username: true, avatar: true },
+    });
+
+    if (senderUser) {
+      emitToUser(targetUserId, "friend:request-received", {
+        id: friendship.id,
+        fromUser: senderUser,
+        sentAt: friendship.createdAt,
+      });
+    }
 
     return NextResponse.json(
       {
