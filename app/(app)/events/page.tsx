@@ -46,7 +46,7 @@ export default function EventsPage() {
     try {
       const [eventsRes, invitationsRes] = await Promise.all([
         fetch("/api/events", { credentials: "include" }),
-        fetch("/api/friends/invitations", { credentials: "include" }),
+        fetch("/api/events/invitations", { credentials: "include" }),
       ]);
 
       const eventsData = await eventsRes.json();
