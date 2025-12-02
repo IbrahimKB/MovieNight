@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bookmark, Clock, Heart, Users, Edit2 } from "lucide-react";
+import { motion } from "framer-motion";
+import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 
 interface Movie {
   id: string;
