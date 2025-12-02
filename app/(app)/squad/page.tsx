@@ -83,6 +83,34 @@ export default function SquadPage() {
     return null;
   }
 
+  const handleRemoveFriend = (friendId: string, friendName: string) => {
+    confirmDialog.openDialog(
+      "Remove Friend?",
+      `Are you sure you want to remove ${friendName} from your friends?`,
+      async () => {
+        try {
+          const res = await fetch(`/api/friends/${friendId}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (res.ok) {
+            setFriends((prev) => prev.filter((f) => f.id !== friendId));
+          } else {
+            console.error("Failed to remove friend");
+          }
+        } catch (error) {
+          console.error("Error removing friend:", error);
+        }
+      },
+      {
+        confirmText: "Remove",
+        cancelText: "Cancel",
+        isDestructive: true,
+      }
+    );
+  };
+
   const tabs = [
     { id: "friends", label: "Friends", count: friends.length },
     { id: "incoming", label: "Requests", count: incomingRequests.length },
