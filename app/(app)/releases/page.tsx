@@ -106,9 +106,11 @@ export default function ReleasesPage() {
           </button>
 
           {release.platform && (
-            <p className="text-xs text-primary mt-2 font-medium">
-              {release.platform}
-            </p>
+            <div className="mt-2">
+              <Badge variant="outline" className="text-xs">
+                {emoji} {release.platform}
+              </Badge>
+            </div>
           )}
 
           {release.genres && release.genres.length > 0 && (
