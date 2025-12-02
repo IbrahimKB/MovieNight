@@ -13,7 +13,7 @@ const CreateEventSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   date: z.string().datetime(),
   notes: z.string().optional(),
-  participants: z.array(z.string()).optional(), // external IDs (puid or id)
+  invitedUsers: z.array(z.string()).optional(), // external IDs (puid or id) to invite
 });
 
 // ------------------------------------------------------
@@ -88,7 +88,7 @@ export async function POST(
       movieId: inputMovieId,
       date,
       notes,
-      participants,
+      invitedUsers,
     } = validation.data;
 
     // Map current user to internal ID
@@ -110,49 +110,41 @@ export async function POST(
       );
     }
 
-    // Validate participants (external -> internal)
-    const internalParticipants: string[] = [hostUserId];
-    const invalidUserIds: string[] = [];
-
-    if (participants) {
-      for (const external of participants) {
-        const internalId = await mapExternalUserIdToInternal(external);
-        if (!internalId) {
-          invalidUserIds.push(external);
-        } else if (!internalParticipants.includes(internalId)) {
-          internalParticipants.push(internalId);
-        }
-      }
-    }
-
-    if (invalidUserIds.length > 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Invalid user IDs: ${invalidUserIds.join(", ")}`,
-        },
-        { status: 400 },
-      );
-    }
-
-    // Create event via Prisma
+    // Create event with only host as participant initially
     const event = await prisma.event.create({
       data: {
         movieId: internalMovieId,
         hostUserId,
-        participants: internalParticipants,
+        participants: [hostUserId], // Only host initially
         date: new Date(date),
         notes: notes ?? null,
       },
     });
 
-    // Map participants back to external IDs
-    const mappedResults = await Promise.allSettled(
-      internalParticipants.map((id) => mapInternalUserIdToExternal(id)),
-    );
-    const externalParticipants = mappedResults.map((result) =>
-      result.status === "fulfilled" ? result.value : "",
-    );
+    // Create invitations for invited users
+    const createdInvitations = [];
+    const failedInvitations = [];
+
+    if (invitedUsers && invitedUsers.length > 0) {
+      for (const externalUserId of invitedUsers) {
+        const internalUserId = await mapExternalUserIdToInternal(externalUserId);
+        if (!internalUserId) {
+          failedInvitations.push(externalUserId);
+          continue;
+        }
+
+        // Create invitation
+        const invitation = await prisma.eventInvitation.create({
+          data: {
+            eventId: event.id,
+            userId: internalUserId,
+            invitedBy: hostUserId,
+          },
+        });
+
+        createdInvitations.push(invitation);
+      }
+    }
 
     return NextResponse.json(
       {
@@ -161,7 +153,8 @@ export async function POST(
           id: event.id,
           movieId: event.movieId,
           hostUserId: getUserExternalId(currentUser),
-          participants: externalParticipants,
+          participants: [getUserExternalId(currentUser)],
+          invitations: createdInvitations.length,
           date: event.date,
           notes: event.notes,
           createdAt: event.createdAt,
