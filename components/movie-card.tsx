@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { Clapperboard, Bookmark, Plus } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
