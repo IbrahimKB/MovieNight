@@ -94,8 +94,8 @@ export async function GET(
       );
     }
 
-    // Get all invitations for this event
-    const invitations = await prisma.eventInvitation.findMany({
+    // Get all invitations for this event (if host) or current user's invitation (if invited)
+    const allInvitations = await prisma.eventInvitation.findMany({
       where: { eventId },
       include: {
         user: {
@@ -105,23 +105,48 @@ export async function GET(
       orderBy: { createdAt: "desc" },
     });
 
-    const mapped = await Promise.all(
-      invitations.map(async (inv) => {
-        const externalUserId = await mapInternalUserIdToExternal(inv.user.id);
-        return {
-          id: inv.id,
-          userId: externalUserId,
-          user: {
-            name: inv.user.name,
-            username: inv.user.username,
-          },
-          status: inv.status,
-          createdAt: inv.createdAt,
-        };
-      }),
-    );
+    // If host, return all invitations
+    if (event.hostUserId === currentUserInternalId) {
+      const mapped = await Promise.all(
+        allInvitations.map(async (inv) => {
+          const externalUserId = await mapInternalUserIdToExternal(inv.user.id);
+          return {
+            id: inv.id,
+            userId: externalUserId,
+            user: {
+              name: inv.user.name,
+              username: inv.user.username,
+            },
+            status: inv.status,
+            createdAt: inv.createdAt,
+          };
+        }),
+      );
 
-    return NextResponse.json({ success: true, data: mapped });
+      return NextResponse.json({ success: true, data: mapped });
+    }
+
+    // If not host, return only current user's invitation if exists
+    const userInvitation = allInvitations.find(
+      (inv) => inv.userId === currentUserInternalId,
+    );
+    if (userInvitation) {
+      return NextResponse.json({
+        success: true,
+        data: [
+          {
+            id: userInvitation.id,
+            status: userInvitation.status,
+          },
+        ],
+      });
+    }
+
+    // User is not invited
+    return NextResponse.json({
+      success: true,
+      data: [],
+    });
   } catch (err) {
     console.error("Get event invitations error:", err);
     return NextResponse.json(
