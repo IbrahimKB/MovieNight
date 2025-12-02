@@ -76,6 +76,7 @@ model AuthUser {
   notifications           Notification[]
   pushSubscriptions       UserPushSubscription[]
   notificationPreferences UserNotificationPreferences?
+  votes                   MovieNightVote[] @relation("UserVotes")
 
   @@map("users")
 }
