@@ -138,10 +138,10 @@ export interface UserNotificationPreferences {
 }
 
 // API Response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
-  error?: string | Record<string, any> | { field?: string; message: string }[];
+  error?: string | Record<string, unknown> | { field?: string; message: string }[];
 }
 
 export interface ValidationError {
