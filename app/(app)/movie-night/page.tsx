@@ -122,6 +122,15 @@ export default function MovieNightPage() {
     fetchFriends();
   }, [user]);
 
+  // Fetch vote counts when filtered movies change
+  useEffect(() => {
+    filteredMovies.forEach((movie) => {
+      if (!movieVotes[movie.id]) {
+        fetchVoteCounts(movie.id);
+      }
+    });
+  }, [filteredMovies]);
+
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
       prev.includes(friendId)
