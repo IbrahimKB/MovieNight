@@ -335,6 +335,32 @@ export default function WatchlistPage() {
         </p>
       </div>
 
+      {/* Featured Movie from Watchlist */}
+      {!isLoading &&
+        watchlist.filter((item) => !item.isWatched).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <FeaturedMovieHero
+              movie={{
+                id: watchlist.filter((item) => !item.isWatched)[0].id,
+                title: watchlist.filter((item) => !item.isWatched)[0].title,
+                year: watchlist.filter((item) => !item.isWatched)[0].year,
+                genres: watchlist.filter((item) => !item.isWatched)[0].genres,
+                description: watchlist.filter((item) => !item.isWatched)[0]
+                  .description,
+                poster: watchlist.filter((item) => !item.isWatched)[0].poster,
+                backdrop: watchlist.filter((item) => !item.isWatched)[0].poster,
+              }}
+              userRating={
+                watchlist.filter((item) => !item.isWatched)[0].userDesireScore
+              }
+            />
+          </motion.div>
+        )}
+
       {/* Section 1: Your Watchlist */}
       <Card className="bg-accent/20">
         <CardHeader>
