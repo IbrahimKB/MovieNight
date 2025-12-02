@@ -12,6 +12,7 @@ import {
   ListItemSkeleton,
 } from "@/components/ui/skeleton-loader";
 import HeroSection from "@/components/hero-section";
+import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 
 import {
   Calendar,
