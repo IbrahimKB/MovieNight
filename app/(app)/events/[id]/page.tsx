@@ -65,7 +65,7 @@ export default function EventDetailPage() {
       const eventData = await eventRes.json();
       if (eventData.success && eventData.data) {
         setEvent(eventData.data);
-        setIsAttending(eventData.data.participants?.length > 0 ?? false);
+        setIsAttending((eventData.data.participants?.length ?? 0) > 0);
       }
 
       if (inviteRes && inviteRes.ok) {
