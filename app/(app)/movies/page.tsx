@@ -9,6 +9,7 @@ import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
 import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
+import { shouldReduceMotion } from "@/lib/animations";
 
 interface Movie {
   id: string;
