@@ -291,6 +291,28 @@ model EventInvitation {
 }
 
 //////////////////////////////////////////////////////////////
+// MOVIE NIGHT VOTING
+//////////////////////////////////////////////////////////////
+
+model MovieNightVote {
+  id        String   @id @default(uuid()) @db.Uuid
+  movieId   String   @db.Uuid @map("movie_id")
+  userId    String   @db.Uuid @map("user_id")
+  voteType  VoteType
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  movie Movie    @relation("MovieVotes", fields: [movieId], references: [id], onDelete: Cascade)
+  user  AuthUser @relation("UserVotes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@index([movieId])
+  @@index([userId])
+  @@index([voteType])
+  @@map("movie_night_votes")
+}
+
+//////////////////////////////////////////////////////////////
 // NOTIFICATIONS & PREFERENCES
 //////////////////////////////////////////////////////////////
 
