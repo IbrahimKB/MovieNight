@@ -248,17 +248,72 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        {/* RSVP Button */}
-        <button
-          onClick={handleRSVP}
-          className={`px-8 py-3 rounded-lg font-medium transition-colors mb-8 ${
-            isAttending
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-card border border-border text-foreground hover:border-primary/50"
-          }`}
-        >
-          {isAttending ? "✓ You're Attending" : "RSVP to Event"}
-        </button>
+        {/* RSVP/Invitation Section */}
+        {invitationStatus &&
+        invitationStatus.status === "pending" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl"
+          >
+            <p className="text-sm font-medium text-foreground mb-4">
+              You've been invited to this event. Will you attend?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleRespondToInvitation("declined")}
+                disabled={respondingToInvitation}
+                className="flex-1 px-4 py-3 rounded-lg border border-border text-foreground hover:bg-red-500/10 hover:border-red-500/50 disabled:opacity-50 font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Decline
+              </button>
+              <button
+                onClick={() => handleRespondToInvitation("accepted")}
+                disabled={respondingToInvitation}
+                className="flex-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                Accept
+              </button>
+            </div>
+          </motion.div>
+        ) : invitationStatus &&
+          invitationStatus.status === "accepted" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3"
+          >
+            <Check className="h-5 w-5 text-green-600" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">
+              You accepted this invitation
+            </span>
+          </motion.div>
+        ) : invitationStatus &&
+          invitationStatus.status === "declined" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3"
+          >
+            <X className="h-5 w-5 text-red-600" />
+            <span className="text-sm font-medium text-red-700 dark:text-red-400">
+              You declined this invitation
+            </span>
+          </motion.div>
+        ) : isAttending ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3"
+          >
+            <Check className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">
+              You're attending this event
+            </span>
+          </motion.div>
+        ) : null}
 
         {/* Movie Info */}
         {event.movie && (
