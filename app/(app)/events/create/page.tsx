@@ -35,6 +35,16 @@ export default function CreateEventPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    // Check for date parameter in URL
+    if (searchParams) {
+      const dateParam = searchParams.get("date");
+      if (dateParam) {
+        setEventDate(dateParam);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         const [moviesRes, friendsRes] = await Promise.all([
