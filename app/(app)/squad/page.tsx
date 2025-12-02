@@ -37,6 +37,7 @@ export default function SquadPage() {
   const [incomingRequests, setIncomingRequests] = useState<Friend[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirmDialog = useConfirmDialog();
 
   useEffect(() => {
     setMounted(true);
