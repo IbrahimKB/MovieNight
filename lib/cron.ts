@@ -10,14 +10,10 @@
 import { syncUpcomingReleases } from "./sync/sync-upcoming-releases";
 
 let isScheduled = false;
-let cronModule: typeof import("node-cron") | null = null;
 
-function getCron() {
-  if (!cronModule) {
-    // Dynamic require to avoid webpack bundling
-    cronModule = require("node-cron");
-  }
-  return cronModule;
+function getCron(): typeof import("node-cron") {
+  // Dynamic require to avoid webpack bundling
+  return require("node-cron");
 }
 
 export async function initCronJobs() {
