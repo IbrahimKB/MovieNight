@@ -10,6 +10,15 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useConfirmDialog } from "@/hooks/use-confirm-dialog";
 
 interface Friend {
   id: string;
