@@ -79,13 +79,11 @@ export default function FeaturedMovieHero({
         )}
       >
         {backdropImage ? (
-          <Image
+          <img
             src={backdropImage}
             alt={movie.title}
-            fill
-            className="object-cover"
-            priority={false}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+            className="w-full h-full object-cover"
+            loading="lazy"
           />
         ) : (
           <div
