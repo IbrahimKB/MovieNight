@@ -307,6 +307,24 @@ export default function SquadPage() {
             )}
           </div>
         )}
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={confirmDialog.isOpen} onOpenChange={confirmDialog.closeDialog}>
+          <AlertDialogContent>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+            <div className="flex gap-3 justify-end">
+              <AlertDialogCancel>{confirmDialog.cancelText}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDialog.handleConfirm}
+                disabled={confirmDialog.isLoading}
+                className={confirmDialog.isDestructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              >
+                {confirmDialog.isLoading ? "..." : confirmDialog.confirmText}
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
