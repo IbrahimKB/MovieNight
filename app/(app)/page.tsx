@@ -241,6 +241,7 @@ export default function HomePage() {
               }
               color="text-blue-500"
               index={0}
+              description="Your connections in MovieNight. Add friends to share suggestions, create events, and discover what they're watching together."
             />
 
             <StatCard
@@ -254,6 +255,7 @@ export default function HomePage() {
               }
               color="text-green-500"
               index={1}
+              description="Movie recommendations waiting for your response. Review and accept suggestions from friends to add movies to your watchlist."
             />
 
             <StatCard
@@ -267,6 +269,7 @@ export default function HomePage() {
               }
               color="text-purple-500"
               index={2}
+              description="Movies you've watched in the past 7 days. Track your viewing habits and discover patterns in your movie preferences."
             />
 
             <StatCard
@@ -284,6 +287,7 @@ export default function HomePage() {
               }
               color="text-orange-500"
               index={3}
+              description="Your suggestion success rate. Based on movies you watched and rated 7+ stars. The higher, the better your taste matches your friends!"
             />
           </>
         )}
