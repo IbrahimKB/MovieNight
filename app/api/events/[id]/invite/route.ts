@@ -271,7 +271,7 @@ export async function POST(
       {
         success: true,
         data: {
-          created: createdInvitations.length,
+          created: createdInvitations.count || 0,
           failed: failedInvitations.length,
           failedUserIds: failedInvitations,
         },
