@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Calendar, Users, Clapperboard } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Clapperboard, Check, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface EventDetail {
   id: string;
@@ -24,6 +26,11 @@ interface EventDetail {
   };
 }
 
+interface InvitationStatus {
+  id: string;
+  status: "pending" | "accepted" | "declined";
+}
+
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,52 +39,88 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAttending, setIsAttending] = useState(false);
+  const [invitationStatus, setInvitationStatus] =
+    useState<InvitationStatus | null>(null);
+  const [respondingToInvitation, setRespondingToInvitation] = useState(false);
   const [guests, setGuests] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const res = await fetch(`/api/events/${eventId}`, {
+  const fetchEventData = async () => {
+    try {
+      const [eventRes, inviteRes] = await Promise.all([
+        fetch(`/api/events/${eventId}`, {
           credentials: "include",
-        });
-        const data = await res.json();
+        }),
+        fetch(`/api/events/${eventId}/invite`, {
+          credentials: "include",
+        }).catch(() => null), // Invitation endpoint might 404 if not invited
+      ]);
 
-        if (data.success && data.data) {
-          setEvent(data.data);
-          setIsAttending(
-            data.data.participants?.includes(data.data.hostUser?.id) ?? false,
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch event:", error);
-      } finally {
-        setLoading(false);
+      const eventData = await eventRes.json();
+      if (eventData.success && eventData.data) {
+        setEvent(eventData.data);
+        setIsAttending(
+          eventData.data.participants?.length > 0 ?? false,
+        );
       }
-    };
 
+      if (inviteRes && inviteRes.ok) {
+        const inviteData = await inviteRes.json();
+        if (inviteData.success && inviteData.data) {
+          // Find the current user's invitation
+          const currentInvitation = inviteData.data[0];
+          if (currentInvitation) {
+            setInvitationStatus(currentInvitation);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch event data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (eventId) {
-      fetchEvent();
+      fetchEventData();
     }
   }, [eventId]);
 
-  const handleRSVP = async () => {
+  const handleRespondToInvitation = async (
+    status: "accepted" | "declined"
+  ) => {
     try {
-      const res = await fetch(`/api/events/${eventId}`, {
-        method: "PATCH",
+      setRespondingToInvitation(true);
+      const res = await fetch(`/api/events/${eventId}/invite`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          action: isAttending ? "unattend" : "attend",
-        }),
+        body: JSON.stringify({ status }),
       });
 
       if (res.ok) {
-        setIsAttending(!isAttending);
+        toast.success(
+          status === "accepted"
+            ? "You accepted the invitation!"
+            : "You declined the invitation"
+        );
+        setInvitationStatus((prev) =>
+          prev ? { ...prev, status } : null
+        );
+        if (status === "accepted") {
+          setIsAttending(true);
+        }
+        await fetchEventData();
+      } else {
+        toast.error("Failed to respond to invitation");
       }
     } catch (error) {
-      console.error("Failed to RSVP:", error);
+      console.error("Failed to respond:", error);
+      toast.error("Failed to respond to invitation");
+    } finally {
+      setRespondingToInvitation(false);
     }
   };
 
