@@ -22,6 +22,7 @@ import {
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { logout, user, isLoading, isAdmin } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +30,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
 
   if (!mounted || isLoading) {
     return (
