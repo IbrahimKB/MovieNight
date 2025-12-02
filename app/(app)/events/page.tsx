@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar, Plus, Check, X } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface Event {
   id: string;
@@ -19,34 +21,90 @@ interface Event {
   participants?: string[];
 }
 
+interface EventInvitation {
+  id: string;
+  eventId: string;
+  movie?: {
+    title: string;
+    poster?: string;
+  };
+  hostUser?: {
+    name: string | null;
+    username: string;
+  };
+  date: string;
+}
+
 export default function EventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<EventInvitation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [respondingTo, setRespondingTo] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const [eventsRes, invitationsRes] = await Promise.all([
+        fetch("/api/events", { credentials: "include" }),
+        fetch("/api/friends/invitations", { credentials: "include" }),
+      ]);
+
+      const eventsData = await eventsRes.json();
+      if (eventsData.success && Array.isArray(eventsData.data)) {
+        const sorted = eventsData.data.sort(
+          (a: Event, b: Event) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
+        setEvents(sorted);
+      }
+
+      const invitationsData = await invitationsRes.json();
+      if (invitationsData.success && Array.isArray(invitationsData.data)) {
+        setPendingInvitations(invitationsData.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const res = await fetch("/api/events", { credentials: "include" });
-        const data = await res.json();
-
-        if (data.success && Array.isArray(data.data)) {
-          // Sort by date
-          const sorted = data.data.sort(
-            (a: Event, b: Event) =>
-              new Date(a.date).getTime() - new Date(b.date).getTime(),
-          );
-          setEvents(sorted);
-        }
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
+    fetchData();
   }, []);
+
+  const handleInvitationResponse = async (
+    eventId: string,
+    invitationId: string,
+    status: "accepted" | "declined"
+  ) => {
+    try {
+      setRespondingTo(invitationId);
+      const res = await fetch(`/api/events/${eventId}/invite`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status }),
+      });
+
+      if (res.ok) {
+        toast.success(
+          status === "accepted"
+            ? "Event invitation accepted!"
+            : "Event invitation declined"
+        );
+        // Refetch to update invitations
+        fetchData();
+      } else {
+        toast.error("Failed to respond to invitation");
+      }
+    } catch (error) {
+      console.error("Failed to respond to invitation:", error);
+      toast.error("Failed to respond to invitation");
+    } finally {
+      setRespondingTo(null);
+    }
+  };
 
   const EventCard = ({ event }: { event: Event }) => {
     const eventDate = new Date(event.date);
