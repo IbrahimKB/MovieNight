@@ -70,7 +70,7 @@ export default function FeaturedMovieHero({
       onHoverEnd={() => setIsHovered(false)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.5 }}
     >
       {/* Backdrop Image or Gradient */}
       <div
