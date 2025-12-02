@@ -187,7 +187,7 @@ export const MovieCard = ({
                 "bg-blue-600/30 border border-blue-400/50",
                 "backdrop-blur-sm text-xs font-medium text-blue-200",
                 "hover:bg-blue-600/40 hover:border-blue-400/70 transition-all",
-                "cursor-pointer"
+                "cursor-pointer",
               )}
             >
               <div className="flex items-center -space-x-1">

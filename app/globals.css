@@ -404,7 +404,9 @@
   }
 
   .neon-glow-border:hover {
-    box-shadow: inset 0 0 30px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2);
+    box-shadow:
+      inset 0 0 30px rgba(59, 130, 246, 0.3),
+      0 0 30px rgba(59, 130, 246, 0.2);
   }
 }
 

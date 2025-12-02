@@ -63,7 +63,7 @@ export default function FeaturedMovieHero({
         "relative w-full overflow-hidden rounded-xl",
         "aspect-[16/9] md:aspect-[21/9]",
         "group",
-        className
+        className,
       )}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -75,7 +75,7 @@ export default function FeaturedMovieHero({
       <div
         className={cn(
           "absolute inset-0 transition-transform duration-500",
-          isHovered && "scale-105"
+          isHovered && "scale-105",
         )}
       >
         {backdropImage ? (
@@ -89,7 +89,7 @@ export default function FeaturedMovieHero({
           <div
             className={cn(
               "w-full h-full bg-gradient-to-br",
-              generateGradient()
+              generateGradient(),
             )}
           />
         )}
@@ -100,7 +100,7 @@ export default function FeaturedMovieHero({
         className={cn(
           "absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent",
           "group-hover:from-black/80 group-hover:via-black/40",
-          "transition-colors duration-300"
+          "transition-colors duration-300",
         )}
       />
 
@@ -109,7 +109,8 @@ export default function FeaturedMovieHero({
         <motion.div
           className="absolute inset-0 rounded-xl pointer-events-none"
           style={{
-            boxShadow: "inset 0 0 30px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2)",
+            boxShadow:
+              "inset 0 0 30px rgba(59, 130, 246, 0.3), 0 0 30px rgba(59, 130, 246, 0.2)",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -138,7 +139,9 @@ export default function FeaturedMovieHero({
               {movie.imdbRating && (
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-gray-200">{movie.imdbRating.toFixed(1)}</span>
+                  <span className="text-gray-200">
+                    {movie.imdbRating.toFixed(1)}
+                  </span>
                 </div>
               )}
 
@@ -194,7 +197,7 @@ export default function FeaturedMovieHero({
                 className={cn(
                   "bg-primary hover:bg-primary/90 text-white",
                   "gap-2 min-h-10 sm:min-h-11",
-                  "hover:shadow-lg hover:shadow-primary/50"
+                  "hover:shadow-lg hover:shadow-primary/50",
                 )}
               >
                 <Play className="h-4 w-4" />
@@ -212,7 +215,7 @@ export default function FeaturedMovieHero({
                   "gap-2 min-h-10 sm:min-h-11",
                   isInWatchlist
                     ? "bg-primary/30 border-primary/50"
-                    : "border-white/30 hover:border-primary/50 hover:bg-white/10"
+                    : "border-white/30 hover:border-primary/50 hover:bg-white/10",
                 )}
               >
                 <Bookmark
@@ -222,7 +225,9 @@ export default function FeaturedMovieHero({
                 <span className="hidden sm:inline">
                   {isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
                 </span>
-                <span className="sm:hidden">{isInWatchlist ? "Added" : "Add"}</span>
+                <span className="sm:hidden">
+                  {isInWatchlist ? "Added" : "Add"}
+                </span>
               </Button>
             )}
 
@@ -233,7 +238,7 @@ export default function FeaturedMovieHero({
                 variant="outline"
                 className={cn(
                   "gap-2 min-h-10 sm:min-h-11",
-                  "border-white/30 hover:border-primary/50 hover:bg-white/10"
+                  "border-white/30 hover:border-primary/50 hover:bg-white/10",
                 )}
               >
                 <Plus className="h-4 w-4" />

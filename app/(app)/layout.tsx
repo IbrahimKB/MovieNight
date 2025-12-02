@@ -115,7 +115,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.3 }}
                     style={{
-                      boxShadow: "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                      boxShadow:
+                        "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
                     }}
                   />
                 )}
@@ -141,7 +142,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3 }}
                   style={{
-                    boxShadow: "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                    boxShadow:
+                      "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
                   }}
                 />
               )}

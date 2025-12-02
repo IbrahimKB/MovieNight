@@ -50,7 +50,7 @@ export default function WatchStatusBadge({
         "bg-green-600/20 border border-green-600/40",
         "backdrop-blur-sm",
         sizeClasses[size],
-        className
+        className,
       )}
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
@@ -87,12 +87,13 @@ export default function WatchStatusBadge({
               >
                 {i < Math.round(rating) ? (
                   <Star
-                    className={cn("fill-yellow-400 text-yellow-400", starSizes[size])}
+                    className={cn(
+                      "fill-yellow-400 text-yellow-400",
+                      starSizes[size],
+                    )}
                   />
                 ) : (
-                  <Star
-                    className={cn("text-gray-600", starSizes[size])}
-                  />
+                  <Star className={cn("text-gray-600", starSizes[size])} />
                 )}
               </motion.div>
             ))}
@@ -101,19 +102,17 @@ export default function WatchStatusBadge({
       )}
 
       {/* Label */}
-      {showLabel && (
-        <span className="text-green-300 font-medium">
-          Watched
-        </span>
-      )}
+      {showLabel && <span className="text-green-300 font-medium">Watched</span>}
 
       {/* Watched Date */}
       {watchedDate && (
         <span className="text-xs text-green-300/70">
-          ({new Date(watchedDate).toLocaleDateString("en-US", {
+          (
+          {new Date(watchedDate).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
-          })})
+          })}
+          )
         </span>
       )}
     </motion.div>

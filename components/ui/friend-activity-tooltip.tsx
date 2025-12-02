@@ -41,7 +41,7 @@ export default function FriendActivityTooltip({
           className={cn(
             "absolute bottom-full left-1/2 -translate-x-1/2 mb-2",
             "z-50 pointer-events-none",
-            className
+            className,
           )}
           initial={{ opacity: 0, scale: 0.9, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -54,7 +54,7 @@ export default function FriendActivityTooltip({
               "bg-card/95 backdrop-blur-md border border-primary/30",
               "rounded-lg shadow-lg shadow-primary/20",
               "p-3 sm:p-4 min-w-[200px] sm:min-w-[280px] max-w-[320px]",
-              "animate-glow-pulse"
+              "animate-glow-pulse",
             )}
           >
             {/* Header */}
@@ -89,7 +89,7 @@ export default function FriendActivityTooltip({
                         className={cn(
                           "h-6 w-6 rounded-full flex items-center justify-center",
                           "bg-primary/20 border border-primary/30",
-                          "text-xs font-semibold text-primary"
+                          "text-xs font-semibold text-primary",
                         )}
                       >
                         {(friend.name || friend.username)
@@ -119,7 +119,7 @@ export default function FriendActivityTooltip({
                                 "h-3 w-3",
                                 i < Math.round(friend.rating!)
                                   ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-600"
+                                  : "text-gray-600",
                               )}
                             />
                           ))}
@@ -129,10 +129,13 @@ export default function FriendActivityTooltip({
                       {/* Date */}
                       {friend.watchedAt && (
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {new Date(friend.watchedAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
+                          {new Date(friend.watchedAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            },
+                          )}
                         </span>
                       )}
                     </div>
