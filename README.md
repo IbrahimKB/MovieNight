@@ -2,6 +2,8 @@
 
 A modern movie discovery and sharing platform built with Next.js App Router and PostgreSQL.
 
+<!-- swoosh-verse branch merge marker -->
+
 ## Tech Stack
 
 - **Framework**: Next.js 15+ (App Router)
