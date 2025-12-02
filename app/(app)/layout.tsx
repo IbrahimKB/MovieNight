@@ -124,20 +124,39 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               </motion.button>
             ))}
             <div className="h-6 w-px bg-border mx-1" />
-            <button
+            <motion.button
               onClick={() => router.push("/settings")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              className={`text-sm transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg relative ${
+                isActive("/settings")
+                  ? "text-primary bg-primary/10 hover:bg-primary/20"
+                  : "text-muted-foreground hover:text-primary hover:bg-accent/30"
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
+              {isActive("/settings") && (
+                <motion.div
+                  className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    boxShadow: "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                  }}
+                />
+              )}
               <Settings size={18} />
               <span className="hidden xl:inline">Settings</span>
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleLogout}
-              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              className="text-sm text-muted-foreground hover:text-destructive transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <LogOut size={18} />
               <span className="hidden xl:inline">Logout</span>
-            </button>
+            </motion.button>
           </div>
 
           {/* Tablet - Icon Only Navigation */}
