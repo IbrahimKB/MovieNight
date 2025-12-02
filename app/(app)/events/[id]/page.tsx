@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Calendar, Users, Clapperboard, Check, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Users,
+  Clapperboard,
+  Check,
+  X,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
@@ -58,9 +65,7 @@ export default function EventDetailPage() {
       const eventData = await eventRes.json();
       if (eventData.success && eventData.data) {
         setEvent(eventData.data);
-        setIsAttending(
-          eventData.data.participants?.length > 0 ?? false,
-        );
+        setIsAttending(eventData.data.participants?.length > 0 ?? false);
       }
 
       if (inviteRes && inviteRes.ok) {
@@ -86,9 +91,7 @@ export default function EventDetailPage() {
     }
   }, [eventId]);
 
-  const handleRespondToInvitation = async (
-    status: "accepted" | "declined"
-  ) => {
+  const handleRespondToInvitation = async (status: "accepted" | "declined") => {
     try {
       setRespondingToInvitation(true);
       const res = await fetch(`/api/events/${eventId}/invite`, {
@@ -104,11 +107,9 @@ export default function EventDetailPage() {
         toast.success(
           status === "accepted"
             ? "You accepted the invitation!"
-            : "You declined the invitation"
+            : "You declined the invitation",
         );
-        setInvitationStatus((prev) =>
-          prev ? { ...prev, status } : null
-        );
+        setInvitationStatus((prev) => (prev ? { ...prev, status } : null));
         if (status === "accepted") {
           setIsAttending(true);
         }
@@ -249,8 +250,7 @@ export default function EventDetailPage() {
         </div>
 
         {/* RSVP/Invitation Section */}
-        {invitationStatus &&
-        invitationStatus.status === "pending" ? (
+        {invitationStatus && invitationStatus.status === "pending" ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -278,8 +278,7 @@ export default function EventDetailPage() {
               </button>
             </div>
           </motion.div>
-        ) : invitationStatus &&
-          invitationStatus.status === "accepted" ? (
+        ) : invitationStatus && invitationStatus.status === "accepted" ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -290,8 +289,7 @@ export default function EventDetailPage() {
               You accepted this invitation
             </span>
           </motion.div>
-        ) : invitationStatus &&
-          invitationStatus.status === "declined" ? (
+        ) : invitationStatus && invitationStatus.status === "declined" ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

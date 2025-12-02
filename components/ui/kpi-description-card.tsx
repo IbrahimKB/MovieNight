@@ -20,16 +20,14 @@ export default function KPIDescription({
     <div
       className={cn(
         "h-full w-full flex flex-col justify-between p-4",
-        className
+        className,
       )}
     >
       <div className="space-y-3">
         <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {title}
         </h3>
-        <p className="text-sm leading-relaxed text-foreground">
-          {description}
-        </p>
+        <p className="text-sm leading-relaxed text-foreground">{description}</p>
       </div>
 
       {details && (

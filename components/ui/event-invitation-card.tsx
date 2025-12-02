@@ -35,7 +35,9 @@ export function EventInvitationCard({
   const [isAccepting, setIsAccepting] = useState(false);
   const [isDeclining, setIsDeclining] = useState(false);
   const [isResponded, setIsResponded] = useState(false);
-  const [response, setResponse] = useState<"accepted" | "declined" | null>(null);
+  const [response, setResponse] = useState<"accepted" | "declined" | null>(
+    null,
+  );
 
   const handleAccept = async () => {
     try {

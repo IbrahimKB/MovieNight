@@ -25,7 +25,7 @@ export default function CreateEventPage() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
   const [invitedFriendIds, setInvitedFriendIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("19:00");
@@ -103,7 +103,7 @@ export default function CreateEventPage() {
       if (res.ok) {
         const data = await res.json();
         toast.success(
-          `Event created with ${data.data?.invitations || 0} invitations sent!`
+          `Event created with ${data.data?.invitations || 0} invitations sent!`,
         );
         router.push(`/events/${data.data?.id || ""}`);
       } else {
@@ -268,7 +268,8 @@ export default function CreateEventPage() {
               {invitedFriendIds.size > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    {invitedFriendIds.size} friend{invitedFriendIds.size > 1 ? "s" : ""} invited
+                    {invitedFriendIds.size} friend
+                    {invitedFriendIds.size > 1 ? "s" : ""} invited
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {Array.from(invitedFriendIds).map((friendId) => {

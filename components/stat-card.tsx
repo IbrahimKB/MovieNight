@@ -36,7 +36,7 @@ export function StatCard({
         "bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md",
         "transition-all cursor-pointer touch-manipulation active:scale-[0.98]",
         "flex flex-col justify-between h-36 sm:h-32",
-        "perspective"
+        "perspective",
       )}
       style={{ perspective: "1000px" }}
     >
@@ -44,37 +44,48 @@ export function StatCard({
       <motion.div
         initial={false}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 15 }}
-        style={{
-          transformStyle: "preserve-3d",
-        } as any}
+        transition={{
+          duration: 0.6,
+          type: "spring",
+          stiffness: 100,
+          damping: 15,
+        }}
+        style={
+          {
+            transformStyle: "preserve-3d",
+          } as any
+        }
         className="w-full h-full flex flex-col justify-between"
       >
         {/* Front Side */}
         <div
-          style={{
-            backfaceVisibility: "hidden",
-          } as any}
+          style={
+            {
+              backfaceVisibility: "hidden",
+            } as any
+          }
           className="w-full h-full flex flex-col justify-between"
         >
           {/* Decorative Gradient Overlay */}
           <div
             className={cn(
               "absolute inset-0 opacity-10 pointer-events-none",
-              "bg-gradient-to-br from-primary/30 to-transparent"
+              "bg-gradient-to-br from-primary/30 to-transparent",
             )}
           />
 
           {/* Header Row */}
           <div className="flex items-center justify-between relative z-10">
-            <h3 className="text-xs font-medium text-muted-foreground">{title}</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">
+              {title}
+            </h3>
 
             {/* Icon Ring */}
             <div
               className={cn(
                 "h-8 w-8 rounded-full flex items-center justify-center",
                 "bg-primary/10 border border-primary/20",
-                color
+                color,
               )}
             >
               <Icon className="h-4 w-4" />
@@ -109,17 +120,19 @@ export function StatCard({
         {/* Back Side */}
         {description && (
           <div
-            style={{
-              backfaceVisibility: "hidden",
-              transform: "rotateY(180deg)",
-            } as any}
+            style={
+              {
+                backfaceVisibility: "hidden",
+                transform: "rotateY(180deg)",
+              } as any
+            }
             className="w-full h-full flex flex-col justify-between absolute inset-0 p-4"
           >
             {/* Decorative Gradient Overlay */}
             <div
               className={cn(
                 "absolute inset-0 opacity-10 pointer-events-none",
-                "bg-gradient-to-br from-primary/30 to-transparent"
+                "bg-gradient-to-br from-primary/30 to-transparent",
               )}
             />
 

@@ -38,7 +38,9 @@ interface EventInvitation {
 export default function EventsPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
-  const [pendingInvitations, setPendingInvitations] = useState<EventInvitation[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<
+    EventInvitation[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
 
@@ -76,7 +78,7 @@ export default function EventsPage() {
   const handleInvitationResponse = async (
     eventId: string,
     invitationId: string,
-    status: "accepted" | "declined"
+    status: "accepted" | "declined",
   ) => {
     try {
       setRespondingTo(invitationId);
@@ -91,7 +93,7 @@ export default function EventsPage() {
         toast.success(
           status === "accepted"
             ? "Event invitation accepted!"
-            : "Event invitation declined"
+            : "Event invitation declined",
         );
         // Refetch to update invitations
         fetchData();
@@ -250,7 +252,7 @@ export default function EventsPage() {
                       handleInvitationResponse(
                         invitation.eventId,
                         invitation.id,
-                        "accepted"
+                        "accepted",
                       )
                     }
                     disabled={respondingTo === invitation.id}
@@ -264,7 +266,7 @@ export default function EventsPage() {
                       handleInvitationResponse(
                         invitation.eventId,
                         invitation.id,
-                        "declined"
+                        "declined",
                       )
                     }
                     disabled={respondingTo === invitation.id}

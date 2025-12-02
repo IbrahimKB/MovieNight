@@ -127,7 +127,8 @@ export async function POST(
 
     if (invitedUsers && invitedUsers.length > 0) {
       for (const externalUserId of invitedUsers) {
-        const internalUserId = await mapExternalUserIdToInternal(externalUserId);
+        const internalUserId =
+          await mapExternalUserIdToInternal(externalUserId);
         if (!internalUserId) {
           failedInvitations.push(externalUserId);
           continue;
