@@ -8,6 +8,7 @@ import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
+import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 
 interface Movie {
   id: string;
