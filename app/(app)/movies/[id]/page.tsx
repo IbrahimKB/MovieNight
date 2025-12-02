@@ -456,6 +456,15 @@ export default function MovieDetailPage() {
           </motion.div>
         )}
 
+        {/* Friends Who Watched Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+        >
+          <FriendsWhoWatched movieId={movieId} />
+        </motion.div>
+
         {/* Additional Info */}
         <motion.div
           className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-card border border-primary/20 rounded-xl p-6"
