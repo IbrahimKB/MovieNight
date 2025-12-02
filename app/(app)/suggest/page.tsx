@@ -66,6 +66,8 @@ function SuggestPageContent() {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [isFromHome, setIsFromHome] = useState(false);
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("19:00");
 
   const [friends, setFriends] = useState<Friend[]>([]);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
