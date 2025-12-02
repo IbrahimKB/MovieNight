@@ -47,12 +47,8 @@ export default function CreateEventPage() {
         }
 
         const friendsData = await friendsRes.json();
-        if (friendsData.success && Array.isArray(friendsData.data)) {
-          // Filter for accepted friendships only
-          const acceptedFriends = friendsData.data.filter(
-            (f: any) => f.status === "accepted"
-          );
-          setFriends(acceptedFriends);
+        if (friendsData.success && friendsData.data?.friends) {
+          setFriends(friendsData.data.friends);
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
