@@ -49,12 +49,12 @@ export default function MoviesPage() {
   const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Fetch local movies and friends from database
+  // Fetch trending movies from TMDB and friends
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [moviesRes, friendsRes] = await Promise.all([
-          fetch("/api/movies", {
+          fetch("/api/movies/trending?page=1", {
             credentials: "include",
           }),
           fetch("/api/friends", {
@@ -218,7 +218,7 @@ export default function MoviesPage() {
 
   const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => (
     <motion.button
-      onClick={() => router.push(`/movies/${movie.id}`)}
+      onClick={() => handleOpenModal(movie)}
       className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -323,10 +323,10 @@ export default function MoviesPage() {
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
-            Browse Movies
+            Trending Movies
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Explore thousands of films to add to your watchlist
+            Discover what&apos;s popular right now
           </p>
         </div>
 

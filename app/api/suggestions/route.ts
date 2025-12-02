@@ -6,8 +6,10 @@ import { ensureMovieExists } from "@/lib/movies";
 
 const CreateSuggestionSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
-  friendIds: z.array(z.string()),
+  friendIds: z.array(z.string()).optional(),
+  toUserId: z.string().optional(), // Alternative: single user ID
   comment: z.string().optional(),
+  message: z.string().optional(), // Alternative field name for comment
   desireRating: z.number().optional(),
 });
 
@@ -131,9 +133,21 @@ export async function POST(req: NextRequest) {
     const {
       movieId: inputMovieId,
       friendIds,
+      toUserId,
       comment,
+      message,
       desireRating,
     } = parsed.data;
+
+    // Combine friendIds and toUserId into a single array
+    const targetFriendIds = friendIds || (toUserId ? [toUserId] : []);
+    
+    if (targetFriendIds.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "No friends specified" },
+        { status: 400 },
+      );
+    }
 
     // Ensure movie exists
     const internalMovieId = await ensureMovieExists(inputMovieId);
@@ -165,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     // Map friendIds (external) to internal UUIDs
     const internalFriendIds: string[] = [];
-    for (const externalId of friendIds) {
+    for (const externalId of targetFriendIds) {
       const friend = await prisma.authUser.findFirst({
         where: { OR: [{ puid: externalId }, { id: externalId }] },
         select: { id: true },
@@ -174,6 +188,9 @@ export async function POST(req: NextRequest) {
         internalFriendIds.push(friend.id);
       }
     }
+    
+    // Use message or comment for the suggestion message
+    const suggestionMessage = message || comment;
 
     const createdResults = await Promise.allSettled(
       internalFriendIds.map((id) =>
@@ -182,7 +199,7 @@ export async function POST(req: NextRequest) {
             movieId: internalMovieId,
             fromUserId: user.id,
             toUserId: id,
-            message: comment,
+            message: suggestionMessage,
             status: "pending",
           },
         }),
