@@ -237,15 +237,23 @@ export async function PATCH(
     if (data.notes !== undefined) updateData.notes = data.notes || null;
 
     if (data.participants !== undefined) {
-      const internalParticipants: string[] = [currentUserInternalId];
-      const invalidUserIds: string[] = [];
+      // Batch query instead of N+1 loop
+      const users = await prisma.authUser.findMany({
+        where: {
+          OR: [
+            { puid: { in: data.participants } },
+            { id: { in: data.participants } },
+          ],
+        },
+        select: { id: true },
+      });
 
-      for (const participantId of data.participants) {
-        const internalId = await mapExternalUserIdToInternal(participantId);
-        if (!internalId) invalidUserIds.push(participantId);
-        else if (!internalParticipants.includes(internalId))
-          internalParticipants.push(internalId);
-      }
+      const foundIds = new Set(users.map((u) => u.id));
+      const invalidUserIds = data.participants.filter((id) => {
+        // Check if this ID matched any user (either as puid or id)
+        const user = users.find((u) => u.id === id);
+        return !user && !users.some((u) => u.id === id);
+      });
 
       if (invalidUserIds.length > 0) {
         return NextResponse.json(
@@ -257,6 +265,10 @@ export async function PATCH(
         );
       }
 
+      const internalParticipants = Array.from(foundIds);
+      if (!internalParticipants.includes(currentUserInternalId)) {
+        internalParticipants.push(currentUserInternalId);
+      }
       updateData.participants = internalParticipants;
     }
 
