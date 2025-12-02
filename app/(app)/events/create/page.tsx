@@ -21,6 +21,7 @@ interface Friend {
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
