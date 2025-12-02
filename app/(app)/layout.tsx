@@ -200,7 +200,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile/Tablet Sidebar */}
         {sidebarOpen && (
-          <div className="md:hidden border-t border-primary/10 bg-background">
+          <div className="lg:hidden border-t border-primary/10 bg-background">
             <div className="flex flex-col p-4 gap-2 pb-6">
               {navItems.map((item) => (
                 <button
