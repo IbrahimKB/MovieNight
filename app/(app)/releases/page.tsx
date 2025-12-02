@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Clapperboard } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Release {
   id: string;
