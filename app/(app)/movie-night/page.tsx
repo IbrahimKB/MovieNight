@@ -204,6 +204,83 @@ export default function MovieNightPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleVote = async (movieId: string, voteType: "yes" | "maybe" | "no") => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to vote",
+        variant: "error",
+      });
+      return;
+    }
+
+    setVotingInProgress(movieId);
+
+    try {
+      const res = await fetch("/api/movie-night/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          movieId,
+          voteType,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit vote");
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setMovieVotes((prev) => ({
+          ...prev,
+          [movieId]: {
+            counts: data.data.counts,
+            userVote: voteType,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Vote error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your vote",
+        variant: "error",
+      });
+    } finally {
+      setVotingInProgress(null);
+    }
+  };
+
+  const fetchVoteCounts = async (movieId: string) => {
+    try {
+      const res = await fetch(
+        `/api/movie-night/vote?movieId=${movieId}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      if (data.success) {
+        setMovieVotes((prev) => ({
+          ...prev,
+          [movieId]: {
+            counts: data.data.counts,
+            userVote: data.data.userVote,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch vote counts:", error);
+    }
+  };
+
   const getPlatformColor = (platform: string) => {
     switch (platform) {
       case "Netflix":
