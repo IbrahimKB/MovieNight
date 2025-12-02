@@ -97,14 +97,31 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {/* Desktop Nav */}
           <div className="hidden lg:flex gap-1 items-center">
             {navItems.map((item) => (
-              <button
+              <motion.button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+                className={`text-sm transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg relative ${
+                  isActive(item.href)
+                    ? "text-primary bg-primary/10 hover:bg-primary/20"
+                    : "text-muted-foreground hover:text-primary hover:bg-accent/30"
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
+                {isActive(item.href) && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      boxShadow: "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                    }}
+                  />
+                )}
                 <item.icon size={18} />
                 <span className="hidden xl:inline">{item.label}</span>
-              </button>
+              </motion.button>
             ))}
             <div className="h-6 w-px bg-border mx-1" />
             <button
