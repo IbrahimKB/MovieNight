@@ -12,6 +12,7 @@ import {
   ListItemSkeleton,
 } from "@/components/ui/skeleton-loader";
 import HeroSection from "@/components/hero-section";
+import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 
 import {
   Calendar,
@@ -168,6 +169,32 @@ export default function HomePage() {
         </p>
       </motion.div>
 
+      {/* Featured Movie Hero */}
+      {!isLoading && trendingMovies.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <FeaturedMovieHero
+            movie={{
+              id: trendingMovies[0].id,
+              title: trendingMovies[0].title,
+              year: trendingMovies[0].year,
+              genres: trendingMovies[0].genres,
+              description: trendingMovies[0].description,
+              poster: trendingMovies[0].poster,
+              backdrop: trendingMovies[0].poster,
+              imdbRating: trendingMovies[0].rating,
+            }}
+            friendsWatched={trendingMovies[0].watchCount || 0}
+            onAddToWatchlist={() => router.push("/movies")}
+            onWatch={() => router.push(`/movies/${trendingMovies[0].id}`)}
+            onSuggest={() => router.push("/suggestions")}
+          />
+        </motion.div>
+      )}
+
       {/* Pull-to-Refresh Indicator */}
       {isRefreshing && (
         <motion.div
@@ -214,6 +241,7 @@ export default function HomePage() {
               }
               color="text-blue-500"
               index={0}
+              description="Your connections in MovieNight. Add friends to share suggestions, create events, and discover what they're watching together."
             />
 
             <StatCard
@@ -227,6 +255,7 @@ export default function HomePage() {
               }
               color="text-green-500"
               index={1}
+              description="Movie recommendations waiting for your response. Review and accept suggestions from friends to add movies to your watchlist."
             />
 
             <StatCard
@@ -240,6 +269,7 @@ export default function HomePage() {
               }
               color="text-purple-500"
               index={2}
+              description="Movies you've watched in the past 7 days. Track your viewing habits and discover patterns in your movie preferences."
             />
 
             <StatCard
@@ -257,6 +287,7 @@ export default function HomePage() {
               }
               color="text-orange-500"
               index={3}
+              description="Your suggestion success rate. Based on movies you watched and rated 7+ stars. The higher, the better your taste matches your friends!"
             />
           </>
         )}

@@ -5,6 +5,17 @@ import { Clapperboard, Bookmark, Plus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import WatchStatusBadge from "@/components/ui/watch-status-badge";
+import FriendActivityTooltip from "@/components/ui/friend-activity-tooltip";
+
+interface FriendActivity {
+  userId: string;
+  name: string;
+  username: string;
+  avatar?: string;
+  rating?: number;
+  watchedAt?: string;
+}
 
 interface MovieCardProps {
   movie: {
@@ -17,6 +28,11 @@ interface MovieCardProps {
   onAddToWatchlist?: (movieId: string) => Promise<void>;
   onSuggest?: (movieId: string) => void;
   inWatchlist?: boolean;
+  isWatched?: boolean;
+  userRating?: number;
+  watchedDate?: string;
+  friendsWhoWatched?: FriendActivity[];
+  totalFriendsWatched?: number;
   showQuickActions?: boolean;
   className?: string;
 }
@@ -26,12 +42,18 @@ export const MovieCard = ({
   onAddToWatchlist,
   onSuggest,
   inWatchlist = false,
+  isWatched = false,
+  userRating,
+  watchedDate,
+  friendsWhoWatched = [],
+  totalFriendsWatched = 0,
   showQuickActions = true,
   className,
 }: MovieCardProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [showFriendTooltip, setShowFriendTooltip] = useState(false);
 
   const handleAddToWatchlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -64,6 +86,8 @@ export const MovieCard = ({
     return colors[hash];
   };
 
+  const friendsCount = totalFriendsWatched || friendsWhoWatched.length;
+
   return (
     <motion.button
       onClick={() => router.push(`/movies/${movie.id}`)}
@@ -72,25 +96,24 @@ export const MovieCard = ({
       whileHover={{ scale: 1.05 }}
       className={cn(
         "group cursor-pointer text-left rounded-lg overflow-hidden",
-        "transition-all duration-300 hover:shadow-xl hover:shadow-primary/30",
+        "transition-all duration-300",
+        "hover:shadow-xl hover:shadow-primary/50",
         className,
       )}
     >
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
         {/* Image or Gradient Placeholder */}
         {movie.poster ? (
-          <>
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className={cn(
-                "w-full h-full object-cover",
-                "transition-transform duration-300 ease-out",
-                isHovered && "scale-110",
-              )}
-              loading="lazy"
-            />
-          </>
+          <img
+            src={movie.poster}
+            alt={movie.title}
+            className={cn(
+              "w-full h-full object-cover",
+              "transition-transform duration-300 ease-out",
+              isHovered && "scale-110",
+            )}
+            loading="lazy"
+          />
         ) : (
           <div
             className={cn(
@@ -104,16 +127,102 @@ export const MovieCard = ({
           </div>
         )}
 
+        {/* Glow Effect on Hover */}
+        {isHovered && (
+          <motion.div
+            className="absolute inset-0 rounded-lg pointer-events-none"
+            style={{
+              boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.2)",
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+
         {/* Rating Badge */}
         {movie.imdbRating && (
           <motion.div
-            className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-lg px-2 py-1 text-xs font-bold text-yellow-400 flex items-center gap-1"
+            className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-lg px-2 py-1 text-xs font-bold text-yellow-400 flex items-center gap-1 z-10"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.1 }}
           >
             ⭐ {movie.imdbRating.toFixed(1)}
           </motion.div>
+        )}
+
+        {/* Watch Status Badge */}
+        {isWatched && (
+          <motion.div
+            className="absolute top-2 left-2 z-10"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+          >
+            <WatchStatusBadge
+              isWatched={isWatched}
+              rating={userRating}
+              watchedDate={watchedDate}
+              size="sm"
+            />
+          </motion.div>
+        )}
+
+        {/* Friend Activity Badge */}
+        {friendsCount > 0 && (
+          <motion.button
+            onMouseEnter={() => setShowFriendTooltip(true)}
+            onMouseLeave={() => setShowFriendTooltip(false)}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-2 left-2 z-10"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.15, type: "spring" }}
+            whileHover={{ scale: 1.1 }}
+          >
+            <div
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded-lg",
+                "bg-blue-600/30 border border-blue-400/50",
+                "backdrop-blur-sm text-xs font-medium text-blue-200",
+                "hover:bg-blue-600/40 hover:border-blue-400/70 transition-all",
+                "cursor-pointer",
+              )}
+            >
+              <div className="flex items-center -space-x-1">
+                {friendsWhoWatched.slice(0, 2).map((friend) => (
+                  <div
+                    key={friend.userId}
+                    className="w-4 h-4 rounded-full border border-blue-400/50 bg-blue-600/40"
+                    title={friend.name}
+                  >
+                    {friend.avatar ? (
+                      <img
+                        src={friend.avatar}
+                        alt={friend.name}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex items-center justify-center w-full h-full text-xs font-bold text-blue-200">
+                        {(friend.name || friend.username)
+                          .split(" ")[0]?.[0]
+                          ?.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <span>{friendsCount}</span>
+            </div>
+
+            {/* Friend Activity Tooltip */}
+            <FriendActivityTooltip
+              friends={friendsWhoWatched}
+              isVisible={showFriendTooltip}
+              totalCount={totalFriendsWatched || friendsCount}
+            />
+          </motion.button>
         )}
 
         {/* Quick Actions Overlay */}
@@ -136,6 +245,7 @@ export const MovieCard = ({
                 whileTap={{ scale: 0.95 }}
                 className={cn(
                   "p-3 rounded-full transition-all",
+                  "hover:shadow-lg hover:shadow-primary/50",
                   inWatchlist
                     ? "bg-primary text-primary-foreground"
                     : "bg-white/20 hover:bg-primary text-white",
@@ -154,7 +264,7 @@ export const MovieCard = ({
                 onClick={handleSuggest}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="p-3 rounded-full bg-white/20 hover:bg-primary text-white transition-all pointer-events-auto"
+                className="p-3 rounded-full bg-white/20 hover:bg-primary text-white transition-all pointer-events-auto hover:shadow-lg hover:shadow-primary/50"
               >
                 <Plus size={20} />
               </motion.button>

@@ -1,9 +1,10 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { motion } from "framer-motion";
 import {
   Home,
   Clapperboard,
@@ -21,6 +22,7 @@ import {
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { logout, user, isLoading, isAdmin } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,6 +30,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
 
   if (!mounted || isLoading) {
     return (
@@ -88,30 +97,68 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {/* Desktop Nav */}
           <div className="hidden lg:flex gap-1 items-center">
             {navItems.map((item) => (
-              <button
+              <motion.button
                 key={item.href}
                 onClick={() => router.push(item.href)}
-                className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+                className={`text-sm transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg relative ${
+                  isActive(item.href)
+                    ? "text-primary bg-primary/10 hover:bg-primary/20"
+                    : "text-muted-foreground hover:text-primary hover:bg-accent/30"
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
+                {isActive(item.href) && (
+                  <motion.div
+                    className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      boxShadow:
+                        "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                    }}
+                  />
+                )}
                 <item.icon size={18} />
                 <span className="hidden xl:inline">{item.label}</span>
-              </button>
+              </motion.button>
             ))}
             <div className="h-6 w-px bg-border mx-1" />
-            <button
+            <motion.button
               onClick={() => router.push("/settings")}
-              className="text-sm text-muted-foreground hover:text-primary active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              className={`text-sm transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg relative ${
+                isActive("/settings")
+                  ? "text-primary bg-primary/10 hover:bg-primary/20"
+                  : "text-muted-foreground hover:text-primary hover:bg-accent/30"
+              }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
+              {isActive("/settings") && (
+                <motion.div
+                  className="absolute inset-0 rounded-lg border border-primary/50 pointer-events-none"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    boxShadow:
+                      "inset 0 0 15px rgba(59, 130, 246, 0.2), 0 0 15px rgba(59, 130, 246, 0.1)",
+                  }}
+                />
+              )}
               <Settings size={18} />
               <span className="hidden xl:inline">Settings</span>
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleLogout}
-              className="text-sm text-muted-foreground hover:text-destructive active:scale-95 transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              className="text-sm text-muted-foreground hover:text-destructive transition-all duration-200 flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg hover:bg-accent/30"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <LogOut size={18} />
               <span className="hidden xl:inline">Logout</span>
-            </button>
+            </motion.button>
           </div>
 
           {/* Tablet - Icon Only Navigation */}

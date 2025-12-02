@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Calendar, Users, Clapperboard } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Users,
+  Clapperboard,
+  Check,
+  X,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 interface EventDetail {
   id: string;
@@ -24,6 +33,11 @@ interface EventDetail {
   };
 }
 
+interface InvitationStatus {
+  id: string;
+  status: "pending" | "accepted" | "declined";
+}
+
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,52 +46,82 @@ export default function EventDetailPage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAttending, setIsAttending] = useState(false);
+  const [invitationStatus, setInvitationStatus] =
+    useState<InvitationStatus | null>(null);
+  const [respondingToInvitation, setRespondingToInvitation] = useState(false);
   const [guests, setGuests] = useState<any[]>([]);
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const res = await fetch(`/api/events/${eventId}`, {
+  const fetchEventData = async () => {
+    try {
+      const [eventRes, inviteRes] = await Promise.all([
+        fetch(`/api/events/${eventId}`, {
           credentials: "include",
-        });
-        const data = await res.json();
+        }),
+        fetch(`/api/events/${eventId}/invite`, {
+          credentials: "include",
+        }).catch(() => null), // Invitation endpoint might 404 if not invited
+      ]);
 
-        if (data.success && data.data) {
-          setEvent(data.data);
-          setIsAttending(
-            data.data.participants?.includes(data.data.hostUser?.id) ?? false,
-          );
-        }
-      } catch (error) {
-        console.error("Failed to fetch event:", error);
-      } finally {
-        setLoading(false);
+      const eventData = await eventRes.json();
+      if (eventData.success && eventData.data) {
+        setEvent(eventData.data);
+        setIsAttending(eventData.data.participants?.length > 0 ?? false);
       }
-    };
 
+      if (inviteRes && inviteRes.ok) {
+        const inviteData = await inviteRes.json();
+        if (inviteData.success && inviteData.data) {
+          // Find the current user's invitation
+          const currentInvitation = inviteData.data[0];
+          if (currentInvitation) {
+            setInvitationStatus(currentInvitation);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch event data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (eventId) {
-      fetchEvent();
+      fetchEventData();
     }
   }, [eventId]);
 
-  const handleRSVP = async () => {
+  const handleRespondToInvitation = async (status: "accepted" | "declined") => {
     try {
-      const res = await fetch(`/api/events/${eventId}`, {
-        method: "PATCH",
+      setRespondingToInvitation(true);
+      const res = await fetch(`/api/events/${eventId}/invite`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-          action: isAttending ? "unattend" : "attend",
-        }),
+        body: JSON.stringify({ status }),
       });
 
       if (res.ok) {
-        setIsAttending(!isAttending);
+        toast.success(
+          status === "accepted"
+            ? "You accepted the invitation!"
+            : "You declined the invitation",
+        );
+        setInvitationStatus((prev) => (prev ? { ...prev, status } : null));
+        if (status === "accepted") {
+          setIsAttending(true);
+        }
+        await fetchEventData();
+      } else {
+        toast.error("Failed to respond to invitation");
       }
     } catch (error) {
-      console.error("Failed to RSVP:", error);
+      console.error("Failed to respond:", error);
+      toast.error("Failed to respond to invitation");
+    } finally {
+      setRespondingToInvitation(false);
     }
   };
 
@@ -205,17 +249,69 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        {/* RSVP Button */}
-        <button
-          onClick={handleRSVP}
-          className={`px-8 py-3 rounded-lg font-medium transition-colors mb-8 ${
-            isAttending
-              ? "bg-primary text-primary-foreground hover:bg-primary/90"
-              : "bg-card border border-border text-foreground hover:border-primary/50"
-          }`}
-        >
-          {isAttending ? "✓ You're Attending" : "RSVP to Event"}
-        </button>
+        {/* RSVP/Invitation Section */}
+        {invitationStatus && invitationStatus.status === "pending" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-xl"
+          >
+            <p className="text-sm font-medium text-foreground mb-4">
+              You've been invited to this event. Will you attend?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleRespondToInvitation("declined")}
+                disabled={respondingToInvitation}
+                className="flex-1 px-4 py-3 rounded-lg border border-border text-foreground hover:bg-red-500/10 hover:border-red-500/50 disabled:opacity-50 font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Decline
+              </button>
+              <button
+                onClick={() => handleRespondToInvitation("accepted")}
+                disabled={respondingToInvitation}
+                className="flex-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                <Check className="h-4 w-4" />
+                Accept
+              </button>
+            </div>
+          </motion.div>
+        ) : invitationStatus && invitationStatus.status === "accepted" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center gap-3"
+          >
+            <Check className="h-5 w-5 text-green-600" />
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">
+              You accepted this invitation
+            </span>
+          </motion.div>
+        ) : invitationStatus && invitationStatus.status === "declined" ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3"
+          >
+            <X className="h-5 w-5 text-red-600" />
+            <span className="text-sm font-medium text-red-700 dark:text-red-400">
+              You declined this invitation
+            </span>
+          </motion.div>
+        ) : isAttending ? (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-xl flex items-center gap-3"
+          >
+            <Check className="h-5 w-5 text-primary" />
+            <span className="text-sm font-medium">
+              You're attending this event
+            </span>
+          </motion.div>
+        ) : null}
 
         {/* Movie Info */}
         {event.movie && (

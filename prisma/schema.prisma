@@ -33,6 +33,12 @@ enum FriendshipStatus {
   rejected
 }
 
+enum InvitationStatus {
+  pending
+  accepted
+  declined
+}
+
 //////////////////////////////////////////////////////////////
 // AUTH + USERS
 //////////////////////////////////////////////////////////////
@@ -59,6 +65,8 @@ model AuthUser {
   friendshipsAsUser2      Friendship[] @relation("FriendshipUser2")
   friendshipsRequested    Friendship[] @relation("FriendshipRequester")
   eventsHosted            Event[]
+  eventInvitations        EventInvitation[] @relation("EventInvitee")
+  eventInvitationsSent    EventInvitation[] @relation("EventInviter")
   notifications           Notification[]
   pushSubscriptions       UserPushSubscription[]
   notificationPreferences UserNotificationPreferences?
@@ -242,13 +250,38 @@ model Event {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  movie    Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
-  hostUser AuthUser @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  movie        Movie                @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  hostUser     AuthUser             @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  invitations  EventInvitation[]
 
   @@index([hostUserId])
   @@index([movieId])
   @@index([date])
   @@map("events")
+}
+
+//////////////////////////////////////////////////////////////
+// EVENT INVITATIONS
+//////////////////////////////////////////////////////////////
+
+model EventInvitation {
+  id        String           @id @default(uuid()) @db.Uuid
+  eventId   String           @db.Uuid @map("event_id")
+  userId    String           @db.Uuid @map("user_id")
+  invitedBy String           @db.Uuid @map("invited_by")
+  status    InvitationStatus @default(pending)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  event Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  AuthUser @relation("EventInvitee", fields: [userId], references: [id], onDelete: Cascade)
+  host  AuthUser @relation("EventInviter", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@index([status])
+  @@index([eventId])
+  @@map("event_invitations")
 }
 
 //////////////////////////////////////////////////////////////

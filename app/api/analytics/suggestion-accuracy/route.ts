@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 
+const RATING_THRESHOLD = 7; // Minimum rating to consider a suggestion successful
+
 async function mapExternalUserIdToInternal(
   externalId: string,
 ): Promise<string | null> {
@@ -45,19 +47,22 @@ export async function GET(
       },
     });
 
-    // Get all watched movies by the user to determine if suggestions were good
-    const watchedMovies = await prisma.watchedMovie.findMany({
-      where: { userId: userIdInternal },
-      select: { movieId: true },
+    // Get all watched movies with ratings >= RATING_THRESHOLD
+    const successfulWatches = await prisma.watchedMovie.findMany({
+      where: {
+        userId: userIdInternal,
+        originalScore: { gte: RATING_THRESHOLD },
+      },
+      select: { movieId: true, originalScore: true },
     });
 
-    const watchedMovieIds = new Set(watchedMovies.map((w) => w.movieId));
+    const successfulMovieIds = new Set(successfulWatches.map((w) => w.movieId));
 
-    // Calculate accuracy: how many suggestions were eventually watched
+    // Calculate accuracy: how many suggestions were watched AND rated >= 7
     let accuracy = 0;
     if (mySuggestions.length > 0) {
       const correctSuggestions = mySuggestions.filter((s) =>
-        watchedMovieIds.has(s.movieId),
+        successfulMovieIds.has(s.movieId),
       ).length;
       accuracy = Math.round((correctSuggestions / mySuggestions.length) * 100);
     }
@@ -67,9 +72,10 @@ export async function GET(
       data: {
         accuracy,
         totalSuggestions: mySuggestions.length,
-        correctSuggestions: mySuggestions.filter((s) =>
-          watchedMovieIds.has(s.movieId),
+        successfulSuggestions: mySuggestions.filter((s) =>
+          successfulMovieIds.has(s.movieId),
         ).length,
+        ratingThreshold: RATING_THRESHOLD,
       },
     });
   } catch (err) {
