@@ -260,12 +260,14 @@ export default function CalendarPage() {
             </p>
           )}
 
-          <button
-            onClick={() => router.push("/events")}
-            className="w-full mt-6 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-          >
-            View All Events
-          </button>
+          {selectedDate && (
+            <button
+              onClick={() => router.push(`/events/create?date=${new Date(selectedDate).toISOString().split('T')[0]}`)}
+              className="w-full mt-6 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            >
+              Create Event for {new Date(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </button>
+          )}
         </div>
       </div>
     </div>
