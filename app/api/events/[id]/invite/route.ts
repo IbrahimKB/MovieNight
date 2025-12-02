@@ -218,40 +218,54 @@ export async function POST(
       );
     }
 
-    // Map external IDs to internal and create invitations
-    const createdInvitations = [];
-    const failedInvitations = [];
+    // Batch map external IDs to internal (instead of N+1 loop)
+    const users = await prisma.authUser.findMany({
+      where: {
+        OR: [
+          { puid: { in: externalUserIds } },
+          { id: { in: externalUserIds } },
+        ],
+      },
+      select: { id: true, puid: true },
+    });
 
-    for (const externalId of externalUserIds) {
-      const internalId = await mapExternalUserIdToInternal(externalId);
-      if (!internalId) {
-        failedInvitations.push(externalId);
-        continue;
-      }
+    // Map external IDs to internal IDs
+    const externalToInternalMap = new Map<string, string>();
+    users.forEach((u) => {
+      if (u.puid) externalToInternalMap.set(u.puid, u.id);
+      externalToInternalMap.set(u.id, u.id);
+    });
 
-      // Check if invitation already exists
-      const existing = await prisma.eventInvitation.findUnique({
-        where: {
-          eventId_userId: { eventId, userId: internalId },
-        },
-      });
+    const validInternalIds = Array.from(externalToInternalMap.values());
+    const failedInvitations = externalUserIds.filter(
+      (id) => !externalToInternalMap.has(id)
+    );
 
-      if (existing) {
-        // Skip if already invited
-        continue;
-      }
+    // Get existing invitations in batch
+    const existingInvitations = await prisma.eventInvitation.findMany({
+      where: {
+        eventId,
+        userId: { in: validInternalIds },
+      },
+      select: { userId: true },
+    });
 
-      // Create invitation
-      const invitation = await prisma.eventInvitation.create({
-        data: {
-          eventId,
-          userId: internalId,
-          invitedBy: currentUserInternalId,
-        },
-      });
+    const existingUserIds = new Set(existingInvitations.map((e) => e.userId));
 
-      createdInvitations.push(invitation);
-    }
+    // Create invitations for non-existing users
+    const invitationsToCreate = validInternalIds
+      .filter((internalId) => !existingUserIds.has(internalId))
+      .map((internalId) => ({
+        eventId,
+        userId: internalId,
+        invitedBy: currentUserInternalId,
+      }));
+
+    const createdInvitations = invitationsToCreate.length > 0
+      ? await prisma.eventInvitation.createMany({
+          data: invitationsToCreate,
+        })
+      : { count: 0 };
 
     return NextResponse.json(
       {
