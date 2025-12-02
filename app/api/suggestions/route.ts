@@ -177,17 +177,20 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Map friendIds (external) to internal UUIDs
-    const internalFriendIds: string[] = [];
-    for (const externalId of targetFriendIds) {
-      const friend = await prisma.authUser.findFirst({
-        where: { OR: [{ puid: externalId }, { id: externalId }] },
-        select: { id: true },
-      });
-      if (friend && friend.id !== user.id) {
-        internalFriendIds.push(friend.id);
-      }
-    }
+    // Map friendIds (external) to internal UUIDs - batch query instead of N+1
+    const friends = await prisma.authUser.findMany({
+      where: {
+        OR: [
+          { puid: { in: targetFriendIds } },
+          { id: { in: targetFriendIds } },
+        ],
+      },
+      select: { id: true },
+    });
+
+    const internalFriendIds = friends
+      .filter((f) => f.id !== user.id)
+      .map((f) => f.id);
     
     // Use message or comment for the suggestion message
     const suggestionMessage = message || comment;
