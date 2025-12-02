@@ -169,6 +169,32 @@ export default function HomePage() {
         </p>
       </motion.div>
 
+      {/* Featured Movie Hero */}
+      {!isLoading && trendingMovies.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <FeaturedMovieHero
+            movie={{
+              id: trendingMovies[0].id,
+              title: trendingMovies[0].title,
+              year: trendingMovies[0].year,
+              genres: trendingMovies[0].genres,
+              description: trendingMovies[0].description,
+              poster: trendingMovies[0].poster,
+              backdrop: trendingMovies[0].poster,
+              imdbRating: trendingMovies[0].rating,
+            }}
+            friendsWatched={trendingMovies[0].watchCount || 0}
+            onAddToWatchlist={() => router.push("/movies")}
+            onWatch={() => router.push(`/movies/${trendingMovies[0].id}`)}
+            onSuggest={() => router.push("/suggestions")}
+          />
+        </motion.div>
+      )}
+
       {/* Pull-to-Refresh Indicator */}
       {isRefreshing && (
         <motion.div
