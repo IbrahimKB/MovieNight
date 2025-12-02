@@ -180,12 +180,17 @@ export async function POST(req: NextRequest) {
     // Map friendIds (external) to internal UUIDs
     const internalFriendIds: string[] = [];
     for (const externalId of targetFriendIds) {
+      console.log(`[Suggestions] Looking up friend with externalId: ${externalId}`);
       const friend = await prisma.authUser.findFirst({
         where: { OR: [{ puid: externalId }, { id: externalId }] },
-        select: { id: true },
+        select: { id: true, username: true },
       });
-      if (friend) {
+      console.log(`[Suggestions] Found friend:`, friend);
+      console.log(`[Suggestions] Current user id: ${user.id}, username: ${(user as any).username}`);
+      if (friend && friend.id !== user.id) {
         internalFriendIds.push(friend.id);
+      } else if (friend && friend.id === user.id) {
+        console.warn(`[Suggestions] Skipping - friend.id matches current user!`);
       }
     }
     
