@@ -69,6 +69,19 @@ const genres = [
   "Thriller",
 ];
 
+interface VoteCounts {
+  yes: number;
+  maybe: number;
+  no: number;
+}
+
+interface MovieVotes {
+  [movieId: string]: {
+    counts: VoteCounts;
+    userVote: "yes" | "maybe" | "no" | null;
+  };
+}
+
 export default function MovieNightPage() {
   const { user } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -81,6 +94,8 @@ export default function MovieNightPage() {
   );
   const [isFinding, setIsFinding] = useState(false);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+  const [movieVotes, setMovieVotes] = useState<MovieVotes>({});
+  const [votingInProgress, setVotingInProgress] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFriends = async () => {
