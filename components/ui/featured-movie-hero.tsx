@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Bookmark, Plus, Play, Star, Users } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
