@@ -51,6 +51,21 @@ export default function ReleasesPage() {
     const releaseDate = new Date(release.releaseDate);
     const isUpcoming = releaseDate > new Date();
 
+    const platformEmoji: Record<string, string> = {
+      "Theatrical": "🎬",
+      "Cinema": "🎬",
+      "Theater": "🎬",
+      "Netflix": "📺",
+      "Disney+": "🎥",
+      "Prime Video": "🎁",
+      "Apple TV": "🍎",
+      "HBO Max": "🎭",
+      "Hulu": "📺",
+      "Peacock": "🦚",
+      "Paramount+": "⭐",
+    };
+    const emoji = platformEmoji[release.platform || ""] || "📺";
+
     return (
       <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all">
         <button
