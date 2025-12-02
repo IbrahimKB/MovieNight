@@ -1,9 +1,10 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { motion } from "framer-motion";
 import {
   Home,
   Clapperboard,
