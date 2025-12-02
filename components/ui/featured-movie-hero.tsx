@@ -126,7 +126,7 @@ export default function FeaturedMovieHero({
           className="space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.5, delay: 0.1 }}
         >
           {/* Title and Metadata */}
           <div className="space-y-2">
