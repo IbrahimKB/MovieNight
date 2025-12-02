@@ -140,7 +140,7 @@ export function StatCard({
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 About {title}
               </h3>
-              <div className="text-sm leading-relaxed text-foreground">
+              <div className="text-sm leading-relaxed text-foreground line-clamp-3">
                 {description}
               </div>
             </div>
