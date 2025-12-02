@@ -233,6 +233,7 @@ export default function SquadPage() {
                     friend={friend}
                     showActions={true}
                     actionType="default"
+                    onRemove={handleRemoveFriend}
                   />
                 ))
               ) : (
