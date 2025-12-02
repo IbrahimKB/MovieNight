@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Users, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface Movie {
   id: string;
@@ -11,10 +12,21 @@ interface Movie {
   poster?: string;
 }
 
+interface Friend {
+  id: string;
+  name: string;
+  username: string;
+  avatar?: string;
+}
+
 export default function CreateEventPage() {
   const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
+  const [invitedFriendIds, setInvitedFriendIds] = useState<Set<string>>(
+    new Set()
+  );
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("19:00");
   const [notes, setNotes] = useState("");
@@ -22,23 +34,51 @@ export default function CreateEventPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/movies", { credentials: "include" });
-        const data = await res.json();
+        const [moviesRes, friendsRes] = await Promise.all([
+          fetch("/api/movies", { credentials: "include" }),
+          fetch("/api/friends", { credentials: "include" }),
+        ]);
 
-        if (data.success && Array.isArray(data.data)) {
-          setMovies(data.data.slice(0, 20)); // Show top 20 movies
+        const moviesData = await moviesRes.json();
+        if (moviesData.success && Array.isArray(moviesData.data)) {
+          setMovies(moviesData.data.slice(0, 20));
+        }
+
+        const friendsData = await friendsRes.json();
+        if (friendsData.success && Array.isArray(friendsData.data)) {
+          // Filter for accepted friendships only
+          const acceptedFriends = friendsData.data.filter(
+            (f: any) => f.status === "accepted"
+          );
+          setFriends(acceptedFriends);
         }
       } catch (error) {
-        console.error("Failed to fetch movies:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMovies();
+    fetchData();
   }, []);
+
+  const toggleFriendInvite = (friendId: string) => {
+    const newSet = new Set(invitedFriendIds);
+    if (newSet.has(friendId)) {
+      newSet.delete(friendId);
+    } else {
+      newSet.add(friendId);
+    }
+    setInvitedFriendIds(newSet);
+  };
+
+  const removeFriendInvite = (friendId: string) => {
+    const newSet = new Set(invitedFriendIds);
+    newSet.delete(friendId);
+    setInvitedFriendIds(newSet);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,15 +100,22 @@ export default function CreateEventPage() {
           movieId: selectedMovie,
           date: combinedDateTime,
           notes,
+          invitedUsers: Array.from(invitedFriendIds),
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
+        toast.success(
+          `Event created with ${data.data?.invitations || 0} invitations sent!`
+        );
         router.push(`/events/${data.data?.id || ""}`);
+      } else {
+        toast.error("Failed to create event");
       }
     } catch (error) {
       console.error("Failed to create event:", error);
+      toast.error("Failed to create event");
     } finally {
       setSubmitting(false);
     }
