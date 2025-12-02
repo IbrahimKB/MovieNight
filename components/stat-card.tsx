@@ -35,7 +35,7 @@ export function StatCard({
         "relative overflow-hidden p-4 rounded-xl border border-primary/10",
         "bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md",
         "transition-all cursor-pointer touch-manipulation active:scale-[0.98]",
-        "flex flex-col justify-between h-36 sm:h-32",
+        "flex flex-col justify-between min-h-36 sm:min-h-32",
         "perspective",
       )}
       style={{ perspective: "1000px" }}
