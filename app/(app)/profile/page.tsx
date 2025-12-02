@@ -106,10 +106,15 @@ export default function ProfilePage() {
   return (
     <div className="space-y-12">
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-8">
+      <motion.div
+        className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-4 sm:p-8 neon-glow-border"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex gap-4 sm:gap-6 items-start">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl sm:text-3xl flex-shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl sm:text-3xl flex-shrink-0 border border-primary/30">
               {user?.name?.[0] || user?.username[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -130,15 +135,38 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-          <button
+          <motion.button
             onClick={() => router.push("/settings")}
-            className="flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-lg border border-primary/50 text-primary hover:bg-primary/10 transition-colors font-medium text-sm sm:text-base whitespace-nowrap w-full sm:w-auto"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-lg border border-primary/50 text-primary hover:bg-primary/10 transition-colors font-medium text-sm sm:text-base whitespace-nowrap w-full sm:w-auto glow-hover"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             <Edit2 size={18} />
             Edit Profile
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Featured Movie from History */}
+      {!loading && watchHistory.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <FeaturedMovieHero
+            movie={{
+              id: watchHistory[0].id,
+              title: watchHistory[0].title,
+              year: watchHistory[0].year,
+              poster: watchHistory[0].poster,
+              backdrop: watchHistory[0].poster,
+            }}
+            onAddToWatchlist={() => router.push("/movies")}
+            onWatch={() => router.push(`/movies/${watchHistory[0].id}`)}
+          />
+        </motion.div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
