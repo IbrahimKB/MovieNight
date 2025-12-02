@@ -235,12 +235,31 @@ export default function CalendarPage() {
           </h3>
 
           {selectedDate && dayEvents.length > 0 ? (
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-3"
+              initial="hidden"
+              animate="visible"
+              variants={shouldReduceMotion() ? {} : {
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.05,
+                  },
+                },
+              }}
+            >
               {dayEvents.map((event) => (
-                <button
+                <motion.button
                   key={event.id}
                   onClick={() => router.push(`/events/${event.id}`)}
                   className="w-full text-left p-3 rounded-lg bg-background hover:bg-background/80 transition-colors border border-border hover:border-primary/50"
+                  variants={shouldReduceMotion() ? {} : {
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  whileHover={shouldReduceMotion() ? {} : { scale: 1.02 }}
+                  whileTap={shouldReduceMotion() ? {} : { scale: 0.98 }}
                 >
                   <p className="font-semibold text-sm">{event.movie?.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -249,9 +268,9 @@ export default function CalendarPage() {
                   <p className="text-xs text-primary mt-2 font-medium">
                     View Event
                   </p>
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           ) : selectedDate ? (
             <p className="text-muted-foreground text-sm">
               No events scheduled for this date
