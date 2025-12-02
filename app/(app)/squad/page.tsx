@@ -121,10 +121,12 @@ export default function SquadPage() {
     friend,
     showActions = true,
     actionType = "default",
+    onRemove,
   }: {
     friend: Friend;
     showActions?: boolean;
     actionType?: "accept" | "cancel" | "default";
+    onRemove?: (friendId: string, friendName: string) => void;
   }) => (
     <div className="bg-card border border-border rounded-lg p-4 md:p-6 hover:border-primary/50 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0 flex-1">
