@@ -170,17 +170,37 @@ export default function ProfilePage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+        <motion.div
+          className="bg-card border border-border rounded-xl p-4 sm:p-6 glow-hover neon-glow-border"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
           <div className="flex items-center gap-3 mb-2">
-            <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </motion.div>
             <p className="text-xs sm:text-sm text-muted-foreground">Friends</p>
           </div>
           <p className="text-2xl sm:text-3xl font-bold">{stats.totalFriends}</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+        <motion.div
+          className="bg-card border border-border rounded-xl p-4 sm:p-6 glow-hover neon-glow-border"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <div className="flex items-center gap-3 mb-2">
-            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.1 }}
+            >
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </motion.div>
             <p className="text-xs sm:text-sm text-muted-foreground">
               Movies Watched
             </p>
@@ -188,11 +208,21 @@ export default function ProfilePage() {
           <p className="text-2xl sm:text-3xl font-bold">
             {stats.moviesWatched}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
+        <motion.div
+          className="bg-card border border-border rounded-xl p-4 sm:p-6 glow-hover neon-glow-border"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+        >
           <div className="flex items-center gap-3 mb-2">
-            <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+            >
+              <Bookmark className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </motion.div>
             <p className="text-xs sm:text-sm text-muted-foreground">
               In Watchlist
             </p>
@@ -200,7 +230,7 @@ export default function ProfilePage() {
           <p className="text-2xl sm:text-3xl font-bold">
             {stats.activeWatchlist}
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Recently Watched */}
