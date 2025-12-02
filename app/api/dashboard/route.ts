@@ -141,9 +141,12 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
         orderBy: { createdAt: 'desc' },
       }),
 
-      // 6. All Watched IDs (for accuracy calc)
+      // 6. All Watched IDs with high ratings (for accuracy calc - rating >= 7)
       prisma.watchedMovie.findMany({
-          where: { userId: userId },
+          where: {
+            userId: userId,
+            originalScore: { gte: 7 }
+          },
           select: { movieId: true }
       }),
 
