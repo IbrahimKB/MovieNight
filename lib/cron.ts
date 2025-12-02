@@ -14,7 +14,7 @@ import type { ScheduledTask } from "node-cron";
 
 let isScheduled = false;
 
-export function initCronJobs() {
+export async function initCronJobs() {
   if (isScheduled) {
     console.log("[CRON] Jobs already scheduled");
     return;
@@ -35,7 +35,6 @@ export function initCronJobs() {
   */
 
   // Upcoming releases sync: Every day at 3:15 AM (15 min after popular)
-  // 15 3 * * * = at 3:15 AM every day
   const upcomingReleasesJob = cron.schedule("15 3 * * *", async () => {
     console.log("[CRON] Triggering upcoming releases sync at 3:15 AM...");
     try {
@@ -59,7 +58,7 @@ export function initCronJobs() {
   };
 }
 
-export function stopCronJobs() {
+export async function stopCronJobs() {
   console.log("[CRON] Stopping all cron jobs...");
   const tasksMap = cron.getTasks();
   if (tasksMap instanceof Map) {
