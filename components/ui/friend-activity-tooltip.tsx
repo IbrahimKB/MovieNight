@@ -80,10 +80,12 @@ export default function FriendActivityTooltip({
                   {/* Avatar */}
                   <div className="flex-shrink-0">
                     {friend.avatar ? (
-                      <img
+                      <Image
                         src={friend.avatar}
                         alt={friend.name}
-                        className="h-6 w-6 rounded-full object-cover border border-primary/30"
+                        width={24}
+                        height={24}
+                        className="rounded-full object-cover border border-primary/30"
                       />
                     ) : (
                       <div
