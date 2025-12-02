@@ -105,18 +105,18 @@ export const MovieCard = ({
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
         {/* Image or Gradient Placeholder */}
         {movie.poster ? (
-          <>
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className={cn(
-                "w-full h-full object-cover",
-                "transition-transform duration-300 ease-out",
-                isHovered && "scale-110",
-              )}
-              loading="lazy"
-            />
-          </>
+          <Image
+            src={movie.poster}
+            alt={movie.title}
+            fill
+            className={cn(
+              "object-cover",
+              "transition-transform duration-300 ease-out",
+              isHovered && "scale-110",
+            )}
+            priority={false}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          />
         ) : (
           <div
             className={cn(
