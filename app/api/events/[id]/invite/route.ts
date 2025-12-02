@@ -50,7 +50,7 @@ const UpdateInvitationSchema = z.object({
 // GET /api/events/[id]/invite - Get invitations for this event
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -71,7 +71,7 @@ export async function GET(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
 
     // Verify user has access to this event
     const event = await prisma.event.findUnique({
@@ -134,7 +134,7 @@ export async function GET(
 // POST /api/events/[id]/invite - Send invitations
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -170,7 +170,7 @@ export async function POST(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const { userIds: externalUserIds } = validation.data;
 
     // Verify event exists and user is host
@@ -251,7 +251,7 @@ export async function POST(
 // PUT /api/events/[id]/invite - Update invitation status (accept/decline)
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
@@ -287,7 +287,7 @@ export async function PUT(
       );
     }
 
-    const eventId = params.id;
+    const { id: eventId } = await params;
     const { status } = validation.data;
 
     // Find and verify invitation belongs to current user
