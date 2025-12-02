@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+
+// Socket type definition
+type Socket = any;
 
 let globalSocket: Socket | null = null;
+let socketIOClient: any = null;
+
+// Try to load socket.io-client if available
+try {
+  socketIOClient = require("socket.io-client");
+} catch {
+  // socket.io-client not available - will be handled in the hook
+}
 
 export function useSocket() {
   const [isConnected, setIsConnected] = useState(false);
@@ -11,6 +21,12 @@ export function useSocket() {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
+    // If socket.io-client isn't available, just mark as not loading
+    if (!socketIOClient) {
+      setIsLoading(false);
+      return;
+    }
+
     // Reuse existing connection if available
     if (globalSocket && globalSocket.connected) {
       socketRef.current = globalSocket;
@@ -20,7 +36,7 @@ export function useSocket() {
     }
 
     // Create new connection
-    const socket = io(
+    const socket = socketIOClient.io(
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       {
         transports: ["websocket", "polling"],
@@ -29,7 +45,7 @@ export function useSocket() {
         reconnectionDelayMax: 5000,
         reconnectionAttempts: 10,
         path: "/api/socket.io",
-      },
+      }
     );
 
     socketRef.current = socket;
@@ -46,14 +62,14 @@ export function useSocket() {
       setIsConnected(false);
     });
 
-    socket.on("connect_error", (error) => {
+    socket.on("connect_error", (error: Error) => {
       console.error("[Socket] Connection error:", error);
       setIsLoading(false);
     });
 
     return () => {
       // Don't disconnect on unmount - keep the connection alive
-      // socket.disconnect();
+      // socket?.disconnect();
     };
   }, []);
 

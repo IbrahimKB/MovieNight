@@ -1,8 +1,14 @@
 import { Server as HTTPServer } from "http";
-import { Socket, Server as SocketIOServer } from "socket.io";
 
-interface SocketWithUser extends Socket {
+// Socket.io types - using any to avoid build issues when socket.io isn't installed locally
+type SocketIOServer = any;
+type Socket = any;
+
+interface SocketWithUser {
+  id: string;
   userId?: string;
+  on: (event: string, callback: (...args: any[]) => void) => void;
+  join: (room: string) => void;
 }
 
 let io: any = null;
@@ -13,7 +19,9 @@ export function initializeSocket(server: HTTPServer) {
   if (io) return io;
 
   try {
-    io = new SocketIOServer(server, {
+    // Dynamic import to avoid build issues
+    const { Server: SocketIOServerClass } = require("socket.io");
+    io = new SocketIOServerClass(server, {
       path: "/api/socket.io",
       cors: {
         origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",

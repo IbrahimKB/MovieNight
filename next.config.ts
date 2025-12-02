@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  serverExternalPackages: ["node-cron"],
+  serverExternalPackages: ["node-cron", "socket.io", "socket.io-client"],
   typescript: {
     tsconfigPath: "./tsconfig.json",
   },

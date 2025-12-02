@@ -28,6 +28,8 @@ const getCachedTrendingMovies = cacheFunction(
         rtRating: true,
         imdbRating: true,
         genres: true,
+        description: true,
+        poster: true,
       },
     });
 
@@ -43,6 +45,8 @@ const getCachedTrendingMovies = cacheFunction(
           rating: movie.imdbRating || movie.rtRating || 0,
           genres: movie.genres,
           watchCount: count,
+          description: movie.description,
+          poster: movie.poster,
         };
       })
       .sort((a, b) => b.watchCount - a.watchCount);

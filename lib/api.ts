@@ -52,6 +52,8 @@ export interface TrendingMovie {
   rating: number;
   watchCount: number;
   genres: string[];
+  description?: string;
+  poster?: string;
 }
 
 // Helper to get auth headers (httpOnly cookies are used for auth)
