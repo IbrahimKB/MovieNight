@@ -194,6 +194,92 @@ export default function EventsPage() {
         </button>
       </div>
 
+      {/* Pending Invitations */}
+      {pendingInvitations.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Calendar className="h-6 w-6" />
+            Pending Invitations
+          </h2>
+          <div className="space-y-3">
+            {pendingInvitations.map((invitation, idx) => (
+              <motion.div
+                key={invitation.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
+                className="flex gap-4 p-4 rounded-lg bg-card border border-primary/20 hover:border-primary/50 transition-all"
+              >
+                {/* Poster */}
+                {invitation.movie?.poster && (
+                  <div className="flex-shrink-0 w-12 h-16 rounded-lg overflow-hidden">
+                    <img
+                      src={invitation.movie.poster}
+                      alt={invitation.movie.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg truncate">
+                    {invitation.movie?.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Invited by{" "}
+                    {invitation.hostUser?.name ||
+                      invitation.hostUser?.username ||
+                      "Unknown"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(invitation.date).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() =>
+                      handleInvitationResponse(
+                        invitation.eventId,
+                        invitation.id,
+                        "accepted"
+                      )
+                    }
+                    disabled={respondingTo === invitation.id}
+                    className="p-2 rounded-lg bg-green-500/10 text-green-600 hover:bg-green-500/20 disabled:opacity-50 transition-colors"
+                    title="Accept"
+                  >
+                    <Check className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleInvitationResponse(
+                        invitation.eventId,
+                        invitation.id,
+                        "declined"
+                      )
+                    }
+                    disabled={respondingTo === invitation.id}
+                    className="p-2 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 disabled:opacity-50 transition-colors"
+                    title="Decline"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Upcoming Events */}
       {upcomingEvents.length > 0 && (
         <div className="space-y-4">
