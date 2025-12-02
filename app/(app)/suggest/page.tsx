@@ -595,6 +595,45 @@ function SuggestPageContent() {
                   </div>
                 </div>
 
+                {/* Planning a Watch Date? */}
+                <div className="space-y-3 p-4 bg-accent/30 rounded-lg border border-primary/20">
+                  <label className="text-sm font-medium">
+                    Planning a watch date? (optional)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label htmlFor="event-date" className="text-xs text-muted-foreground">
+                        Date
+                      </label>
+                      <Input
+                        id="event-date"
+                        type="date"
+                        value={eventDate}
+                        onChange={(e) => setEventDate(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                      />
+                    </div>
+                    {eventDate && (
+                      <div className="space-y-1">
+                        <label htmlFor="event-time" className="text-xs text-muted-foreground">
+                          Time
+                        </label>
+                        <Input
+                          id="event-time"
+                          type="time"
+                          value={eventTime}
+                          onChange={(e) => setEventTime(e.target.value)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {eventDate && (
+                    <p className="text-xs text-muted-foreground">
+                      ✓ An event will be created for {new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+
                 {/* Comment */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
