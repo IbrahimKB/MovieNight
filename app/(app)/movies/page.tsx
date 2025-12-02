@@ -224,9 +224,9 @@ export default function MoviesPage() {
       className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.4, delay: (index % 12) * 0.05 }}
+      whileHover={shouldReduceMotion() ? {} : { scale: 1.05 }}
+      whileTap={shouldReduceMotion() ? {} : { scale: 0.95 }}
     >
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
         {movie.poster ? (
