@@ -416,8 +416,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                     <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="hidden sm:inline">Coming Soon</span>
-                    <span className="sm:hidden">Releases</span>
+                    Coming Soon
                   </CardTitle>
                   <Button
                     variant="ghost"
