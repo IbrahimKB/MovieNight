@@ -226,6 +226,81 @@ export default function CreateEventPage() {
           />
         </div>
 
+        {/* Friend Invitations */}
+        <div className="space-y-4">
+          <label className="block text-sm font-medium flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Invite Friends (Optional)
+          </label>
+
+          {friends.length === 0 ? (
+            <p className="text-sm text-muted-foreground p-4 bg-muted/50 rounded-lg">
+              No friends to invite. Add friends first to invite them to events.
+            </p>
+          ) : (
+            <>
+              {/* Friend Selection Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-card border border-border rounded-xl p-4">
+                {friends.map((friend) => (
+                  <button
+                    key={friend.id}
+                    type="button"
+                    onClick={() => toggleFriendInvite(friend.id)}
+                    className={`p-3 rounded-lg transition-all flex flex-col items-center gap-2 text-center ${
+                      invitedFriendIds.has(friend.id)
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background border border-border hover:border-primary/50"
+                    }`}
+                  >
+                    {friend.avatar && (
+                      <img
+                        src={friend.avatar}
+                        alt={friend.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium truncate">
+                        {friend.name || friend.username}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Selected Friends Summary */}
+              {invitedFriendIds.size > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {invitedFriendIds.size} friend{invitedFriendIds.size > 1 ? "s" : ""} invited
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from(invitedFriendIds).map((friendId) => {
+                      const friend = friends.find((f) => f.id === friendId);
+                      if (!friend) return null;
+                      return (
+                        <div
+                          key={friendId}
+                          className="flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
+                        >
+                          <span>{friend.name || friend.username}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeFriendInvite(friendId)}
+                            className="hover:opacity-70"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
         {/* Notes */}
         <div className="space-y-2">
           <label className="block text-sm font-medium">Notes (Optional)</label>
