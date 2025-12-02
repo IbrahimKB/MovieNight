@@ -21,7 +21,12 @@ import {
   TrendingUp,
   Filter,
   Loader2,
+  ThumbsUp,
+  ThumbsDown,
+  HelpCircle,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { shouldReduceMotion } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
