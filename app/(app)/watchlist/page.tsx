@@ -10,6 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 import {
   Dialog,
   DialogContent,
