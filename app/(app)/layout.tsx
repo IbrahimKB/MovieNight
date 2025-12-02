@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { PageTransition } from "@/components/page-transition";
 import { motion } from "framer-motion";
 import {
   Home,
