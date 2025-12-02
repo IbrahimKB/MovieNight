@@ -16,6 +16,7 @@ import {
 import { useConfetti } from "@/hooks/use-confetti";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { toast } from "@/components/ui/use-toast";
+import { FriendsWhoWatched } from "@/components/friends-who-watched";
 
 interface Movie {
   id: string;
