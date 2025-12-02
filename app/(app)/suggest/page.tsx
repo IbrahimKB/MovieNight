@@ -216,6 +216,7 @@ function SuggestPageContent() {
     if (!selectedMovie || selectedFriends.length === 0) return;
 
     try {
+      // Step 1: Create suggestion
       const res = await fetch("/api/suggestions", {
         method: "POST",
         headers: {
@@ -230,30 +231,75 @@ function SuggestPageContent() {
         }),
       });
 
-      if (res.ok) {
-        const friendNames = selectedFriends
-          .map((id) => friends.find((f) => f.id === id)?.name)
-          .filter(Boolean)
-          .join(", ");
-
-        toast({
-          title: "Movie suggested! 🎬",
-          description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
-        });
-
-        // Reset form
-        setSelectedMovie(null);
-        setDesireRating([7]);
-        setSelectedFriends([]);
-        setComment("");
-        setSearchTerm("");
-      } else {
+      if (!res.ok) {
         toast({
           title: "Error",
           description: "Failed to send suggestion. Try again.",
           variant: "error",
         });
+        return;
       }
+
+      const friendNames = selectedFriends
+        .map((id) => friends.find((f) => f.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
+
+      // Step 2: If date is provided, create event
+      if (eventDate) {
+        const eventDatetime = new Date(`${eventDate}T${eventTime}`);
+
+        try {
+          const eventRes = await fetch("/api/events", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              movieId: selectedMovie.id,
+              date: eventDatetime.toISOString(),
+              invitedFriendIds: selectedFriends,
+            }),
+          });
+
+          if (eventRes.ok) {
+            const eventData = await eventRes.json();
+            toast({
+              title: "Movie suggested & event created! 🎬",
+              description: `"${selectedMovie.title}" suggested to ${friendNames} and event scheduled for ${eventDate}`,
+            });
+          } else {
+            // Suggestion succeeded but event creation failed
+            toast({
+              title: "Movie suggested (event creation failed)",
+              description: `"${selectedMovie.title}" suggested to ${friendNames}, but event creation failed.`,
+              variant: "warning",
+            });
+          }
+        } catch (eventError) {
+          console.error("Event creation error", eventError);
+          // Still show success for suggestion
+          toast({
+            title: "Movie suggested! 🎬",
+            description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+          });
+        }
+      } else {
+        toast({
+          title: "Movie suggested! 🎬",
+          description: `"${selectedMovie.title}" has been suggested to ${friendNames}`,
+        });
+      }
+
+      // Reset form
+      setSelectedMovie(null);
+      setDesireRating([7]);
+      setSelectedFriends([]);
+      setComment("");
+      setSearchTerm("");
+      setEventDate("");
+      setEventTime("19:00");
     } catch (error) {
       console.error("Suggest error", error);
     }
