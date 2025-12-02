@@ -118,6 +118,7 @@ model Movie {
   watchDesires WatchDesire[]
   suggestions  Suggestion[]
   events       Event[]
+  votes        MovieNightVote[] @relation("MovieVotes")
 
   @@map("movies")
 }
