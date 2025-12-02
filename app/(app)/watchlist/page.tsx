@@ -114,9 +114,9 @@ export default function WatchlistPage() {
         const watchlistData = await watchlistRes.json();
         const friendsData = await friendsRes.json();
 
-        if (watchlistData.success) {
-          setWatchlist(watchlistData.watchlist);
-          setHistory(watchlistData.history);
+        if (watchlistData.success && watchlistData.data) {
+          setWatchlist(watchlistData.data.watchlist || []);
+          setHistory(watchlistData.data.history || []);
         }
 
         if (friendsData.success && friendsData.data?.friends) {
