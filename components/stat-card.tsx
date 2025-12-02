@@ -3,6 +3,7 @@
 import { useState, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { shouldReduceMotion, durations } from "@/lib/animations";
 
 interface StatCardProps {
   title: string;
