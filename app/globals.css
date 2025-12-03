@@ -186,11 +186,17 @@
   /* Cinematic card component with neon glow */
   .card-cinematic {
     @apply rounded-xl border border-primary/20 bg-card text-card-foreground shadow-sm;
-    @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300;
+    @apply hover:border-primary/50 transition-all duration-300;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-cinematic:hover {
+    box-shadow: 0 8px 24px rgba(45, 90, 184, 0.12);
   }
 
   .card-cinematic.glow {
     @apply animate-glow-pulse;
+    box-shadow: 0 0 15px rgba(45, 90, 184, 0.15);
   }
 
   /* Mobile-optimized card component */
