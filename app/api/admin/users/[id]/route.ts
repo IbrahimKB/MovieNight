@@ -1,26 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
-import { hash } from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
+import { hash } from "bcryptjs";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { id: userId } = await params;
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 403 }
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
+    const { user } = authResult;
+
+    const { id: userId } = await params;
 
     if (userId === user.id) {
       return NextResponse.json(
-        { success: false, error: 'Cannot delete yourself' },
-        { status: 400 }
+        { success: false, error: "Cannot delete yourself" },
+        { status: 400 },
       );
     }
 
@@ -30,13 +29,13 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully',
+      message: "User deleted successfully",
     });
   } catch (err) {
-    console.error('Error deleting user:', err);
+    console.error("Error deleting user:", err);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

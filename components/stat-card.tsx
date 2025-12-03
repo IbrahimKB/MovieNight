@@ -3,6 +3,7 @@
 import { useState, ReactNode } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { shouldReduceMotion, durations } from "@/lib/animations";
 
 interface StatCardProps {
   title: string;
@@ -29,13 +30,17 @@ export function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: index * 0.06 }}
+      transition={
+        shouldReduceMotion()
+          ? { duration: 0 }
+          : { duration: 0.35, delay: index * 0.06 }
+      }
       onClick={() => setIsFlipped(!isFlipped)}
       className={cn(
         "relative overflow-hidden p-4 rounded-xl border border-primary/10",
         "bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md",
         "transition-all cursor-pointer touch-manipulation active:scale-[0.98]",
-        "flex flex-col justify-between h-36 sm:h-32",
+        "flex flex-col justify-between min-h-36 sm:min-h-32",
         "perspective",
       )}
       style={{ perspective: "1000px" }}
@@ -140,7 +145,7 @@ export function StatCard({
               <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 About {title}
               </h3>
-              <div className="text-sm leading-relaxed text-foreground">
+              <div className="text-sm leading-relaxed text-foreground line-clamp-3">
                 {description}
               </div>
             </div>

@@ -58,10 +58,11 @@ const getCachedTrendingMovies = cacheFunction(
 // Cached Upcoming Releases
 const getCachedUpcomingReleases = cacheFunction(
   async () => {
-    return await prisma.movie.findMany({
+    return await prisma.release.findMany({
       where: {
         releaseDate: {
           gte: new Date(),
+          lte: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
         },
       },
       orderBy: { releaseDate: "asc" },

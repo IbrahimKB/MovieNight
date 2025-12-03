@@ -39,6 +39,12 @@ enum InvitationStatus {
   declined
 }
 
+enum VoteType {
+  yes
+  maybe
+  no
+}
+
 //////////////////////////////////////////////////////////////
 // AUTH + USERS
 //////////////////////////////////////////////////////////////
@@ -70,6 +76,7 @@ model AuthUser {
   notifications           Notification[]
   pushSubscriptions       UserPushSubscription[]
   notificationPreferences UserNotificationPreferences?
+  votes                   MovieNightVote[] @relation("UserVotes")
 
   @@map("users")
 }
@@ -112,6 +119,7 @@ model Movie {
   watchDesires WatchDesire[]
   suggestions  Suggestion[]
   events       Event[]
+  votes        MovieNightVote[] @relation("MovieVotes")
 
   @@map("movies")
 }
@@ -282,6 +290,28 @@ model EventInvitation {
   @@index([status])
   @@index([eventId])
   @@map("event_invitations")
+}
+
+//////////////////////////////////////////////////////////////
+// MOVIE NIGHT VOTING
+//////////////////////////////////////////////////////////////
+
+model MovieNightVote {
+  id        String   @id @default(uuid()) @db.Uuid
+  movieId   String   @db.Uuid @map("movie_id")
+  userId    String   @db.Uuid @map("user_id")
+  voteType  VoteType
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  movie Movie    @relation("MovieVotes", fields: [movieId], references: [id], onDelete: Cascade)
+  user  AuthUser @relation("UserVotes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([movieId, userId])
+  @@index([movieId])
+  @@index([userId])
+  @@index([voteType])
+  @@map("movie_night_votes")
 }
 
 //////////////////////////////////////////////////////////////

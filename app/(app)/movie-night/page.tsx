@@ -21,7 +21,12 @@ import {
   TrendingUp,
   Filter,
   Loader2,
+  ThumbsUp,
+  ThumbsDown,
+  HelpCircle,
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { shouldReduceMotion } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
@@ -64,6 +69,19 @@ const genres = [
   "Thriller",
 ];
 
+interface VoteCounts {
+  yes: number;
+  maybe: number;
+  no: number;
+}
+
+interface MovieVotes {
+  [movieId: string]: {
+    counts: VoteCounts;
+    userVote: "yes" | "maybe" | "no" | null;
+  };
+}
+
 export default function MovieNightPage() {
   const { user } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
@@ -76,6 +94,8 @@ export default function MovieNightPage() {
   );
   const [isFinding, setIsFinding] = useState(false);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+  const [movieVotes, setMovieVotes] = useState<MovieVotes>({});
+  const [votingInProgress, setVotingInProgress] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -101,6 +121,15 @@ export default function MovieNightPage() {
     };
     fetchFriends();
   }, [user]);
+
+  // Fetch vote counts when filtered movies change
+  useEffect(() => {
+    filteredMovies.forEach((movie) => {
+      if (!movieVotes[movie.id]) {
+        fetchVoteCounts(movie.id);
+      }
+    });
+  }, [filteredMovies]);
 
   const handleFriendToggle = (friendId: string) => {
     setPresentFriends((prev) =>
@@ -182,6 +211,83 @@ export default function MovieNightPage() {
     });
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleVote = async (
+    movieId: string,
+    voteType: "yes" | "maybe" | "no",
+  ) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to vote",
+        variant: "error",
+      });
+      return;
+    }
+
+    setVotingInProgress(movieId);
+
+    try {
+      const res = await fetch("/api/movie-night/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          movieId,
+          voteType,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to submit vote");
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setMovieVotes((prev) => ({
+          ...prev,
+          [movieId]: {
+            counts: data.data.counts,
+            userVote: voteType,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Vote error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your vote",
+        variant: "error",
+      });
+    } finally {
+      setVotingInProgress(null);
+    }
+  };
+
+  const fetchVoteCounts = async (movieId: string) => {
+    try {
+      const res = await fetch(`/api/movie-night/vote?movieId=${movieId}`, {
+        credentials: "include",
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      if (data.success) {
+        setMovieVotes((prev) => ({
+          ...prev,
+          [movieId]: {
+            counts: data.data.counts,
+            userVote: data.data.userVote,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to fetch vote counts:", error);
+    }
   };
 
   const getPlatformColor = (platform: string) => {
@@ -551,8 +657,75 @@ export default function MovieNightPage() {
                         </div>
                       </div>
 
+                      {/* Voting Section */}
+                      <div className="pt-4 border-t border-border space-y-3">
+                        <h4 className="text-sm font-medium">
+                          What do you think?
+                        </h4>
+                        <div className="grid grid-cols-3 gap-2">
+                          {["yes", "maybe", "no"].map((voteType) => {
+                            const isSelected =
+                              movieVotes[movie.id]?.userVote === voteType;
+                            const count =
+                              movieVotes[movie.id]?.counts[
+                                voteType as keyof VoteCounts
+                              ] || 0;
+                            const icon =
+                              voteType === "yes"
+                                ? ThumbsUp
+                                : voteType === "maybe"
+                                  ? HelpCircle
+                                  : ThumbsDown;
+                            const Icon = icon;
+
+                            return (
+                              <motion.button
+                                key={voteType}
+                                onClick={() =>
+                                  handleVote(
+                                    movie.id,
+                                    voteType as "yes" | "maybe" | "no",
+                                  )
+                                }
+                                disabled={votingInProgress === movie.id}
+                                animate={
+                                  isSelected && !shouldReduceMotion()
+                                    ? { scale: 1.05 }
+                                    : { scale: 1 }
+                                }
+                                whileHover={
+                                  shouldReduceMotion() ? {} : { scale: 1.08 }
+                                }
+                                whileTap={
+                                  shouldReduceMotion() ? {} : { scale: 0.95 }
+                                }
+                                className={cn(
+                                  "flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-all",
+                                  isSelected
+                                    ? voteType === "yes"
+                                      ? "bg-green-500/20 border border-green-500/50 text-green-500"
+                                      : voteType === "maybe"
+                                        ? "bg-yellow-500/20 border border-yellow-500/50 text-yellow-500"
+                                        : "bg-red-500/20 border border-red-500/50 text-red-500"
+                                    : "bg-background border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground",
+                                )}
+                              >
+                                <Icon className="h-4 w-4" />
+                                <span className="text-xs font-medium">
+                                  {count > 0 ? count : "-"}
+                                </span>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       {/* Action */}
-                      <Button className="w-full" size="sm" variant="outline">
+                      <Button
+                        className="w-full mt-2"
+                        size="sm"
+                        variant="outline"
+                      >
                         <Play className="h-4 w-4 mr-2" />
                         Watch Now
                       </Button>

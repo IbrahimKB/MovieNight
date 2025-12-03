@@ -10,6 +10,15 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useConfirmDialog } from "@/hooks/use-confirm-dialog";
 
 interface Friend {
   id: string;
@@ -28,6 +37,7 @@ export default function SquadPage() {
   const [incomingRequests, setIncomingRequests] = useState<Friend[]>([]);
   const [outgoingRequests, setOutgoingRequests] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirmDialog = useConfirmDialog();
 
   useEffect(() => {
     setMounted(true);
@@ -73,6 +83,34 @@ export default function SquadPage() {
     return null;
   }
 
+  const handleRemoveFriend = (friendId: string, friendName: string) => {
+    confirmDialog.openDialog(
+      "Remove Friend?",
+      `Are you sure you want to remove ${friendName} from your friends?`,
+      async () => {
+        try {
+          const res = await fetch(`/api/friends/${friendId}`, {
+            method: "DELETE",
+            credentials: "include",
+          });
+
+          if (res.ok) {
+            setFriends((prev) => prev.filter((f) => f.id !== friendId));
+          } else {
+            console.error("Failed to remove friend");
+          }
+        } catch (error) {
+          console.error("Error removing friend:", error);
+        }
+      },
+      {
+        confirmText: "Remove",
+        cancelText: "Cancel",
+        isDestructive: true,
+      },
+    );
+  };
+
   const tabs = [
     { id: "friends", label: "Friends", count: friends.length },
     { id: "incoming", label: "Requests", count: incomingRequests.length },
@@ -83,10 +121,12 @@ export default function SquadPage() {
     friend,
     showActions = true,
     actionType = "default",
+    onRemove,
   }: {
     friend: Friend;
     showActions?: boolean;
     actionType?: "accept" | "cancel" | "default";
+    onRemove?: (friendId: string, friendName: string) => void;
   }) => (
     <div className="bg-card border border-border rounded-lg p-4 md:p-6 hover:border-primary/50 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0 flex-1">
@@ -127,7 +167,12 @@ export default function SquadPage() {
                 <MessageCircle size={16} />
                 <span className="hidden sm:inline">Message</span>
               </button>
-              <button className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-border text-destructive hover:bg-destructive/10 transition-colors font-medium flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+              <button
+                onClick={() =>
+                  onRemove?.(friend.id, friend.name || friend.username)
+                }
+                className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-border text-destructive hover:bg-destructive/10 transition-colors font-medium flex items-center justify-center gap-2 text-sm whitespace-nowrap"
+              >
                 <Trash2 size={16} />
                 <span className="hidden sm:inline">Remove</span>
               </button>
@@ -190,6 +235,7 @@ export default function SquadPage() {
                     friend={friend}
                     showActions={true}
                     actionType="default"
+                    onRemove={handleRemoveFriend}
                   />
                 ))
               ) : (
@@ -263,6 +309,33 @@ export default function SquadPage() {
             )}
           </div>
         )}
+
+        {/* Confirmation Dialog */}
+        <AlertDialog
+          open={confirmDialog.isOpen}
+          onOpenChange={confirmDialog.closeDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.description}
+            </AlertDialogDescription>
+            <div className="flex gap-3 justify-end">
+              <AlertDialogCancel>{confirmDialog.cancelText}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDialog.handleConfirm}
+                disabled={confirmDialog.isLoading}
+                className={
+                  confirmDialog.isDestructive
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    : ""
+                }
+              >
+                {confirmDialog.isLoading ? "..." : confirmDialog.confirmText}
+              </AlertDialogAction>
+            </div>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

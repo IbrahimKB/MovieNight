@@ -1,29 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
-import { hash } from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
+import { hash } from "bcryptjs";
 
 export async function POST(
   req: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 403 }
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
+    const { user } = authResult;
 
     const body = await req.json();
     const { newPassword } = body;
 
     if (!newPassword || newPassword.length < 6) {
-        return NextResponse.json(
-            { success: false, error: 'Password must be at least 6 chars' },
-            { status: 400 }
-        );
+      return NextResponse.json(
+        { success: false, error: "Password must be at least 6 chars" },
+        { status: 400 },
+      );
     }
 
     const { id } = await context.params;
@@ -36,10 +34,10 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: "Password reset" });
   } catch (err) {
-    console.error('Error resetting password:', err);
+    console.error("Error resetting password:", err);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

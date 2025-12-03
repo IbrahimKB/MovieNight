@@ -1,16 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 403 }
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
+    const { user } = authResult;
 
     const users = await prisma.authUser.findMany({
       select: {
@@ -21,7 +19,7 @@ export async function GET(req: NextRequest) {
         role: true,
         joinedAt: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json({
@@ -29,10 +27,10 @@ export async function GET(req: NextRequest) {
       data: users,
     });
   } catch (err) {
-    console.error('Error fetching users:', err);
+    console.error("Error fetching users:", err);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

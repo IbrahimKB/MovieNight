@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/brand-logo";
+import { PageTransition } from "@/components/page-transition";
 import { motion } from "framer-motion";
 import {
   Home,
@@ -200,7 +201,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Mobile/Tablet Sidebar */}
         {sidebarOpen && (
-          <div className="md:hidden border-t border-primary/10 bg-background">
+          <div className="lg:hidden border-t border-primary/10 bg-background">
             <div className="flex flex-col p-4 gap-2 pb-6">
               {navItems.map((item) => (
                 <button
@@ -240,7 +241,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
     </div>
   );

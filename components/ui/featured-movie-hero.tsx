@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { shouldReduceMotion } from "@/lib/animations";
 
 interface FeaturedMovieHeroProps {
   movie: {
@@ -69,7 +70,7 @@ export default function FeaturedMovieHero({
       onHoverEnd={() => setIsHovered(false)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.5 }}
     >
       {/* Backdrop Image or Gradient */}
       <div
@@ -125,7 +126,11 @@ export default function FeaturedMovieHero({
           className="space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          transition={
+            shouldReduceMotion()
+              ? { duration: 0 }
+              : { duration: 0.5, delay: 0.1 }
+          }
         >
           {/* Title and Metadata */}
           <div className="space-y-2">

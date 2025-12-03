@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Users, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ interface Friend {
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<string | null>(null);
@@ -32,6 +33,16 @@ export default function CreateEventPage() {
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Check for date parameter in URL
+    if (searchParams) {
+      const dateParam = searchParams.get("date");
+      if (dateParam) {
+        setEventDate(dateParam);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchData = async () => {

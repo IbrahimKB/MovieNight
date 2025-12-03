@@ -16,6 +16,7 @@ import {
 import { useConfetti } from "@/hooks/use-confetti";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { toast } from "@/components/ui/use-toast";
+import { FriendsWhoWatched } from "@/components/friends-who-watched";
 
 interface Movie {
   id: string;
@@ -454,6 +455,15 @@ export default function MovieDetailPage() {
             </div>
           </motion.div>
         )}
+
+        {/* Friends Who Watched Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.4 }}
+        >
+          <FriendsWhoWatched movieId={movieId} />
+        </motion.div>
 
         {/* Additional Info */}
         <motion.div

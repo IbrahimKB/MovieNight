@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
+import { unauthorized, badRequest, ok, serverError } from "@/lib/api-helpers";
 
 const SettingsSchema = z.object({
   emailNotifications: z.boolean().optional(),
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized("You must be logged in to view settings");
     }
 
     const prefs = await prisma.userNotificationPreferences.findUnique({
@@ -23,19 +24,18 @@ export async function GET(req: NextRequest) {
     });
 
     // Return defaults if no record exists
-    return NextResponse.json({
-      success: true,
-      data: prefs || {
+    return ok(
+      prefs || {
         emailNotifications: true,
         pushNotifications: true,
         friendRequests: true,
         suggestions: true,
         movieReleases: true,
       },
-    });
+    );
   } catch (err) {
     console.error("Get settings error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return serverError("Failed to retrieve settings", (err as any).message);
   }
 }
 
@@ -43,14 +43,14 @@ export async function PATCH(req: NextRequest) {
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return unauthorized("You must be logged in to update settings");
     }
 
     const body = await req.json();
     const parsed = SettingsSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid data" }, { status: 400 });
+      return badRequest("Invalid settings data");
     }
 
     const prefs = await prisma.userNotificationPreferences.upsert({
@@ -62,9 +62,9 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, data: prefs });
+    return ok(prefs);
   } catch (err) {
     console.error("Update settings error:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return serverError("Failed to update settings", (err as any).message);
   }
 }

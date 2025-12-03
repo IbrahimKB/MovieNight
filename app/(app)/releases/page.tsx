@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Clapperboard } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Release {
   id: string;
@@ -50,6 +51,21 @@ export default function ReleasesPage() {
     const releaseDate = new Date(release.releaseDate);
     const isUpcoming = releaseDate > new Date();
 
+    const platformEmoji: Record<string, string> = {
+      Theatrical: "🎬",
+      Cinema: "🎬",
+      Theater: "🎬",
+      Netflix: "📺",
+      "Disney+": "🎥",
+      "Prime Video": "🎁",
+      "Apple TV": "🍎",
+      "HBO Max": "🎭",
+      Hulu: "📺",
+      Peacock: "🦚",
+      "Paramount+": "⭐",
+    };
+    const emoji = platformEmoji[release.platform || ""] || "📺";
+
     return (
       <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 transition-all">
         <button
@@ -90,9 +106,11 @@ export default function ReleasesPage() {
           </button>
 
           {release.platform && (
-            <p className="text-xs text-primary mt-2 font-medium">
-              {release.platform}
-            </p>
+            <div className="mt-2">
+              <Badge variant="outline" className="text-xs">
+                {emoji} {release.platform}
+              </Badge>
+            </div>
           )}
 
           {release.genres && release.genres.length > 0 && (
