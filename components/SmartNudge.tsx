@@ -26,6 +26,10 @@ export default function SmartNudge({
       if (!user) return;
       try {
         const res = await fetch("/api/nudge", { credentials: "include" });
+        if (!res.ok) {
+          console.error("Failed to fetch nudge:", res.status);
+          return;
+        }
         const data = await res.json();
         if (data.success && data.nudge) {
           setNudge(data.nudge);
