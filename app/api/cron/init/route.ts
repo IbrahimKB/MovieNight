@@ -97,21 +97,42 @@ export async function POST(
 
     console.log(`[API] POST cron action: ${action}`);
 
+    // Check admin auth
+    let isAdmin = false;
+    try {
+      const { getCurrentUser } = await import("@/lib/auth");
+      const user = await getCurrentUser();
+      isAdmin = user?.role === "admin";
+    } catch (e) {
+      // Ignore auth error
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized - admin access required" },
+        { status: 401 }
+      );
+    }
+
     if (action === "run-now" || action === "run-all") {
       if (!process.env.TMDB_API_KEY) {
          console.error("[API] Cannot sync: TMDB_API_KEY missing");
          return NextResponse.json({
             success: false,
-            error: "TMDB_API_KEY is missing on server"
+            error: "TMDB_API_KEY is missing on server. Contact administrator to set the environment variable."
          }, { status: 500 });
       }
 
-      await runSyncsNow();
+      console.log("[API] Starting sync with TMDB_API_KEY present");
+      const result = await runSyncsNow();
+      console.log("[API] Sync result:", result);
+
       return NextResponse.json({
         success: true,
         data: {
-          message: "All syncs triggered",
+          message: "All syncs triggered successfully",
           timestamp: new Date().toISOString(),
+          result,
         },
       });
     }
@@ -128,7 +149,7 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to process cron request",
+        error: `Failed to process cron request: ${err instanceof Error ? err.message : String(err)}`,
       },
       { status: 500 }
     );
