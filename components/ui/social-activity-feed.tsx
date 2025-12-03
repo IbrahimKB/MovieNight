@@ -60,6 +60,12 @@ export default function SocialActivityFeed({
         const notificationsRes = await fetch("/api/notifications", {
           credentials: "include",
         });
+        if (!notificationsRes.ok) {
+          console.error("Failed to fetch notifications:", notificationsRes.status);
+          setActivity([]);
+          setLoading(false);
+          return;
+        }
         const notificationsData = await notificationsRes.json();
 
         let recentActivity: ActivityItem[] = [];
