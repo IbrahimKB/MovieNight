@@ -56,7 +56,6 @@ export async function PATCH(
     }
 
     const { rating } = validation.data;
-    const desireId = params.id;
 
     // Verify the desire belongs to the current user
     const desire = await prisma.watchDesire.findFirst({
