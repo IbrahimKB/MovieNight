@@ -76,16 +76,19 @@ export async function GET(
     const watchersList = watchers.map((w) => ({
       userId: w.user.id,
       username: w.user.username,
-      name: w.user.name || w.user.username,
+      name: w.user.name || null,
       avatar: w.user.avatar,
-      rating: w.originalScore,
+      originalScore: w.originalScore,
       watchedAt: w.watchedAt.toISOString(),
     }));
 
     return NextResponse.json(
       {
         success: true,
-        data: watchersList,
+        data: {
+          friendWatchers: watchersList,
+          totalFriendWatchers: watchersList.length,
+        },
       },
       { status: 200 }
     );
