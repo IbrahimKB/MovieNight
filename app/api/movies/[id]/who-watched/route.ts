@@ -35,7 +35,6 @@ export async function GET(
       );
     }
 
-    const movieId = params.id;
 
     // Get all friendships for the current user (bidirectional)
     const friendships = await prisma.friendship.findMany({
