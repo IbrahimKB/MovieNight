@@ -36,6 +36,7 @@ interface UserStats {
   suggestions: number;
   acceptanceRate: number;
   avgDesire: number;
+  avgRating: number;
   favGenre: string;
 }
 
