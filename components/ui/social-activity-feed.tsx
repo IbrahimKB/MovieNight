@@ -139,7 +139,7 @@ export default function SocialActivityFeed({
             onClick={() =>
               toast({
                 title: "Activity Clicked",
-                description: `${item.user} ${item.action} ${item.movie}.`,
+                description: `${item.userName} ${item.action} ${item.movie}.`,
               })
             }
           >
