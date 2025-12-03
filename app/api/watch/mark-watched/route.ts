@@ -19,7 +19,9 @@ const MarkWatchedSchema = z.object({
 // -----------------------------------------------------
 // Map PUID <-> Internal UUID
 // -----------------------------------------------------
-async function mapExternalUserIdToInternal(externalId: string): Promise<string | null> {
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
   const user = await prisma.authUser.findFirst({
     where: { OR: [{ puid: externalId }, { id: externalId }] },
     select: { id: true },
@@ -30,13 +32,15 @@ async function mapExternalUserIdToInternal(externalId: string): Promise<string |
 // -----------------------------------------------------
 // POST /api/watch/mark-watched
 // -----------------------------------------------------
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ApiResponse>> {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     if (!userIdInternal) {
       return NextResponse.json(
         { success: false, error: "User not found" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -59,11 +63,16 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
             .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join("; "),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { movieId: inputMovieId, watchedDate, originalScore, reaction } = validation.data;
+    const {
+      movieId: inputMovieId,
+      watchedDate,
+      originalScore,
+      reaction,
+    } = validation.data;
 
     // Ensure movie exists (lazy sync)
     const internalMovieId = await ensureMovieExists(inputMovieId);
@@ -71,7 +80,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
     if (!internalMovieId) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -80,17 +89,59 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // -----------------------------------------------------
     // Create watched movie record
+    // If already watched, return success with existing record
     // reaction: undefined → valid
     // -----------------------------------------------------
-    const watched = await prisma.watchedMovie.create({
-      data: {
-        userId: userIdInternal,
-        movieId: internalMovieId,
-        watchedAt,
-        originalScore: originalScore ?? null,
-        reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
-      },
-    });
+    let watched;
+    try {
+      watched = await prisma.watchedMovie.create({
+        data: {
+          userId: userIdInternal,
+          movieId: internalMovieId,
+          watchedAt,
+          originalScore: originalScore ?? null,
+          reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
+        },
+      });
+    } catch (err: any) {
+      // Handle unique constraint violation - movie already marked as watched
+      if (
+        err.code === "P2002" &&
+        err.meta?.target?.includes("userId_movieId")
+      ) {
+        // Movie already watched - fetch existing record
+        const existing = await prisma.watchedMovie.findUnique({
+          where: {
+            userId_movieId: {
+              userId: userIdInternal,
+              movieId: internalMovieId,
+            },
+          },
+        });
+
+        if (existing) {
+          return NextResponse.json(
+            {
+              success: true,
+              data: {
+                id: existing.id,
+                userId: currentUser.id,
+                movieId: internalMovieId,
+                watchedAt: existing.watchedAt,
+                originalScore: existing.originalScore ?? null,
+                reaction: existing.reaction ?? null,
+                createdAt: existing.createdAt,
+                updatedAt: existing.updatedAt,
+              },
+              message: "Movie already marked as watched",
+            },
+            { status: 200 },
+          );
+        }
+      }
+      // Re-throw if not a constraint violation
+      throw err;
+    }
 
     // -----------------------------------------------------
     // Remove from WatchDesire if present
@@ -116,13 +167,13 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
           updatedAt: watched.updatedAt,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     console.error("Mark watched error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

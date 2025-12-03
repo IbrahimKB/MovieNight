@@ -2,7 +2,7 @@
  * Cron Job Scheduler
  * Runs background tasks at scheduled times
  * - 3:15 AM: Sync upcoming releases (for calendar)
- * 
+ *
  * NOTE: This file uses require() for node-cron to avoid webpack bundling issues.
  * node-cron uses child_process which cannot be bundled by Next.js.
  */
@@ -57,5 +57,5 @@ export async function stopCronJobs() {
 // For testing: run syncs immediately
 export async function runSyncsNow() {
   console.log("[CRON] Running syncs immediately...");
-  await syncUpcomingReleases();
+  return await syncUpcomingReleases();
 }

@@ -12,14 +12,15 @@ import type { ApiResponse } from "@/types";
 let cronInitialized = false;
 
 export async function GET(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Security check: Require CRON_SECRET or Admin Auth
     const authHeader = req.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
-    const isCronAuthorized = cronSecret && authHeader === `Bearer ${cronSecret}`;
-    
+    const isCronAuthorized =
+      cronSecret && authHeader === `Bearer ${cronSecret}`;
+
     // Also allow admin users to manually trigger via UI
     let isAdmin = false;
     if (!isCronAuthorized) {
@@ -35,9 +36,9 @@ export async function GET(
     }
 
     if (!isCronAuthorized && !isAdmin) {
-       return NextResponse.json(
+      return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -82,14 +83,14 @@ export async function GET(
         success: false,
         error: "Failed to initialize cron jobs",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // POST endpoint to manually trigger syncs (with optional auth)
 export async function POST(
-  req: NextRequest
+  req: NextRequest,
 ): Promise<NextResponse<ApiResponse>> {
   try {
     const body = await req.json().catch(() => ({})); // Handle empty body
@@ -97,21 +98,46 @@ export async function POST(
 
     console.log(`[API] POST cron action: ${action}`);
 
+    // Check admin auth
+    let isAdmin = false;
+    try {
+      const { getCurrentUser } = await import("@/lib/auth");
+      const user = await getCurrentUser();
+      isAdmin = user?.role === "admin";
+    } catch (e) {
+      // Ignore auth error
+    }
+
+    if (!isAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized - admin access required" },
+        { status: 401 },
+      );
+    }
+
     if (action === "run-now" || action === "run-all") {
       if (!process.env.TMDB_API_KEY) {
-         console.error("[API] Cannot sync: TMDB_API_KEY missing");
-         return NextResponse.json({
+        console.error("[API] Cannot sync: TMDB_API_KEY missing");
+        return NextResponse.json(
+          {
             success: false,
-            error: "TMDB_API_KEY is missing on server"
-         }, { status: 500 });
+            error:
+              "TMDB_API_KEY is missing on server. Contact administrator to set the environment variable.",
+          },
+          { status: 500 },
+        );
       }
 
-      await runSyncsNow();
+      console.log("[API] Starting sync with TMDB_API_KEY present");
+      const result = await runSyncsNow();
+      console.log("[API] Sync result:", result);
+
       return NextResponse.json({
         success: true,
         data: {
-          message: "All syncs triggered",
+          message: "All syncs triggered successfully",
           timestamp: new Date().toISOString(),
+          result,
         },
       });
     }
@@ -121,16 +147,16 @@ export async function POST(
         success: false,
         error: "Unknown action",
       },
-      { status: 400 }
+      { status: 400 },
     );
   } catch (err) {
     console.error("[API] Cron POST error:", err);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to process cron request",
+        error: `Failed to process cron request: ${err instanceof Error ? err.message : String(err)}`,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
