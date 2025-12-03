@@ -36,6 +36,7 @@ interface UserStats {
   suggestions: number;
   acceptanceRate: number;
   avgDesire: number;
+  avgRating: number;
   favGenre: string;
 }
 
@@ -127,7 +128,7 @@ export default function StatsPage() {
         </CardHeader>
         <CardContent>
           {userStats ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Total Movies Watched */}
               <Card className="border-0 bg-accent/30">
                 <CardContent className="p-4 text-center">
@@ -196,6 +197,28 @@ export default function StatsPage() {
                     </div>
                     <div className="text-sm text-muted-foreground">
                       🔥 Avg Desire Score
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Avg Rating */}
+              <Card className="border-0 bg-accent/30">
+                <CardContent className="p-4 text-center">
+                  <div className="space-y-2">
+                    <div
+                      className={cn(
+                        "w-12 h-12 rounded-full mx-auto flex items-center justify-center text-white",
+                        getStatsCardColor(userStats.avgRating),
+                      )}
+                    >
+                      <Award className="h-6 w-6" />
+                    </div>
+                    <div className="text-2xl font-bold">
+                      {userStats.avgRating}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      ⭐ Avg Rating Given
                     </div>
                   </div>
                 </CardContent>
@@ -289,7 +312,7 @@ export default function StatsPage() {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex gap-4 text-right">
+                    <div className="flex gap-3 text-right">
                       <div>
                         <div className="text-sm font-semibold">
                           {entry.totalWatched}
@@ -303,10 +326,21 @@ export default function StatsPage() {
                           variant="secondary"
                           className={cn(
                             "text-white",
-                            getStatsCardColor(entry.avgDesire), // Using avgDesire as color indicator for now
+                            getStatsCardColor(entry.avgDesire),
                           )}
                         >
-                          {entry.avgDesire}
+                          💙 {entry.avgDesire}
+                        </Badge>
+                      </div>
+                      <div>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "text-white",
+                            getStatsCardColor(entry.avgRating),
+                          )}
+                        >
+                          ⭐ {entry.avgRating}
                         </Badge>
                       </div>
                     </div>

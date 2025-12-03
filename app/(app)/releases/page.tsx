@@ -13,19 +13,32 @@ interface Release {
   platform?: string;
   poster?: string;
   genres?: string[];
+  countryCode?: string;
 }
+
+const AVAILABLE_COUNTRIES = [
+  { code: "US", label: "United States" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "JP", label: "Japan" },
+  { code: "KR", label: "South Korea" },
+];
 
 export default function ReleasesPage() {
   const router = useRouter();
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<string>("US");
 
   useEffect(() => {
     const fetchReleases = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/releases/upcoming?page=1&limit=40", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `/api/releases/upcoming?page=1&limit=40&countryCode=${selectedCountry}`,
+          {
+            credentials: "include",
+          },
+        );
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -45,7 +58,7 @@ export default function ReleasesPage() {
     };
 
     fetchReleases();
-  }, []);
+  }, [selectedCountry]);
 
   const ReleaseCard = ({ release }: { release: Release }) => {
     const releaseDate = new Date(release.releaseDate);
@@ -163,6 +176,23 @@ export default function ReleasesPage() {
         <p className="text-sm sm:text-base text-muted-foreground">
           New movies coming to your favorite platforms
         </p>
+      </div>
+
+      {/* Country Filter */}
+      <div className="flex flex-wrap gap-2">
+        {AVAILABLE_COUNTRIES.map((country) => (
+          <button
+            key={country.code}
+            onClick={() => setSelectedCountry(country.code)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              selectedCountry === country.code
+                ? "bg-primary text-primary-foreground shadow-lg"
+                : "bg-card border border-border text-foreground hover:border-primary/50"
+            }`}
+          >
+            {country.label}
+          </button>
+        ))}
       </div>
 
       {/* Upcoming */}

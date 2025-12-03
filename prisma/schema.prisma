@@ -129,8 +129,9 @@ model Movie {
 
 model Release {
   id          String   @id @default(uuid()) @db.Uuid
-  tmdbId      Int?     @unique @map("tmdb_id")
+  tmdbId      Int?     @map("tmdb_id")
   movieId     String   @db.Uuid @map("movie_id")
+  countryCode String   @map("country_code")
   title       String
   platform    String
   releaseDate DateTime @map("release_date")
@@ -143,8 +144,10 @@ model Release {
 
   movie Movie @relation(fields: [movieId], references: [id], onDelete: Cascade)
 
+  @@unique([tmdbId, countryCode, platform])
   @@index([movieId])
   @@index([releaseDate])
+  @@index([countryCode])
   @@map("releases")
 }
 

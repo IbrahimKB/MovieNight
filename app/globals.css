@@ -84,29 +84,29 @@
   0%,
   100% {
     box-shadow:
-      0 0 10px rgba(59, 130, 246, 0.5),
-      inset 0 0 10px rgba(59, 130, 246, 0.2);
+      0 0 10px rgba(45, 90, 184, 0.25),
+      inset 0 0 10px rgba(45, 90, 184, 0.1);
   }
   50% {
     box-shadow:
-      0 0 20px rgba(59, 130, 246, 0.8),
-      inset 0 0 15px rgba(59, 130, 246, 0.3);
+      0 0 20px rgba(45, 90, 184, 0.35),
+      inset 0 0 15px rgba(45, 90, 184, 0.15);
   }
 }
 
 @keyframes neon-border-glow {
   0%,
   100% {
-    border-color: hsl(217 91.2% 59.8%);
+    border-color: hsl(217 85% 48%);
     box-shadow:
-      0 0 10px rgba(59, 130, 246, 0.3),
-      inset 0 0 5px rgba(59, 130, 246, 0.1);
+      0 0 10px rgba(45, 90, 184, 0.2),
+      inset 0 0 5px rgba(45, 90, 184, 0.08);
   }
   50% {
-    border-color: hsl(217 100% 70%);
+    border-color: hsl(217 85% 55%);
     box-shadow:
-      0 0 20px rgba(59, 130, 246, 0.6),
-      inset 0 0 10px rgba(59, 130, 246, 0.2);
+      0 0 20px rgba(45, 90, 184, 0.3),
+      inset 0 0 10px rgba(45, 90, 184, 0.12);
   }
 }
 
@@ -186,11 +186,17 @@
   /* Cinematic card component with neon glow */
   .card-cinematic {
     @apply rounded-xl border border-primary/20 bg-card text-card-foreground shadow-sm;
-    @apply hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 transition-all duration-300;
+    @apply hover:border-primary/50 transition-all duration-300;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .card-cinematic:hover {
+    box-shadow: 0 8px 24px rgba(45, 90, 184, 0.12);
   }
 
   .card-cinematic.glow {
     @apply animate-glow-pulse;
+    box-shadow: 0 0 15px rgba(45, 90, 184, 0.15);
   }
 
   /* Mobile-optimized card component */
@@ -212,7 +218,12 @@
 
   .btn-cinematic-primary {
     @apply bg-primary text-primary-foreground hover:bg-primary/90;
-    @apply hover:shadow-lg hover:shadow-primary/50;
+    @apply hover:shadow-lg transition-all duration-200;
+    box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
+  }
+
+  .btn-cinematic-primary:hover {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.25);
   }
 
   .btn-cinematic-ghost {
@@ -525,7 +536,7 @@
     --popover: 0 0% 8.2%;
     --popover-foreground: 0 0% 97.6%;
 
-    --primary: 217 91.2% 59.8%;
+    --primary: 217 85% 48%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 15%;
@@ -534,7 +545,7 @@
     --muted: 0 0% 25%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 217 91.2% 59.8%;
+    --accent: 217 80% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -542,15 +553,15 @@
 
     --border: 0 0% 15%;
     --input: 0 0% 12%;
-    --ring: 217 91.2% 59.8%;
+    --ring: 217 80% 52%;
 
     /* Cinema colors for neon effects */
-    --cinema-blue: 217 91.2% 59.8%;
+    --cinema-blue: 217 75% 45%;
     --cinema-red: 0 84.2% 60.2%;
     --cinema-dark: 0 0% 5.1%;
 
     /* Neon accent colors */
-    --neon-blue: 217 100% 70%;
+    --neon-blue: 217 80% 55%;
     --neon-red: 0 100% 60%;
     --neon-purple: 280 100% 70%;
 
@@ -558,12 +569,12 @@
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 97.6%;
-    --sidebar-primary: 217 91.2% 59.8%;
+    --sidebar-primary: 217 85% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 97.6%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 217 91.2% 59.8%;
+    --sidebar-ring: 217 80% 52%;
   }
 
   .light {

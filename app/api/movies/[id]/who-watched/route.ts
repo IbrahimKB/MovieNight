@@ -1,38 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/auth";
+import { ApiResponse } from "@/types";
+
+async function mapExternalUserIdToInternal(
+  externalId: string,
+): Promise<string | null> {
+  const user = await prisma.authUser.findFirst({
+    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    select: { id: true },
+  });
+  return user?.id ?? null;
+}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<NextResponse<ApiResponse>> {
+  const { id: movieId } = await params;
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: "Unauthenticated" },
         { status: 401 },
       );
     }
 
-    const { id: movieId } = await params;
-
-    // Verify movie exists
-    const movie = await prisma.movie.findUnique({
-      where: { id: movieId },
-    });
-
-    if (!movie) {
+    const userIdInternal = await mapExternalUserIdToInternal(currentUser.id);
+    if (!userIdInternal) {
       return NextResponse.json(
-        { success: false, error: "Movie not found" },
-        { status: 404 },
+        { success: false, error: "User not found" },
+        { status: 401 },
       );
     }
 
-    // Get all users who watched this movie (from watch history)
+    // Get all friendships for the current user (bidirectional)
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        status: "accepted",
+        OR: [{ userId1: userIdInternal }, { userId2: userIdInternal }],
+      },
+      select: {
+        userId1: true,
+        userId2: true,
+      },
+    });
+
+    // Extract friend IDs
+    const friendIds = friendships.flatMap((f) => [
+      f.userId1 === userIdInternal ? f.userId2 : f.userId1,
+    ]);
+
+    // Find friends who watched this movie
     const watchers = await prisma.watchedMovie.findMany({
       where: {
-        movieId,
+        movieId: movieId,
+        userId: { in: friendIds },
       },
       include: {
         user: {
@@ -44,54 +68,31 @@ export async function GET(
           },
         },
       },
-      orderBy: {
-        watchedAt: "desc",
-      },
+      orderBy: { watchedAt: "desc" },
     });
 
-    // Get user's friends
-    const friendships = await prisma.friendship.findMany({
-      where: {
-        status: "accepted",
-        OR: [{ userId1: user.id }, { userId2: user.id }],
-      },
-      select: {
-        userId1: true,
-        userId2: true,
-      },
-    });
+    // Format the response
+    const watchersList = watchers.map((w) => ({
+      userId: w.user.id,
+      username: w.user.username,
+      name: w.user.name || null,
+      avatar: w.user.avatar,
+      originalScore: w.originalScore,
+      watchedAt: w.watchedAt.toISOString(),
+    }));
 
-    const friendIds = new Set<string>();
-    friendships.forEach((f) => {
-      if (f.userId1 === user.id) {
-        friendIds.add(f.userId2);
-      } else {
-        friendIds.add(f.userId1);
-      }
-    });
-
-    // Filter watchers to only show friends
-    const friendWatchers = watchers
-      .filter((w) => friendIds.has(w.userId))
-      .map((w) => ({
-        userId: w.user.id,
-        username: w.user.username,
-        name: w.user.name,
-        avatar: w.user.avatar,
-        watchedAt: w.watchedAt,
-        originalScore: w.originalScore,
-      }));
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        friendWatchers,
-        totalWatchers: watchers.length,
-        totalFriendWatchers: friendWatchers.length,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          friendWatchers: watchersList,
+          totalFriendWatchers: watchersList.length,
+        },
       },
-    });
-  } catch (error) {
-    console.error("Who watched error:", error);
+      { status: 200 },
+    );
+  } catch (err) {
+    console.error("Get who-watched error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 },

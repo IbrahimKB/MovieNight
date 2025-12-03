@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import WatchStatusBadge from "@/components/ui/watch-status-badge";
 import FriendActivityTooltip from "@/components/ui/friend-activity-tooltip";
+import { generatePosterSrcSet, generateImageSizes } from "@/lib/image-utils";
 
 interface FriendActivity {
   userId: string;
@@ -106,6 +107,8 @@ export const MovieCard = ({
         {movie.poster ? (
           <img
             src={movie.poster}
+            srcSet={generatePosterSrcSet(movie.poster)}
+            sizes={generateImageSizes("poster")}
             alt={movie.title}
             className={cn(
               "w-full h-full object-cover",

@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
 import { useSocket } from "@/hooks/useSocket";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Friend {
   id: string;
@@ -364,9 +365,22 @@ export default function FriendsPage() {
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-5 w-5" />
-                        </div>
+                        <Avatar className="w-10 h-10">
+                          {foundUser.avatar && (
+                            <AvatarImage
+                              src={foundUser.avatar}
+                              alt={foundUser.name || foundUser.username}
+                            />
+                          )}
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {(foundUser.name || foundUser.username)
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <p className="font-medium">
                             {foundUser.name || foundUser.username || "Unknown"}
@@ -437,9 +451,27 @@ export default function FriendsPage() {
                       className="flex items-center justify-between p-4 border rounded-lg bg-accent/20"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-5 w-5" />
-                        </div>
+                        <Avatar className="w-10 h-10">
+                          {request.fromUser.avatar && (
+                            <AvatarImage
+                              src={request.fromUser.avatar}
+                              alt={
+                                request.fromUser.name ||
+                                request.fromUser.username
+                              }
+                            />
+                          )}
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {(
+                              request.fromUser.name || request.fromUser.username
+                            )
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <p className="font-medium">
                             {request.fromUser.name ||
@@ -523,13 +555,19 @@ export default function FriendsPage() {
                     <div className="space-y-3">
                       {/* Friend Info */}
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-                          <span className="text-lg font-bold">
+                        <Avatar className="w-12 h-12">
+                          {friend.avatar && (
+                            <AvatarImage
+                              src={friend.avatar}
+                              alt={friend.name || friend.username}
+                            />
+                          )}
+                          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-lg font-bold">
                             {(friend.name || friend.username || "U")
                               .charAt(0)
                               .toUpperCase()}
-                          </span>
-                        </div>
+                          </AvatarFallback>
+                        </Avatar>
                         <div className="flex-1">
                           <h4 className="font-semibold">
                             {friend.name || friend.username || "Unknown"}

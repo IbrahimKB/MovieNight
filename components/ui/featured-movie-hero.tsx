@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { shouldReduceMotion } from "@/lib/animations";
+import { generatePosterSrcSet, generateImageSizes } from "@/lib/image-utils";
 
 interface FeaturedMovieHeroProps {
   movie: {
@@ -82,6 +83,8 @@ export default function FeaturedMovieHero({
         {backdropImage ? (
           <img
             src={backdropImage}
+            srcSet={generatePosterSrcSet(backdropImage)}
+            sizes={generateImageSizes("hero")}
             alt={movie.title}
             className="w-full h-full object-cover"
             loading="lazy"

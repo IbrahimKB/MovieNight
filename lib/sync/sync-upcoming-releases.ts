@@ -1,7 +1,7 @@
 /**
  * Sync Upcoming Releases from TMDB
  * Runs daily to populate the releases calendar
- * Pulls movies releasing in the next 180 days
+ * Pulls movies releasing in the next 30 days for multiple regions
  */
 
 import axios from "axios";
@@ -12,6 +12,14 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 // Import shared genre map
 import { TMDB_GENRE_MAP } from "@/lib/tmdb";
+
+// Country codes mapping for TMDB region parameter
+const COUNTRIES = {
+  US: { code: "US", label: "United States", tmdbRegion: "US" },
+  GB: { code: "GB", label: "United Kingdom", tmdbRegion: "GB" },
+  JP: { code: "JP", label: "Japan", tmdbRegion: "JP" },
+  KR: { code: "KR", label: "South Korea", tmdbRegion: "KR" },
+};
 
 interface TMDBMovie {
   id: number;
@@ -40,11 +48,15 @@ export async function syncUpcomingReleases() {
   console.log(`[SYNC] TMDB_API_KEY is ${hasApiKey ? "set" : "MISSING"}`);
 
   try {
-    console.log("[SYNC] Starting upcoming releases sync...");
+    console.log(
+      "[SYNC] Starting upcoming releases sync for multiple regions...",
+    );
     const startTime = Date.now();
     let totalImported = 0;
     let totalSkipped = 0;
     let hasErrors = false;
+    const countryStats: Record<string, { imported: number; skipped: number }> =
+      {};
 
     // Calculate date range: today to 30 days from now
     const today = new Date();
@@ -56,120 +68,161 @@ export async function syncUpcomingReleases() {
 
     console.log(`[SYNC] Fetching releases from ${today_iso} to ${future_iso}`);
 
-    // Fetch upcoming releases from multiple pages (30 days window)
-    for (let page = 1; page <= 3; page++) {
-      try {
-        console.log(`[SYNC] Fetching upcoming releases page ${page}...`);
+    // Outer loop: iterate over all countries
+    for (const countryKey of Object.keys(COUNTRIES)) {
+      const country = COUNTRIES[countryKey as keyof typeof COUNTRIES];
+      countryStats[country.code] = { imported: 0, skipped: 0 };
 
-        const response = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
-          params: {
-            api_key: TMDB_API_KEY,
-            sort_by: "release_date.asc",
-            primary_release_date_gte: today_iso,
-            primary_release_date_lte: future_iso,
-            page,
-            language: "en-US",
-          },
-          timeout: 10000,
-        });
+      console.log(
+        `[SYNC] Starting sync for ${country.label} (${country.code})...`,
+      );
 
-        const movies: TMDBMovie[] = response.data.results || [];
-        console.log(`[SYNC] Found ${movies.length} releases on page ${page}`);
+      // Inner loop: fetch upcoming releases from multiple pages per country
+      for (let page = 1; page <= 3; page++) {
+        try {
+          console.log(
+            `[SYNC] Fetching ${country.code} releases page ${page}...`,
+          );
 
-        for (const movie of movies) {
-          // Skip movies without essential data
-          if (!movie.title || !movie.release_date || !movie.id) {
-            if (!movie.id)
-              console.warn(
-                `[SYNC] Skipping movie "${movie.title}" - Missing ID`,
-              );
-            totalSkipped++;
-            continue;
-          }
+          const response = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
+            params: {
+              api_key: TMDB_API_KEY,
+              sort_by: "release_date.asc",
+              primary_release_date_gte: today_iso,
+              primary_release_date_lte: future_iso,
+              region: country.tmdbRegion,
+              page,
+              language: "en-US",
+            },
+            timeout: 10000,
+          });
 
-          try {
-            const releaseYear = new Date(movie.release_date).getFullYear();
-            const mappedGenres =
-              movie.genre_ids?.map((id) => TMDB_GENRE_MAP[id] || String(id)) ||
-              [];
+          const movies: TMDBMovie[] = response.data.results || [];
+          console.log(
+            `[SYNC] Found ${movies.length} releases for ${country.code} on page ${page}`,
+          );
 
-            // Upsert: update if exists, create if new
-            const movieData = {
-              tmdbId: movie.id,
-              title: movie.title,
-              year: releaseYear,
-              description: movie.overview,
-              poster: movie.poster_path
-                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                : null,
-              genres: mappedGenres,
-              imdbRating: movie.vote_average,
-              rtRating: movie.vote_average * 10, // Approximation
-              releaseDate: new Date(movie.release_date),
-            };
+          for (const movie of movies) {
+            // Skip movies without essential data
+            if (!movie.title || !movie.release_date || !movie.id) {
+              if (!movie.id)
+                console.warn(
+                  `[SYNC] Skipping movie "${movie.title}" - Missing ID`,
+                );
+              totalSkipped++;
+              countryStats[country.code].skipped++;
+              continue;
+            }
 
-            // Create/Update Movie Record (Required for Foreign Key)
-            // We keep this because Release table requires a valid movieId
-            const dbMovie = await prisma.movie.upsert({
-              where: { tmdbId: movie.id },
-              update: { ...movieData, updatedAt: new Date() },
-              create: movieData,
-            });
+            try {
+              const releaseYear = new Date(movie.release_date).getFullYear();
+              const mappedGenres =
+                movie.genre_ids?.map(
+                  (id) => TMDB_GENRE_MAP[id] || String(id),
+                ) || [];
 
-            // Upsert Release entry
-            await prisma.release.upsert({
-              where: { tmdbId: movie.id },
-              update: {
-                title: movie.title,
-                movieId: dbMovie.id,
-                platform: "Theater", // Default for now
-                releaseDate: new Date(movie.release_date),
-                genres: mappedGenres,
-                description: movie.overview,
-                poster: movie.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-                  : null,
-                year: releaseYear,
-              },
-              create: {
+              // Upsert: update if exists, create if new
+              const movieData = {
                 tmdbId: movie.id,
-                movieId: dbMovie.id,
                 title: movie.title,
-                platform: "Theater",
-                releaseDate: new Date(movie.release_date),
-                genres: mappedGenres,
+                year: releaseYear,
                 description: movie.overview,
                 poster: movie.poster_path
                   ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
                   : null,
-                year: releaseYear,
-              },
-            });
+                genres: mappedGenres,
+                imdbRating: movie.vote_average,
+                rtRating: movie.vote_average * 10, // Approximation
+                releaseDate: new Date(movie.release_date),
+              };
 
-            totalImported++;
-          } catch (err) {
-            console.error(
-              `[SYNC] Error importing release ${movie.title} (ID: ${movie.id}):`,
-              err,
-            );
-            totalSkipped++;
+              // Create/Update Movie Record (Required for Foreign Key)
+              // We keep this because Release table requires a valid movieId
+              const dbMovie = await prisma.movie.upsert({
+                where: { tmdbId: movie.id },
+                update: { ...movieData, updatedAt: new Date() },
+                create: movieData,
+              });
+
+              // Upsert Release entry with composite unique key: (tmdbId, countryCode, platform)
+              const platform = "Theater"; // Default platform
+              await prisma.release.upsert({
+                where: {
+                  tmdbId_countryCode_platform: {
+                    tmdbId: movie.id,
+                    countryCode: country.code,
+                    platform: platform,
+                  },
+                },
+                update: {
+                  title: movie.title,
+                  movieId: dbMovie.id,
+                  releaseDate: new Date(movie.release_date),
+                  genres: mappedGenres,
+                  description: movie.overview,
+                  poster: movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : null,
+                  year: releaseYear,
+                  updatedAt: new Date(),
+                },
+                create: {
+                  tmdbId: movie.id,
+                  movieId: dbMovie.id,
+                  countryCode: country.code,
+                  title: movie.title,
+                  platform: platform,
+                  releaseDate: new Date(movie.release_date),
+                  genres: mappedGenres,
+                  description: movie.overview,
+                  poster: movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : null,
+                  year: releaseYear,
+                },
+              });
+
+              totalImported++;
+              countryStats[country.code].imported++;
+            } catch (err) {
+              console.error(
+                `[SYNC] Error importing release ${movie.title} (ID: ${movie.id}) for ${country.code}:`,
+                err,
+              );
+              totalSkipped++;
+              countryStats[country.code].skipped++;
+            }
           }
-        }
 
-        // Rate limit: wait 1 second between pages
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (pageErr) {
-        console.error(`[SYNC] Error fetching page ${page}:`, pageErr);
-        hasErrors = true;
-        continue;
+          // Rate limit: wait 1 second between pages
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } catch (pageErr) {
+          console.error(
+            `[SYNC] Error fetching page ${page} for ${country.code}:`,
+            pageErr,
+          );
+          hasErrors = true;
+          continue;
+        }
       }
+
+      console.log(
+        `[SYNC] Completed ${country.label} - Imported: ${countryStats[country.code].imported}, Skipped: ${countryStats[country.code].skipped}`,
+      );
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     const status = hasErrors ? "⚠️ PARTIAL" : "✅";
     console.log(
-      `[SYNC] ${status} Upcoming releases sync complete in ${duration}s - Imported: ${totalImported}, Skipped: ${totalSkipped}`,
+      `[SYNC] ${status} Upcoming releases sync complete in ${duration}s - Total Imported: ${totalImported}, Total Skipped: ${totalSkipped}`,
     );
+
+    // Log stats per country
+    Object.entries(countryStats).forEach(([code, stats]) => {
+      console.log(
+        `[SYNC] ${code}: Imported=${stats.imported}, Skipped=${stats.skipped}`,
+      );
+    });
 
     // Verify data was actually saved
     const releaseCount = await prisma.release.count();
@@ -182,6 +235,7 @@ export async function syncUpcomingReleases() {
       duration: `${duration}s`,
       totalInDatabase: releaseCount,
       hadErrors: hasErrors,
+      countryStats,
     };
   } catch (err) {
     console.error("[SYNC] ❌ Upcoming releases sync failed:", err);

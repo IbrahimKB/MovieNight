@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import { shouldReduceMotion } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/use-toast";
+import { useGesture } from "@/hooks/use-gesture";
 
 interface Friend {
   id: string;
@@ -96,6 +97,7 @@ export default function MovieNightPage() {
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [movieVotes, setMovieVotes] = useState<MovieVotes>({});
   const [votingInProgress, setVotingInProgress] = useState<string | null>(null);
+  const swipedMovieRef = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -289,6 +291,35 @@ export default function MovieNightPage() {
       console.error("Failed to fetch vote counts:", error);
     }
   };
+
+  // Gesture handling for swipe voting
+  useGesture({
+    threshold: 50,
+    timeThreshold: 500,
+    enabled: showResults && filteredMovies.length > 0,
+    onGesture: (gestureType) => {
+      const currentMovie = swipedMovieRef.current;
+      if (!currentMovie) return;
+
+      let voteType: "yes" | "maybe" | "no" | null = null;
+
+      if (gestureType === "swipe-right") {
+        voteType = "yes";
+      } else if (gestureType === "swipe-left") {
+        voteType = "no";
+      } else if (gestureType === "swipe-up") {
+        voteType = "maybe";
+      }
+
+      if (voteType) {
+        handleVote(currentMovie, voteType);
+        toast({
+          title: `Swiped ${voteType}!`,
+          description: `Your vote has been recorded.`,
+        });
+      }
+    },
+  });
 
   const getPlatformColor = (platform: string) => {
     switch (platform) {
@@ -567,6 +598,12 @@ export default function MovieNightPage() {
                     "group hover:bg-accent/30 transition-all duration-200 relative",
                     index === 0 && "ring-2 ring-primary/30 bg-primary/5",
                   )}
+                  onTouchStart={() => {
+                    swipedMovieRef.current = movie.id;
+                  }}
+                  onTouchEnd={() => {
+                    swipedMovieRef.current = null;
+                  }}
                 >
                   {index === 0 && (
                     <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold">

@@ -97,10 +97,15 @@ export default function MovieDetailPage() {
           setFriends(friendsData.data.friends);
         }
 
-        // Note: Friends who watched this movie would require a dedicated API endpoint
-        // with proper ACL checks. For now, we don't fetch this data.
-        // TODO: Add /api/movies/:id/who-watched endpoint on backend
-        setFriendsWhoWatched([]);
+        // Fetch friends who watched this movie
+        const whoWatchedRes = await fetch(
+          `/api/movies/${movieId}/who-watched`,
+          { credentials: "include" },
+        );
+        const whoWatchedData = await whoWatchedRes.json();
+        if (whoWatchedData.success && Array.isArray(whoWatchedData.data)) {
+          setFriendsWhoWatched(whoWatchedData.data);
+        }
       } catch (error) {
         console.error("Failed to fetch movie:", error);
         toast({

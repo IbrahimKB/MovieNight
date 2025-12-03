@@ -209,13 +209,19 @@ export default function HeroSection() {
           {/* Auth Buttons */}
           <div className="flex gap-3 items-center">
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => {
+                console.log("NavBar: Navigate to /login");
+                router.push("/login");
+              }}
               className="hidden sm:block text-sm text-muted-foreground hover:text-white px-4 py-2 rounded-lg hover:bg-primary/10 transition-all"
             >
               Sign In
             </button>
             <button
-              onClick={() => router.push("/signup")}
+              onClick={() => {
+                console.log("NavBar: Navigate to /signup");
+                router.push("/signup");
+              }}
               className="px-4 sm:px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all"
             >
               Sign Up
@@ -313,7 +319,10 @@ export default function HeroSection() {
             transition={{ delay: 0.3 }}
           >
             <button
-              onClick={() => router.push("/signup")}
+              onClick={() => {
+                console.log("HeroSection: Navigate to /signup");
+                router.push("/signup");
+              }}
               className="group relative px-8 sm:px-12 py-3 sm:py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base sm:text-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60"
             >
               <div className="absolute inset-0 rounded-xl bg-primary opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-300" />
@@ -324,7 +333,10 @@ export default function HeroSection() {
             </button>
 
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => {
+                console.log("HeroSection: Navigate to /login");
+                router.push("/login");
+              }}
               className="px-8 sm:px-12 py-3 sm:py-4 rounded-xl border border-primary/50 text-white hover:bg-primary/10 hover:border-primary/80 font-bold text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Play size={20} />

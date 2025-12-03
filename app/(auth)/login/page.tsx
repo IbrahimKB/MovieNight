@@ -24,20 +24,28 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
+    console.log("Login: Form submission started");
+
     if (!formData.emailOrUsername || !formData.password) {
+      console.log("Login: Validation failed - missing fields");
       setError("Please fill in all fields");
       setIsLoading(false);
       return;
     }
 
     try {
-      const success = await login(formData.emailOrUsername, formData.password);
-      if (success) {
+      console.log("Login: Calling login API for:", formData.emailOrUsername);
+      const result = await login(formData.emailOrUsername, formData.password);
+      console.log("Login: API response:", result);
+      if (result.success) {
+        console.log("Login: Success - navigating to /");
         router.push("/");
       } else {
+        console.log("Login: Failed - invalid credentials");
         setError("Invalid email/username or password");
       }
     } catch (err) {
+      console.error("Login: Exception during login:", err);
       setError("An error occurred during login");
     } finally {
       setIsLoading(false);

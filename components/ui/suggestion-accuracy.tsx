@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SuggestionAccuracyProps {
   userId?: string; // Optional, defaults to current user
@@ -122,9 +123,9 @@ export default function SuggestionAccuracy({
 
 export function SuggestionLeaderboard() {
   const { user } = useAuth();
-  const [board, setBoard] = useState<{ username: string; accuracy: number }[]>(
-    [],
-  );
+  const [board, setBoard] = useState<
+    { id: string; username: string; avatar?: string; accuracy: number }[]
+  >([]);
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -136,7 +137,9 @@ export function SuggestionLeaderboard() {
           setBoard(
             data.squadStats
               .map((s: any) => ({
+                id: s.id,
                 username: s.name,
+                avatar: s.avatar,
                 accuracy: s.acceptanceRate,
               }))
               .sort((a: any, b: any) => b.accuracy - a.accuracy)
@@ -163,12 +166,27 @@ export function SuggestionLeaderboard() {
             Loading leaderboard…
           </p>
         ) : (
-          board.map((entry, index) => (
+          board.map((entry) => (
             <div
-              key={index}
+              key={entry.id}
               className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50"
             >
-              <span className="font-medium">{entry.username}</span>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  {entry.avatar && (
+                    <AvatarImage src={entry.avatar} alt={entry.username} />
+                  )}
+                  <AvatarFallback className="bg-primary/20 text-xs">
+                    {entry.username
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="font-medium truncate">{entry.username}</span>
+              </div>
               <Badge variant="outline">{entry.accuracy}%</Badge>
             </div>
           ))

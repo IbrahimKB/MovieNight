@@ -7,6 +7,14 @@ import { tmdbClient } from "@/lib/tmdb";
 const PageSchema = z.object({
   page: z.string().transform(Number).optional().default("1"),
   limit: z.string().transform(Number).optional().default("20"),
+  countryCode: z
+    .string()
+    .toUpperCase()
+    .refine((code) => ["US", "GB", "JP", "KR"].includes(code), {
+      message: "Invalid country code. Must be one of: US, GB, JP, KR",
+    })
+    .optional()
+    .default("US"),
 });
 
 // Helper function to convert TMDB movie to local format
@@ -15,12 +23,14 @@ function mapTMDBMovieToLocal(tmdbMovie: any) {
   return {
     id: undefined,
     tmdbId: tmdbMovie.id,
-    title: tmdbMovie.title || tmdbMovie.name || 'Unknown Title',
-    year: new Date(releaseDate || '2024-01-01').getFullYear(),
+    title: tmdbMovie.title || tmdbMovie.name || "Unknown Title",
+    year: new Date(releaseDate || "2024-01-01").getFullYear(),
     genres: tmdbMovie.genre_ids || [],
     platform: null,
-    poster: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
-    description: tmdbMovie.overview || '',
+    poster: tmdbMovie.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}`
+      : null,
+    description: tmdbMovie.overview || "",
     imdbRating: tmdbMovie.vote_average || null,
     rtRating: null,
     releaseDate: releaseDate ? new Date(releaseDate) : null,
@@ -36,7 +46,7 @@ export async function GET(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -44,22 +54,27 @@ export async function GET(req: NextRequest) {
     const parsed = PageSchema.safeParse({
       page: searchParams.get("page"),
       limit: searchParams.get("limit"),
+      countryCode: searchParams.get("countryCode"),
     });
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Invalid query parameters" },
-        { status: 400 }
+        {
+          success: false,
+          error: "Invalid query parameters",
+          details: parsed.error.errors,
+        },
+        { status: 400 },
       );
     }
 
-    const { page, limit } = parsed.data;
+    const { page, limit, countryCode } = parsed.data;
 
     // Fallback to local database
     // We strictly serve from Postgres as per the "Postgres-backed endpoint" policy for this route.
     // This ensures speed and stability for calendar views.
     console.log("[RELEASES] Upcoming hit");
-    
+
     const now = new Date();
     const nineDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
@@ -69,6 +84,7 @@ export async function GET(req: NextRequest) {
           gte: now,
           lte: nineDaysFromNow,
         },
+        countryCode: countryCode,
       },
       select: {
         id: true,
@@ -78,8 +94,10 @@ export async function GET(req: NextRequest) {
         year: true,
         genres: true,
         description: true,
+        countryCode: true,
+        platform: true,
         // Release model doesn't have imdbRating directly, it's on the relation movie
-        // checking schema... Release has: id, tmdbId, movieId, title, platform, releaseDate, genres, description, poster, year
+        // checking schema... Release has: id, tmdbId, movieId, title, platform, releaseDate, genres, description, poster, year, countryCode
         // It links to Movie which has imdbRating.
       },
       orderBy: {
@@ -87,7 +105,7 @@ export async function GET(req: NextRequest) {
       },
       take: limit,
     });
-    
+
     console.log("[RELEASES] Returning count:", releases.length);
 
     return NextResponse.json(
@@ -96,7 +114,7 @@ export async function GET(req: NextRequest) {
         data: releases,
         message: "Upcoming releases retrieved successfully from local database",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     console.error("Error fetching upcoming releases:", err);
@@ -105,7 +123,7 @@ export async function GET(req: NextRequest) {
         success: false,
         error: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
