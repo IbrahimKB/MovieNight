@@ -365,9 +365,22 @@ export default function FriendsPage() {
                       className="flex items-center justify-between p-3 border rounded-lg"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-5 w-5" />
-                        </div>
+                        <Avatar className="w-10 h-10">
+                          {foundUser.avatar && (
+                            <AvatarImage
+                              src={foundUser.avatar}
+                              alt={foundUser.name || foundUser.username}
+                            />
+                          )}
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {(foundUser.name || foundUser.username)
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <p className="font-medium">
                             {foundUser.name || foundUser.username || "Unknown"}
