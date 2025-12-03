@@ -80,17 +80,56 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // -----------------------------------------------------
     // Create watched movie record
+    // If already watched, return success with existing record
     // reaction: undefined → valid
     // -----------------------------------------------------
-    const watched = await prisma.watchedMovie.create({
-      data: {
-        userId: userIdInternal,
-        movieId: internalMovieId,
-        watchedAt,
-        originalScore: originalScore ?? null,
-        reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
-      },
-    });
+    let watched;
+    try {
+      watched = await prisma.watchedMovie.create({
+        data: {
+          userId: userIdInternal,
+          movieId: internalMovieId,
+          watchedAt,
+          originalScore: originalScore ?? null,
+          reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
+        },
+      });
+    } catch (err: any) {
+      // Handle unique constraint violation - movie already marked as watched
+      if (err.code === 'P2002' && err.meta?.target?.includes('userId_movieId')) {
+        // Movie already watched - fetch existing record
+        const existing = await prisma.watchedMovie.findUnique({
+          where: {
+            userId_movieId: {
+              userId: userIdInternal,
+              movieId: internalMovieId,
+            },
+          },
+        });
+
+        if (existing) {
+          return NextResponse.json(
+            {
+              success: true,
+              data: {
+                id: existing.id,
+                userId: currentUser.id,
+                movieId: internalMovieId,
+                watchedAt: existing.watchedAt,
+                originalScore: existing.originalScore ?? null,
+                reaction: existing.reaction ?? null,
+                createdAt: existing.createdAt,
+                updatedAt: existing.updatedAt,
+              },
+              message: "Movie already marked as watched",
+            },
+            { status: 200 }
+          );
+        }
+      }
+      // Re-throw if not a constraint violation
+      throw err;
+    }
 
     // -----------------------------------------------------
     // Remove from WatchDesire if present
