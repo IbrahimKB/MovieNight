@@ -36,6 +36,12 @@ export default function SocialActivityFeed({
         const friendsRes = await fetch("/api/friends", {
           credentials: "include",
         });
+        if (!friendsRes.ok) {
+          console.error("Failed to fetch friends:", friendsRes.status);
+          setActivity([]);
+          setLoading(false);
+          return;
+        }
         const friendsData = await friendsRes.json();
         const friends =
           friendsData.success && Array.isArray(friendsData.data)
@@ -54,6 +60,15 @@ export default function SocialActivityFeed({
         const notificationsRes = await fetch("/api/notifications", {
           credentials: "include",
         });
+        if (!notificationsRes.ok) {
+          console.error(
+            "Failed to fetch notifications:",
+            notificationsRes.status,
+          );
+          setActivity([]);
+          setLoading(false);
+          return;
+        }
         const notificationsData = await notificationsRes.json();
 
         let recentActivity: ActivityItem[] = [];

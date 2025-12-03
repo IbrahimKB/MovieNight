@@ -13,7 +13,7 @@ const CreateEventSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   date: z.string().datetime(),
   notes: z.string().optional(),
-  invitedUsers: z.array(z.string()).optional(), // external IDs (puid or id) to invite
+  invitedFriendIds: z.array(z.string()).optional(), // external IDs (puid or id) to invite
 });
 
 // ------------------------------------------------------
@@ -88,7 +88,7 @@ export async function POST(
       movieId: inputMovieId,
       date,
       notes,
-      invitedUsers,
+      invitedFriendIds,
     } = validation.data;
 
     // Map current user to internal ID
@@ -125,8 +125,8 @@ export async function POST(
     const createdInvitations = [];
     const failedInvitations = [];
 
-    if (invitedUsers && invitedUsers.length > 0) {
-      for (const externalUserId of invitedUsers) {
+    if (invitedFriendIds && invitedFriendIds.length > 0) {
+      for (const externalUserId of invitedFriendIds) {
         const internalUserId =
           await mapExternalUserIdToInternal(externalUserId);
         if (!internalUserId) {
