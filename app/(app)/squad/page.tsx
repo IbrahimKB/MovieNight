@@ -132,9 +132,22 @@ export default function SquadPage() {
   }) => (
     <div className="bg-card border border-border rounded-lg p-4 md:p-6 hover:border-primary/50 transition-all flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div className="flex items-center gap-4 min-w-0 flex-1">
-        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-2xl">
-          🎬
-        </div>
+        <Avatar className="w-12 h-12 md:w-14 md:h-14 flex-shrink-0">
+          {friend.avatar && (
+            <AvatarImage
+              src={friend.avatar}
+              alt={friend.name || friend.username}
+            />
+          )}
+          <AvatarFallback className="bg-primary/10 text-lg md:text-xl">
+            {(friend.name || friend.username)
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-base md:text-lg">
             {friend.name || friend.username}
