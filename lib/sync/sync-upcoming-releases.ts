@@ -1,7 +1,7 @@
 /**
  * Sync Upcoming Releases from TMDB
  * Runs daily to populate the releases calendar
- * Pulls movies releasing in the next 180 days
+ * Pulls movies releasing in the next 30 days for multiple regions
  */
 
 import axios from "axios";
@@ -12,6 +12,14 @@ const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 // Import shared genre map
 import { TMDB_GENRE_MAP } from "@/lib/tmdb";
+
+// Country codes mapping for TMDB region parameter
+const COUNTRIES = {
+  US: { code: "US", label: "United States", tmdbRegion: "US" },
+  GB: { code: "GB", label: "United Kingdom", tmdbRegion: "GB" },
+  JP: { code: "JP", label: "Japan", tmdbRegion: "JP" },
+  KR: { code: "KR", label: "South Korea", tmdbRegion: "KR" },
+};
 
 interface TMDBMovie {
   id: number;
