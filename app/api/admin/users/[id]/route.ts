@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { requireAdmin, isErrorResponse } from '@/lib/auth-helpers';
 import { hash } from 'bcryptjs';
 
 export async function DELETE(
@@ -8,14 +8,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: userId } = await params;
-    const user = await getCurrentUser();
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 403 }
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
+    const { user } = authResult;
+
+    const { id: userId } = await params;
 
     if (userId === user.id) {
       return NextResponse.json(
