@@ -312,7 +312,7 @@ export default function StatsPage() {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex gap-4 text-right">
+                    <div className="flex gap-3 text-right">
                       <div>
                         <div className="text-sm font-semibold">
                           {entry.totalWatched}
@@ -326,10 +326,21 @@ export default function StatsPage() {
                           variant="secondary"
                           className={cn(
                             "text-white",
-                            getStatsCardColor(entry.avgDesire), // Using avgDesire as color indicator for now
+                            getStatsCardColor(entry.avgDesire),
                           )}
                         >
-                          {entry.avgDesire}
+                          💙 {entry.avgDesire}
+                        </Badge>
+                      </div>
+                      <div>
+                        <Badge
+                          variant="secondary"
+                          className={cn(
+                            "text-white",
+                            getStatsCardColor(entry.avgRating),
+                          )}
+                        >
+                          ⭐ {entry.avgRating}
                         </Badge>
                       </div>
                     </div>
