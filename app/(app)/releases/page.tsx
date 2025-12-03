@@ -31,10 +31,14 @@ export default function ReleasesPage() {
 
   useEffect(() => {
     const fetchReleases = async () => {
+      setLoading(true);
       try {
-        const res = await fetch("/api/releases/upcoming?page=1&limit=40", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `/api/releases/upcoming?page=1&limit=40&countryCode=${selectedCountry}`,
+          {
+            credentials: "include",
+          },
+        );
         const data = await res.json();
 
         if (data.success && Array.isArray(data.data)) {
@@ -54,7 +58,7 @@ export default function ReleasesPage() {
     };
 
     fetchReleases();
-  }, []);
+  }, [selectedCountry]);
 
   const ReleaseCard = ({ release }: { release: Release }) => {
     const releaseDate = new Date(release.releaseDate);
