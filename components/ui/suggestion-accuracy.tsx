@@ -136,6 +136,10 @@ export function SuggestionLeaderboard() {
       if (!user) return;
       try {
         const res = await fetch("/api/stats", { credentials: "include" });
+        if (!res.ok) {
+          console.error("Failed to fetch leaderboard stats:", res.status);
+          return;
+        }
         const data = await res.json();
         if (data.success) {
           setBoard(
