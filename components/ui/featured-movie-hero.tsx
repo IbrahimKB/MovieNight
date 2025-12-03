@@ -83,6 +83,8 @@ export default function FeaturedMovieHero({
         {backdropImage ? (
           <img
             src={backdropImage}
+            srcSet={generatePosterSrcSet(backdropImage)}
+            sizes={generateImageSizes("hero")}
             alt={movie.title}
             className="w-full h-full object-cover"
             loading="lazy"
