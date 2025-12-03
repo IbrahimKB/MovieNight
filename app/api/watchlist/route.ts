@@ -54,6 +54,32 @@ export async function GET(req: NextRequest) {
       orderBy: { watchedAt: "desc" },
     });
 
+    // Fetch events to derive selectedFriends for each watchlist item
+    const events = await prisma.event.findMany({
+      where: {
+        OR: [
+          { hostUserId: user.id },
+          { participants: { has: user.id } },
+        ],
+      },
+      select: {
+        movieId: true,
+        participants: true,
+        hostUserId: true,
+      },
+    });
+
+    // Map events by movieId for quick lookup
+    const eventsByMovieId = new Map<string, string[]>();
+    events.forEach((event) => {
+      const participants = event.participants || [];
+      // Exclude the current user from selectedFriends
+      const friendIds = participants.filter((p) => p !== user.id);
+      if (friendIds.length > 0 || event.hostUserId !== user.id) {
+        eventsByMovieId.set(event.movieId, friendIds);
+      }
+    });
+
     // Map to frontend format
     const watchlistData = watchDesires.map((wd) => ({
       id: wd.movie.id, // Using movie ID as the primary identifier for the list item seems safer for uniqueness in list
@@ -68,7 +94,7 @@ export async function GET(req: NextRequest) {
         ? wd.movie.releaseDate.toISOString()
         : null,
       userDesireScore: wd.rating || 0,
-      selectedFriends: [], // We don't store this in WatchDesire currently
+      selectedFriends: eventsByMovieId.get(wd.movie.id) || [],
       suggestedBy: wd.suggestion?.fromUser.name,
       dateAdded: wd.createdAt.toISOString(),
       isWatched: false, // It's in watchlist
