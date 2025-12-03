@@ -42,20 +42,22 @@ export async function GET(req: NextRequest) {
       const totalWatched = u.watchHistory.length;
       const totalSuggestions = u.suggestionsFrom.length;
       const acceptedSuggestions = u.suggestionsFrom.filter(s => s.status === 'accepted').length;
-      const acceptanceRate = totalSuggestions > 0 
-        ? Math.round((acceptedSuggestions / totalSuggestions) * 100) 
-        : 0;
-      
-      const totalDesire = u.watchDesires.reduce((sum, d) => sum + (d.rating || 0), 0);
-      const avgDesire = u.watchDesires.length > 0 
-        ? parseFloat((totalDesire / u.watchDesires.length).toFixed(1)) 
+      const acceptanceRate = totalSuggestions > 0
+        ? Math.round((acceptedSuggestions / totalSuggestions) * 100)
         : 0;
 
-      // Calculate average rating given to movies watched (using originalScore from watchHistory)
-      // Note: The schema has 'originalScore' in WatchedMovie
-      // But I didn't select it above. Let's fix the query or just ignore for now if not strictly needed.
-      // Actually, let's re-query properly.
-      
+      const totalDesire = u.watchDesires.reduce((sum, d) => sum + (d.rating || 0), 0);
+      const avgDesire = u.watchDesires.length > 0
+        ? parseFloat((totalDesire / u.watchDesires.length).toFixed(1))
+        : 0;
+
+      // Calculate average rating from originalScore in watch history
+      const ratedMovies = u.watchHistory.filter(wm => wm.originalScore !== null);
+      const totalRating = ratedMovies.reduce((sum, wm) => sum + (wm.originalScore || 0), 0);
+      const avgRating = ratedMovies.length > 0
+        ? parseFloat((totalRating / ratedMovies.length).toFixed(1))
+        : 0;
+
       return {
         id: u.id,
         name: u.name || 'Unknown',
@@ -64,8 +66,7 @@ export async function GET(req: NextRequest) {
         suggestions: totalSuggestions,
         acceptanceRate,
         avgDesire,
-        // Dummy avgRating for now as it's complex to aggregate across all watched movies scores if they are not consistently stored
-        avgRating: 0 
+        avgRating
       };
     });
 
