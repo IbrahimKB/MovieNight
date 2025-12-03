@@ -209,13 +209,19 @@ export default function HeroSection() {
           {/* Auth Buttons */}
           <div className="flex gap-3 items-center">
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => {
+                console.log("NavBar: Navigate to /login");
+                router.push("/login");
+              }}
               className="hidden sm:block text-sm text-muted-foreground hover:text-white px-4 py-2 rounded-lg hover:bg-primary/10 transition-all"
             >
               Sign In
             </button>
             <button
-              onClick={() => router.push("/signup")}
+              onClick={() => {
+                console.log("NavBar: Navigate to /signup");
+                router.push("/signup");
+              }}
               className="px-4 sm:px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-all"
             >
               Sign Up
