@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  context: { params: { id: string } },
 ) {
   try {
     const user = await getCurrentUser();
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const movieId = params.id;
+    const movieId = context.params.id;
 
     // Verify movie exists
     const movie = await prisma.movie.findUnique({
