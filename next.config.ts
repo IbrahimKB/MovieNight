@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
   compress: true,
   output: "standalone",
   poweredByHeader: false,
+  // Allow cross-origin requests in development for external preview domains
+  // (e.g., Fly.io, Builder.io preview URLs)
+  experimental: {
+    allowedDevOrigins: ["*.fly.dev", "localhost", "127.0.0.1"],
+  },
   // Disable ESLint during production builds to prevent circular reference issues
   eslint: {
     ignoreDuringBuilds: true,
