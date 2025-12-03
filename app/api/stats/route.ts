@@ -19,7 +19,8 @@ export async function GET(req: NextRequest) {
         name: true,
         avatar: true,
         watchHistory: {
-          include: {
+          select: {
+            originalScore: true,
             movie: true,
           }
         },
