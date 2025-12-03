@@ -292,6 +292,35 @@ export default function MovieNightPage() {
     }
   };
 
+  // Gesture handling for swipe voting
+  useGesture({
+    threshold: 50,
+    timeThreshold: 500,
+    enabled: showResults && filteredMovies.length > 0,
+    onGesture: (gestureType) => {
+      const currentMovie = swipedMovieRef.current;
+      if (!currentMovie) return;
+
+      let voteType: "yes" | "maybe" | "no" | null = null;
+
+      if (gestureType === "swipe-right") {
+        voteType = "yes";
+      } else if (gestureType === "swipe-left") {
+        voteType = "no";
+      } else if (gestureType === "swipe-up") {
+        voteType = "maybe";
+      }
+
+      if (voteType) {
+        handleVote(currentMovie, voteType);
+        toast({
+          title: `Swiped ${voteType}!`,
+          description: `Your vote has been recorded.`,
+        });
+      }
+    },
+  });
+
   const getPlatformColor = (platform: string) => {
     switch (platform) {
       case "Netflix":
