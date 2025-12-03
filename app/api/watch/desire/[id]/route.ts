@@ -20,8 +20,9 @@ async function mapExternalUserIdToInternal(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse>> {
+  const { id: desireId } = await params;
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
