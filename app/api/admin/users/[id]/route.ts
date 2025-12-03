@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { requireAdmin, isErrorResponse } from '@/lib/auth-helpers';
-import { hash } from 'bcryptjs';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
+import { hash } from "bcryptjs";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const authResult = await requireAdmin();
@@ -18,8 +18,8 @@ export async function DELETE(
 
     if (userId === user.id) {
       return NextResponse.json(
-        { success: false, error: 'Cannot delete yourself' },
-        { status: 400 }
+        { success: false, error: "Cannot delete yourself" },
+        { status: 400 },
       );
     }
 
@@ -29,13 +29,13 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'User deleted successfully',
+      message: "User deleted successfully",
     });
   } catch (err) {
-    console.error('Error deleting user:', err);
+    console.error("Error deleting user:", err);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

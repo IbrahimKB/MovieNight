@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
         friendRequests: true,
         suggestions: true,
         movieReleases: true,
-      }
+      },
     );
   } catch (err) {
     console.error("Get settings error:", err);

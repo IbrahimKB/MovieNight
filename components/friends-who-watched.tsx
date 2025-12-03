@@ -147,7 +147,10 @@ export function FriendsWhoWatched({ movieId }: FriendsWhoWatchedProps) {
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="h-10 w-10 flex-shrink-0">
-                  <AvatarImage src={watcher.avatar} alt={watcher.name || watcher.username} />
+                  <AvatarImage
+                    src={watcher.avatar}
+                    alt={watcher.name || watcher.username}
+                  />
                   <AvatarFallback className="bg-primary/20 text-primary">
                     {(watcher.name || watcher.username)
                       .split(" ")
@@ -172,9 +175,7 @@ export function FriendsWhoWatched({ movieId }: FriendsWhoWatchedProps) {
                 watcher.originalScore !== undefined && (
                   <motion.div
                     className="flex items-center gap-1 bg-primary/10 px-2.5 py-1 rounded-lg flex-shrink-0 ml-2"
-                    whileHover={
-                      shouldReduceMotion() ? {} : { scale: 1.05 }
-                    }
+                    whileHover={shouldReduceMotion() ? {} : { scale: 1.05 }}
                   >
                     <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-semibold">

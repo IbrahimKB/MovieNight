@@ -238,7 +238,7 @@ export async function POST(
 
     const validInternalIds = Array.from(externalToInternalMap.values());
     const failedInvitations = externalUserIds.filter(
-      (id) => !externalToInternalMap.has(id)
+      (id) => !externalToInternalMap.has(id),
     );
 
     // Get existing invitations in batch
@@ -261,11 +261,12 @@ export async function POST(
         invitedBy: currentUserInternalId,
       }));
 
-    const createdInvitations = invitationsToCreate.length > 0
-      ? await prisma.eventInvitation.createMany({
-          data: invitationsToCreate,
-        })
-      : { count: 0 };
+    const createdInvitations =
+      invitationsToCreate.length > 0
+        ? await prisma.eventInvitation.createMany({
+            data: invitationsToCreate,
+          })
+        : { count: 0 };
 
     return NextResponse.json(
       {

@@ -20,14 +20,17 @@ const MAX_LIMIT = 200;
  */
 export function getPaginationParams(
   searchParams: URLSearchParams,
-  config: PaginationConfig = {}
+  config: PaginationConfig = {},
 ): PaginationParams {
   const { defaultLimit = DEFAULT_LIMIT, maxLimit = MAX_LIMIT } = config;
 
   const limitStr = searchParams.get("limit") || String(defaultLimit);
   const offsetStr = searchParams.get("offset") || "0";
 
-  const limit = Math.min(Math.max(1, parseInt(limitStr, 10) || defaultLimit), maxLimit);
+  const limit = Math.min(
+    Math.max(1, parseInt(limitStr, 10) || defaultLimit),
+    maxLimit,
+  );
   const offset = Math.max(0, parseInt(offsetStr, 10) || 0);
 
   return { limit, offset };
@@ -38,7 +41,7 @@ export function getPaginationParams(
  */
 export function getPrismaPageParams(
   searchParams: URLSearchParams,
-  config: PaginationConfig = {}
+  config: PaginationConfig = {},
 ) {
   const { limit, offset } = getPaginationParams(searchParams, config);
   return {

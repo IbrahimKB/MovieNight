@@ -213,7 +213,10 @@ export default function MovieNightPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleVote = async (movieId: string, voteType: "yes" | "maybe" | "no") => {
+  const handleVote = async (
+    movieId: string,
+    voteType: "yes" | "maybe" | "no",
+  ) => {
     if (!user) {
       toast({
         title: "Error",
@@ -266,12 +269,9 @@ export default function MovieNightPage() {
 
   const fetchVoteCounts = async (movieId: string) => {
     try {
-      const res = await fetch(
-        `/api/movie-night/vote?movieId=${movieId}`,
-        {
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`/api/movie-night/vote?movieId=${movieId}`, {
+        credentials: "include",
+      });
 
       if (!res.ok) return;
 
@@ -659,7 +659,9 @@ export default function MovieNightPage() {
 
                       {/* Voting Section */}
                       <div className="pt-4 border-t border-border space-y-3">
-                        <h4 className="text-sm font-medium">What do you think?</h4>
+                        <h4 className="text-sm font-medium">
+                          What do you think?
+                        </h4>
                         <div className="grid grid-cols-3 gap-2">
                           {["yes", "maybe", "no"].map((voteType) => {
                             const isSelected =
@@ -682,7 +684,7 @@ export default function MovieNightPage() {
                                 onClick={() =>
                                   handleVote(
                                     movie.id,
-                                    voteType as "yes" | "maybe" | "no"
+                                    voteType as "yes" | "maybe" | "no",
                                   )
                                 }
                                 disabled={votingInProgress === movie.id}
@@ -692,14 +694,10 @@ export default function MovieNightPage() {
                                     : { scale: 1 }
                                 }
                                 whileHover={
-                                  shouldReduceMotion()
-                                    ? {}
-                                    : { scale: 1.08 }
+                                  shouldReduceMotion() ? {} : { scale: 1.08 }
                                 }
                                 whileTap={
-                                  shouldReduceMotion()
-                                    ? {}
-                                    : { scale: 0.95 }
+                                  shouldReduceMotion() ? {} : { scale: 0.95 }
                                 }
                                 className={cn(
                                   "flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg transition-all",
@@ -709,7 +707,7 @@ export default function MovieNightPage() {
                                       : voteType === "maybe"
                                         ? "bg-yellow-500/20 border border-yellow-500/50 text-yellow-500"
                                         : "bg-red-500/20 border border-red-500/50 text-red-500"
-                                    : "bg-background border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"
+                                    : "bg-background border border-border hover:border-primary/50 text-muted-foreground hover:text-foreground",
                                 )}
                               >
                                 <Icon className="h-4 w-4" />
@@ -723,7 +721,11 @@ export default function MovieNightPage() {
                       </div>
 
                       {/* Action */}
-                      <Button className="w-full mt-2" size="sm" variant="outline">
+                      <Button
+                        className="w-full mt-2"
+                        size="sm"
+                        variant="outline"
+                      >
                         <Play className="h-4 w-4 mr-2" />
                         Watch Now
                       </Button>

@@ -20,7 +20,10 @@ export const SignupSchema = z.object({
     .string()
     .min(3, "Username must be at least 3 characters")
     .max(30, "Username must be at most 30 characters")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, hyphens, and underscores"),
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username can only contain letters, numbers, hyphens, and underscores",
+    ),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
@@ -30,7 +33,11 @@ export const SignupSchema = z.object({
 // ============================================================================
 
 export const ProfileSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name too long").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name too long")
+    .optional(),
   avatar: z.string().url("Invalid avatar URL").optional().or(z.literal("")),
 });
 
@@ -51,12 +58,20 @@ export const CreateWatchDesireSchema = z.object({
     errorMap: () => ({ message: "Movie ID must be a valid string or number" }),
   }),
   suggestionId: z.string().uuid("Invalid suggestion ID").optional(),
-  rating: z.number().min(1, "Rating must be at least 1").max(10, "Rating must be at most 10").optional(),
+  rating: z
+    .number()
+    .min(1, "Rating must be at least 1")
+    .max(10, "Rating must be at most 10")
+    .optional(),
 });
 
 export const WatchMovieSchema = z.object({
   movieId: z.string().uuid("Invalid movie ID"),
-  score: z.number().min(1, "Score must be at least 1").max(10, "Score must be at most 10").optional(),
+  score: z
+    .number()
+    .min(1, "Score must be at least 1")
+    .max(10, "Score must be at most 10")
+    .optional(),
   reaction: z.record(z.unknown()).optional(),
 });
 
@@ -95,13 +110,19 @@ export const CreateEventSchema = z.object({
 
 export const UpdateEventSchema = z.object({
   movieId: z.string().uuid("Invalid movie ID").optional(),
-  date: z.string().datetime("Invalid date format").or(z.coerce.date()).optional(),
+  date: z
+    .string()
+    .datetime("Invalid date format")
+    .or(z.coerce.date())
+    .optional(),
   notes: z.string().optional().or(z.literal("")),
   participants: z.array(z.string()).optional(),
 });
 
 export const SendInvitationsSchema = z.object({
-  externalUserIds: z.array(z.string()).min(1, "At least one user must be invited"),
+  externalUserIds: z
+    .array(z.string())
+    .min(1, "At least one user must be invited"),
 });
 
 export const UpdateInvitationSchema = z.object({
@@ -153,5 +174,7 @@ export type UpdateEventInput = z.infer<typeof UpdateEventSchema>;
 export type SendInvitationsInput = z.infer<typeof SendInvitationsSchema>;
 export type UpdateInvitationInput = z.infer<typeof UpdateInvitationSchema>;
 export type FriendRequestInput = z.infer<typeof FriendRequestSchema>;
-export type RespondFriendRequestInput = z.infer<typeof RespondFriendRequestSchema>;
+export type RespondFriendRequestInput = z.infer<
+  typeof RespondFriendRequestSchema
+>;
 export type MovieNightVoteInput = z.infer<typeof MovieNightVoteSchema>;

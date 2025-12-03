@@ -25,7 +25,10 @@ export type ApiResponse<T = unknown> = ApiSuccessResponse<T> | ApiErrorResponse;
 /**
  * Success response (200 OK, 201 Created, etc)
  */
-export function ok<T>(data: T, status: number = 200): NextResponse<ApiSuccessResponse<T>> {
+export function ok<T>(
+  data: T,
+  status: number = 200,
+): NextResponse<ApiSuccessResponse<T>> {
   return NextResponse.json({ success: true, data }, { status });
 }
 
@@ -41,7 +44,7 @@ export function created<T>(data: T): NextResponse<ApiSuccessResponse<T>> {
  */
 export function badRequest(
   error: string,
-  validationErrors?: ValidationError[]
+  validationErrors?: ValidationError[],
 ): NextResponse<ApiErrorResponse> {
   return NextResponse.json(
     {
@@ -49,48 +52,44 @@ export function badRequest(
       error,
       ...(validationErrors && { validationErrors }),
     },
-    { status: 400 }
+    { status: 400 },
   );
 }
 
 /**
  * Unauthorized - no valid session/token
  */
-export function unauthorized(error: string = "Unauthorized"): NextResponse<ApiErrorResponse> {
-  return NextResponse.json(
-    { success: false, error },
-    { status: 401 }
-  );
+export function unauthorized(
+  error: string = "Unauthorized",
+): NextResponse<ApiErrorResponse> {
+  return NextResponse.json({ success: false, error }, { status: 401 });
 }
 
 /**
  * Forbidden - authenticated but not authorized for this action
  */
-export function forbidden(error: string = "Forbidden"): NextResponse<ApiErrorResponse> {
-  return NextResponse.json(
-    { success: false, error },
-    { status: 403 }
-  );
+export function forbidden(
+  error: string = "Forbidden",
+): NextResponse<ApiErrorResponse> {
+  return NextResponse.json({ success: false, error }, { status: 403 });
 }
 
 /**
  * Not Found
  */
-export function notFound(error: string = "Not Found"): NextResponse<ApiErrorResponse> {
-  return NextResponse.json(
-    { success: false, error },
-    { status: 404 }
-  );
+export function notFound(
+  error: string = "Not Found",
+): NextResponse<ApiErrorResponse> {
+  return NextResponse.json({ success: false, error }, { status: 404 });
 }
 
 /**
  * Conflict - resource already exists, duplicate, etc
  */
-export function conflict(error: string = "Conflict"): NextResponse<ApiErrorResponse> {
-  return NextResponse.json(
-    { success: false, error },
-    { status: 409 }
-  );
+export function conflict(
+  error: string = "Conflict",
+): NextResponse<ApiErrorResponse> {
+  return NextResponse.json({ success: false, error }, { status: 409 });
 }
 
 /**
@@ -98,7 +97,7 @@ export function conflict(error: string = "Conflict"): NextResponse<ApiErrorRespo
  */
 export function serverError(
   error: string = "Internal Server Error",
-  details?: string
+  details?: string,
 ): NextResponse<ApiErrorResponse> {
   const response: ApiErrorResponse = { success: false, error };
   // Only include details in development
@@ -112,7 +111,7 @@ export function serverError(
  * Convert Zod validation errors to standard format
  */
 export function formatZodErrors(
-  zodErrors: Record<string, { _errors: string[] }>
+  zodErrors: Record<string, { _errors: string[] }>,
 ): ValidationError[] {
   return Object.entries(zodErrors).map(([field, error]) => ({
     field,
@@ -123,6 +122,8 @@ export function formatZodErrors(
 /**
  * Type guard to check if response is an error
  */
-export function isErrorResponse(response: ApiResponse): response is ApiErrorResponse {
+export function isErrorResponse(
+  response: ApiResponse,
+): response is ApiErrorResponse {
   return !response.success;
 }

@@ -5,12 +5,14 @@ import { ApiResponse } from "@/types";
 /**
  * Check if user is authenticated, return 401 if not
  */
-export async function requireAuth(): Promise<{ user: any } | NextResponse<ApiResponse>> {
+export async function requireAuth(): Promise<
+  { user: any } | NextResponse<ApiResponse>
+> {
   const user = await getCurrentUser();
   if (!user) {
     return NextResponse.json(
       { success: false, error: "Unauthenticated" },
-      { status: 401 }
+      { status: 401 },
     );
   }
   return { user };
@@ -20,20 +22,22 @@ export async function requireAuth(): Promise<{ user: any } | NextResponse<ApiRes
  * Check if user is authenticated AND has admin role
  * Returns 401 if not authenticated, 403 if not admin
  */
-export async function requireAdmin(): Promise<{ user: any } | NextResponse<ApiResponse>> {
+export async function requireAdmin(): Promise<
+  { user: any } | NextResponse<ApiResponse>
+> {
   const user = await getCurrentUser();
-  
+
   if (!user) {
     return NextResponse.json(
       { success: false, error: "Unauthenticated" },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
   if (user.role !== "admin") {
     return NextResponse.json(
       { success: false, error: "Forbidden - Admin access required" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 

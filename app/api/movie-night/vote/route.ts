@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { success: false, error: "Invalid request" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!movie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     console.error("Vote error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
     if (!movieId) {
       return NextResponse.json(
         { success: false, error: "movieId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -148,7 +148,7 @@ export async function GET(req: NextRequest) {
     console.error("Get votes error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

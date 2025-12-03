@@ -456,19 +456,22 @@ export default function HomePage() {
                   >
                     {recentReleases.slice(0, 2).map((release) => {
                       const platformEmoji = {
-                        "Theatrical": "🎬",
-                        "Cinema": "🎬",
-                        "Theater": "🎬",
-                        "Netflix": "📺",
+                        Theatrical: "🎬",
+                        Cinema: "🎬",
+                        Theater: "🎬",
+                        Netflix: "📺",
                         "Disney+": "🎥",
                         "Prime Video": "🎁",
                         "Apple TV": "🍎",
                         "HBO Max": "🎭",
-                        "Hulu": "📺",
-                        "Peacock": "🦚",
+                        Hulu: "📺",
+                        Peacock: "🦚",
                         "Paramount+": "⭐",
                       };
-                      const emoji = platformEmoji[release.platform as keyof typeof platformEmoji] || "📺";
+                      const emoji =
+                        platformEmoji[
+                          release.platform as keyof typeof platformEmoji
+                        ] || "📺";
 
                       return (
                         <motion.div
@@ -495,13 +498,12 @@ export default function HomePage() {
                                 {emoji} {release.platform}
                               </Badge>
                               <span className="text-xs text-muted-foreground truncate">
-                                {new Date(release.releaseDate).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                  },
-                                )}
+                                {new Date(
+                                  release.releaseDate,
+                                ).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
                               </span>
                             </div>
                           </div>

@@ -107,7 +107,7 @@ export default function SquadPage() {
         confirmText: "Remove",
         cancelText: "Cancel",
         isDestructive: true,
-      }
+      },
     );
   };
 
@@ -168,7 +168,9 @@ export default function SquadPage() {
                 <span className="hidden sm:inline">Message</span>
               </button>
               <button
-                onClick={() => onRemove?.(friend.id, friend.name || friend.username)}
+                onClick={() =>
+                  onRemove?.(friend.id, friend.name || friend.username)
+                }
                 className="flex-1 sm:flex-none px-4 py-2 rounded-lg border border-border text-destructive hover:bg-destructive/10 transition-colors font-medium flex items-center justify-center gap-2 text-sm whitespace-nowrap"
               >
                 <Trash2 size={16} />
@@ -309,16 +311,25 @@ export default function SquadPage() {
         )}
 
         {/* Confirmation Dialog */}
-        <AlertDialog open={confirmDialog.isOpen} onOpenChange={confirmDialog.closeDialog}>
+        <AlertDialog
+          open={confirmDialog.isOpen}
+          onOpenChange={confirmDialog.closeDialog}
+        >
           <AlertDialogContent>
             <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
-            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {confirmDialog.description}
+            </AlertDialogDescription>
             <div className="flex gap-3 justify-end">
               <AlertDialogCancel>{confirmDialog.cancelText}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDialog.handleConfirm}
                 disabled={confirmDialog.isLoading}
-                className={confirmDialog.isDestructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+                className={
+                  confirmDialog.isDestructive
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    : ""
+                }
               >
                 {confirmDialog.isLoading ? "..." : confirmDialog.confirmText}
               </AlertDialogAction>

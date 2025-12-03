@@ -224,7 +224,11 @@ export default function MoviesPage() {
       className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.4, delay: (index % 12) * 0.05 }}
+      transition={
+        shouldReduceMotion()
+          ? { duration: 0 }
+          : { duration: 0.4, delay: (index % 12) * 0.05 }
+      }
       whileHover={shouldReduceMotion() ? {} : { scale: 1.05 }}
       whileTap={shouldReduceMotion() ? {} : { scale: 0.95 }}
     >
@@ -468,13 +472,17 @@ export default function MoviesPage() {
               className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
               initial="hidden"
               animate="visible"
-              variants={shouldReduceMotion() ? {} : {
-                visible: {
-                  transition: {
-                    staggerChildren: 0.05,
-                  },
-                },
-              }}
+              variants={
+                shouldReduceMotion()
+                  ? {}
+                  : {
+                      visible: {
+                        transition: {
+                          staggerChildren: 0.05,
+                        },
+                      },
+                    }
+              }
             >
               {displayedMovies.map((movie, index) => (
                 <MovieCard key={movie.id} movie={movie} index={index} />

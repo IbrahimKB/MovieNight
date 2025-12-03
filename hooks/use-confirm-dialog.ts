@@ -30,7 +30,7 @@ export function useConfirmDialog() {
       confirmText?: string;
       cancelText?: string;
       isDestructive?: boolean;
-    }
+    },
   ) => {
     setDialogState({
       isOpen: true,

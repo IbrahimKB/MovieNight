@@ -30,7 +30,11 @@ export function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={shouldReduceMotion() ? { duration: 0 } : { duration: 0.35, delay: index * 0.06 }}
+      transition={
+        shouldReduceMotion()
+          ? { duration: 0 }
+          : { duration: 0.35, delay: index * 0.06 }
+      }
       onClick={() => setIsFlipped(!isFlipped)}
       className={cn(
         "relative overflow-hidden p-4 rounded-xl border border-primary/10",

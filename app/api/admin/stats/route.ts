@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { requireAdmin, isErrorResponse } from '@/lib/auth-helpers';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,9 +10,15 @@ export async function GET(req: NextRequest) {
     }
     const { user } = authResult;
 
-    const [totalUsers, totalAdmins, totalMovies, totalSuggestions, totalEvents] = await Promise.all([
+    const [
+      totalUsers,
+      totalAdmins,
+      totalMovies,
+      totalSuggestions,
+      totalEvents,
+    ] = await Promise.all([
       prisma.authUser.count(),
-      prisma.authUser.count({ where: { role: 'admin' } }),
+      prisma.authUser.count({ where: { role: "admin" } }),
       prisma.movie.count(),
       prisma.suggestion.count(),
       prisma.event.count(),
@@ -29,10 +35,10 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('Error fetching stats:', err);
+    console.error("Error fetching stats:", err);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
+      { success: false, error: "Internal server error" },
+      { status: 500 },
     );
   }
 }

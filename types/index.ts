@@ -141,7 +141,10 @@ export interface UserNotificationPreferences {
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
-  error?: string | Record<string, unknown> | { field?: string; message: string }[];
+  error?:
+    | string
+    | Record<string, unknown>
+    | { field?: string; message: string }[];
 }
 
 export interface ValidationError {

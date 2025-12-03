@@ -4,14 +4,14 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function GET(
     if (!movie) {
       return NextResponse.json(
         { success: false, error: "Movie not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -53,10 +53,7 @@ export async function GET(
     const friendships = await prisma.friendship.findMany({
       where: {
         status: "accepted",
-        OR: [
-          { userId1: user.id },
-          { userId2: user.id },
-        ],
+        OR: [{ userId1: user.id }, { userId2: user.id }],
       },
       select: {
         userId1: true,
@@ -97,7 +94,7 @@ export async function GET(
     console.error("Who watched error:", error);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

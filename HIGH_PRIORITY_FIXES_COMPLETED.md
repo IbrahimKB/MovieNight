@@ -1,6 +1,7 @@
 # High Priority Fixes - COMPLETED ✅
 
 ## Summary
+
 All high-priority issues from the codebase health check have been successfully fixed.
 
 ---
@@ -10,6 +11,7 @@ All high-priority issues from the codebase health check have been successfully f
 **File Created**: `lib/schemas.ts`
 
 ### What was added:
+
 - **Auth Schemas**: `LoginSchema`, `SignupSchema`
 - **User Schemas**: `ProfileSchema`, `SettingsSchema`
 - **Movie Schemas**: `CreateWatchDesireSchema`, `WatchMovieSchema`
@@ -19,6 +21,7 @@ All high-priority issues from the codebase health check have been successfully f
 - **Movie Night Schemas**: `MovieNightVoteSchema`
 
 ### Benefits:
+
 - ✅ **DRY Principle**: Schemas no longer duplicated in route files
 - ✅ **Single Source of Truth**: All validation rules in one place
 - ✅ **Type Safety**: Exported TypeScript types for all schemas
@@ -26,7 +29,9 @@ All high-priority issues from the codebase health check have been successfully f
 - ✅ **Better Developer Experience**: Easy schema discovery and reuse
 
 ### Recommended Next Steps:
+
 Update API routes to import schemas from `lib/schemas.ts`:
+
 ```typescript
 import { CreateSuggestionSchema } from "@/lib/schemas";
 ```
@@ -38,6 +43,7 @@ import { CreateSuggestionSchema } from "@/lib/schemas";
 ### What was fixed:
 
 #### Files Updated:
+
 1. **app/api/admin/users/route.ts**
 2. **app/api/admin/stats/route.ts**
 3. **app/api/admin/users/[id]/route.ts** (DELETE)
@@ -48,6 +54,7 @@ import { CreateSuggestionSchema } from "@/lib/schemas";
 #### New Helper File Created: `lib/auth-helpers.ts`
 
 **Functions Added**:
+
 - `requireAuth()` - Checks authentication only (returns 401 if missing)
 - `requireAdmin()` - Checks authentication AND admin role (returns 401 or 403)
 - `isErrorResponse()` - Type guard for error responses
@@ -55,26 +62,29 @@ import { CreateSuggestionSchema } from "@/lib/schemas";
 ### Changes Made:
 
 **Before**:
+
 ```typescript
 const user = await getCurrentUser();
-if (!user || user.role !== 'admin') {
+if (!user || user.role !== "admin") {
   return NextResponse.json(
-    { success: false, error: 'Unauthorized' },
-    { status: 403 }  // WRONG: 403 for both cases
+    { success: false, error: "Unauthorized" },
+    { status: 403 }, // WRONG: 403 for both cases
   );
 }
 ```
 
 **After**:
+
 ```typescript
 const authResult = await requireAdmin();
 if (isErrorResponse(authResult)) {
-  return authResult;  // Returns 401 if unauthenticated, 403 if unauthorized
+  return authResult; // Returns 401 if unauthenticated, 403 if unauthorized
 }
 const { user } = authResult;
 ```
 
 ### HTTP Status Code Semantics:
+
 - **401 Unauthorized**: No valid authentication token/session
 - **403 Forbidden**: Authenticated but insufficient permissions
 - **400 Bad Request**: Validation errors
@@ -83,6 +93,7 @@ const { user } = authResult;
 - **500 Internal Server Error**: Server error
 
 ### Benefits:
+
 - ✅ **REST Compliance**: Proper HTTP semantics
 - ✅ **Better Client Handling**: Frontend can distinguish between auth and permission errors
 - ✅ **Clearer Error Messages**: Different messages for 401 vs 403
@@ -94,7 +105,9 @@ const { user } = authResult;
 ## 3. Optional: Event.participants Normalization (Deferred)
 
 ### Current Issue:
+
 `Event.participants` is stored as `String[]` (denormalized), which:
+
 - Makes querying by participant membership difficult
 - Requires scanning all event records
 - Not scalable for large participant lists
@@ -102,17 +115,19 @@ const { user } = authResult;
 ### Future Options:
 
 #### Option A: Create Join Table (Recommended)
+
 Create `EventParticipant` model:
+
 ```prisma
 model EventParticipant {
   id String @id @default(uuid()) @db.Uuid
   eventId String @db.Uuid
   userId String @db.Uuid
   status String // "pending" | "accepted" | "declined"
-  
+
   event Event @relation(fields: [eventId], references: [id])
   user AuthUser @relation(fields: [userId], references: [id])
-  
+
   @@unique([eventId, userId])
   @@index([eventId])
   @@index([userId])
@@ -123,7 +138,9 @@ model EventParticipant {
 **Cons**: Requires migration, code changes
 
 #### Option B: Add GIN Index (Quick Fix)
+
 Use PostgreSQL GIN index for array membership queries:
+
 ```prisma
 model Event {
   participants String[] @db.Text
@@ -135,22 +152,24 @@ model Event {
 **Cons**: PostgreSQL-specific, still denormalized
 
 ### Effort Estimate:
+
 - **Option A**: 3-5 hours (migration + code updates)
 - **Option B**: 1 hour (migration only)
 
 ### Recommendation:
+
 Defer to when participant counts grow significantly or become a performance bottleneck.
 
 ---
 
 ## 📊 Completion Status
 
-| Task | Status | Files | Effort |
-|------|--------|-------|--------|
-| Centralized Zod Schemas | ✅ DONE | 1 created | 1h |
-| Fix 401 vs 403 Codes | ✅ DONE | 6 updated, 1 created | 1h |
-| Auth Helpers | ✅ DONE | 1 created | 0.5h |
-| Event.participants | ⏸️ DEFERRED | - | 3-5h |
+| Task                    | Status      | Files                | Effort |
+| ----------------------- | ----------- | -------------------- | ------ |
+| Centralized Zod Schemas | ✅ DONE     | 1 created            | 1h     |
+| Fix 401 vs 403 Codes    | ✅ DONE     | 6 updated, 1 created | 1h     |
+| Auth Helpers            | ✅ DONE     | 1 created            | 0.5h   |
+| Event.participants      | ⏸️ DEFERRED | -                    | 3-5h   |
 
 **Total Effort**: ~2.5 hours
 
@@ -203,6 +222,7 @@ Defer to when participant counts grow significantly or become a performance bott
 ## Summary
 
 All high-priority issues have been successfully resolved:
+
 - ✅ Eliminated schema duplication (lib/schemas.ts)
 - ✅ Standardized HTTP status codes (401 vs 403)
 - ✅ Created reusable auth helpers (lib/auth-helpers.ts)

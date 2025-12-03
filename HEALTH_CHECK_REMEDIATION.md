@@ -1,6 +1,7 @@
 # Codebase Health Check - Remediation Summary
 
 ## Overview
+
 Comprehensive health check and remediation of MovieNight codebase addressing critical and high-priority issues.
 
 ---
@@ -10,6 +11,7 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 ### Critical Issues (Fixed)
 
 #### 1. **API Response Format Standardization** ✅
+
 - **Files Modified**: `app/api/user/profile/route.ts`, `app/api/user/settings/route.ts`
 - **Issue**: Inconsistent error response format (missing `success: false` in some endpoints)
 - **Solution**: Created `lib/api-helpers.ts` with standardized response helpers
@@ -25,18 +27,20 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 - **Impact**: All API responses now follow consistent envelope format
 
 #### 2. **N+1 Query Pattern Fixes** ✅
-- **Files Modified**: 
+
+- **Files Modified**:
   - `app/api/suggestions/route.ts` - Lines 180-190
   - `app/api/events/[id]/route.ts` - Lines 239-261
   - `app/api/events/[id]/invite/route.ts` - Lines 221-267
 - **Issue**: Loop-based sequential DB queries instead of batch operations
 - **Solution**: Replaced loops with single `findMany` batched queries
-- **Performance Improvement**: 
+- **Performance Improvement**:
   - Before: O(n) database calls per request
   - After: O(1) database calls per request
 - **Impact**: Significant performance improvement especially with large friend/participant lists
 
 #### 3. **Pagination Limits** ✅
+
 - **File Created**: `lib/pagination.ts` with reusable helpers
 - **Status**: Helper utilities created; most routes already have pagination (verified)
 - **Routes with Limits**: notifications, watch history, watch desires
@@ -45,6 +49,7 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 ### High-Priority Issues (Fixed)
 
 #### 1. **Type Safety Improvements** ✅
+
 - **File Modified**: `types/index.ts`
 - **Issue**: `ApiResponse<T = any>` losing TypeScript type checking
 - **Solution**: Replaced default `any` with `unknown`
@@ -53,6 +58,7 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 - **Impact**: Improved type safety, reduces runtime errors
 
 #### 2. **API Response Consistency** ✅
+
 - **Updated Routes**: `app/api/user/profile/route.ts`, `app/api/user/settings/route.ts`
 - **Changes**:
   - Now use standardized response helpers from `lib/api-helpers.ts`
@@ -66,7 +72,8 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 
 ### High-Priority (Should Complete)
 
-#### 1. **HTTP Status Code Standardization** 
+#### 1. **HTTP Status Code Standardization**
+
 - **Issue**: Mixed usage of 401 (unauthenticated) vs 403 (forbidden)
 - **Current**: Some endpoints return 401 for both cases
 - **Recommendation**:
@@ -74,10 +81,11 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
   - 403 = Authenticated but insufficient permissions
 - **Estimate**: 1-2 hours (20-30 routes)
 - **Action Items**:
-  - Update admin-only endpoints (app/api/admin/*)
+  - Update admin-only endpoints (app/api/admin/\*)
   - Review user permission checks
 
 #### 2. **Centralized Zod Schema Library**
+
 - **File Needed**: `lib/schemas.ts`
 - **Issue**: Validation schemas defined inline in routes (duplication)
 - **Solution**: Extract to single file:
@@ -89,7 +97,8 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 - **Estimate**: 1-2 hours
 - **Benefit**: Reduced duplication, easier maintenance
 
-#### 3. **Event Participants Normalization** 
+#### 3. **Event Participants Normalization**
+
 - **Current**: `Event.participants` stored as `String[]` (denormalized)
 - **Issue**: Hard to query, inefficient for large participant lists
 - **Options**:
@@ -101,17 +110,20 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 ### Low-Priority (Nice to Have)
 
 #### 1. **Socket.IO Type Safety**
+
 - **File**: `hooks/useSocket.ts`
 - **Issue**: `type Socket = any`, event callbacks untyped
 - **Solution**: Create event interface and type socket properly
 - **Estimate**: 1-2 hours
 
 #### 2. **Lib/tmdb.ts Type Improvements**
+
 - **Issue**: Multiple `any` types in response parsing
 - **Solution**: Create TMDB-specific DTOs
 - **Estimate**: 1 hour
 
 #### 3. **ESLint & TypeScript Strict Mode**
+
 - **Actions**:
   - Run `npm run lint` and fix warnings
   - Run `tsc --noEmit` and fix type errors
@@ -122,14 +134,14 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 
 ## 🔧 Code Quality Metrics
 
-| Metric | Before | After | Status |
-|--------|--------|-------|--------|
-| API Response Consistency | ⚠️ Inconsistent | ✅ 100% | Fixed |
-| N+1 Queries | ❌ Found in 3 routes | ✅ Fixed | Fixed |
-| Type Safety (default any) | ⚠️ Present | ✅ Removed | Fixed |
-| Pagination Coverage | ✅ Mostly OK | ✅ Maintained | OK |
-| HTTP Status Codes | ⚠️ Mixed | ⚠️ TODO | Pending |
-| Zod Schemas | ⚠️ Duplicated | ⚠️ TODO | Pending |
+| Metric                    | Before               | After         | Status  |
+| ------------------------- | -------------------- | ------------- | ------- |
+| API Response Consistency  | ⚠️ Inconsistent      | ✅ 100%       | Fixed   |
+| N+1 Queries               | ❌ Found in 3 routes | ✅ Fixed      | Fixed   |
+| Type Safety (default any) | ⚠️ Present           | ✅ Removed    | Fixed   |
+| Pagination Coverage       | ✅ Mostly OK         | ✅ Maintained | OK      |
+| HTTP Status Codes         | ⚠️ Mixed             | ⚠️ TODO       | Pending |
+| Zod Schemas               | ⚠️ Duplicated        | ⚠️ TODO       | Pending |
 
 ---
 
@@ -166,22 +178,26 @@ Comprehensive health check and remediation of MovieNight codebase addressing cri
 ## Summary
 
 **Critical Issues: 3/3 FIXED** ✅
+
 - API response standardization
-- N+1 query patterns  
+- N+1 query patterns
 - Type safety (basic)
 
 **High-Priority Issues: 4/4 FIXED** ✅
+
 - Type safety improvements
 - API consistency
 - Pagination helpers
 - Error handling standardization
 
 **Remaining High-Priority: 3**
+
 - HTTP status codes (401 vs 403)
 - Centralized Zod schemas
 - Event.participants normalization
 
 **Remaining Low-Priority: 3**
+
 - Socket.IO typing
 - TMDB response typing
 - ESLint/TypeScript strict mode

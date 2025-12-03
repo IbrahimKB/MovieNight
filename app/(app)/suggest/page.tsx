@@ -602,7 +602,10 @@ function SuggestPageContent() {
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label htmlFor="event-date" className="text-xs text-muted-foreground">
+                      <label
+                        htmlFor="event-date"
+                        className="text-xs text-muted-foreground"
+                      >
                         Date
                       </label>
                       <Input
@@ -610,12 +613,15 @@ function SuggestPageContent() {
                         type="date"
                         value={eventDate}
                         onChange={(e) => setEventDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split("T")[0]}
                       />
                     </div>
                     {eventDate && (
                       <div className="space-y-1">
-                        <label htmlFor="event-time" className="text-xs text-muted-foreground">
+                        <label
+                          htmlFor="event-time"
+                          className="text-xs text-muted-foreground"
+                        >
                           Time
                         </label>
                         <Input
@@ -629,7 +635,12 @@ function SuggestPageContent() {
                   </div>
                   {eventDate && (
                     <p className="text-xs text-muted-foreground">
-                      ✓ An event will be created for {new Date(eventDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      ✓ An event will be created for{" "}
+                      {new Date(eventDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
                     </p>
                   )}
                 </div>

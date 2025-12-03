@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
 
     // Combine friendIds and toUserId into a single array
     const targetFriendIds = friendIds || (toUserId ? [toUserId] : []);
-    
+
     if (targetFriendIds.length === 0) {
       return NextResponse.json(
         { success: false, error: "No friends specified" },
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
     const internalFriendIds = friends
       .filter((f) => f.id !== user.id)
       .map((f) => f.id);
-    
+
     // Use message or comment for the suggestion message
     const suggestionMessage = message || comment;
 
