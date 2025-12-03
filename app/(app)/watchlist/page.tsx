@@ -168,7 +168,41 @@ export default function WatchlistPage() {
     }
   };
 
+  // Debounced save function for desire score changes
+  const saveDesireScore = async (itemId: string, score: number) => {
+    const item = watchlist.find((w) => w.id === itemId);
+    if (!item?.desireId) return;
+
+    try {
+      const res = await fetch(`/api/watch/desire/${item.desireId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ rating: score }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save desire score");
+      }
+    } catch (error) {
+      // Rollback to previous state on error
+      setWatchlist(previousWatchlistRef.current);
+      toast({
+        title: "Error",
+        description: "Failed to save desire score. Changes reverted.",
+        variant: "error",
+      });
+    }
+  };
+
+  const { execute: debouncedSaveScore } = useDebounce(saveDesireScore, {
+    delay: 500,
+  });
+
   const handleDesireScoreChange = (itemId: string, newScore: number[]) => {
+    // Store previous state for rollback
+    previousWatchlistRef.current = watchlist;
+
     // Optimistic update
     setWatchlist((prev) =>
       prev.map((item) =>
@@ -176,7 +210,8 @@ export default function WatchlistPage() {
       ),
     );
 
-    // TODO: Debounce and save to API
+    // Debounce and save to API
+    debouncedSaveScore(itemId, newScore[0]);
   };
 
   const handleFriendsChange = (itemId: string, friendId: string) => {
