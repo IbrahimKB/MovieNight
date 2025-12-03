@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
           gte: now,
           lte: nineDaysFromNow,
         },
+        countryCode: countryCode,
       },
       select: {
         id: true,
@@ -87,8 +88,10 @@ export async function GET(req: NextRequest) {
         year: true,
         genres: true,
         description: true,
+        countryCode: true,
+        platform: true,
         // Release model doesn't have imdbRating directly, it's on the relation movie
-        // checking schema... Release has: id, tmdbId, movieId, title, platform, releaseDate, genres, description, poster, year
+        // checking schema... Release has: id, tmdbId, movieId, title, platform, releaseDate, genres, description, poster, year, countryCode
         // It links to Movie which has imdbRating.
       },
       orderBy: {
