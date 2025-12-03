@@ -60,14 +60,18 @@ export default function SignupPage() {
     setError("");
     setIsLoading(true);
 
+    console.log("Signup: Form submission started");
+
     const validationError = validateForm();
     if (validationError) {
+      console.log("Signup: Validation failed -", validationError);
       setError(validationError);
       setIsLoading(false);
       return;
     }
 
     try {
+      console.log("Signup: Calling signup API for:", formData.username);
       const result = await signup(
         formData.username,
         formData.email,
@@ -75,12 +79,16 @@ export default function SignupPage() {
         formData.name,
       );
 
+      console.log("Signup: API response:", result);
       if (result.success) {
+        console.log("Signup: Success - navigating to /");
         router.push("/");
       } else {
+        console.log("Signup: Failed -", result.error?.message);
         setError(result.error?.message || "Username or email already exists");
       }
     } catch (err) {
+      console.error("Signup: Exception during signup:", err);
       setError("An error occurred during signup");
     } finally {
       setIsLoading(false);
