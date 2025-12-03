@@ -19,12 +19,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useConfirmDialog } from "@/hooks/use-confirm-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Friend {
   id: string;
   username: string;
   email: string;
   name?: string;
+  avatar?: string;
 }
 
 export default function SquadPage() {
