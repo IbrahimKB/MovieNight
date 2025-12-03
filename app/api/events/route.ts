@@ -13,7 +13,7 @@ const CreateEventSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
   date: z.string().datetime(),
   notes: z.string().optional(),
-  invitedUsers: z.array(z.string()).optional(), // external IDs (puid or id) to invite
+  invitedFriendIds: z.array(z.string()).optional(), // external IDs (puid or id) to invite
 });
 
 // ------------------------------------------------------
