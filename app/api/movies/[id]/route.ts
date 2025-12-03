@@ -156,13 +156,11 @@ export async function PATCH(
 ): Promise<NextResponse<ApiResponse>> {
   try {
     // Auth required + must be admin
-    const user = await getCurrentUser();
-    if (!user || user.role !== "admin") {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 403 },
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
+    const { user } = authResult;
 
     const { id } = await params;
 
