@@ -59,6 +59,7 @@ export async function PATCH(
         where: { id: suggestionId },
         data: { status: "accepted" },
       });
+      console.log("✓ Suggestion accepted", { suggestionId, movieId: suggestion.movieId, userId: user.id });
 
       // Create WatchDesire
       // Use upsert just in case
@@ -80,6 +81,7 @@ export async function PATCH(
           rating: rating || 5,
         },
       });
+      console.log("✓ WatchDesire created/updated", { suggestionId, movieId: suggestion.movieId, userId: user.id, rating: rating || 5 });
     } else if (action === "reject") {
       await prisma.suggestion.update({
         where: { id: suggestionId },
