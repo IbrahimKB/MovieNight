@@ -145,22 +145,22 @@ export default {
         },
         "glow-pulse": {
           "0%, 100%": {
-            "text-shadow": "0 0 10px rgba(59, 130, 246, 0.5)",
+            "text-shadow": "0 0 10px rgba(45, 90, 184, 0.3)",
             opacity: "1",
           },
           "50%": {
-            "text-shadow": "0 0 20px rgba(59, 130, 246, 0.8)",
+            "text-shadow": "0 0 20px rgba(45, 90, 184, 0.5)",
             opacity: "1",
           },
         },
         "neon-flicker": {
           "0%, 19%, 21%, 23%, 25%, 54%, 56%, 100%": {
             "text-shadow":
-              "0 0 10px rgba(59, 130, 246, 0.7), 0 0 20px rgba(59, 130, 246, 0.4)",
+              "0 0 10px rgba(45, 90, 184, 0.35), 0 0 20px rgba(45, 90, 184, 0.2)",
             opacity: "1",
           },
           "20%, 24%, 55%": {
-            "text-shadow": "0 0 5px rgba(59, 130, 246, 0.3)",
+            "text-shadow": "0 0 5px rgba(45, 90, 184, 0.15)",
             opacity: "0.8",
           },
         },
