@@ -61,7 +61,10 @@ export default function SocialActivityFeed({
           credentials: "include",
         });
         if (!notificationsRes.ok) {
-          console.error("Failed to fetch notifications:", notificationsRes.status);
+          console.error(
+            "Failed to fetch notifications:",
+            notificationsRes.status,
+          );
           setActivity([]);
           setLoading(false);
           return;

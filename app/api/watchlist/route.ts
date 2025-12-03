@@ -57,10 +57,7 @@ export async function GET(req: NextRequest) {
     // Fetch events to derive selectedFriends for each watchlist item
     const events = await prisma.event.findMany({
       where: {
-        OR: [
-          { hostUserId: user.id },
-          { participants: { has: user.id } },
-        ],
+        OR: [{ hostUserId: user.id }, { participants: { has: user.id } }],
       },
       select: {
         movieId: true,
