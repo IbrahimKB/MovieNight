@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAdmin, isErrorResponse } from "@/lib/auth-helpers";
 import { ApiResponse } from "@/types";
 import { tmdbClient } from "@/lib/tmdb";
 
