@@ -2,7 +2,12 @@
 
 import { useRef, useCallback, useEffect } from "react";
 
-export type GestureType = "swipe-left" | "swipe-right" | "swipe-up" | "swipe-down" | "none";
+export type GestureType =
+  | "swipe-left"
+  | "swipe-right"
+  | "swipe-up"
+  | "swipe-down"
+  | "none";
 
 interface GesturePoint {
   x: number;
@@ -30,7 +35,7 @@ export function useGesture(options: UseGestureOptions = {}) {
 
   const calculateGestureType = (
     startPoint: GesturePoint,
-    endPoint: GesturePoint
+    endPoint: GesturePoint,
   ): { type: GestureType; distance: number } => {
     const deltaX = endPoint.x - startPoint.x;
     const deltaY = endPoint.y - startPoint.y;
@@ -77,7 +82,7 @@ export function useGesture(options: UseGestureOptions = {}) {
       };
       currentGestureRef.current = "none";
     },
-    [enabled]
+    [enabled],
   );
 
   const handleTouchEnd = useCallback(
@@ -94,7 +99,7 @@ export function useGesture(options: UseGestureOptions = {}) {
 
       const { type, distance } = calculateGestureType(
         startPointRef.current,
-        endPoint
+        endPoint,
       );
 
       if (type !== "none") {
@@ -104,7 +109,7 @@ export function useGesture(options: UseGestureOptions = {}) {
 
       startPointRef.current = null;
     },
-    [enabled, onGesture]
+    [enabled, onGesture],
   );
 
   const handleTouchMove = useCallback(
@@ -120,13 +125,16 @@ export function useGesture(options: UseGestureOptions = {}) {
         time: Date.now(),
       };
 
-      const { type } = calculateGestureType(startPointRef.current, currentPoint);
+      const { type } = calculateGestureType(
+        startPointRef.current,
+        currentPoint,
+      );
       // Update current gesture if it changes direction
       if (type !== "none") {
         currentGestureRef.current = type;
       }
     },
-    [enabled]
+    [enabled],
   );
 
   useEffect(() => {
@@ -139,12 +147,12 @@ export function useGesture(options: UseGestureOptions = {}) {
     return () => {
       document.removeEventListener(
         "touchstart",
-        handleTouchStart as EventListener
+        handleTouchStart as EventListener,
       );
       document.removeEventListener("touchend", handleTouchEnd as EventListener);
       document.removeEventListener(
         "touchmove",
-        handleTouchMove as EventListener
+        handleTouchMove as EventListener,
       );
     };
   }, [enabled, handleTouchStart, handleTouchEnd, handleTouchMove]);

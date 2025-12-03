@@ -48,12 +48,15 @@ export async function syncUpcomingReleases() {
   console.log(`[SYNC] TMDB_API_KEY is ${hasApiKey ? "set" : "MISSING"}`);
 
   try {
-    console.log("[SYNC] Starting upcoming releases sync for multiple regions...");
+    console.log(
+      "[SYNC] Starting upcoming releases sync for multiple regions...",
+    );
     const startTime = Date.now();
     let totalImported = 0;
     let totalSkipped = 0;
     let hasErrors = false;
-    const countryStats: Record<string, { imported: number; skipped: number }> = {};
+    const countryStats: Record<string, { imported: number; skipped: number }> =
+      {};
 
     // Calculate date range: today to 30 days from now
     const today = new Date();
@@ -70,12 +73,16 @@ export async function syncUpcomingReleases() {
       const country = COUNTRIES[countryKey as keyof typeof COUNTRIES];
       countryStats[country.code] = { imported: 0, skipped: 0 };
 
-      console.log(`[SYNC] Starting sync for ${country.label} (${country.code})...`);
+      console.log(
+        `[SYNC] Starting sync for ${country.label} (${country.code})...`,
+      );
 
       // Inner loop: fetch upcoming releases from multiple pages per country
       for (let page = 1; page <= 3; page++) {
         try {
-          console.log(`[SYNC] Fetching ${country.code} releases page ${page}...`);
+          console.log(
+            `[SYNC] Fetching ${country.code} releases page ${page}...`,
+          );
 
           const response = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
             params: {
@@ -110,8 +117,9 @@ export async function syncUpcomingReleases() {
             try {
               const releaseYear = new Date(movie.release_date).getFullYear();
               const mappedGenres =
-                movie.genre_ids?.map((id) => TMDB_GENRE_MAP[id] || String(id)) ||
-                [];
+                movie.genre_ids?.map(
+                  (id) => TMDB_GENRE_MAP[id] || String(id),
+                ) || [];
 
               // Upsert: update if exists, create if new
               const movieData = {

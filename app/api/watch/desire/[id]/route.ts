@@ -20,7 +20,7 @@ async function mapExternalUserIdToInternal(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   const { id: desireId } = await params;
   try {
@@ -28,7 +28,7 @@ export async function PATCH(
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,7 +36,7 @@ export async function PATCH(
     if (!userIdInternal) {
       return NextResponse.json(
         { success: false, error: "User not found" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function PATCH(
             .map((e) => `${e.path.join(".")}: ${e.message}`)
             .join("; "),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -68,7 +68,7 @@ export async function PATCH(
     if (!desire) {
       return NextResponse.json(
         { success: false, error: "Watch desire not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -89,13 +89,13 @@ export async function PATCH(
           updatedAt: updated.updatedAt,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     console.error("Update watch desire error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

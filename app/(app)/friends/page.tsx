@@ -455,11 +455,16 @@ export default function FriendsPage() {
                           {request.fromUser.avatar && (
                             <AvatarImage
                               src={request.fromUser.avatar}
-                              alt={request.fromUser.name || request.fromUser.username}
+                              alt={
+                                request.fromUser.name ||
+                                request.fromUser.username
+                              }
                             />
                           )}
                           <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                            {(request.fromUser.name || request.fromUser.username)
+                            {(
+                              request.fromUser.name || request.fromUser.username
+                            )
                               .split(" ")
                               .map((n) => n[0])
                               .join("")

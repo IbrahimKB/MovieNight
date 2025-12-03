@@ -100,7 +100,7 @@ export default function MovieDetailPage() {
         // Fetch friends who watched this movie
         const whoWatchedRes = await fetch(
           `/api/movies/${movieId}/who-watched`,
-          { credentials: "include" }
+          { credentials: "include" },
         );
         const whoWatchedData = await whoWatchedRes.json();
         if (whoWatchedData.success && Array.isArray(whoWatchedData.data)) {

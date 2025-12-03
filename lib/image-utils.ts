@@ -10,9 +10,12 @@
  * @param width - Desired width, defaults to different widths for srcSet
  * @returns URL optimized for the given width, or srcSet string
  */
-export function getPosterImageUrl(url: string | undefined, width?: number): string {
+export function getPosterImageUrl(
+  url: string | undefined,
+  width?: number,
+): string {
   if (!url) return "";
-  
+
   // Already a data URL or placeholder
   if (url.startsWith("data:") || url.startsWith("blob:")) {
     return url;
@@ -29,18 +32,17 @@ export function getPosterImageUrl(url: string | undefined, width?: number): stri
       600: "w600",
     };
 
-    const sizeKey = width ? Object.keys(sizes).reduce((closest, key) => {
-      const keyNum = parseInt(key);
-      const closestNum = parseInt(closest);
-      return Math.abs(keyNum - width) < Math.abs(closestNum - width)
-        ? key
-        : closest;
-    }) : "500";
+    const sizeKey = width
+      ? Object.keys(sizes).reduce((closest, key) => {
+          const keyNum = parseInt(key);
+          const closestNum = parseInt(closest);
+          return Math.abs(keyNum - width) < Math.abs(closestNum - width)
+            ? key
+            : closest;
+        })
+      : "500";
 
-    return url.replace(
-      /\bw\d+\b/,
-      sizes[parseInt(sizeKey)]
-    ) || url;
+    return url.replace(/\bw\d+\b/, sizes[parseInt(sizeKey)]) || url;
   }
 
   return url;
@@ -70,7 +72,7 @@ export function generatePosterSrcSet(baseUrl: string | undefined): string {
  * @returns sizes attribute value
  */
 export function generateImageSizes(
-  type: "poster" | "hero" | "thumbnail" = "poster"
+  type: "poster" | "hero" | "thumbnail" = "poster",
 ): string {
   const sizeConfig: Record<string, string> = {
     poster: "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
@@ -101,7 +103,9 @@ export function getImagePlaceholder(imageUrl?: string): string {
  * @param priority - Whether image is high priority (above the fold)
  * @returns "lazy" or "eager"
  */
-export function getImageLoadingAttribute(priority: boolean = false): "lazy" | "eager" {
+export function getImageLoadingAttribute(
+  priority: boolean = false,
+): "lazy" | "eager" {
   return priority ? "eager" : "lazy";
 }
 

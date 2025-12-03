@@ -15,7 +15,7 @@ async function mapExternalUserIdToInternal(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse>> {
   const { id: movieId } = await params;
   try {
@@ -23,7 +23,7 @@ export async function GET(
     if (!currentUser) {
       return NextResponse.json(
         { success: false, error: "Unauthenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -31,10 +31,9 @@ export async function GET(
     if (!userIdInternal) {
       return NextResponse.json(
         { success: false, error: "User not found" },
-        { status: 401 }
+        { status: 401 },
       );
     }
-
 
     // Get all friendships for the current user (bidirectional)
     const friendships = await prisma.friendship.findMany({
@@ -90,13 +89,13 @@ export async function GET(
           totalFriendWatchers: watchersList.length,
         },
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (err) {
     console.error("Get who-watched error:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

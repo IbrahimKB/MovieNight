@@ -89,7 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
-            console.log("AuthContext: Session valid, user logged in:", data.data.username);
+            console.log(
+              "AuthContext: Session valid, user logged in:",
+              data.data.username,
+            );
             setUser(data.data);
             localStorage.setItem("movienight_user", JSON.stringify(data.data));
           } else {
@@ -97,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             throw new Error("Invalid session");
           }
         } else {
-          console.log("AuthContext: Session expired or missing (status:", res.status + ")");
+          console.log(
+            "AuthContext: Session expired or missing (status:",
+            res.status + ")",
+          );
           throw new Error("Session expired");
         }
       } catch (e) {

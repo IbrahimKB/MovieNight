@@ -15,7 +15,7 @@ interface UseDebounceOptions {
  */
 export function useDebounce<T extends (...args: any[]) => Promise<any>>(
   callback: T,
-  options: UseDebounceOptions = {}
+  options: UseDebounceOptions = {},
 ) {
   const { delay = 500 } = options;
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -38,7 +38,7 @@ export function useDebounce<T extends (...args: any[]) => Promise<any>>(
         }
       }, delay);
     },
-    [callback, delay]
+    [callback, delay],
   );
 
   const cancel = useCallback(() => {
