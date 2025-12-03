@@ -32,6 +32,10 @@ export default function SuggestionAccuracy({
       if (!user) return;
       try {
         const res = await fetch("/api/stats", { credentials: "include" });
+        if (!res.ok) {
+          console.error("Failed to fetch stats:", res.status);
+          return;
+        }
         const json = await res.json();
         if (json.success) {
           // If userId is provided, find in squadStats, else use userStats
