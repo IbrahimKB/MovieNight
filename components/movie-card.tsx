@@ -107,6 +107,8 @@ export const MovieCard = ({
         {movie.poster ? (
           <img
             src={movie.poster}
+            srcSet={generatePosterSrcSet(movie.poster)}
+            sizes={generateImageSizes("poster")}
             alt={movie.title}
             className={cn(
               "w-full h-full object-cover",
