@@ -57,5 +57,5 @@ export async function stopCronJobs() {
 // For testing: run syncs immediately
 export async function runSyncsNow() {
   console.log("[CRON] Running syncs immediately...");
-  await syncUpcomingReleases();
+  return await syncUpcomingReleases();
 }
