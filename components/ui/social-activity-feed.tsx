@@ -36,6 +36,12 @@ export default function SocialActivityFeed({
         const friendsRes = await fetch("/api/friends", {
           credentials: "include",
         });
+        if (!friendsRes.ok) {
+          console.error("Failed to fetch friends:", friendsRes.status);
+          setActivity([]);
+          setLoading(false);
+          return;
+        }
         const friendsData = await friendsRes.json();
         const friends =
           friendsData.success && Array.isArray(friendsData.data)
