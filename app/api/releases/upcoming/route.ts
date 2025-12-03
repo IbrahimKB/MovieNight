@@ -52,16 +52,17 @@ export async function GET(req: NextRequest) {
     const parsed = PageSchema.safeParse({
       page: searchParams.get("page"),
       limit: searchParams.get("limit"),
+      countryCode: searchParams.get("countryCode"),
     });
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Invalid query parameters" },
+        { success: false, error: "Invalid query parameters", details: parsed.error.errors },
         { status: 400 }
       );
     }
 
-    const { page, limit } = parsed.data;
+    const { page, limit, countryCode } = parsed.data;
 
     // Fallback to local database
     // We strictly serve from Postgres as per the "Postgres-backed endpoint" policy for this route.
