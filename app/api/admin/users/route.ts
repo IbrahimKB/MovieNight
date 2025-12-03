@@ -1,23 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/auth';
+import { requireAdmin, isErrorResponse } from '@/lib/auth-helpers';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthenticated' },
-        { status: 401 }
-      );
+    const authResult = await requireAdmin();
+    if (isErrorResponse(authResult)) {
+      return authResult;
     }
-
-    if (user.role !== 'admin') {
-      return NextResponse.json(
-        { success: false, error: 'Forbidden - Admin access required' },
-        { status: 403 }
-      );
-    }
+    const { user } = authResult;
 
     const users = await prisma.authUser.findMany({
       select: {
