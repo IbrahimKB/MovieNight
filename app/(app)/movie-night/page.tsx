@@ -97,6 +97,7 @@ export default function MovieNightPage() {
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [movieVotes, setMovieVotes] = useState<MovieVotes>({});
   const [votingInProgress, setVotingInProgress] = useState<string | null>(null);
+  const swipedMovieRef = useRef<string | null>(null);
 
   useEffect(() => {
     const fetchFriends = async () => {
