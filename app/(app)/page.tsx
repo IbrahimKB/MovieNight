@@ -65,13 +65,6 @@ export default function HomePage() {
   const pullStartY = useRef(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Check authentication
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [authLoading, user, router]);
-
   // Load dashboard data
   useEffect(() => {
     if (user) loadDashboardData();
