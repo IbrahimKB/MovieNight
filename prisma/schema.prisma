@@ -71,8 +71,11 @@ model AuthUser {
   friendshipsAsUser2      Friendship[] @relation("FriendshipUser2")
   friendshipsRequested    Friendship[] @relation("FriendshipRequester")
   eventsHosted            Event[]
+
+  // Event Invitation relations
   eventInvitations        EventInvitation[] @relation("EventInvitee")
   eventInvitationsSent    EventInvitation[] @relation("EventInviter")
+
   notifications           Notification[]
   pushSubscriptions       UserPushSubscription[]
   notificationPreferences UserNotificationPreferences?
@@ -164,7 +167,7 @@ model WatchedMovie {
 
   @@index([userId])
   @@index([movieId])
-  @@index([userId, watchedAt]) // Optimization: Compound index for "watched recently" queries
+  @@index([userId, watchedAt])
   @@unique([userId, movieId])
   @@map("watch_history")
 }
@@ -214,7 +217,7 @@ model Suggestion {
   @@index([movieId])
   @@index([status])
   @@index([fromUserId, toUserId])
-  @@index([toUserId, status]) // Optimization: Index for filtering pending suggestions
+  @@index([toUserId, status])
   @@map("suggestions")
 }
 
@@ -275,8 +278,8 @@ model Event {
 model EventInvitation {
   id        String           @id @default(uuid()) @db.Uuid
   eventId   String           @db.Uuid @map("event_id")
-  userId    String           @db.Uuid @map("user_id")
-  invitedBy String           @db.Uuid @map("invited_by")
+  userId    String           @db.Uuid @map("user_id")      // invitee
+  invitedBy String           @db.Uuid @map("invited_by")   // inviter
   status    InvitationStatus @default(pending)
   createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
