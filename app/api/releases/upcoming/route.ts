@@ -7,6 +7,14 @@ import { tmdbClient } from "@/lib/tmdb";
 const PageSchema = z.object({
   page: z.string().transform(Number).optional().default("1"),
   limit: z.string().transform(Number).optional().default("20"),
+  countryCode: z
+    .string()
+    .toUpperCase()
+    .refine((code) => ["US", "GB", "JP", "KR"].includes(code), {
+      message: "Invalid country code. Must be one of: US, GB, JP, KR",
+    })
+    .optional()
+    .default("US"),
 });
 
 // Helper function to convert TMDB movie to local format
