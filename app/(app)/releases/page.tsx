@@ -13,12 +13,21 @@ interface Release {
   platform?: string;
   poster?: string;
   genres?: string[];
+  countryCode?: string;
 }
+
+const AVAILABLE_COUNTRIES = [
+  { code: "US", label: "United States" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "JP", label: "Japan" },
+  { code: "KR", label: "South Korea" },
+];
 
 export default function ReleasesPage() {
   const router = useRouter();
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCountry, setSelectedCountry] = useState<string>("US");
 
   useEffect(() => {
     const fetchReleases = async () => {
