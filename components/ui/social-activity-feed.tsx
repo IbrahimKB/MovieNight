@@ -37,9 +37,10 @@ export default function SocialActivityFeed({
           credentials: "include",
         });
         const friendsData = await friendsRes.json();
-        const friends = friendsData.success && Array.isArray(friendsData.data)
-          ? friendsData.data
-          : [];
+        const friends =
+          friendsData.success && Array.isArray(friendsData.data)
+            ? friendsData.data
+            : [];
 
         if (friends.length === 0) {
           setActivity([]);
@@ -57,7 +58,10 @@ export default function SocialActivityFeed({
 
         let recentActivity: ActivityItem[] = [];
 
-        if (notificationsData.success && Array.isArray(notificationsData.data)) {
+        if (
+          notificationsData.success &&
+          Array.isArray(notificationsData.data)
+        ) {
           // Build a friend map for quick lookup
           const friendMap = new Map(friends.map((f: any) => [f.id, f]));
 
@@ -65,12 +69,13 @@ export default function SocialActivityFeed({
           recentActivity = notificationsData.data
             .filter((item: any) => {
               // Show notifications about friend activity
-              return item.type && item.type !== 'general';
+              return item.type && item.type !== "general";
             })
             .map((item: any) => {
               // Try to extract friend info from notification data
               const friendInfo = item.data?.fromUser || item.data?.user;
-              const friendName = friendInfo?.name || friendInfo?.username || "A friend";
+              const friendName =
+                friendInfo?.name || friendInfo?.username || "A friend";
 
               return {
                 id: item.id,
@@ -78,10 +83,13 @@ export default function SocialActivityFeed({
                 userImage: friendInfo?.avatar,
                 action: getActionText(item.type),
                 movie: item.title || item.data?.movieTitle || "a movie",
-                timestamp: new Date(item.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                }),
+                timestamp: new Date(item.createdAt).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "short",
+                    day: "numeric",
+                  },
+                ),
                 movieId: item.data?.movieId || "",
               };
             });
@@ -101,11 +109,11 @@ export default function SocialActivityFeed({
 
   const getActionText = (type: string): string => {
     const actionMap: Record<string, string> = {
-      "watched": "watched",
-      "movie_watched": "watched",
-      "friend_request": "sent you a friend request",
-      "suggestion": "suggested",
-      "friend_accepted": "accepted your friend request",
+      watched: "watched",
+      movie_watched: "watched",
+      friend_request: "sent you a friend request",
+      suggestion: "suggested",
+      friend_accepted: "accepted your friend request",
     };
     return actionMap[type] || type.replace(/_/g, " ");
   };
