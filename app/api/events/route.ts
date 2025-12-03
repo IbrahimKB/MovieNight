@@ -88,7 +88,7 @@ export async function POST(
       movieId: inputMovieId,
       date,
       notes,
-      invitedUsers,
+      invitedFriendIds,
     } = validation.data;
 
     // Map current user to internal ID
