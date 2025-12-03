@@ -102,6 +102,7 @@ export default function WatchlistPage() {
   const [historyFilter, setHistoryFilter] = useState("All");
   const [selectedFriend, setSelectedFriend] = useState("All Friends");
   const [isSavingWatched, setIsSavingWatched] = useState(false);
+  const previousWatchlistRef = useRef<WatchlistItem[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
