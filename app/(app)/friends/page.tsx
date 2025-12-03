@@ -438,9 +438,22 @@ export default function FriendsPage() {
                       className="flex items-center justify-between p-4 border rounded-lg bg-accent/20"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                          <Users className="h-5 w-5" />
-                        </div>
+                        <Avatar className="w-10 h-10">
+                          {request.fromUser.avatar && (
+                            <AvatarImage
+                              src={request.fromUser.avatar}
+                              alt={request.fromUser.name || request.fromUser.username}
+                            />
+                          )}
+                          <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                            {(request.fromUser.name || request.fromUser.username)
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
                         <div>
                           <p className="font-medium">
                             {request.fromUser.name ||
