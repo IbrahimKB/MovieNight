@@ -178,6 +178,23 @@ export default function ReleasesPage() {
         </p>
       </div>
 
+      {/* Country Filter */}
+      <div className="flex flex-wrap gap-2">
+        {AVAILABLE_COUNTRIES.map((country) => (
+          <button
+            key={country.code}
+            onClick={() => setSelectedCountry(country.code)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+              selectedCountry === country.code
+                ? "bg-primary text-primary-foreground shadow-lg"
+                : "bg-card border border-border text-foreground hover:border-primary/50"
+            }`}
+          >
+            {country.label}
+          </button>
+        ))}
+      </div>
+
       {/* Upcoming */}
       {upcomingReleases.length > 0 && (
         <div>
