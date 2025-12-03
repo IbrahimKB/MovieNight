@@ -525,7 +525,7 @@
     --popover: 0 0% 8.2%;
     --popover-foreground: 0 0% 97.6%;
 
-    --primary: 217 91.2% 59.8%;
+    --primary: 217 85% 48%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 15%;
@@ -534,7 +534,7 @@
     --muted: 0 0% 25%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 217 91.2% 59.8%;
+    --accent: 217 80% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -542,15 +542,15 @@
 
     --border: 0 0% 15%;
     --input: 0 0% 12%;
-    --ring: 217 91.2% 59.8%;
+    --ring: 217 80% 52%;
 
     /* Cinema colors for neon effects */
-    --cinema-blue: 217 91.2% 59.8%;
+    --cinema-blue: 217 75% 45%;
     --cinema-red: 0 84.2% 60.2%;
     --cinema-dark: 0 0% 5.1%;
 
     /* Neon accent colors */
-    --neon-blue: 217 100% 70%;
+    --neon-blue: 217 80% 55%;
     --neon-red: 0 100% 60%;
     --neon-purple: 280 100% 70%;
 
@@ -558,12 +558,12 @@
 
     --sidebar-background: 0 0% 7%;
     --sidebar-foreground: 0 0% 97.6%;
-    --sidebar-primary: 217 91.2% 59.8%;
+    --sidebar-primary: 217 85% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 97.6%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 217 91.2% 59.8%;
+    --sidebar-ring: 217 80% 52%;
   }
 
   .light {
