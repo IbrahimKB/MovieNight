@@ -35,11 +35,16 @@ export async function syncUpcomingReleases() {
     `[SYNC] DATABASE_URL is ${dbUrl ? "set" : "MISSING"} (${dbUrl ? dbUrl.replace(/:[^:]*@/, ":***@") : "N/A"})`,
   );
 
+  // Check TMDB_API_KEY
+  const hasApiKey = !!TMDB_API_KEY;
+  console.log(`[SYNC] TMDB_API_KEY is ${hasApiKey ? "set" : "MISSING"}`);
+
   try {
     console.log("[SYNC] Starting upcoming releases sync...");
     const startTime = Date.now();
     let totalImported = 0;
     let totalSkipped = 0;
+    let hasErrors = false;
 
     // Calculate date range: today to 30 days from now
     const today = new Date();
