@@ -15,8 +15,9 @@ async function mapExternalUserIdToInternal(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse>> {
+  const { id: movieId } = await params;
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
