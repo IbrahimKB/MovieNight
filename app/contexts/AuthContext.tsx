@@ -82,21 +82,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const checkSession = async () => {
       // We rely on httpOnly cookies, so just hit the endpoint
       try {
+        console.log("AuthContext: Checking session...");
         // Verify with server
         const res = await fetch(`${API_BASE}/auth/me`);
 
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.data) {
+            console.log("AuthContext: Session valid, user logged in:", data.data.username);
             setUser(data.data);
             localStorage.setItem("movienight_user", JSON.stringify(data.data));
           } else {
+            console.log("AuthContext: Invalid session response");
             throw new Error("Invalid session");
           }
         } else {
+          console.log("AuthContext: Session expired or missing (status:", res.status + ")");
           throw new Error("Session expired");
         }
       } catch (e) {
+        console.log("AuthContext: No active session, user is unauthenticated");
         // If server check fails, clear local user data
         try {
           localStorage.removeItem("movienight_user");
