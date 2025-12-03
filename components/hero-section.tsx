@@ -313,7 +313,10 @@ export default function HeroSection() {
             transition={{ delay: 0.3 }}
           >
             <button
-              onClick={() => router.push("/signup")}
+              onClick={() => {
+                console.log("HeroSection: Navigate to /signup");
+                router.push("/signup");
+              }}
               className="group relative px-8 sm:px-12 py-3 sm:py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base sm:text-lg transition-all duration-300 hover:scale-105 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-primary/40 hover:shadow-primary/60"
             >
               <div className="absolute inset-0 rounded-xl bg-primary opacity-0 group-hover:opacity-20 blur-lg transition-opacity duration-300" />
@@ -324,7 +327,10 @@ export default function HeroSection() {
             </button>
 
             <button
-              onClick={() => router.push("/login")}
+              onClick={() => {
+                console.log("HeroSection: Navigate to /login");
+                router.push("/login");
+              }}
               className="px-8 sm:px-12 py-3 sm:py-4 rounded-xl border border-primary/50 text-white hover:bg-primary/10 hover:border-primary/80 font-bold text-base sm:text-lg transition-all duration-300 flex items-center justify-center gap-2"
             >
               <Play size={20} />
