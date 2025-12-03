@@ -160,26 +160,38 @@ export async function syncUpcomingReleases() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (pageErr) {
         console.error(`[SYNC] Error fetching page ${page}:`, pageErr);
+        hasErrors = true;
         continue;
       }
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    const status = hasErrors ? "⚠️ PARTIAL" : "✅";
     console.log(
-      `[SYNC] ✅ Upcoming releases sync complete in ${duration}s - Imported: ${totalImported}, Skipped: ${totalSkipped}`,
+      `[SYNC] ${status} Upcoming releases sync complete in ${duration}s - Imported: ${totalImported}, Skipped: ${totalSkipped}`,
     );
 
+    // Verify data was actually saved
+    const releaseCount = await prisma.release.count();
+    console.log(`[SYNC] Total releases in database: ${releaseCount}`);
+
     return {
-      success: true,
+      success: !hasErrors,
       imported: totalImported,
       skipped: totalSkipped,
       duration: `${duration}s`,
+      totalInDatabase: releaseCount,
+      hadErrors: hasErrors,
     };
   } catch (err) {
     console.error("[SYNC] ❌ Upcoming releases sync failed:", err);
+    const errorMsg = err instanceof Error ? err.message : String(err);
     return {
       success: false,
-      error: String(err),
+      error: errorMsg,
+      imported: 0,
+      skipped: 0,
+      duration: "0s",
     };
   } finally {
     await prisma.$disconnect();
