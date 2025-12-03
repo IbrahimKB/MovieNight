@@ -598,6 +598,12 @@ export default function MovieNightPage() {
                     "group hover:bg-accent/30 transition-all duration-200 relative",
                     index === 0 && "ring-2 ring-primary/30 bg-primary/5",
                   )}
+                  onTouchStart={() => {
+                    swipedMovieRef.current = movie.id;
+                  }}
+                  onTouchEnd={() => {
+                    swipedMovieRef.current = null;
+                  }}
                 >
                   {index === 0 && (
                     <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-bold">
