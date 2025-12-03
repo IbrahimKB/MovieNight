@@ -153,7 +153,7 @@ export default function SocialActivityFeed({
           >
             <div className="space-y-0.5">
               <p className="text-sm font-medium">
-                <strong>{item.user}</strong> {item.action}{" "}
+                <strong>{item.userName}</strong> {item.action}{" "}
                 <span className="italic">{item.movie}</span>
               </p>
               <p className="text-xs text-muted-foreground">{item.timestamp}</p>
