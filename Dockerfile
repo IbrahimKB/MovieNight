@@ -46,6 +46,7 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+RUN chown -R nextjs:nodejs /app/prisma
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
@@ -55,7 +56,7 @@ RUN chown nextjs:nodejs .next
 RUN apk add --no-cache openssl
 
 # Copy node_modules from builder to include all dependencies needed by server.ts
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
