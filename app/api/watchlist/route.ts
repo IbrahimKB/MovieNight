@@ -77,6 +77,29 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    // Calculate average watch desire for each movie across all users
+    const allWatchDesires = await prisma.watchDesire.findMany({
+      where: {
+        movieId: {
+          in: watchDesires.map((wd) => wd.movieId),
+        },
+      },
+      select: {
+        movieId: true,
+        rating: true,
+      },
+    });
+
+    const avgDesireByMovieId = new Map<string, number>();
+    allWatchDesires.forEach((wd) => {
+      const current = avgDesireByMovieId.get(wd.movieId) || { total: 0, count: 0 };
+      const updated = {
+        total: (current as any).total + (wd.rating || 0),
+        count: (current as any).count + 1,
+      };
+      avgDesireByMovieId.set(wd.movieId, updated.total / updated.count);
+    });
+
     // Map to frontend format
     const watchlistData = watchDesires.map((wd) => ({
       id: wd.movie.id, // Using movie ID as the primary identifier for the list item seems safer for uniqueness in list
@@ -90,7 +113,7 @@ export async function GET(req: NextRequest) {
       releaseDate: wd.movie.releaseDate
         ? wd.movie.releaseDate.toISOString()
         : null,
-      userDesireScore: wd.rating || 0,
+      userDesireScore: parseFloat((avgDesireByMovieId.get(wd.movieId) || 0).toFixed(1)),
       selectedFriends: eventsByMovieId.get(wd.movie.id) || [],
       suggestedBy: wd.suggestion?.fromUser.name,
       dateAdded: wd.createdAt.toISOString(),
