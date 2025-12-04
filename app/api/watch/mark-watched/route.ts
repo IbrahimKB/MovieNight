@@ -11,7 +11,11 @@ import { ensureMovieExists } from "@/lib/movies";
 
 const MarkWatchedSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
-  watchedDate: z.string().datetime().optional(),
+  desireId: z.string().optional(),
+  watchedDate: z.string().optional(),
+  rating: z.number().min(1).max(5).optional(),
+  review: z.string().optional(),
+  watchedWith: z.array(z.string()).optional(),
   originalScore: z.number().min(1).max(10).optional(),
   reaction: z.record(z.any()).optional(), // generic JSON
 });
@@ -69,7 +73,11 @@ export async function POST(
 
     const {
       movieId: inputMovieId,
+      desireId,
       watchedDate,
+      rating,
+      review,
+      watchedWith,
       originalScore,
       reaction,
     } = validation.data;
@@ -87,6 +95,12 @@ export async function POST(
     const now = new Date();
     const watchedAt = watchedDate ? new Date(watchedDate) : now;
 
+    // Build reaction object with all data
+    const reactionData: any = reaction || {};
+    if (rating !== undefined) reactionData.rating = rating;
+    if (review !== undefined) reactionData.review = review;
+    if (watchedWith !== undefined) reactionData.watchedWith = watchedWith;
+
     // -----------------------------------------------------
     // Create watched movie record
     // If already watched, return success with existing record
@@ -100,7 +114,10 @@ export async function POST(
           movieId: internalMovieId,
           watchedAt,
           originalScore: originalScore ?? null,
-          reaction: reaction ? (reaction as Prisma.InputJsonValue) : undefined,
+          reaction:
+            Object.keys(reactionData).length > 0
+              ? (reactionData as Prisma.InputJsonValue)
+              : undefined,
         },
       });
     } catch (err: any) {
