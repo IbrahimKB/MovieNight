@@ -8,7 +8,6 @@ import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
-import FeaturedMovieHero from "@/components/ui/featured-movie-hero";
 import { shouldReduceMotion } from "@/lib/animations";
 
 interface Movie {
@@ -336,29 +335,6 @@ export default function MoviesPage() {
           </p>
         </div>
 
-        {/* Featured Movie Hero */}
-        {!loading && displayedMovies.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            <FeaturedMovieHero
-              movie={{
-                id: displayedMovies[0].id,
-                title: displayedMovies[0].title,
-                year: displayedMovies[0].year,
-                genres: displayedMovies[0].genres,
-                poster: displayedMovies[0].poster,
-                backdrop: displayedMovies[0].poster,
-                imdbRating: displayedMovies[0].imdbRating,
-              }}
-              onAddToWatchlist={() => handleOpenModal(displayedMovies[0])}
-              onWatch={() => router.push(`/movies/${displayedMovies[0].id}`)}
-              onSuggest={() => handleOpenModal(displayedMovies[0])}
-            />
-          </motion.div>
-        )}
 
         {/* Search Bar */}
         <motion.div
