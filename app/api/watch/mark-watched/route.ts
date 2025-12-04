@@ -11,7 +11,11 @@ import { ensureMovieExists } from "@/lib/movies";
 
 const MarkWatchedSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
-  watchedDate: z.string().datetime().optional(),
+  desireId: z.string().optional(),
+  watchedDate: z.string().optional(),
+  rating: z.number().min(1).max(5).optional(),
+  review: z.string().optional(),
+  watchedWith: z.array(z.string()).optional(),
   originalScore: z.number().min(1).max(10).optional(),
   reaction: z.record(z.any()).optional(), // generic JSON
 });
