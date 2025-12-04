@@ -25,6 +25,7 @@ interface TMDBMovie {
   id: number;
   title: string;
   release_date: string;
+  primary_release_date?: string;
   overview: string;
   poster_path: string | null;
   vote_average: number;
@@ -115,7 +116,10 @@ export async function syncUpcomingReleases() {
             }
 
             try {
-              const releaseYear = new Date(movie.release_date).getFullYear();
+              // Use primary_release_date for upcoming releases (what the query filtered by)
+              // Fall back to release_date if primary_release_date is not available
+              const releaseDate = movie.primary_release_date || movie.release_date;
+              const releaseYear = new Date(releaseDate).getFullYear();
               const mappedGenres =
                 movie.genre_ids?.map(
                   (id) => TMDB_GENRE_MAP[id] || String(id),
@@ -133,7 +137,7 @@ export async function syncUpcomingReleases() {
                 genres: mappedGenres,
                 imdbRating: movie.vote_average,
                 rtRating: movie.vote_average * 10, // Approximation
-                releaseDate: new Date(movie.release_date),
+                releaseDate: new Date(releaseDate),
               };
 
               // Create/Update Movie Record (Required for Foreign Key)
@@ -146,6 +150,7 @@ export async function syncUpcomingReleases() {
 
               // Upsert Release entry with composite unique key: (tmdbId, countryCode, platform)
               const platform = "Theater"; // Default platform
+              const releaseDateObj = new Date(releaseDate);
               await prisma.release.upsert({
                 where: {
                   tmdbId_countryCode_platform: {
@@ -157,7 +162,7 @@ export async function syncUpcomingReleases() {
                 update: {
                   title: movie.title,
                   movieId: dbMovie.id,
-                  releaseDate: new Date(movie.release_date),
+                  releaseDate: releaseDateObj,
                   genres: mappedGenres,
                   description: movie.overview,
                   poster: movie.poster_path
@@ -172,7 +177,7 @@ export async function syncUpcomingReleases() {
                   countryCode: country.code,
                   title: movie.title,
                   platform: platform,
-                  releaseDate: new Date(movie.release_date),
+                  releaseDate: releaseDateObj,
                   genres: mappedGenres,
                   description: movie.overview,
                   poster: movie.poster_path
