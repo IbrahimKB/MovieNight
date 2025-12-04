@@ -369,7 +369,7 @@ export function AddMovieModal({
                       className="space-y-4"
                     >
                       <div className="space-y-2">
-                        <Label>Your Interest Level (WatchDesire Score)</Label>
+                        <Label>Watch Desire Score</Label>
                         <div className="space-y-2">
                           <Slider
                             value={desiredScore}
