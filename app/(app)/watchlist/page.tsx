@@ -470,7 +470,7 @@ export default function WatchlistPage() {
                           {/* Desire Score */}
                           <div className="space-y-2">
                             <label className="text-sm font-medium">
-                              Your WatchDesire ({item.userDesireScore}/10)
+                              Watch Desire ({item.userDesireScore}/10)
                             </label>
                             <Slider
                               value={[item.userDesireScore]}
