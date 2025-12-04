@@ -118,7 +118,8 @@ export async function syncUpcomingReleases() {
             try {
               // Use primary_release_date for upcoming releases (what the query filtered by)
               // Fall back to release_date if primary_release_date is not available
-              const releaseDate = movie.primary_release_date || movie.release_date;
+              const releaseDate =
+                movie.primary_release_date || movie.release_date;
               const releaseYear = new Date(releaseDate).getFullYear();
               const mappedGenres =
                 movie.genre_ids?.map(

@@ -114,7 +114,10 @@ export async function POST(
           movieId: internalMovieId,
           watchedAt,
           originalScore: originalScore ?? null,
-          reaction: Object.keys(reactionData).length > 0 ? (reactionData as Prisma.InputJsonValue) : undefined,
+          reaction:
+            Object.keys(reactionData).length > 0
+              ? (reactionData as Prisma.InputJsonValue)
+              : undefined,
         },
       });
     } catch (err: any) {

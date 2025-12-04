@@ -92,7 +92,10 @@ export async function GET(req: NextRequest) {
 
     const avgDesireByMovieId = new Map<string, number>();
     allWatchDesires.forEach((wd) => {
-      const current = avgDesireByMovieId.get(wd.movieId) || { total: 0, count: 0 };
+      const current = avgDesireByMovieId.get(wd.movieId) || {
+        total: 0,
+        count: 0,
+      };
       const updated = {
         total: (current as any).total + (wd.rating || 0),
         count: (current as any).count + 1,
@@ -113,7 +116,9 @@ export async function GET(req: NextRequest) {
       releaseDate: wd.movie.releaseDate
         ? wd.movie.releaseDate.toISOString()
         : null,
-      userDesireScore: parseFloat((avgDesireByMovieId.get(wd.movieId) || 0).toFixed(1)),
+      userDesireScore: parseFloat(
+        (avgDesireByMovieId.get(wd.movieId) || 0).toFixed(1),
+      ),
       selectedFriends: eventsByMovieId.get(wd.movie.id) || [],
       suggestedBy: wd.suggestion?.fromUser.name,
       dateAdded: wd.createdAt.toISOString(),

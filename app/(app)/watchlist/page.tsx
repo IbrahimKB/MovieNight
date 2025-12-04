@@ -371,7 +371,6 @@ export default function WatchlistPage() {
         </p>
       </div>
 
-
       {/* Section 1: Your Watchlist */}
       <Card className="bg-accent/20">
         <CardHeader>

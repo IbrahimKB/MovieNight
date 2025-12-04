@@ -335,7 +335,6 @@ export default function MoviesPage() {
           </p>
         </div>
 
-
         {/* Search Bar */}
         <motion.div
           className="relative z-20"
