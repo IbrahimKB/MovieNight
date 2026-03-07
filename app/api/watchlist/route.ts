@@ -136,19 +136,34 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const historyData = history.map((h) => ({
-      id: h.movie.id,
-      historyId: h.id,
-      title: h.movie.title,
-      year: h.movie.year,
-      genres: h.movie.genres,
-      platform: h.movie.platform || "Unknown",
-      poster: h.movie.poster,
-      watchedDate: h.watchedAt.toISOString(),
-      watchedWith: [], // We'd need to look up Events or similar to find who it was watched with
-      originalScore: h.originalScore || 0,
-      actualRating: h.reaction ? (h.reaction as any).rating : undefined,
-    }));
+    const historyData = history.map((h) => {
+      const reaction =
+        h.reaction && typeof h.reaction === "object"
+          ? (h.reaction as Record<string, unknown>)
+          : null;
+
+      const watchedWithRaw = reaction?.watchedWith;
+      const watchedWith = Array.isArray(watchedWithRaw)
+        ? watchedWithRaw.filter((id): id is string => typeof id === "string")
+        : [];
+
+      const actualRating =
+        typeof reaction?.rating === "number" ? reaction.rating : undefined;
+
+      return {
+        id: h.movie.id,
+        historyId: h.id,
+        title: h.movie.title,
+        year: h.movie.year,
+        genres: h.movie.genres,
+        platform: h.movie.platform || "Unknown",
+        poster: h.movie.poster,
+        watchedDate: h.watchedAt.toISOString(),
+        watchedWith,
+        originalScore: h.originalScore || 0,
+        actualRating,
+      };
+    });
 
     return NextResponse.json({
       success: true,

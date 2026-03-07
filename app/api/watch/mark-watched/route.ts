@@ -33,6 +33,37 @@ async function mapExternalUserIdToInternal(
   return user?.id ?? null;
 }
 
+async function mapExternalUserIdsToInternal(
+  externalIds: string[],
+): Promise<Map<string, string>> {
+  const uniqueExternalIds = Array.from(
+    new Set(externalIds.map((id) => id.trim()).filter(Boolean)),
+  );
+
+  if (uniqueExternalIds.length === 0) {
+    return new Map<string, string>();
+  }
+
+  const users = await prisma.authUser.findMany({
+    where: {
+      OR: [{ puid: { in: uniqueExternalIds } }, { id: { in: uniqueExternalIds } }],
+    },
+    select: { id: true, puid: true },
+  });
+
+  const mapped = new Map<string, string>();
+  for (const user of users) {
+    if (user.puid && uniqueExternalIds.includes(user.puid)) {
+      mapped.set(user.puid, user.id);
+    }
+    if (uniqueExternalIds.includes(user.id)) {
+      mapped.set(user.id, user.id);
+    }
+  }
+
+  return mapped;
+}
+
 // -----------------------------------------------------
 // POST /api/watch/mark-watched
 // -----------------------------------------------------
@@ -82,6 +113,26 @@ export async function POST(
       reaction,
     } = validation.data;
 
+    const watchedWithExternal = Array.from(
+      new Set(
+        (watchedWith || [])
+          .map((id) => id.trim())
+          .filter((id) => id && id !== currentUser.id),
+      ),
+    );
+
+    const watchedWithMap = await mapExternalUserIdsToInternal(watchedWithExternal);
+    const validWatchedWithExternal: string[] = [];
+    const seenInternalIds = new Set<string>();
+
+    for (const externalId of watchedWithExternal) {
+      const internalId = watchedWithMap.get(externalId);
+      if (!internalId || internalId === userIdInternal) continue;
+      if (seenInternalIds.has(internalId)) continue;
+      seenInternalIds.add(internalId);
+      validWatchedWithExternal.push(externalId);
+    }
+
     // Ensure movie exists (lazy sync)
     const internalMovieId = await ensureMovieExists(inputMovieId);
 
@@ -99,7 +150,9 @@ export async function POST(
     const reactionData: any = reaction || {};
     if (rating !== undefined) reactionData.rating = rating;
     if (review !== undefined) reactionData.review = review;
-    if (watchedWith !== undefined) reactionData.watchedWith = watchedWith;
+    if (watchedWith !== undefined) {
+      reactionData.watchedWith = validWatchedWithExternal;
+    }
 
     // -----------------------------------------------------
     // Create watched movie record
@@ -161,7 +214,48 @@ export async function POST(
     }
 
     // -----------------------------------------------------
-    // Remove from WatchDesire if present
+    // Mirror watched history for selected friends.
+    // -----------------------------------------------------
+    for (const externalFriendId of validWatchedWithExternal) {
+      const internalFriendId = watchedWithMap.get(externalFriendId);
+      if (!internalFriendId || internalFriendId === userIdInternal) continue;
+
+      const friendReactionData = {
+        watchedWith: [
+          currentUser.id,
+          ...validWatchedWithExternal.filter((id) => id !== externalFriendId),
+        ],
+      };
+
+      try {
+        await prisma.watchedMovie.create({
+          data: {
+            userId: internalFriendId,
+            movieId: internalMovieId,
+            watchedAt,
+            reaction: friendReactionData as Prisma.InputJsonValue,
+          },
+        });
+      } catch (err: any) {
+        // Friend already has this movie in history; keep existing row.
+        if (
+          err.code !== "P2002" ||
+          !err.meta?.target?.includes("userId_movieId")
+        ) {
+          throw err;
+        }
+      }
+
+      await prisma.watchDesire.deleteMany({
+        where: {
+          userId: internalFriendId,
+          movieId: internalMovieId,
+        },
+      });
+    }
+
+    // -----------------------------------------------------
+    // Remove from current user's WatchDesire if present
     // -----------------------------------------------------
     await prisma.watchDesire.deleteMany({
       where: {
