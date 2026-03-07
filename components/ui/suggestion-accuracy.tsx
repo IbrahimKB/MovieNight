@@ -142,17 +142,28 @@ export function SuggestionLeaderboard() {
         }
         const data = await res.json();
         if (data.success) {
-          setBoard(
-            data.squadStats
-              .map((s: any) => ({
-                id: s.id,
-                username: s.name,
-                avatar: s.avatar,
-                accuracy: s.acceptanceRate,
-              }))
-              .sort((a: any, b: any) => b.accuracy - a.accuracy)
-              .slice(0, 5),
-          );
+          const ranked = data.squadStats
+            .filter((s: any) => s.suggestions > 0)
+            .map((s: any) => ({
+              id: s.id,
+              username: s.name,
+              avatar: s.avatar,
+              accuracy: s.acceptanceRate,
+              suggestions: s.suggestions,
+            }))
+            .sort((a: any, b: any) => {
+              if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+              return b.suggestions - a.suggestions;
+            })
+            .slice(0, 5)
+            .map(({ id, username, avatar, accuracy }: any) => ({
+              id,
+              username,
+              avatar,
+              accuracy,
+            }));
+
+          setBoard(ranked);
         }
       } catch (error) {
         console.error("Failed to fetch leaderboard", error);
@@ -170,8 +181,8 @@ export function SuggestionLeaderboard() {
 
       <CardContent className="space-y-2">
         {board.length === 0 ? (
-          <p className="text-sm text-muted-foreground animate-pulse">
-            Loading leaderboard…
+          <p className="text-sm text-muted-foreground">
+            Not enough suggestion data yet.
           </p>
         ) : (
           board.map((entry) => (

@@ -12,10 +12,28 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 1. Get all users to build the leaderboard
+    // 1. Build squad scope: current user + accepted friends only
+    const friendships = await prisma.friendship.findMany({
+      where: {
+        status: "accepted",
+        OR: [{ userId1: user.id }, { userId2: user.id }],
+      },
+      select: { userId1: true, userId2: true },
+    });
+
+    const squadUserIds = Array.from(
+      new Set([
+        user.id,
+        ...friendships.map((f) => (f.userId1 === user.id ? f.userId2 : f.userId1)),
+      ]),
+    );
+
+    // 2. Get squad users to build the leaderboard
     const users = await prisma.authUser.findMany({
+      where: { id: { in: squadUserIds } },
       select: {
         id: true,
+        username: true,
         name: true,
         avatar: true,
         watchHistory: {
@@ -37,7 +55,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // 2. Calculate stats for each user
+    // 3. Calculate stats for each user
     const squadStats = users.map((u) => {
       const totalWatched = u.watchHistory.length;
       const totalSuggestions = u.suggestionsFrom.length;
@@ -73,7 +91,7 @@ export async function GET(req: NextRequest) {
 
       return {
         id: u.id,
-        name: u.name || "Unknown",
+        name: u.name || u.username || "Unknown",
         avatar: u.avatar,
         totalWatched,
         suggestions: totalSuggestions,
@@ -83,7 +101,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    // Sort by totalWatched for rank
+    // Sort by total watched for rank
     squadStats.sort((a, b) => b.totalWatched - a.totalWatched);
 
     // Add rank
@@ -92,7 +110,7 @@ export async function GET(req: NextRequest) {
       rank: index + 1,
     }));
 
-    // 3. Get current user's specific stats with more detail
+    // 4. Get current user's specific stats with more detail
     const currentUserStats = rankedSquadStats.find((s) => s.id === user.id);
 
     // Calculate favorite genre for current user

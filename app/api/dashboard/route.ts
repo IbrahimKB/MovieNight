@@ -8,52 +8,76 @@ import { cacheFunction, CACHE_TTL } from "@/lib/cache";
 // CACHED DATA FETCHERS
 // ------------------------------------------------------
 
-// Cached Trending Movies (Global)
-const getCachedTrendingMovies = cacheFunction(
-  async () => {
-    const trendingGroups = await prisma.watchedMovie.groupBy({
-      by: ["movieId"],
-      _count: { movieId: true },
-      orderBy: { _count: { movieId: "desc" } },
-      take: 5,
-    });
+const TRENDING_LOOKBACK_DAYS = 90;
 
-    const movieIds = trendingGroups.map((g) => g.movieId);
-    const movies = await prisma.movie.findMany({
-      where: { id: { in: movieIds } },
-      select: {
-        id: true,
-        title: true,
-        year: true,
-        rtRating: true,
-        imdbRating: true,
-        genres: true,
-        description: true,
-        poster: true,
-      },
-    });
+async function getNetworkTrendingMovies(squadUserIds: string[]) {
+  if (squadUserIds.length === 0) return [];
 
-    return movies
-      .map((movie) => {
-        const count =
-          trendingGroups.find((t) => t.movieId === movie.id)?._count.movieId ||
-          0;
-        return {
-          id: movie.id,
-          title: movie.title,
-          year: movie.year,
-          rating: movie.imdbRating || movie.rtRating || 0,
-          genres: movie.genres,
-          watchCount: count,
-          description: movie.description,
-          poster: movie.poster,
-        };
-      })
-      .sort((a, b) => b.watchCount - a.watchCount);
-  },
-  ["dashboard-trending-movies"],
-  { revalidate: CACHE_TTL.HOUR }, // Cache for 1 hour
-);
+  const lookbackDate = new Date(
+    Date.now() - TRENDING_LOOKBACK_DAYS * 24 * 60 * 60 * 1000,
+  );
+
+  const recentGroups = await prisma.watchedMovie.groupBy({
+    by: ["movieId"],
+    where: {
+      userId: { in: squadUserIds },
+      watchedAt: { gte: lookbackDate },
+    },
+    _count: { movieId: true },
+    orderBy: { _count: { movieId: "desc" } },
+    take: 8,
+  });
+
+  const groupsToUse =
+    recentGroups.length > 0
+      ? recentGroups
+      : await prisma.watchedMovie.groupBy({
+          by: ["movieId"],
+          where: { userId: { in: squadUserIds } },
+          _count: { movieId: true },
+          orderBy: { _count: { movieId: "desc" } },
+          take: 8,
+        });
+
+  if (groupsToUse.length === 0) return [];
+
+  const movieIds = groupsToUse.map((g) => g.movieId);
+  const movies = await prisma.movie.findMany({
+    where: { id: { in: movieIds } },
+    select: {
+      id: true,
+      title: true,
+      year: true,
+      rtRating: true,
+      imdbRating: true,
+      genres: true,
+      description: true,
+      poster: true,
+    },
+  });
+
+  return movies
+    .map((movie) => {
+      const count =
+        groupsToUse.find((group) => group.movieId === movie.id)?._count.movieId ||
+        0;
+
+      return {
+        id: movie.id,
+        title: movie.title,
+        year: movie.year,
+        rating: movie.imdbRating || movie.rtRating || 0,
+        genres: movie.genres,
+        watchCount: count,
+        description: movie.description,
+        poster: movie.poster,
+      };
+    })
+    .sort((a, b) => {
+      if (b.watchCount !== a.watchCount) return b.watchCount - a.watchCount;
+      return b.year - a.year;
+    });
+}
 
 // Cached Upcoming Releases
 const getCachedUpcomingReleases = cacheFunction(
@@ -102,22 +126,22 @@ export async function GET(
     // Fetch user-specific data live (cannot be globally cached)
     // But we can parallelize it with cached global data
     const [
-      friendsCount,
+      friendships,
       activeSuggestions,
       watchHistoryCount,
       suggestionsMade,
       nudge,
       allWatchedIds,
-      trending,
       upcomingReleases,
       upcomingEvents,
     ] = await Promise.all([
-      // 1. Friends Count
-      prisma.friendship.count({
+      // 1. Friend relationships (count + squad scope)
+      prisma.friendship.findMany({
         where: {
           status: "accepted",
           OR: [{ userId1: userId }, { userId2: userId }],
         },
+        select: { userId1: true, userId2: true },
       }),
 
       // 2. Active Suggestions
@@ -160,13 +184,10 @@ export async function GET(
         select: { movieId: true },
       }),
 
-      // 7. Cached Trending
-      getCachedTrendingMovies(),
-
-      // 8. Cached Upcoming
+      // 7. Cached Upcoming
       getCachedUpcomingReleases(),
 
-      // 9. Upcoming Events (Personal)
+      // 8. Upcoming Events (Personal)
       prisma.event.findMany({
         where: {
           OR: [{ hostUserId: userId }, { participants: { has: userId } }],
@@ -177,6 +198,16 @@ export async function GET(
         take: 3,
       }),
     ]);
+
+    const friendsCount = friendships.length;
+    const squadUserIds = Array.from(
+      new Set([
+        userId,
+        ...friendships.map((f) => (f.userId1 === userId ? f.userId2 : f.userId1)),
+      ]),
+    );
+
+    const trending = await getNetworkTrendingMovies(squadUserIds);
 
     // Calculate Accuracy (in memory, cheap)
     const watchedSet = new Set(allWatchedIds.map((w) => w.movieId));
