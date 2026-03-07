@@ -350,7 +350,7 @@ export async function PUT(
       data: { status: status as any },
     });
 
-    // If accepted, add user to event participants
+    // Keep event participants in sync with invitation status
     if (status === "accepted") {
       const event = await prisma.event.findUnique({
         where: { id: eventId },
@@ -362,6 +362,22 @@ export async function PUT(
           where: { id: eventId },
           data: {
             participants: [...event.participants, currentUserInternalId],
+          },
+        });
+      }
+    } else {
+      const event = await prisma.event.findUnique({
+        where: { id: eventId },
+        select: { participants: true },
+      });
+
+      if (event && event.participants.includes(currentUserInternalId)) {
+        await prisma.event.update({
+          where: { id: eventId },
+          data: {
+            participants: event.participants.filter(
+              (participantId) => participantId !== currentUserInternalId,
+            ),
           },
         });
       }
