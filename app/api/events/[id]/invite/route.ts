@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
+import { enqueuePushToUser } from "@/lib/push-notifications";
 
 // Helpers: map external <-> internal user IDs
 async function mapExternalUserIdToInternal(
@@ -267,6 +268,59 @@ export async function POST(
             data: invitationsToCreate,
           })
         : { count: 0 };
+
+    if (invitationsToCreate.length > 0) {
+      const [host, eventDetails] = await Promise.all([
+        prisma.authUser.findUnique({
+          where: { id: currentUserInternalId },
+          select: { name: true, username: true },
+        }),
+        prisma.event.findUnique({
+          where: { id: eventId },
+          include: {
+            movie: {
+              select: { title: true },
+            },
+          },
+        }),
+      ]);
+
+      const hostName = host?.name || host?.username || "A friend";
+      const movieTitle = eventDetails?.movie?.title || "a movie";
+      const eventDate = eventDetails?.date
+        ? new Date(eventDetails.date).toLocaleDateString("en-GB")
+        : "";
+
+      await prisma.notification.createMany({
+        data: invitationsToCreate.map((invitation) => ({
+          userId: invitation.userId,
+          type: "event_invitation",
+          title: "Movie night invitation",
+          message: `${hostName} invited you to watch "${movieTitle}"${eventDate ? ` on ${eventDate}` : ""}.`,
+          data: {
+            eventId,
+            movieTitle,
+          },
+        })),
+      });
+
+      await Promise.all(
+        invitationsToCreate.map((invitation) =>
+          enqueuePushToUser(
+            invitation.userId,
+            {
+              title: "Movie night invitation",
+              body: `${hostName} invited you to watch "${movieTitle}".`,
+              url: `/events/${eventId}`,
+              type: "event_invitation",
+              tag: `event-invite-${eventId}`,
+              data: { eventId },
+            },
+            "friendRequests",
+          ),
+        ),
+      );
+    }
 
     return NextResponse.json(
       {

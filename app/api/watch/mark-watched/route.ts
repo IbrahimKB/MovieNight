@@ -27,7 +27,10 @@ async function mapExternalUserIdToInternal(
   externalId: string,
 ): Promise<string | null> {
   const user = await prisma.authUser.findFirst({
-    where: { OR: [{ puid: externalId }, { id: externalId }] },
+    where: {
+      deletedAt: null,
+      OR: [{ puid: externalId }, { id: externalId }],
+    },
     select: { id: true },
   });
   return user?.id ?? null;
@@ -46,6 +49,7 @@ async function mapExternalUserIdsToInternal(
 
   const users = await prisma.authUser.findMany({
     where: {
+      deletedAt: null,
       OR: [{ puid: { in: uniqueExternalIds } }, { id: { in: uniqueExternalIds } }],
     },
     select: { id: true, puid: true },

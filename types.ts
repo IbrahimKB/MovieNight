@@ -4,7 +4,7 @@ export interface User {
   email: string;
   name: string;
   password: string; // Hashed password
-  role: "user" | "admin";
+  role: "user" | "admin" | "super_admin";
   avatar?: string;
   joinedAt: string;
   createdAt: string;
@@ -217,7 +217,7 @@ export interface ResetPasswordRequest {
 
 export interface JWTPayload {
   userId: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "super_admin";
   iat?: number;
   exp?: number;
 }

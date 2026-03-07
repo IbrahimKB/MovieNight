@@ -47,11 +47,11 @@ export default function SmartNudge({
   return (
     <Card className="border-2 border-primary/20">
       <CardHeader>
-        <CardTitle>Smart Nudge 🎯</CardTitle>
+        <CardTitle>Smart Nudge</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          <strong>{nudge.movie}</strong> — {nudge.reason}
+          <strong>{nudge.movie}</strong> - {nudge.reason}
         </p>
 
         <div className="flex gap-2">

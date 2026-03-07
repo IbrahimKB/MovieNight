@@ -6,6 +6,7 @@ import { unauthorized, badRequest, ok, serverError } from "@/lib/api-helpers";
 
 const ProfileSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  email: z.string().email().optional(),
   avatar: z.string().url().optional().or(z.literal("")),
 });
 
@@ -21,6 +22,23 @@ export async function PATCH(req: NextRequest) {
 
     if (!parsed.success) {
       return badRequest("Invalid profile data");
+    }
+
+    if (parsed.data.email) {
+      const existing = await prisma.authUser.findFirst({
+        where: {
+          email: {
+            equals: parsed.data.email,
+            mode: "insensitive",
+          },
+          NOT: { id: user.id },
+        },
+        select: { id: true },
+      });
+
+      if (existing) {
+        return badRequest("Email is already in use");
+      }
     }
 
     const updatedUser = await prisma.authUser.update({

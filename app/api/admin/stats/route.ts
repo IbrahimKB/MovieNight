@@ -13,15 +13,33 @@ export async function GET(req: NextRequest) {
     const [
       totalUsers,
       totalAdmins,
+      totalSuperAdmins,
+      disabledUsers,
       totalMovies,
       totalSuggestions,
       totalEvents,
+      queuedPushJobs,
+      failedPushJobs,
     ] = await Promise.all([
-      prisma.authUser.count(),
-      prisma.authUser.count({ where: { role: "admin" } }),
+      prisma.authUser.count({
+        where: { deletedAt: null },
+      }),
+      prisma.authUser.count({ where: { role: "admin", deletedAt: null } }),
+      prisma.authUser.count({
+        where: { role: "super_admin", deletedAt: null },
+      }),
+      prisma.authUser.count({
+        where: { disabledAt: { not: null }, deletedAt: null },
+      }),
       prisma.movie.count(),
       prisma.suggestion.count(),
       prisma.event.count(),
+      prisma.pushDeliveryJob.count({
+        where: { status: "queued" },
+      }),
+      prisma.pushDeliveryJob.count({
+        where: { status: "failed" },
+      }),
     ]);
 
     return NextResponse.json({
@@ -29,9 +47,13 @@ export async function GET(req: NextRequest) {
       data: {
         totalUsers,
         totalAdmins,
+        totalSuperAdmins,
+        disabledUsers,
         totalMovies,
         totalSuggestions,
         totalEvents,
+        queuedPushJobs,
+        failedPushJobs,
       },
     });
   } catch (err) {

@@ -280,6 +280,7 @@ export function hasExistingRequest(
 // Dashboard and statistics
 export async function getDashboardStats(): Promise<{
   stats: DashboardStats;
+  featured: TrendingMovie | null;
   trending: TrendingMovie[];
   upcoming: any[];
   nudge: any;
@@ -292,6 +293,7 @@ export async function getDashboardStats(): Promise<{
     });
     const data = await handleApiResponse<{
       stats: DashboardStats;
+      featured: TrendingMovie | null;
       trending: TrendingMovie[];
       upcoming: any[];
       nudge: any;
@@ -307,6 +309,7 @@ export async function getDashboardStats(): Promise<{
         moviesWatchedThisWeek: 0,
         suggestionAccuracy: 0,
       },
+      featured: null,
       trending: [],
       upcoming: [],
       nudge: null,

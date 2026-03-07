@@ -16,7 +16,7 @@ export interface User {
   username: string;
   email: string;
   name: string | null;
-  role: "user" | "admin";
+  role: "user" | "admin" | "super_admin";
   joinedAt: string;
   createdAt?: string;
   updatedAt?: string;
@@ -385,7 +385,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.role === "super_admin";
 
   return (
     <AuthContext.Provider

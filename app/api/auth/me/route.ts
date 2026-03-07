@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     // Get internal user (id or puid)
     const user = await prisma.authUser.findFirst({
       where: {
+        deletedAt: null,
+        disabledAt: null,
         OR: [
           { id: currentUser.id },
           { puid: currentUser.id },

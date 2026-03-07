@@ -16,6 +16,37 @@ const WatchlistPostSchema = z.object({
 
 type WatchlistPostRequest = z.infer<typeof WatchlistPostSchema>;
 
+async function mapExternalUserIdsToInternal(
+  externalIds: string[],
+): Promise<Map<string, string>> {
+  const uniqueExternalIds = Array.from(
+    new Set(externalIds.map((id) => id.trim()).filter(Boolean)),
+  );
+  if (uniqueExternalIds.length === 0) {
+    return new Map<string, string>();
+  }
+
+  const users = await prisma.authUser.findMany({
+    where: {
+      OR: [{ puid: { in: uniqueExternalIds } }, { id: { in: uniqueExternalIds } }],
+      deletedAt: null,
+    },
+    select: { id: true, puid: true },
+  });
+
+  const mapped = new Map<string, string>();
+  for (const dbUser of users) {
+    if (dbUser.puid && uniqueExternalIds.includes(dbUser.puid)) {
+      mapped.set(dbUser.puid, dbUser.id);
+    }
+    if (uniqueExternalIds.includes(dbUser.id)) {
+      mapped.set(dbUser.id, dbUser.id);
+    }
+  }
+
+  return mapped;
+}
+
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
@@ -209,16 +240,47 @@ export async function POST(req: NextRequest) {
     const { action, movieId, watchedWith } = validationResult.data;
 
     if (action === "markWatched") {
+      const watchedWithRaw = Array.from(new Set((watchedWith || []).filter(Boolean)));
+      const watchedWithMap = await mapExternalUserIdsToInternal(watchedWithRaw);
+      const validWatchedWith = watchedWithRaw
+        .map((id) => watchedWithMap.get(id))
+        .filter((id): id is string => !!id && id !== user.id);
+
       // Create WatchedMovie entry
       await prisma.watchedMovie.create({
         data: {
           userId: user.id,
           movieId: movieId,
           reaction: {
-            watchedWith: watchedWith,
+            watchedWith: validWatchedWith,
           },
         },
       });
+
+      for (const friendId of validWatchedWith) {
+        try {
+          await prisma.watchedMovie.create({
+            data: {
+              userId: friendId,
+              movieId,
+              reaction: {
+                watchedWith: [
+                  user.id,
+                  ...validWatchedWith.filter((id) => id !== friendId),
+                ],
+              },
+            },
+          });
+        } catch (err: any) {
+          if (err.code !== "P2002") {
+            throw err;
+          }
+        }
+
+        await prisma.watchDesire.deleteMany({
+          where: { userId: friendId, movieId },
+        });
+      }
 
       // Remove from WatchDesire since it's now watched
       await prisma.watchDesire.deleteMany({

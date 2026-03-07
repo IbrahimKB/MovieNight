@@ -286,7 +286,7 @@ export default function WatchlistPage() {
         setHistory((prev) => [newItem, ...prev]);
 
         toast({
-          title: "Movie marked as watched! ✅",
+          title: "Movie marked as watched",
           description: `${item.title} has been added to your watch history.`,
         });
       } else {
@@ -376,7 +376,7 @@ export default function WatchlistPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <Target className="h-6 w-6 text-primary" />
-            🎯 Your Watchlist
+            Your Watchlist
           </CardTitle>
           <p className="text-muted-foreground">
             Movies you want to watch - edit your desire scores and plan who to
@@ -555,7 +555,7 @@ export default function WatchlistPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
             <History className="h-6 w-6 text-primary" />
-            📅 Viewing History
+            Viewing History
           </CardTitle>
           <p className="text-muted-foreground">
             A timeline of everything you've watched with friends.
@@ -711,8 +711,8 @@ export default function WatchlistPage() {
                           item.actualRating !== item.originalScore && (
                             <div className="text-xs text-muted-foreground bg-accent/30 p-2 rounded">
                               {item.actualRating > item.originalScore
-                                ? "🎉 Better than expected!"
-                                : "😐 Didn't quite meet expectations"}
+                                ? "Better than expected!"
+                                : "Did not quite meet expectations"}
                             </div>
                           )}
                       </div>
@@ -760,19 +760,19 @@ export default function WatchlistPage() {
               <Label>Your Rating</Label>
               <div className="space-y-3">
                 <div className="flex gap-1 text-4xl cursor-pointer">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setRating([i + 1])}
-                      className="transition-transform hover:scale-110 active:scale-95"
-                    >
-                      {i < rating[0] ? (
-                        <span className="text-yellow-400">★</span>
-                      ) : (
-                        <span className="text-muted-foreground">☆</span>
-                      )}
-                    </button>
-                  ))}
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setRating([i + 1])}
+                          className="transition-transform hover:scale-110 active:scale-95"
+                        >
+                          {i < rating[0] ? (
+                        <span className="text-yellow-400">*</span>
+                          ) : (
+                        <span className="text-muted-foreground">-</span>
+                          )}
+                        </button>
+                      ))}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {rating[0]}/5 Stars - Letterboxd Style Rating

@@ -1,23 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import {
   requireAdmin,
   requireSuperAdmin,
   isErrorResponse,
 } from "@/lib/auth-helpers";
-import { hash } from "bcryptjs";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { logAdminAction } from "@/lib/admin-audit";
 
-export async function POST(
+const StatusSchema = z.object({
+  disabled: z.boolean(),
+});
+
+export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
     const clientIp = getClientIp(req.headers);
     const rate = checkRateLimit({
-      key: `admin-reset-password:${clientIp}`,
-      limit: 30,
+      key: `admin-user-status:${clientIp}`,
+      limit: 40,
       windowMs: 60 * 60 * 1000,
     });
     if (!rate.allowed) {
@@ -34,23 +38,25 @@ export async function POST(
     const { user } = authResult;
 
     const body = await req.json();
-    const { newPassword } = body;
-
-    if (!newPassword || newPassword.length < 8) {
+    const parsed = StatusSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Password must be at least 8 chars" },
+        { success: false, error: "Invalid payload" },
         { status: 400 },
       );
     }
 
     const { id } = await context.params;
+    if (id === user.id && parsed.data.disabled) {
+      return NextResponse.json(
+        { success: false, error: "Cannot disable yourself" },
+        { status: 400 },
+      );
+    }
+
     const target = await prisma.authUser.findUnique({
       where: { id },
-      select: {
-        id: true,
-        role: true,
-        deletedAt: true,
-      },
+      select: { id: true, role: true, deletedAt: true },
     });
 
     if (!target || target.deletedAt) {
@@ -60,41 +66,58 @@ export async function POST(
       );
     }
 
-    if (target.role === "super_admin" && target.id !== user.id) {
+    if (
+      (target.role === "admin" || target.role === "super_admin") &&
+      target.id !== user.id
+    ) {
       const superAdminResult = await requireSuperAdmin();
       if (isErrorResponse(superAdminResult)) {
         return superAdminResult;
       }
     }
 
-    const passwordHash = await hash(newPassword, 12);
-
-    await prisma.authUser.update({
+    const disabledAt = parsed.data.disabled ? new Date() : null;
+    const updated = await prisma.authUser.update({
       where: { id },
       data: {
-        passwordHash,
+        disabledAt,
         failedLoginAttempts: 0,
         lockedUntil: null,
       },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        name: true,
+        role: true,
+        joinedAt: true,
+        disabledAt: true,
+      },
     });
 
-    await prisma.session.deleteMany({
-      where: { userId: id },
-    });
+    if (parsed.data.disabled) {
+      await prisma.session.deleteMany({
+        where: { userId: id },
+      });
+    }
 
     await logAdminAction({
       actorId: user.id,
       targetUserId: id,
-      action: "user.reset_password",
-      metadata: { sessionsRevoked: true },
+      action: parsed.data.disabled ? "user.disable" : "user.enable",
+      metadata: { previousRole: target.role },
     });
 
-    return NextResponse.json({ success: true, message: "Password reset" });
+    return NextResponse.json({
+      success: true,
+      data: updated,
+    });
   } catch (err) {
-    console.error("Error resetting password:", err);
+    console.error("Error updating user status:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 },
     );
   }
 }
+

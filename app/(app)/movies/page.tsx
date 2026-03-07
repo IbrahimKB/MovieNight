@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Search, Clapperboard, Loader2, Plus, Check } from "lucide-react";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
@@ -233,13 +234,15 @@ export default function MoviesPage() {
     >
       <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
         {movie.poster ? (
-          <motion.img
-            src={movie.poster}
-            alt={movie.title}
-            className="w-full h-full object-cover"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.3 }}
-          />
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
+            <Image
+              src={movie.poster}
+              alt={movie.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+              className="object-cover"
+            />
+          </motion.div>
         ) : (
           <div className="text-center p-4">
             <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
@@ -276,11 +279,15 @@ export default function MoviesPage() {
       >
         <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-background flex items-center justify-center">
           {movie.poster ? (
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={movie.poster}
+                alt={movie.title}
+                fill
+                sizes="64px"
+                className="object-cover group-hover:scale-110 transition-transform"
+              />
+            </div>
           ) : (
             <Clapperboard className="h-6 w-6 text-muted-foreground" />
           )}
@@ -291,7 +298,7 @@ export default function MoviesPage() {
             <p className="text-xs text-muted-foreground">{movie.year}</p>
             {movie.imdbRating && (
               <p className="text-xs text-yellow-500 mt-1">
-                ⭐ {movie.imdbRating.toFixed(1)}
+                IMDB {movie.imdbRating.toFixed(1)}
               </p>
             )}
           </div>

@@ -72,6 +72,8 @@ export async function GET(
       const users = await prisma.authUser.findMany({
         where: {
           AND: [
+            { deletedAt: null },
+            { disabledAt: null },
             {
               OR: [
                 { username: { contains: term, mode: "insensitive" } },
@@ -114,6 +116,8 @@ export async function GET(
       where: {
         status: "accepted",
         OR: [{ userId1: currentUser.id }, { userId2: currentUser.id }],
+        user1: { is: { deletedAt: null, disabledAt: null } },
+        user2: { is: { deletedAt: null, disabledAt: null } },
       },
       include: {
         user1: true,
@@ -142,6 +146,7 @@ export async function GET(
       where: {
         status: "pending",
         userId2: currentUser.id,
+        user1: { is: { deletedAt: null, disabledAt: null } },
       },
       include: {
         user1: true, // Sender
@@ -168,6 +173,7 @@ export async function GET(
       where: {
         status: "pending",
         userId1: currentUser.id,
+        user2: { is: { deletedAt: null, disabledAt: null } },
       },
       include: {
         user2: true, // Receiver

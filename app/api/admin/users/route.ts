@@ -10,12 +10,22 @@ export async function GET(req: NextRequest) {
     }
     const { user } = authResult;
 
+    const includeDeleted = req.nextUrl.searchParams.get("includeDeleted") === "1";
+
     const users = await prisma.authUser.findMany({
+      where: includeDeleted
+        ? undefined
+        : {
+            deletedAt: null,
+          },
       select: {
         id: true,
+        puid: true,
         username: true,
         email: true,
         name: true,
+        disabledAt: true,
+        deletedAt: true,
         role: true,
         joinedAt: true,
       },

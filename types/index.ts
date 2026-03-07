@@ -7,7 +7,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   name?: string;
-  role: "user" | "admin";
+  role: "user" | "admin" | "super_admin";
   joinedAt: Date;
   puid?: string;
 }

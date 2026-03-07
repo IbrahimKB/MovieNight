@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { emitToUser } from "@/lib/socket-server";
+import { enqueuePushToUser } from "@/lib/push-notifications";
 import { ApiResponse } from "@/types";
 
 // ---------------------------------------------
@@ -126,19 +127,56 @@ export async function POST(
       },
     });
 
-    // Emit real-time notification to recipient (production only)
-    if (process.env.NODE_ENV === "production") {
+    const recipientPrefs = await prisma.userNotificationPreferences.findUnique({
+      where: { userId: targetUserId },
+      select: { friendRequests: true },
+    });
+
+    const shouldNotifyInApp = recipientPrefs?.friendRequests ?? true;
+
+    if (shouldNotifyInApp) {
       const senderUser = await prisma.authUser.findUnique({
         where: { id: userId1 },
         select: { id: true, name: true, username: true, avatar: true },
       });
 
       if (senderUser) {
-        emitToUser(targetUserId, "friend:request-received", {
-          id: friendship.id,
-          fromUser: senderUser,
-          sentAt: friendship.createdAt,
+        await prisma.notification.create({
+          data: {
+            userId: targetUserId,
+            type: "friend_request",
+            title: "New friend request",
+            message: `${senderUser.name || senderUser.username} sent you a friend request.`,
+            data: {
+              friendshipId: friendship.id,
+              fromUserId: senderUser.id,
+            },
+          },
         });
+
+        // Keep real-time update behavior for active sessions.
+        if (process.env.NODE_ENV === "production") {
+          emitToUser(targetUserId, "friend:request-received", {
+            id: friendship.id,
+            fromUser: senderUser,
+            sentAt: friendship.createdAt,
+          });
+        }
+
+        await enqueuePushToUser(
+          targetUserId,
+          {
+            title: "New friend request",
+            body: `${senderUser.name || senderUser.username} sent you a friend request.`,
+            url: "/friends",
+            type: "friend_request",
+            tag: `friend-request-${friendship.id}`,
+            data: {
+              friendshipId: friendship.id,
+            },
+          },
+          "friendRequests",
+        );
       }
     }
 

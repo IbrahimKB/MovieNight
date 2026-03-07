@@ -2,7 +2,9 @@
   "name": "MovieNight - Discover & Share Movies with Friends",
   "short_name": "MovieNight",
   "description": "Discover movies, suggest to friends, and build your perfect movie night with MovieNight.",
+  "id": "/",
   "start_url": "/",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#dc2626",
@@ -89,8 +91,5 @@
       "url": "url"
     }
   },
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  }
+  "prefer_related_applications": false
 }

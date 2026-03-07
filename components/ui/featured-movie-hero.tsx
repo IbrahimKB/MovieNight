@@ -1,13 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Bookmark, Plus, Play, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { shouldReduceMotion } from "@/lib/animations";
-import { generatePosterSrcSet, generateImageSizes } from "@/lib/image-utils";
+import {
+  generateImageSizes,
+  getPosterImageUrl,
+} from "@/lib/image-utils";
 
 interface FeaturedMovieHeroProps {
   movie: {
@@ -85,18 +89,15 @@ export default function FeaturedMovieHero({
         )}
       >
         {showImage ? (
-          <img
-            src={backdropImage}
-            srcSet={generatePosterSrcSet(backdropImage)}
-            sizes={generateImageSizes("hero")}
+          <Image
+            src={getPosterImageUrl(backdropImage, hasBackdropImage ? 780 : 500)}
             alt={movie.title}
+            fill
+            priority
+            sizes={generateImageSizes("hero")}
             className={cn(
-              "w-full h-full",
               hasBackdropImage ? "object-cover object-center" : "object-cover object-top",
             )}
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
             onError={() => setImageFailed(true)}
           />
         ) : (
@@ -172,7 +173,7 @@ export default function FeaturedMovieHero({
 
               {userRating && (
                 <Badge className="bg-green-600/80 hover:bg-green-600">
-                  Your: {userRating}★
+                  Your: {userRating}*
                 </Badge>
               )}
             </div>

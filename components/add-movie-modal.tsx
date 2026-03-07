@@ -254,7 +254,7 @@ export function AddMovieModal({
   const getRatingStars = (value: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
       <span key={i} className={i < Math.ceil(value) ? "text-yellow-400" : ""}>
-        {i < Math.ceil(value) ? "★" : "☆"}
+        {i < Math.ceil(value) ? "*" : "-"}
       </span>
     ));
   };
@@ -299,7 +299,7 @@ export function AddMovieModal({
                       {movie.year}
                       {movie.imdbRating && (
                         <span className="ml-3">
-                          ⭐ {movie.imdbRating.toFixed(1)}
+                          IMDB {movie.imdbRating.toFixed(1)}
                         </span>
                       )}
                     </p>
@@ -437,10 +437,10 @@ export function AddMovieModal({
                                 className="transition-transform hover:scale-110 active:scale-95"
                               >
                                 {i < rating[0] ? (
-                                  <span className="text-yellow-400">★</span>
+                                  <span className="text-yellow-400">*</span>
                                 ) : (
                                   <span className="text-muted-foreground">
-                                    ☆
+                                    -
                                   </span>
                                 )}
                               </button>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,11 +28,6 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import SmartNudge from "@/components/SmartNudge";
-import SocialActivityFeed from "@/components/ui/social-activity-feed";
-import SuggestionAccuracy, {
-  SuggestionLeaderboard,
-} from "@/components/ui/suggestion-accuracy";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -53,11 +49,55 @@ const defaultStats: DashboardStats = {
 
 import { StatCard } from "@/components/stat-card";
 
+const SmartNudge = dynamic(() => import("@/components/SmartNudge"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-24 rounded-lg border border-primary/10 bg-card animate-pulse" />
+  ),
+});
+
+const SocialActivityFeed = dynamic(
+  () => import("@/components/ui/social-activity-feed"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="space-y-3 sm:space-y-4">
+        <div className="h-24 rounded-lg border border-primary/10 bg-card animate-pulse" />
+        <div className="h-24 rounded-lg border border-primary/10 bg-card animate-pulse" />
+      </div>
+    ),
+  },
+);
+
+const SuggestionAccuracy = dynamic(
+  () => import("@/components/ui/suggestion-accuracy").then((m) => m.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-28 rounded-lg border border-primary/10 bg-card animate-pulse" />
+    ),
+  },
+);
+
+const SuggestionLeaderboard = dynamic(
+  () =>
+    import("@/components/ui/suggestion-accuracy").then(
+      (m) => m.SuggestionLeaderboard,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-40 rounded-lg border border-primary/10 bg-card animate-pulse" />
+    ),
+  },
+);
+
 export default function HomePage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
 
   const [stats, setStats] = useState<DashboardStats>(defaultStats);
+  const [featuredMovie, setFeaturedMovie] = useState<TrendingMovie | null>(null);
   const [trendingMovies, setTrendingMovies] = useState<TrendingMovie[]>([]);
   const [recentReleases, setRecentReleases] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,11 +116,13 @@ export default function HomePage() {
 
       const {
         stats: dashboardStats,
+        featured,
         trending,
         upcoming,
       } = await getDashboardStats();
 
       setStats(dashboardStats);
+      setFeaturedMovie(featured || trending[0] || null);
       setTrendingMovies(trending);
       setRecentReleases(upcoming);
     } catch (error) {
@@ -155,7 +197,7 @@ export default function HomePage() {
         transition={{ duration: 0.4 }}
       >
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight">
-          Welcome back, {user?.name?.split(" ")[0] || "Movie Lover"}! 🎬
+          Welcome back, {user?.name?.split(" ")[0] || "Movie Lover"}!
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Discover what your friends are watching and find your next great movie
@@ -163,7 +205,7 @@ export default function HomePage() {
       </motion.div>
 
       {/* Featured Movie Hero */}
-      {!isLoading && trendingMovies.length > 0 && (
+      {!isLoading && featuredMovie && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -171,18 +213,18 @@ export default function HomePage() {
         >
           <FeaturedMovieHero
             movie={{
-              id: trendingMovies[0].id,
-              title: trendingMovies[0].title,
-              year: trendingMovies[0].year,
-              genres: trendingMovies[0].genres,
-              description: trendingMovies[0].description || "",
-              poster: trendingMovies[0].poster || "",
-              backdrop: trendingMovies[0].backdrop || trendingMovies[0].poster || "",
-              imdbRating: trendingMovies[0].rating,
+              id: featuredMovie.id,
+              title: featuredMovie.title,
+              year: featuredMovie.year,
+              genres: featuredMovie.genres,
+              description: featuredMovie.description || "",
+              poster: featuredMovie.poster || "",
+              backdrop: featuredMovie.backdrop || featuredMovie.poster || "",
+              imdbRating: featuredMovie.rating,
             }}
-            friendsWatched={trendingMovies[0].watchCount || 0}
+            friendsWatched={featuredMovie.watchCount || 0}
             onAddToWatchlist={() => router.push("/movies")}
-            onWatch={() => router.push(`/movies/${trendingMovies[0].id}`)}
+            onWatch={() => router.push(`/movies/${featuredMovie.id}`)}
             onSuggest={() => router.push("/suggestions")}
           />
         </motion.div>
@@ -449,22 +491,22 @@ export default function HomePage() {
                   >
                     {recentReleases.slice(0, 2).map((release) => {
                       const platformEmoji = {
-                        Theatrical: "🎬",
-                        Cinema: "🎬",
-                        Theater: "🎬",
-                        Netflix: "📺",
-                        "Disney+": "🎥",
-                        "Prime Video": "🎁",
-                        "Apple TV": "🍎",
-                        "HBO Max": "🎭",
-                        Hulu: "📺",
-                        Peacock: "🦚",
-                        "Paramount+": "⭐",
+                        Theatrical: "CINEMA",
+                        Cinema: "CINEMA",
+                        Theater: "CINEMA",
+                        Netflix: "NETFLIX",
+                        "Disney+": "DISNEY",
+                        "Prime Video": "PRIME",
+                        "Apple TV": "APPLE",
+                        "HBO Max": "MAX",
+                        Hulu: "HULU",
+                        Peacock: "PEACOCK",
+                        "Paramount+": "PARAMOUNT",
                       };
                       const emoji =
                         platformEmoji[
                           release.platform as keyof typeof platformEmoji
-                        ] || "📺";
+                        ] || "STREAM";
 
                       return (
                         <motion.div

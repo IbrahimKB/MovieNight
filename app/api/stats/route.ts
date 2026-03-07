@@ -30,7 +30,10 @@ export async function GET(req: NextRequest) {
 
     // 2. Get squad users to build the leaderboard
     const users = await prisma.authUser.findMany({
-      where: { id: { in: squadUserIds } },
+      where: {
+        id: { in: squadUserIds },
+        deletedAt: null,
+      },
       select: {
         id: true,
         username: true,

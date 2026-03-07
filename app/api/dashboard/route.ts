@@ -9,7 +9,24 @@ import { tmdbClient } from "@/lib/tmdb";
 // CACHED DATA FETCHERS
 // ------------------------------------------------------
 
-const TRENDING_LOOKBACK_DAYS = 90;
+const TRENDING_LOOKBACK_DAYS = 45;
+
+// Cache TMDB backdrop lookups so dashboard requests do not repeatedly block on external API latency.
+const getCachedBackdropUrl = cacheFunction(
+  async (tmdbId: number) => {
+    if (!process.env.TMDB_API_KEY) return null;
+
+    try {
+      const tmdbDetails = await tmdbClient.getMovieDetails(tmdbId);
+      if (!tmdbDetails?.backdrop_path) return null;
+      return tmdbClient.getBackdropUrl(tmdbDetails.backdrop_path) || null;
+    } catch {
+      return null;
+    }
+  },
+  ["dashboard-featured-backdrop"],
+  { revalidate: CACHE_TTL.DAY },
+);
 
 async function getNetworkTrendingMovies(squadUserIds: string[]) {
   if (squadUserIds.length === 0) return [];
@@ -83,19 +100,98 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
     });
 
   const featuredMovie = sorted[0];
-  if (featuredMovie?.tmdbId && process.env.TMDB_API_KEY) {
-    try {
-      const tmdbDetails = await tmdbClient.getMovieDetails(featuredMovie.tmdbId);
-      if (tmdbDetails?.backdrop_path) {
-        featuredMovie.backdrop =
-          tmdbClient.getBackdropUrl(tmdbDetails.backdrop_path) || null;
-      }
-    } catch (err) {
-      console.warn("Failed to fetch featured movie backdrop:", err);
-    }
+  if (featuredMovie?.tmdbId) {
+    featuredMovie.backdrop = await getCachedBackdropUrl(featuredMovie.tmdbId);
   }
 
   return sorted.map(({ tmdbId, ...movie }) => movie);
+}
+
+async function getFeaturedUpcomingMovie(squadUserIds: string[]) {
+  const windowStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const windowEnd = new Date(Date.now() + 120 * 24 * 60 * 60 * 1000);
+
+  const releases = await prisma.release.findMany({
+    where: {
+      releaseDate: {
+        gte: windowStart,
+        lte: windowEnd,
+      },
+    },
+    include: {
+      movie: {
+        select: {
+          id: true,
+          tmdbId: true,
+          title: true,
+          year: true,
+          imdbRating: true,
+          rtRating: true,
+          genres: true,
+          description: true,
+          poster: true,
+        },
+      },
+    },
+    orderBy: {
+      releaseDate: "asc",
+    },
+    take: 60,
+  });
+
+  if (releases.length === 0) return null;
+
+  const movieIds = Array.from(new Set(releases.map((r) => r.movieId)));
+  const desires = await prisma.watchDesire.groupBy({
+    by: ["movieId"],
+    where: {
+      movieId: { in: movieIds },
+      userId: { in: squadUserIds },
+    },
+    _count: { movieId: true },
+  });
+
+  const desireCountByMovie = new Map(
+    desires.map((row) => [row.movieId, row._count.movieId]),
+  );
+
+  const ranked = releases
+    .map((release) => ({
+      id: release.movie.id,
+      title: release.movie.title,
+      year: release.movie.year,
+      rating: release.movie.imdbRating || release.movie.rtRating || 0,
+      genres: release.movie.genres,
+      watchCount: desireCountByMovie.get(release.movie.id) || 0,
+      description: release.movie.description,
+      poster: release.movie.poster,
+      releaseDate: release.releaseDate,
+      tmdbId: release.movie.tmdbId,
+      backdrop: null as string | null,
+    }))
+    .sort((a, b) => {
+      if (b.watchCount !== a.watchCount) return b.watchCount - a.watchCount;
+      return a.releaseDate.getTime() - b.releaseDate.getTime();
+    });
+
+  const featured = ranked[0];
+  if (featured?.tmdbId) {
+    featured.backdrop = await getCachedBackdropUrl(featured.tmdbId);
+  }
+
+  return featured
+    ? {
+        id: featured.id,
+        title: featured.title,
+        year: featured.year,
+        rating: featured.rating,
+        genres: featured.genres,
+        watchCount: featured.watchCount,
+        description: featured.description,
+        poster: featured.poster,
+        backdrop: featured.backdrop,
+      }
+    : null;
 }
 
 // Cached Upcoming Releases
@@ -226,7 +322,11 @@ export async function GET(
       ]),
     );
 
-    const trending = await getNetworkTrendingMovies(squadUserIds);
+    const [trending, featuredUpcoming] = await Promise.all([
+      getNetworkTrendingMovies(squadUserIds),
+      getFeaturedUpcomingMovie(squadUserIds),
+    ]);
+    const featured = featuredUpcoming || trending[0] || null;
 
     // Calculate Accuracy (in memory, cheap)
     const watchedSet = new Set(allWatchedIds.map((w) => w.movieId));
@@ -257,6 +357,7 @@ export async function GET(
           moviesWatchedThisWeek: watchHistoryCount,
           suggestionAccuracy: accuracy,
         },
+        featured,
         trending,
         upcoming: upcomingReleases,
         nudge: smartNudge,

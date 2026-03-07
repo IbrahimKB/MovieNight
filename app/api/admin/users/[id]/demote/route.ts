@@ -11,7 +11,7 @@ export async function POST(
   try {
     const clientIp = getClientIp(req.headers);
     const rate = checkRateLimit({
-      key: `admin-promote:${clientIp}`,
+      key: `admin-demote:${clientIp}`,
       limit: 30,
       windowMs: 60 * 60 * 1000,
     });
@@ -30,6 +30,13 @@ export async function POST(
 
     const { id } = await context.params;
 
+    if (id === user.id) {
+      return NextResponse.json(
+        { success: false, error: "Cannot demote yourself" },
+        { status: 400 },
+      );
+    }
+
     const target = await prisma.authUser.findUnique({
       where: { id },
       select: { id: true, role: true, deletedAt: true },
@@ -42,23 +49,39 @@ export async function POST(
       );
     }
 
-    if (target.role === "super_admin") {
+    if (target.role === "user") {
       return NextResponse.json(
-        { success: false, error: "User is already super admin" },
+        { success: false, error: "User is already base user" },
         { status: 400 },
       );
     }
 
-    if (target.role === "admin") {
+    const [adminCount, superAdminCount] = await Promise.all([
+      prisma.authUser.count({
+        where: { role: "admin", deletedAt: null },
+      }),
+      prisma.authUser.count({
+        where: { role: "super_admin", deletedAt: null },
+      }),
+    ]);
+
+    if (target.role === "admin" && adminCount <= 1) {
       return NextResponse.json(
-        { success: false, error: "User is already admin" },
+        { success: false, error: "Cannot demote the last admin account" },
+        { status: 400 },
+      );
+    }
+
+    if (target.role === "super_admin" && superAdminCount <= 1) {
+      return NextResponse.json(
+        { success: false, error: "Cannot demote the last super admin account" },
         { status: 400 },
       );
     }
 
     const updated = await prisma.authUser.update({
       where: { id },
-      data: { role: "admin" },
+      data: { role: "user" },
       select: {
         id: true,
         username: true,
@@ -72,13 +95,13 @@ export async function POST(
     await logAdminAction({
       actorId: user.id,
       targetUserId: id,
-      action: "user.promote_to_admin",
-      metadata: { via: "admin-panel", previousRole: target.role },
+      action: "user.demote_to_user",
+      metadata: { previousRole: target.role },
     });
 
     return NextResponse.json({ success: true, data: updated });
   } catch (err) {
-    console.error("Error promoting user:", err);
+    console.error("Error demoting user:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 },

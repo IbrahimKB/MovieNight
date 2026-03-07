@@ -8,6 +8,7 @@
  */
 
 import { syncUpcomingReleases } from "./sync/sync-upcoming-releases";
+import { processPushQueueBatch } from "./push-notifications";
 
 let isScheduled = false;
 
@@ -37,9 +38,22 @@ export async function initCronJobs() {
     }
   });
 
+  // Push delivery queue: every minute
+  cron.schedule("* * * * *", async () => {
+    try {
+      const result = await processPushQueueBatch(50);
+      if (result.processed > 0) {
+        console.log(`[CRON] Push queue processed: ${result.processed}`);
+      }
+    } catch (err) {
+      console.error("[CRON] Push queue processing error:", err);
+    }
+  });
+
   isScheduled = true;
-  console.log("[CRON] ✅ Jobs scheduled:");
+  console.log("[CRON] Jobs scheduled:");
   console.log("[CRON]   - Upcoming releases: 3:15 AM daily");
+  console.log("[CRON]   - Push queue: every minute");
 }
 
 export async function stopCronJobs() {

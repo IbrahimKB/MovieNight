@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { z } from "zod";
 import { ensureMovieExists } from "@/lib/movies";
+import { enqueuePushToUser } from "@/lib/push-notifications";
 
 const CreateSuggestionSchema = z.object({
   movieId: z.union([z.string(), z.number()]), // Accept UUID or TMDB ID
@@ -212,6 +213,79 @@ export async function POST(req: NextRequest) {
     const successfulSuggestions = createdResults.filter(
       (result) => result.status === "fulfilled",
     );
+
+    const createdSuggestions = createdResults.flatMap((result) => {
+      if (result.status !== "fulfilled") return [];
+      if (typeof result.value.toUserId !== "string") return [];
+      return [
+        {
+          id: result.value.id,
+          toUserId: result.value.toUserId,
+        },
+      ];
+    });
+
+    if (createdSuggestions.length > 0) {
+      const [sender, movie, prefs] = await Promise.all([
+        prisma.authUser.findUnique({
+          where: { id: user.id },
+          select: { id: true, name: true, username: true },
+        }),
+        prisma.movie.findUnique({
+          where: { id: internalMovieId },
+          select: { title: true },
+        }),
+        prisma.userNotificationPreferences.findMany({
+          where: {
+            userId: { in: createdSuggestions.map((s) => s.toUserId) },
+          },
+          select: { userId: true, suggestions: true },
+        }),
+      ]);
+
+      const senderName = sender?.name || sender?.username || "Someone";
+      const movieTitle = movie?.title || "a movie";
+      const prefsMap = new Map(prefs.map((p) => [p.userId, p.suggestions]));
+
+      const recipients = createdSuggestions.filter(
+        (s) => (prefsMap.get(s.toUserId) ?? true) === true,
+      );
+
+      if (recipients.length > 0) {
+        await prisma.notification.createMany({
+          data: recipients.map((recipient) => ({
+            userId: recipient.toUserId,
+            type: "suggestion",
+            title: "New movie suggestion",
+            message: `${senderName} suggested "${movieTitle}" to you.`,
+            data: {
+              suggestionId: recipient.id,
+              movieId: internalMovieId,
+            },
+          })),
+        });
+
+        await Promise.all(
+          recipients.map((recipient) =>
+            enqueuePushToUser(
+              recipient.toUserId,
+              {
+                title: "New movie suggestion",
+                body: `${senderName} suggested "${movieTitle}" to you.`,
+                url: "/suggestions",
+                type: "suggestion",
+                tag: `suggestion-${recipient.id}`,
+                data: {
+                  suggestionId: recipient.id,
+                  movieId: internalMovieId,
+                },
+              },
+              "suggestions",
+            ),
+          ),
+        );
+      }
+    }
 
     return NextResponse.json({
       success: true,

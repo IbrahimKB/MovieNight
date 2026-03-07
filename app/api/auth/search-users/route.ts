@@ -30,6 +30,8 @@ export async function GET(
     // Search users by username or name (case-insensitive)
     const users = await prisma.authUser.findMany({
       where: {
+        deletedAt: null,
+        disabledAt: null,
         OR: [
           { username: { contains: q.toLowerCase(), mode: "insensitive" } },
           { name: { contains: q.toLowerCase(), mode: "insensitive" } },

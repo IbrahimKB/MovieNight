@@ -2,8 +2,7 @@ import "./globals.css";
 import { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { LayoutClient } from "@/components/layout-client";
-import { initCronJobs } from "@/lib/cron";
-import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 
 export const viewport: Viewport = {
   themeColor: "#0a0a0a",
@@ -119,7 +118,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className="dark">
       <body>
         <LayoutClient>
-          <ServiceWorkerRegister />
+          <PwaInstallPrompt />
           {children}
         </LayoutClient>
       </body>

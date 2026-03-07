@@ -32,8 +32,12 @@ export async function getSessionFromCookie(): Promise<Session | null> {
 // -----------------------------------------------------
 export async function getUserFromSession(session: Session): Promise<User | null> {
   try {
-    const user = await prisma.authUser.findUnique({
-      where: { id: session.userId },
+    const user = await prisma.authUser.findFirst({
+      where: {
+        id: session.userId,
+        deletedAt: null,
+        disabledAt: null,
+      },
     });
 
     if (!user) return null;

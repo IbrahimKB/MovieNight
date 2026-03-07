@@ -3,6 +3,7 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // -----------------------------
 // Validation schema
@@ -17,6 +18,29 @@ const LoginSchema = z.object({
 // -----------------------------
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req.headers);
+    const rateKey = `login:${clientIp}`;
+    const rate = checkRateLimit({
+      key: rateKey,
+      limit: 12,
+      windowMs: 5 * 60 * 1000,
+    });
+    if (!rate.allowed) {
+      const retryAfter = Math.max(
+        1,
+        Math.ceil((rate.resetAt - Date.now()) / 1000),
+      );
+      return NextResponse.json(
+        { success: false, error: "Too many login attempts. Try again shortly." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": retryAfter.toString(),
+          },
+        },
+      );
+    }
+
     const body = await req.json();
     const parsed = LoginSchema.safeParse(body);
 
@@ -38,6 +62,7 @@ export async function POST(req: NextRequest) {
     // Find user by email or username (case-insensitive)
     const user = await prisma.authUser.findFirst({
       where: {
+        deletedAt: null,
         OR: [
           {
             email: {
@@ -62,14 +87,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (user.disabledAt) {
+      return NextResponse.json(
+        { success: false, error: "Account is disabled. Contact support." },
+        { status: 403 },
+      );
+    }
+
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Account temporarily locked due to failed login attempts. Please try again later.",
+        },
+        { status: 423 },
+      );
+    }
+
     // Password check
     const isValid = await compare(password, user.passwordHash);
     if (!isValid) {
+      const attempts = user.failedLoginAttempts + 1;
+      const shouldLock = attempts >= 5;
+
+      await prisma.authUser.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: shouldLock ? 0 : attempts,
+          lockedUntil: shouldLock
+            ? new Date(Date.now() + 15 * 60 * 1000)
+            : null,
+        },
+      });
+
       return NextResponse.json(
         { success: false, error: "Invalid email/username or password" },
         { status: 401 },
       );
     }
+
+    await prisma.authUser.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
 
     // Create session
     const session = await createSession(user.id);

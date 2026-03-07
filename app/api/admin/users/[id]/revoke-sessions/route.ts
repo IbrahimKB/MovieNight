@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireSuperAdmin, isErrorResponse } from "@/lib/auth-helpers";
+import {
+  requireAdmin,
+  requireSuperAdmin,
+  isErrorResponse,
+} from "@/lib/auth-helpers";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { logAdminAction } from "@/lib/admin-audit";
 
@@ -11,8 +15,8 @@ export async function POST(
   try {
     const clientIp = getClientIp(req.headers);
     const rate = checkRateLimit({
-      key: `admin-promote:${clientIp}`,
-      limit: 30,
+      key: `admin-revoke-sessions:${clientIp}`,
+      limit: 60,
       windowMs: 60 * 60 * 1000,
     });
     if (!rate.allowed) {
@@ -22,7 +26,7 @@ export async function POST(
       );
     }
 
-    const authResult = await requireSuperAdmin();
+    const authResult = await requireAdmin();
     if (isErrorResponse(authResult)) {
       return authResult;
     }
@@ -42,43 +46,30 @@ export async function POST(
       );
     }
 
-    if (target.role === "super_admin") {
-      return NextResponse.json(
-        { success: false, error: "User is already super admin" },
-        { status: 400 },
-      );
+    if (target.role === "super_admin" && target.id !== user.id) {
+      const superAdminResult = await requireSuperAdmin();
+      if (isErrorResponse(superAdminResult)) {
+        return superAdminResult;
+      }
     }
 
-    if (target.role === "admin") {
-      return NextResponse.json(
-        { success: false, error: "User is already admin" },
-        { status: 400 },
-      );
-    }
-
-    const updated = await prisma.authUser.update({
-      where: { id },
-      data: { role: "admin" },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        name: true,
-        role: true,
-        joinedAt: true,
-      },
+    const result = await prisma.session.deleteMany({
+      where: { userId: id },
     });
 
     await logAdminAction({
       actorId: user.id,
       targetUserId: id,
-      action: "user.promote_to_admin",
-      metadata: { via: "admin-panel", previousRole: target.role },
+      action: "user.revoke_sessions",
+      metadata: { revokedSessions: result.count },
     });
 
-    return NextResponse.json({ success: true, data: updated });
+    return NextResponse.json({
+      success: true,
+      data: { revokedSessions: result.count },
+    });
   } catch (err) {
-    console.error("Error promoting user:", err);
+    console.error("Error revoking user sessions:", err);
     return NextResponse.json(
       { success: false, error: "Internal server error" },
       { status: 500 },
