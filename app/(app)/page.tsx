@@ -177,7 +177,7 @@ export default function HomePage() {
               genres: trendingMovies[0].genres,
               description: trendingMovies[0].description || "",
               poster: trendingMovies[0].poster || "",
-              backdrop: trendingMovies[0].poster || "",
+              backdrop: trendingMovies[0].backdrop || trendingMovies[0].poster || "",
               imdbRating: trendingMovies[0].rating,
             }}
             friendsWatched={trendingMovies[0].watchCount || 0}

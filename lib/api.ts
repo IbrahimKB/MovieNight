@@ -54,6 +54,7 @@ export interface TrendingMovie {
   genres: string[];
   description?: string;
   poster?: string;
+  backdrop?: string | null;
 }
 
 // Helper to get auth headers (httpOnly cookies are used for auth)

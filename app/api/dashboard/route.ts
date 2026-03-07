@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { ApiResponse } from "@/types";
 import { cacheFunction, CACHE_TTL } from "@/lib/cache";
+import { tmdbClient } from "@/lib/tmdb";
 
 // ------------------------------------------------------
 // CACHED DATA FETCHERS
@@ -46,6 +47,7 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
     where: { id: { in: movieIds } },
     select: {
       id: true,
+      tmdbId: true,
       title: true,
       year: true,
       rtRating: true,
@@ -56,7 +58,7 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
     },
   });
 
-  return movies
+  const sorted = movies
     .map((movie) => {
       const count =
         groupsToUse.find((group) => group.movieId === movie.id)?._count.movieId ||
@@ -64,6 +66,7 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
 
       return {
         id: movie.id,
+        tmdbId: movie.tmdbId,
         title: movie.title,
         year: movie.year,
         rating: movie.imdbRating || movie.rtRating || 0,
@@ -71,12 +74,28 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
         watchCount: count,
         description: movie.description,
         poster: movie.poster,
+        backdrop: null as string | null,
       };
     })
     .sort((a, b) => {
       if (b.watchCount !== a.watchCount) return b.watchCount - a.watchCount;
       return b.year - a.year;
     });
+
+  const featuredMovie = sorted[0];
+  if (featuredMovie?.tmdbId && process.env.TMDB_API_KEY) {
+    try {
+      const tmdbDetails = await tmdbClient.getMovieDetails(featuredMovie.tmdbId);
+      if (tmdbDetails?.backdrop_path) {
+        featuredMovie.backdrop =
+          tmdbClient.getBackdropUrl(tmdbDetails.backdrop_path) || null;
+      }
+    } catch (err) {
+      console.warn("Failed to fetch featured movie backdrop:", err);
+    }
+  }
+
+  return sorted.map(({ tmdbId, ...movie }) => movie);
 }
 
 // Cached Upcoming Releases

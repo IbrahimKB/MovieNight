@@ -23,26 +23,22 @@ export function getPosterImageUrl(
 
   // For TMDB images, optimize the size
   if (url.includes("tmdb.org")) {
-    // TMDB allows width parameter for image optimization
-    const sizes: Record<number, string> = {
-      200: "w200",
-      300: "w300",
-      400: "w400",
-      500: "w500",
-      600: "w600",
-    };
+    // Use only valid TMDB image sizes (poster + backdrop union).
+    const validSizes = [92, 154, 185, 300, 342, 500, 780, 1280];
 
-    const sizeKey = width
-      ? Object.keys(sizes).reduce((closest, key) => {
-          const keyNum = parseInt(key);
-          const closestNum = parseInt(closest);
-          return Math.abs(keyNum - width) < Math.abs(closestNum - width)
-            ? key
-            : closest;
-        })
-      : "500";
+    const targetSize = width
+      ? validSizes.reduce((closest, candidate) =>
+          Math.abs(candidate - width) < Math.abs(closest - width)
+            ? candidate
+            : closest,
+        )
+      : 500;
 
-    return url.replace(/\bw\d+\b/, sizes[parseInt(sizeKey)]) || url;
+    const sizeToken = `w${targetSize}`;
+
+    // Replace existing TMDB size segment if present.
+    const replaced = url.replace(/\/(w\d+|original)\//, `/${sizeToken}/`);
+    return replaced || url;
   }
 
   return url;
@@ -58,7 +54,8 @@ export function getPosterImageUrl(
 export function generatePosterSrcSet(baseUrl: string | undefined): string {
   if (!baseUrl) return "";
 
-  const sizes = [200, 400, 600];
+  // Valid TMDB sizes to avoid broken image candidates on high-DPR screens.
+  const sizes = [185, 342, 500, 780];
   return sizes
     .map((width) => `${getPosterImageUrl(baseUrl, width)} ${width}w`)
     .join(", ");
@@ -119,8 +116,8 @@ export function getImageLoadingAttribute(
 export function generateAvatarSrcSet(baseUrl: string | undefined): string {
   if (!baseUrl) return "";
 
-  // For avatars, typically 40px-80px sizes
-  const sizes = [40, 80];
+  // Closest sensible TMDB sizes for small avatars.
+  const sizes = [92, 154];
   return sizes
     .map((width) => `${getPosterImageUrl(baseUrl, width)} ${width}w`)
     .join(", ");

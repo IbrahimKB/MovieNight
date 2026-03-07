@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BrandLogo } from "@/components/ui/brand-logo";
 import { PageTransition } from "@/components/page-transition";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 import {
   Home,
   Clapperboard,
@@ -73,6 +74,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     { label: "Profile", icon: User, href: "/profile" },
     ...(isAdmin ? [{ label: "Admin", icon: Shield, href: "/admin" }] : []),
   ];
+  const mobilePrimaryNav = navItems.filter((item) =>
+    ["/", "/movies", "/watchlist", "/calendar", "/friends"].includes(item.href),
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -240,9 +244,36 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       </nav>
 
       {/* Main Content */}
-      <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8">
         <PageTransition>{children}</PageTransition>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div
+        className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t border-primary/10 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/75"
+        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
+      >
+        <div className="grid grid-cols-5 gap-1 px-2 pt-2">
+          {mobilePrimaryNav.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <button
+                key={item.href}
+                onClick={() => router.push(item.href)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 rounded-lg py-2 min-h-[52px] transition-colors",
+                  active
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground hover:text-primary hover:bg-accent/40",
+                )}
+              >
+                <item.icon size={18} />
+                <span className="text-[10px] leading-none">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

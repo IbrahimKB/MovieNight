@@ -42,9 +42,13 @@ export default function FeaturedMovieHero({
   className,
 }: FeaturedMovieHeroProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   // Use backdrop or poster as fallback
   const backdropImage = movie.backdrop || movie.poster;
+  const hasBackdropImage =
+    !!movie.backdrop && !!movie.poster && movie.backdrop !== movie.poster;
+  const showImage = !!backdropImage && !imageFailed;
 
   // Generate gradient if no image
   const generateGradient = () => {
@@ -80,14 +84,20 @@ export default function FeaturedMovieHero({
           isHovered && "scale-105",
         )}
       >
-        {backdropImage ? (
+        {showImage ? (
           <img
             src={backdropImage}
             srcSet={generatePosterSrcSet(backdropImage)}
             sizes={generateImageSizes("hero")}
             alt={movie.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            className={cn(
+              "w-full h-full",
+              hasBackdropImage ? "object-cover object-center" : "object-cover object-top",
+            )}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={() => setImageFailed(true)}
           />
         ) : (
           <div

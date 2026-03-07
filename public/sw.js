@@ -1,7 +1,7 @@
 // MovieNight PWA Service Worker
-const CACHE_NAME = "movienight-v1.1.0";
-const STATIC_CACHE_NAME = "movienight-static-v1.1.0";
-const DYNAMIC_CACHE_NAME = "movienight-dynamic-v1.1.0";
+const CACHE_NAME = "movienight-v1.2.0";
+const STATIC_CACHE_NAME = "movienight-static-v1.2.0";
+const DYNAMIC_CACHE_NAME = "movienight-dynamic-v1.2.0";
 
 // Files to cache immediately (app shell)
 const STATIC_ASSETS = [
@@ -166,7 +166,7 @@ async function staleWhileRevalidate(request) {
 
   const fetchPromise = fetch(request)
     .then((networkResponse) => {
-      if (networkResponse.ok) {
+      if (networkResponse.ok || networkResponse.type === "opaque") {
         cache.put(request, networkResponse.clone());
       }
       return networkResponse;
