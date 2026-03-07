@@ -147,8 +147,8 @@ export async function POST(
         success: true,
         data: {
           id: friendship.id,
-          fromUserId: currentUser.id,
-          toUserId: targetUserId,
+          fromUserId: currentUser.puid || currentUser.id,
+          toUserId,
           status: friendship.status,
           createdAt: friendship.createdAt,
         },

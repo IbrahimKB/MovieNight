@@ -9,6 +9,7 @@ type FriendshipRow = {
   username: string;
   avatar: string | null;
   userId: string;
+  externalUserId: string;
   friendshipId: string;
 };
 
@@ -16,16 +17,20 @@ type FriendRequestRow = {
   id: string;
   fromUser?: {
     id: string;
+    externalId: string;
     name: string | null;
     username: string;
     avatar: string | null;
   };
   toUser?: {
     id: string;
+    externalId: string;
     name: string | null;
     username: string;
     avatar: string | null;
   };
+  fromUserId?: string;
+  toUserId?: string;
   sentAt: Date;
 };
 
@@ -122,11 +127,12 @@ export async function GET(
       const isUser1 = f.userId1 === currentUser.id;
       const otherUser = isUser1 ? f.user2 : f.user1;
       return {
-        id: otherUser.id,
+        id: otherUser.puid || otherUser.id,
         name: otherUser.name,
         username: otherUser.username,
         avatar: otherUser.avatar,
-        userId: otherUser.id, // Legacy support for frontend mapping if needed
+        userId: otherUser.id, // Internal DB UUID (legacy compatibility)
+        externalUserId: otherUser.puid || otherUser.id,
         friendshipId: f.id,
       };
     });
@@ -146,11 +152,14 @@ export async function GET(
     const incomingRequests = incomingRaw.map((f) => ({
       id: f.id,
       fromUser: {
-        id: f.user1.id,
+        id: f.user1.puid || f.user1.id,
+        externalId: f.user1.puid || f.user1.id,
         name: f.user1.name,
         username: f.user1.username,
         avatar: f.user1.avatar,
       },
+      fromUserId: f.user1.puid || f.user1.id,
+      toUserId: currentUser.puid || currentUser.id,
       sentAt: f.createdAt,
     }));
 
@@ -169,11 +178,14 @@ export async function GET(
     const outgoingRequests = outgoingRaw.map((f) => ({
       id: f.id,
       toUser: {
-        id: f.user2.id,
+        id: f.user2.puid || f.user2.id,
+        externalId: f.user2.puid || f.user2.id,
         name: f.user2.name,
         username: f.user2.username,
         avatar: f.user2.avatar,
       },
+      fromUserId: currentUser.puid || currentUser.id,
+      toUserId: f.user2.puid || f.user2.id,
       sentAt: f.createdAt,
     }));
 

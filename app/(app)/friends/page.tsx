@@ -31,6 +31,7 @@ interface Friend {
   name: string | null;
   username: string;
   avatar?: string;
+  userId?: string;
 }
 
 interface FriendRequest {
@@ -71,9 +72,17 @@ export default function FriendsPage() {
           const outgoing = data.data.outgoingRequests || [];
 
           setFriendsList(friends);
-          setCurrentFriends(new Set(friends.map((f: any) => f.userId)));
+          setCurrentFriends(
+            new Set(friends.map((f: any) => f.externalUserId || f.id)),
+          );
           setIncomingRequests(incoming);
-          setSentRequests(new Set(outgoing.map((r: any) => r.toUserId)));
+          setSentRequests(
+            new Set(
+              outgoing
+                .map((r: any) => r.toUserId || r.toUser?.id)
+                .filter(Boolean),
+            ),
+          );
         }
       } catch (error) {
         console.error("Failed to fetch friends data:", error);
