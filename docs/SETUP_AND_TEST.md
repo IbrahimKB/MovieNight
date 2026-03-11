@@ -37,7 +37,6 @@ npm run build
 
 ```bash
 curl http://localhost:3000/api/health
-curl http://localhost:3000/api/debug
 ```
 
 Authenticated routes require a valid session cookie.
@@ -45,4 +44,3 @@ Authenticated routes require a valid session cookie.
 ## Notes
 
 - Runtime database schema must match Prisma migrations in `prisma/migrations/`.
-- `schema.sql` is empty and not used by runtime code.

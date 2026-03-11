@@ -19,5 +19,4 @@ Legacy status/checklist/archive markdown files were removed to reduce documentat
 
 ## Notes
 
-- `schema.sql` at project root is empty and not used by runtime.
 - Canonical database definition is `prisma/schema.prisma` plus migrations in `prisma/migrations/`.
