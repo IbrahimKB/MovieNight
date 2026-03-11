@@ -42,7 +42,11 @@ export async function GET(req: NextRequest) {
       tmdbId: movie.id,
       title: movie.title || "Unknown Title",
       year: movie.release_date ? new Date(movie.release_date).getFullYear() : 0,
-      poster: tmdbClient.getPosterUrl(movie.poster_path),
+      poster: movie.poster_path
+        ? tmdbClient.getPosterUrl(movie.poster_path)
+        : movie.backdrop_path
+          ? tmdbClient.getBackdropUrl(movie.backdrop_path, "w780")
+          : null,
       description: movie.overview || "",
       genres: movie.genre_ids
         ? movie.genre_ids.map((id: number) => TMDB_GENRE_MAP[id] || String(id))

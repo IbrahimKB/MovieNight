@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
-import { tmdbClient, TMDB_GENRE_MAP } from "@/lib/tmdb";
+import { cacheFunction, CACHE_TTL } from "@/lib/cache";
+import { tmdbClient, TMDB_GENRE_MAP, TMDBMovie } from "@/lib/tmdb";
+
+const QuerySchema = z.object({
+  page: z.coerce.number().int().min(1).max(10).default(1),
+  timeWindow: z.enum(["day", "week"]).default("week"),
+});
+
+const getCachedTrendingMovies = cacheFunction(
+  async (timeWindow: "day" | "week", page: number) => {
+    return tmdbClient.getTrendingMovies(timeWindow, page);
+  },
+  ["movies-trending"],
+  { revalidate: CACHE_TTL.MINUTE * 10 },
+);
+
+function mapTrendingMovie(movie: TMDBMovie) {
+  const releaseDate = movie.release_date || movie.first_air_date;
+  const year = releaseDate ? new Date(releaseDate).getFullYear() : 0;
+
+  return {
+    id: `tmdb_${movie.id}`,
+    tmdbId: movie.id,
+    title: movie.title || movie.name || "Unknown",
+    year: Number.isFinite(year) ? year : 0,
+    poster: movie.poster_path
+      ? tmdbClient.getPosterUrl(movie.poster_path)
+      : movie.backdrop_path
+        ? tmdbClient.getBackdropUrl(movie.backdrop_path, "w780")
+        : null,
+    genres:
+      movie.genre_ids?.map((id) => TMDB_GENRE_MAP[id]).filter(Boolean) || [],
+    imdbRating: movie.vote_average,
+  };
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,11 +48,21 @@ export async function GET(req: NextRequest) {
     }
 
     const searchParams = req.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1");
-    const timeWindow = searchParams.get("timeWindow") === "day" ? "day" : "week";
+    const parsedQuery = QuerySchema.safeParse({
+      page: searchParams.get("page") ?? undefined,
+      timeWindow: searchParams.get("timeWindow") ?? undefined,
+    });
 
-    const tmdbResponse = await tmdbClient.getTrendingMovies(timeWindow, page);
-    
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        { success: false, error: "Invalid query parameters" },
+        { status: 400 },
+      );
+    }
+
+    const { page, timeWindow } = parsedQuery.data;
+    const tmdbResponse = await getCachedTrendingMovies(timeWindow, page);
+
     if (!tmdbResponse) {
       return NextResponse.json(
         { success: false, error: "Failed to fetch trending movies" },
@@ -25,24 +70,14 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const movies = tmdbResponse.results.map((movie) => ({
-      id: `tmdb_${movie.id}`,
-      tmdbId: movie.id,
-      title: movie.title || movie.name || "Unknown",
-      year: new Date(movie.release_date || movie.first_air_date || "2024-01-01").getFullYear(),
-      poster: movie.poster_path
-        ? tmdbClient.getPosterUrl(movie.poster_path)
-        : null,
-      genres: movie.genre_ids?.map((id) => TMDB_GENRE_MAP[id]).filter(Boolean) || [],
-      imdbRating: movie.vote_average,
-    }));
+    const movies = tmdbResponse.results.map(mapTrendingMovie);
 
     return NextResponse.json({
       success: true,
       data: movies,
       pagination: {
         page: tmdbResponse.page,
-        totalPages: tmdbResponse.total_pages,
+        totalPages: Math.min(tmdbResponse.total_pages, 10),
         totalCount: tmdbResponse.total_results,
       },
     });

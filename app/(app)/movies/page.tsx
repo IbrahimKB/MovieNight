@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Search, Clapperboard, Loader2, Plus, Check } from "lucide-react";
+import { Search, Clapperboard, Loader2, Plus } from "lucide-react";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { MovieCardSkeleton } from "@/components/ui/skeleton-loader";
 import { AddMovieModal } from "@/components/add-movie-modal";
 import { toast } from "@/components/ui/use-toast";
 import { shouldReduceMotion } from "@/lib/animations";
+import { isTmdbImageUrl } from "@/lib/image-utils";
 
 interface Movie {
   id: string;
@@ -28,65 +28,94 @@ interface Friend {
   avatar?: string;
 }
 
-const MOVIES_PER_PAGE = 20;
 const SEARCH_DEBOUNCE_MS = 300;
+const TMDB_MAX_PAGES = 10;
 
 export default function MoviesPage() {
-  const router = useRouter();
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [allGenres, setAllGenres] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [displayedMovies, setDisplayedMovies] = useState<Movie[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [tmdbResults, setTmdbResults] = useState<Movie[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [showAddMovieModal, setShowAddMovieModal] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [addedMovieIds, setAddedMovieIds] = useState<Set<string>>(new Set());
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchAbortRef = useRef<AbortController | null>(null);
 
-  // Fetch trending movies from TMDB and friends
+  const fetchTrendingPage = useCallback(
+    async (page: number, append: boolean = false) => {
+      const moviesRes = await fetch(`/api/movies/trending?page=${page}`, {
+        credentials: "include",
+      });
+
+      const moviesData = await moviesRes.json();
+      if (!moviesData.success || !Array.isArray(moviesData.data)) {
+        throw new Error("Failed to load trending movies");
+      }
+
+      setMovies((prev) => {
+        const base = append ? prev : [];
+        const merged = [...base, ...moviesData.data];
+        const deduped = new Map<string, Movie>();
+
+        merged.forEach((movie: Movie) => {
+          if (!movie?.id) return;
+          deduped.set(movie.id, movie);
+        });
+
+        return Array.from(deduped.values());
+      });
+
+      const responsePage =
+        typeof moviesData.pagination?.page === "number"
+          ? moviesData.pagination.page
+          : page;
+
+      const responseTotalPages =
+        typeof moviesData.pagination?.totalPages === "number"
+          ? moviesData.pagination.totalPages
+          : page;
+
+      setCurrentPage(responsePage);
+      setTotalPages(Math.max(1, Math.min(responseTotalPages, TMDB_MAX_PAGES)));
+
+      return moviesData.data as Movie[];
+    },
+    [],
+  );
+
+  const filteredMovies = useMemo(() => {
+    if (!selectedGenre) return movies;
+    return movies.filter((movie) => movie.genres?.includes(selectedGenre));
+  }, [movies, selectedGenre]);
+
+  const allGenres = useMemo(() => {
+    const genres = new Set<string>();
+    movies.forEach((movie) => {
+      movie.genres?.forEach((genre) => genres.add(genre));
+    });
+    return Array.from(genres).sort();
+  }, [movies]);
+
+  const hasMore = currentPage < totalPages;
+
+  // Fetch initial trending page and friends list
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [moviesRes, friendsRes] = await Promise.all([
-          fetch("/api/movies/trending?page=1", {
-            credentials: "include",
-          }),
+        const [_, friendsRes] = await Promise.all([
+          fetchTrendingPage(1, false),
           fetch("/api/friends", {
             credentials: "include",
           }),
         ]);
 
-        const moviesData = await moviesRes.json();
         const friendsData = await friendsRes.json();
-
-        if (moviesData.success && Array.isArray(moviesData.data)) {
-          setMovies(moviesData.data);
-          setFilteredMovies(moviesData.data);
-          setCurrentPage(1);
-          setDisplayedMovies(moviesData.data.slice(0, MOVIES_PER_PAGE));
-          setHasMore(moviesData.data.length > MOVIES_PER_PAGE);
-
-          // Extract unique genres
-          const genres = new Set<string>();
-          moviesData.data.forEach((movie: Movie) => {
-            movie.genres?.forEach((g) => genres.add(g));
-          });
-          setAllGenres(Array.from(genres).sort());
-
-          // Track which movies are already in database
-          const addedIds = new Set<string>(
-            moviesData.data.map((m: Movie) => m.id),
-          );
-          setAddedMovieIds(addedIds);
-        }
 
         if (friendsData.success && friendsData.data?.friends) {
           setFriends(
@@ -111,31 +140,46 @@ export default function MoviesPage() {
     };
 
     fetchData();
-  }, []);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      searchAbortRef.current?.abort();
+    };
+  }, [fetchTrendingPage]);
 
   // Live TMDB search with debounce
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
+    searchAbortRef.current?.abort();
 
     if (searchQuery.length < 2) {
       setTmdbResults([]);
       setShowSearchResults(false);
+      setIsSearching(false);
       return;
     }
 
     setIsSearching(true);
 
     searchTimeoutRef.current = setTimeout(async () => {
+      const controller = new AbortController();
+      searchAbortRef.current = controller;
+
       try {
         const res = await fetch(
           `/api/movies/search?q=${encodeURIComponent(searchQuery)}&page=1`,
           {
             credentials: "include",
+            signal: controller.signal,
           },
         );
+
         const data = await res.json();
+        if (controller.signal.aborted) return;
 
         if (data.success && data.data) {
           const results = data.data.map((movie: Movie) => ({
@@ -152,7 +196,9 @@ export default function MoviesPage() {
         } else {
           setTmdbResults([]);
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error?.name === "AbortError") return;
+
         console.error("Search failed:", error);
         toast({
           title: "Search Error",
@@ -160,6 +206,7 @@ export default function MoviesPage() {
           variant: "error",
         });
       } finally {
+        if (controller.signal.aborted) return;
         setIsSearching(false);
       }
     }, SEARCH_DEBOUNCE_MS);
@@ -168,36 +215,26 @@ export default function MoviesPage() {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+      searchAbortRef.current?.abort();
     };
   }, [searchQuery]);
 
-  // Filter local movies based on genre
-  useEffect(() => {
-    let results = movies;
-
-    if (selectedGenre) {
-      results = results.filter((movie) =>
-        movie.genres?.includes(selectedGenre),
-      );
-    }
-
-    setFilteredMovies(results);
-    setCurrentPage(1);
-    setDisplayedMovies(results.slice(0, MOVIES_PER_PAGE));
-    setHasMore(results.length > MOVIES_PER_PAGE);
-  }, [selectedGenre, movies]);
-
   // Load more local movies
-  const handleLoadMore = async () => {
+  const handleLoadMore = useCallback(async () => {
     const nextPage = currentPage + 1;
-    const startIdx = nextPage * MOVIES_PER_PAGE - MOVIES_PER_PAGE;
-    const endIdx = startIdx + MOVIES_PER_PAGE;
-    const newMovies = filteredMovies.slice(0, endIdx);
+    if (nextPage > totalPages) return;
 
-    setDisplayedMovies(newMovies);
-    setCurrentPage(nextPage);
-    setHasMore(endIdx < filteredMovies.length);
-  };
+    try {
+      await fetchTrendingPage(nextPage, true);
+    } catch (error) {
+      console.error("Failed to load more movies:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load more movies",
+        variant: "error",
+      });
+    }
+  }, [currentPage, totalPages, fetchTrendingPage]);
 
   // Open the add movie modal
   const handleOpenModal = (movie: Movie) => {
@@ -218,58 +255,66 @@ export default function MoviesPage() {
     threshold: 300,
   });
 
-  const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => (
-    <motion.button
-      onClick={() => handleOpenModal(movie)}
-      className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={
-        shouldReduceMotion()
-          ? { duration: 0 }
-          : { duration: 0.4, delay: (index % 12) * 0.05 }
-      }
-      whileHover={shouldReduceMotion() ? {} : { scale: 1.05 }}
-      whileTap={shouldReduceMotion() ? {} : { scale: 0.95 }}
-    >
-      <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
-        {movie.poster ? (
-          <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
+  const MovieCard = ({ movie, index }: { movie: Movie; index: number }) => {
+    const [imageFailed, setImageFailed] = useState(false);
+    const posterUrl = !imageFailed ? movie.poster : undefined;
+
+    return (
+      <motion.button
+        onClick={() => handleOpenModal(movie)}
+        className="rounded-lg overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 text-left w-full"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={
+          shouldReduceMotion()
+            ? { duration: 0 }
+            : { duration: 0.3, delay: (index % 8) * 0.03 }
+        }
+        whileHover={shouldReduceMotion() ? {} : { scale: 1.03 }}
+        whileTap={shouldReduceMotion() ? {} : { scale: 0.98 }}
+      >
+        <div className="relative bg-card border border-border rounded-lg overflow-hidden aspect-[3/4] flex items-center justify-center">
+          {posterUrl ? (
             <Image
-              src={movie.poster}
+              src={posterUrl}
               alt={movie.title}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               className="object-cover"
+              unoptimized={isTmdbImageUrl(posterUrl)}
+              onError={() => setImageFailed(true)}
             />
-          </motion.div>
-        ) : (
-          <div className="text-center p-4">
-            <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">{movie.title}</p>
-          </div>
-        )}
+          ) : (
+            <div className="text-center p-4">
+              <Clapperboard className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+              <p className="text-xs text-muted-foreground">{movie.title}</p>
+            </div>
+          )}
 
-        {/* Rating badge */}
-        {movie.imdbRating && (
-          <motion.div
-            className="absolute top-2 right-2 bg-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-primary-foreground"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: (index % 12) * 0.05 + 0.2 }}
-          >
-            {movie.imdbRating.toFixed(1)}
-          </motion.div>
-        )}
-      </div>
-      <div className="mt-3 px-1">
-        <p className="font-semibold text-sm truncate">{movie.title}</p>
-        <p className="text-xs text-muted-foreground">{movie.year}</p>
-      </div>
-    </motion.button>
-  );
+          {/* Rating badge */}
+          {movie.imdbRating && (
+            <motion.div
+              className="absolute top-2 right-2 bg-primary/90 rounded-lg px-2 py-1 text-xs font-bold text-primary-foreground"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: (index % 12) * 0.05 + 0.2 }}
+            >
+              {movie.imdbRating.toFixed(1)}
+            </motion.div>
+          )}
+        </div>
+        <div className="mt-3 px-1">
+          <p className="font-semibold text-sm truncate">{movie.title}</p>
+          <p className="text-xs text-muted-foreground">{movie.year}</p>
+        </div>
+      </motion.button>
+    );
+  };
 
   const TMDBMovieCard = ({ movie }: { movie: Movie }) => {
+    const [imageFailed, setImageFailed] = useState(false);
+    const posterUrl = !imageFailed ? movie.poster : undefined;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -278,14 +323,16 @@ export default function MoviesPage() {
         className="bg-card border border-border rounded-lg p-3 hover:border-primary/50 transition-all flex gap-3 group cursor-pointer hover:shadow-md"
       >
         <div className="w-16 h-20 flex-shrink-0 rounded overflow-hidden bg-background flex items-center justify-center">
-          {movie.poster ? (
+          {posterUrl ? (
             <div className="relative h-full w-full">
               <Image
-                src={movie.poster}
+                src={posterUrl}
                 alt={movie.title}
                 fill
                 sizes="64px"
                 className="object-cover group-hover:scale-110 transition-transform"
+                unoptimized={isTmdbImageUrl(posterUrl)}
+                onError={() => setImageFailed(true)}
               />
             </div>
           ) : (
@@ -466,7 +513,7 @@ export default function MoviesPage() {
                     }
               }
             >
-              {displayedMovies.map((movie, index) => (
+              {filteredMovies.map((movie, index) => (
                 <MovieCard key={movie.id} movie={movie} index={index} />
               ))}
             </motion.div>
@@ -491,7 +538,7 @@ export default function MoviesPage() {
               </div>
             )}
 
-            {!hasMore && displayedMovies.length > 0 && (
+            {!hasMore && filteredMovies.length > 0 && (
               <motion.div
                 className="text-center py-8 text-muted-foreground"
                 initial={{ opacity: 0 }}
@@ -513,15 +560,25 @@ export default function MoviesPage() {
             <p className="text-muted-foreground">
               No movies found matching your criteria
             </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSelectedGenre(null);
-              }}
-              className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
-            >
-              Clear Filters
-            </button>
+            {hasMore ? (
+              <div
+                ref={observerTarget}
+                className="mt-6 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+              >
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading more movies...
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedGenre(null);
+                }}
+                className="mt-4 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 active:scale-95 transition-all"
+              >
+                Clear Filters
+              </button>
+            )}
           </motion.div>
         )}
       </motion.div>

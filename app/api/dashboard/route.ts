@@ -11,22 +11,48 @@ import { tmdbClient } from "@/lib/tmdb";
 
 const TRENDING_LOOKBACK_DAYS = 45;
 
-// Cache TMDB backdrop lookups so dashboard requests do not repeatedly block on external API latency.
-const getCachedBackdropUrl = cacheFunction(
+// Cache TMDB artwork lookups so dashboard requests do not repeatedly block on external API latency.
+const getCachedMovieArtwork = cacheFunction(
   async (tmdbId: number) => {
     if (!process.env.TMDB_API_KEY) return null;
 
     try {
       const tmdbDetails = await tmdbClient.getMovieDetails(tmdbId);
-      if (!tmdbDetails?.backdrop_path) return null;
-      return tmdbClient.getBackdropUrl(tmdbDetails.backdrop_path) || null;
+      if (!tmdbDetails) return null;
+
+      return {
+        backdrop: tmdbDetails.backdrop_path
+          ? tmdbClient.getBackdropUrl(tmdbDetails.backdrop_path)
+          : null,
+        poster: tmdbDetails.poster_path
+          ? tmdbClient.getPosterUrl(tmdbDetails.poster_path, "w500")
+          : null,
+      };
     } catch {
       return null;
     }
   },
-  ["dashboard-featured-backdrop"],
+  ["dashboard-featured-artwork"],
   { revalidate: CACHE_TTL.DAY },
 );
+
+function normalizePosterUrl(poster: string | null | undefined): string | null {
+  if (!poster) return null;
+
+  if (poster.startsWith("//")) {
+    return `https:${poster}`;
+  }
+
+  if (poster.startsWith("http://")) {
+    return poster.replace("http://", "https://");
+  }
+
+  if (poster.startsWith("/")) {
+    return tmdbClient.getPosterUrl(poster) || null;
+  }
+
+  return poster;
+}
 
 async function getNetworkTrendingMovies(squadUserIds: string[]) {
   if (squadUserIds.length === 0) return [];
@@ -90,7 +116,7 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
         genres: movie.genres,
         watchCount: count,
         description: movie.description,
-        poster: movie.poster,
+        poster: normalizePosterUrl(movie.poster),
         backdrop: null as string | null,
       };
     })
@@ -101,7 +127,11 @@ async function getNetworkTrendingMovies(squadUserIds: string[]) {
 
   const featuredMovie = sorted[0];
   if (featuredMovie?.tmdbId) {
-    featuredMovie.backdrop = await getCachedBackdropUrl(featuredMovie.tmdbId);
+    const artwork = await getCachedMovieArtwork(featuredMovie.tmdbId);
+    featuredMovie.backdrop = artwork?.backdrop || null;
+    if (!featuredMovie.poster) {
+      featuredMovie.poster = artwork?.poster || null;
+    }
   }
 
   return sorted.map(({ tmdbId, ...movie }) => movie);
@@ -164,7 +194,7 @@ async function getFeaturedUpcomingMovie(squadUserIds: string[]) {
       genres: release.movie.genres,
       watchCount: desireCountByMovie.get(release.movie.id) || 0,
       description: release.movie.description,
-      poster: release.movie.poster,
+      poster: normalizePosterUrl(release.movie.poster),
       releaseDate: release.releaseDate,
       tmdbId: release.movie.tmdbId,
       backdrop: null as string | null,
@@ -176,7 +206,11 @@ async function getFeaturedUpcomingMovie(squadUserIds: string[]) {
 
   const featured = ranked[0];
   if (featured?.tmdbId) {
-    featured.backdrop = await getCachedBackdropUrl(featured.tmdbId);
+    const artwork = await getCachedMovieArtwork(featured.tmdbId);
+    featured.backdrop = artwork?.backdrop || null;
+    if (!featured.poster) {
+      featured.poster = artwork?.poster || null;
+    }
   }
 
   return featured

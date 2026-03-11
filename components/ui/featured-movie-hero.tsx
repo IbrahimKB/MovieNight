@@ -11,6 +11,7 @@ import { shouldReduceMotion } from "@/lib/animations";
 import {
   generateImageSizes,
   getPosterImageUrl,
+  isTmdbImageUrl,
 } from "@/lib/image-utils";
 
 interface FeaturedMovieHeroProps {
@@ -53,6 +54,10 @@ export default function FeaturedMovieHero({
   const hasBackdropImage =
     !!movie.backdrop && !!movie.poster && movie.backdrop !== movie.poster;
   const showImage = !!backdropImage && !imageFailed;
+  const resolvedBackdropUrl = getPosterImageUrl(
+    backdropImage,
+    hasBackdropImage ? 780 : 500,
+  );
 
   // Generate gradient if no image
   const generateGradient = () => {
@@ -90,11 +95,12 @@ export default function FeaturedMovieHero({
       >
         {showImage ? (
           <Image
-            src={getPosterImageUrl(backdropImage, hasBackdropImage ? 780 : 500)}
+            src={resolvedBackdropUrl}
             alt={movie.title}
             fill
             priority
             sizes={generateImageSizes("hero")}
+            unoptimized={isTmdbImageUrl(resolvedBackdropUrl)}
             className={cn(
               hasBackdropImage ? "object-cover object-center" : "object-cover object-top",
             )}

@@ -45,6 +45,18 @@ export function getPosterImageUrl(
 }
 
 /**
+ * Detect if URL points to TMDB-hosted images.
+ * Useful to decide whether to bypass Next.js optimizer in constrained deploys.
+ */
+export function isTmdbImageUrl(url: string | undefined | null): boolean {
+  if (!url) return false;
+
+  return /^(https?:)?\/\/(image\.tmdb\.org|www\.themoviedb\.org|media\.themoviedb\.org)\//i.test(
+    url,
+  );
+}
+
+/**
  * Generate srcSet attribute value for responsive images
  * Provides different image sizes for different device widths
  *
