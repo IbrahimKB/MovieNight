@@ -21,30 +21,85 @@ type QueuePayload = {
 };
 
 let vapidInitialized = false;
+let vapidInitError: string | null = null;
+
+function normalizeConfigValue(value: string | undefined) {
+  return (value || "").trim().replace(/^"|"$/g, "");
+}
+
+function isPlaceholderValue(value: string) {
+  const normalized = value.toLowerCase();
+  return (
+    normalized.includes("place_your_") ||
+    normalized.includes("your_public_key_here") ||
+    normalized.includes("your_private_key_here") ||
+    normalized.includes("...place_")
+  );
+}
+
+function isLikelyUrlSafeBase64(value: string) {
+  return /^[A-Za-z0-9_-]+$/.test(value);
+}
 
 function getVapidConfig() {
-  const publicKey =
-    process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-  const privateKey = process.env.VAPID_PRIVATE_KEY;
-  const subject = process.env.VAPID_SUBJECT || "mailto:admin@movie-night.co.uk";
+  const publicKey = normalizeConfigValue(
+    process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  );
+  const privateKey = normalizeConfigValue(process.env.VAPID_PRIVATE_KEY);
+  const subject =
+    normalizeConfigValue(process.env.VAPID_SUBJECT) ||
+    "mailto:admin@movie-night.co.uk";
 
   return { publicKey, privateKey, subject };
 }
 
 export function getPublicVapidKey(): string | null {
+  const validationError = validateVapidConfig();
+  if (validationError) return null;
+
   const { publicKey } = getVapidConfig();
   return publicKey || null;
+}
+
+function validateVapidConfig(): string | null {
+  const { publicKey, privateKey } = getVapidConfig();
+
+  if (!publicKey || !privateKey) {
+    return "Push not configured (missing VAPID keys)";
+  }
+
+  if (isPlaceholderValue(publicKey) || isPlaceholderValue(privateKey)) {
+    return "Push not configured (placeholder VAPID keys)";
+  }
+
+  if (!isLikelyUrlSafeBase64(publicKey) || !isLikelyUrlSafeBase64(privateKey)) {
+    return "Push not configured (invalid VAPID key format)";
+  }
+
+  return null;
 }
 
 function ensureVapidInitialized(): boolean {
   if (vapidInitialized) return true;
 
-  const { publicKey, privateKey, subject } = getVapidConfig();
-  if (!publicKey || !privateKey) return false;
+  const validationError = validateVapidConfig();
+  if (validationError) {
+    vapidInitError = validationError;
+    return false;
+  }
 
-  webpush.setVapidDetails(subject, publicKey, privateKey);
-  vapidInitialized = true;
-  return true;
+  const { publicKey, privateKey, subject } = getVapidConfig();
+
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    vapidInitialized = true;
+    vapidInitError = null;
+    return true;
+  } catch (error: any) {
+    vapidInitError = "Push not configured (invalid VAPID keys)";
+    console.error("Invalid VAPID configuration:", error?.message || error);
+    return false;
+  }
 }
 
 async function canReceivePush(
@@ -73,7 +128,7 @@ export async function sendPushToUser(
   preferenceKey?: NotificationPreferenceKey,
 ): Promise<{ sent: number; skipped: string | null }> {
   if (!ensureVapidInitialized()) {
-    return { sent: 0, skipped: "Push not configured (missing VAPID keys)" };
+    return { sent: 0, skipped: vapidInitError || "Push not configured" };
   }
 
   const allowed = await canReceivePush(userId, preferenceKey);
