@@ -81,6 +81,25 @@ export function getSocket() {
   return io;
 }
 
+export async function closeSocket() {
+  if (!io) return;
+
+  await new Promise<void>((resolve) => {
+    try {
+      io.close(() => {
+        resolve();
+      });
+    } catch (error) {
+      console.error("[Socket.io] Error closing server:", error);
+      resolve();
+    }
+  });
+
+  io = null;
+  userSockets.clear();
+  socketUsers.clear();
+}
+
 export function emitToUser(userId: string, event: string, data: any) {
   if (!io) return;
   io.to(`user:${userId}`).emit(event, data);

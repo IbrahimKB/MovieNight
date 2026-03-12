@@ -4,8 +4,8 @@
   "version": "2.0.0",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "tsx server.ts",
+    "build": "next build && tsc -p tsconfig.server.json",
+    "start": "node dist-server/server.js",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },

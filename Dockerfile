@@ -64,13 +64,12 @@ COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy server files for Socket.io integration
-COPY --from=builder --chown=nextjs:nodejs /app/server.ts ./server.ts
-COPY --from=builder --chown=nextjs:nodejs /app/lib/socket-server.ts ./lib/socket-server.ts
+# Copy precompiled custom server for Socket.io integration
+COPY --from=builder --chown=nextjs:nodejs /app/dist-server ./dist-server
 
 USER nextjs
 
 EXPOSE 3000
 
 # Run migrations and start the server with Socket.io
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && ./node_modules/.bin/tsx server.ts"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist-server/server.js"]

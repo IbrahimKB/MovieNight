@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist-server",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "isolatedModules": false,
+    "incremental": false,
+    "allowImportingTsExtensions": false
+  },
+  "include": ["server.ts", "lib/socket-server.ts", "lib/prisma.ts"],
+  "exclude": ["node_modules", ".next"]
+}
