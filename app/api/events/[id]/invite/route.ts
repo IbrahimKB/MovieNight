@@ -87,27 +87,18 @@ export async function GET(
       );
     }
 
-    // Only host can view all invitations
-    if (event.hostUserId !== currentUserInternalId) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 403 },
-      );
-    }
-
-    // Get all invitations for this event (if host) or current user's invitation (if invited)
-    const allInvitations = await prisma.eventInvitation.findMany({
-      where: { eventId },
-      include: {
-        user: {
-          select: { id: true, puid: true, name: true, username: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // If host, return all invitations
+    // Host can view all invitations for this event.
     if (event.hostUserId === currentUserInternalId) {
+      const allInvitations = await prisma.eventInvitation.findMany({
+        where: { eventId },
+        include: {
+          user: {
+            select: { id: true, puid: true, name: true, username: true },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
       const mapped = await Promise.all(
         allInvitations.map(async (inv) => {
           const externalUserId = await mapInternalUserIdToExternal(inv.user.id);
@@ -127,10 +118,14 @@ export async function GET(
       return NextResponse.json({ success: true, data: mapped });
     }
 
-    // If not host, return only current user's invitation if exists
-    const userInvitation = allInvitations.find(
-      (inv) => inv.userId === currentUserInternalId,
-    );
+    // Invitee can view only their own invitation status.
+    const userInvitation = await prisma.eventInvitation.findUnique({
+      where: {
+        eventId_userId: { eventId, userId: currentUserInternalId },
+      },
+      select: { id: true, status: true, createdAt: true },
+    });
+
     if (userInvitation) {
       return NextResponse.json({
         success: true,
@@ -138,6 +133,7 @@ export async function GET(
           {
             id: userInvitation.id,
             status: userInvitation.status,
+            createdAt: userInvitation.createdAt,
           },
         ],
       });

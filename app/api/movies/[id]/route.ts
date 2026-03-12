@@ -86,6 +86,27 @@ function isTMDBId(id: string): boolean {
   return /^\d+$/.test(id);
 }
 
+function extractTMDBId(id: string): number | null {
+  if (/^\d+$/.test(id)) {
+    const parsed = parseInt(id, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  const prefixed = id.match(/^tmdb_(\d+)$/);
+  if (prefixed) {
+    const parsed = parseInt(prefixed[1], 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  return null;
+}
+
+function isUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    id,
+  );
+}
+
 // ---------------------------------------------
 // GET /api/movies/[id]
 // ---------------------------------------------
@@ -103,14 +124,12 @@ export async function GET(
       );
     }
 
-    // 1. Try TMDB Live Lookup First (if ID is numeric or looks like TMDB ID)
-    // Note: Our local IDs are UUIDs, TMDB IDs are integers.
-    // If the ID is an integer, it's definitely a TMDB ID request (from live search).
-    // If it's a UUID, it's a request for a local movie (e.g. from watchlist history).
-    const isTmdbId = /^\d+$/.test(id);
+    const tmdbId = extractTMDBId(id);
+    const validUuid = isUuid(id);
 
-    if (isTmdbId && process.env.TMDB_API_KEY) {
-      const tmdbMovie = await tmdbClient.getMovieDetails(parseInt(id));
+    // 1. Try TMDB live lookup first for numeric IDs or tmdb_<id> aliases.
+    if (tmdbId !== null && process.env.TMDB_API_KEY) {
+      const tmdbMovie = await tmdbClient.getMovieDetails(tmdbId);
       if (tmdbMovie) {
         return NextResponse.json({
           success: true,
@@ -120,10 +139,24 @@ export async function GET(
       }
     }
 
-    // 2. Fallback to local database (for UUIDs or if TMDB fails/not numeric)
-    const movie = await prisma.movie.findUnique({
-      where: { id },
-    });
+    // 2. Fallback to local database by UUID or tmdbId (if provided).
+    let movie = null;
+    if (validUuid) {
+      movie = await prisma.movie.findUnique({
+        where: { id },
+      });
+    } else if (tmdbId !== null) {
+      movie = await prisma.movie.findUnique({
+        where: { tmdbId },
+      });
+    }
+
+    if (!validUuid && tmdbId === null) {
+      return NextResponse.json(
+        { success: false, error: "Invalid movie ID format" },
+        { status: 400 },
+      );
+    }
 
     if (!movie) {
       return NextResponse.json(

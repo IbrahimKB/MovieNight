@@ -65,16 +65,21 @@ export async function GET(req: NextRequest) {
 
     // Map to frontend format
     const data = suggestions.map((s) => ({
+      fromUserExternalId: s.fromUser.puid || s.fromUser.id,
+      toUserExternalId: s.toUser ? (s.toUser.puid || s.toUser.id) : null,
+      fromUserInternalId: s.fromUserId,
+      toUserInternalId: s.toUserId,
       id: s.id,
       movieId: s.movieId,
-      fromUserId: s.fromUserId,
-      toUserId: s.toUserId,
+      fromUserId: s.fromUser.puid || s.fromUser.id,
+      toUserId: s.toUser ? (s.toUser.puid || s.toUser.id) : null,
       status: s.status,
       message: s.message,
       createdAt: s.createdAt.toISOString(),
       updatedAt: s.updatedAt.toISOString(),
       movie: {
         id: s.movie.id,
+        tmdbId: s.movie.tmdbId,
         title: s.movie.title,
         year: s.movie.year,
         genres: s.movie.genres,
@@ -83,14 +88,16 @@ export async function GET(req: NextRequest) {
         rating: s.movie.imdbRating,
       },
       fromUser: {
-        id: s.fromUser.id,
+        id: s.fromUser.puid || s.fromUser.id,
+        internalId: s.fromUser.id,
         name: s.fromUser.name,
         username: s.fromUser.username,
         avatar: s.fromUser.avatar,
       },
       toUser: s.toUser
         ? {
-            id: s.toUser.id,
+            id: s.toUser.puid || s.toUser.id,
+            internalId: s.toUser.id,
             name: s.toUser.name,
             username: s.toUser.username,
             avatar: s.toUser.avatar,
